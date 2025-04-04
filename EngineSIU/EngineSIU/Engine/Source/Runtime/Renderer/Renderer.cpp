@@ -140,8 +140,8 @@ void FRenderer::SetPixelShader(const FWString& filename, const FString& funcname
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
         assert(0);
-    if (VertexShader != nullptr)
-        ResetVertexShader();
+    if (PixelShader != nullptr)
+        ResetPixelShader();
     ID3DBlob* pixelshaderCSO;
     D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &pixelshaderCSO, nullptr);
     Graphics->Device->CreatePixelShader(pixelshaderCSO->GetBufferPointer(), pixelshaderCSO->GetBufferSize(), nullptr, &PixelShader);
