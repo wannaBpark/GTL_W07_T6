@@ -1,6 +1,8 @@
 #pragma once
+#include "HAL/PlatformType.h"
 
-enum EViewModeIndex
+
+enum EViewModeIndex : uint8
 {
     VMI_Lit,
     VMI_Unlit,
@@ -8,9 +10,10 @@ enum EViewModeIndex
 };
 
 
-enum ELevelViewportType
+enum ELevelViewportType : uint8
 {
     LVT_Perspective = 0,
+
     /** Top */
     LVT_OrthoXY = 1,
     /** Bottom */
@@ -23,6 +26,7 @@ enum ELevelViewportType
     LVT_OrthoXZ,
     /** Back */
     LVT_OrthoNegativeXZ,
+
     LVT_MAX,
     LVT_None = 255,
 };

@@ -2,11 +2,7 @@
 #include "World.h"
 
 ShowFlags::ShowFlags()
-{
-    currentFlags = 31;
-}
-
-ShowFlags::~ShowFlags()
+    : currentFlags(31)
 {
 }
 
@@ -16,7 +12,7 @@ ShowFlags& ShowFlags::GetInstance()
 	return instance;
 }
 
-void ShowFlags::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void ShowFlags::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const
 {
 	float controllWindowWidth = static_cast<float>(width) * 0.12f;
 	float controllWindowHeight = static_cast<float>(height) * 0.f;
@@ -30,12 +26,14 @@ void ShowFlags::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 
 	if (ImGui::Begin("ShowFlags"))
 	{
-		const char* items[] = { "AABB", "Primitves","BillBoardText","UUID"};
+		const char* items[] = {"AABB", "Primitives", "BillBoardText", "UUID"};
         uint64 curFlag = ActiveViewport->GetShowFlag();
-		bool selected[IM_ARRAYSIZE(items)] = { curFlag & static_cast<uint64>(EEngineShowFlags::SF_AABB),
-            curFlag& static_cast<uint64>(EEngineShowFlags::SF_Primitives),
-            curFlag& static_cast<uint64>(EEngineShowFlags::SF_BillboardText),
-            curFlag& static_cast<uint64>(EEngineShowFlags::SF_UUIDText) };  // 각 항목의 체크 상태 저장
+        bool selected[IM_ARRAYSIZE(items)] = {
+            static_cast<bool>(curFlag & EEngineShowFlags::SF_AABB),
+            static_cast<bool>(curFlag & EEngineShowFlags::SF_Primitives),
+            static_cast<bool>(curFlag & EEngineShowFlags::SF_BillboardText),
+            static_cast<bool>(curFlag & EEngineShowFlags::SF_UUIDText)
+        }; // 각 항목의 체크 상태 저장
 
 		if (ImGui::BeginCombo("Show Flags", "Select Show Flags"))
 		{
@@ -50,7 +48,8 @@ void ShowFlags::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 	}
 	ImGui::End(); // 윈도우 종료
 }
-uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[])
+
+uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[]) const
 {
 	uint64 flags = static_cast<uint64>(EEngineShowFlags::None);
 

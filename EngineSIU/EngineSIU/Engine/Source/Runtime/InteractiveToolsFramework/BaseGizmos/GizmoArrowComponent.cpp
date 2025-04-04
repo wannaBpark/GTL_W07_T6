@@ -1,19 +1,5 @@
 #include "GizmoArrowComponent.h"
 
-#include "World.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
-#include "Actors/Player.h"
-#include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
-
-
-UGizmoArrowComponent::UGizmoArrowComponent()
-{
-}
-
-UGizmoArrowComponent::~UGizmoArrowComponent()
-{
-}
 
 void UGizmoArrowComponent::InitializeComponent()
 {
@@ -43,7 +29,7 @@ void UGizmoArrowComponent::TickComponent(float DeltaTime)
 //     FVector4 UUIDColor = EncodeUUID() / 255.0f;
     
 //     // 최종 MVP 행렬
-//     FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+//     FMatrix MVP = Model * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     
 //     if (this == GetWorld()->GetPickingGizmo()) {
 //         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);

@@ -1,13 +1,8 @@
 #include "CubeComp.h"
-#include "Math/JungleMath.h"
 #include "World.h"
-#include "UObject/ObjectFactory.h"
-#include "PropertyEditor/ShowFlags.h"
-
-#include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
-
 #include "Engine/FLoaderOBJ.h"
+#include "UObject/ObjectFactory.h"
+
 
 UCubeComp::UCubeComp()
 {
@@ -15,10 +10,6 @@ UCubeComp::UCubeComp()
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
 
-}
-
-UCubeComp::~UCubeComp()
-{
 }
 
 void UCubeComp::InitializeComponent()

@@ -1,15 +1,19 @@
 #pragma once
+#include <sstream>
 #include "Define.h"
 #include "Container/Map.h"
+
 class SSplitterH;
 class SSplitterV;
 class UWorld;
 class FEditorViewportClient;
+
+
 class SLevelEditor
 {
 public:
     SLevelEditor();
-    ~SLevelEditor();
+
     void Initialize();
     void Tick(double deltaTime);
     void Input();
@@ -20,7 +24,8 @@ public:
     void ResizeViewports();
     void OnMultiViewport();
     void OffMultiViewport();
-    bool IsMultiViewport();
+    bool IsMultiViewport() const;
+
 private:
     bool bInitialize;
     SSplitterH* HSplitter;
@@ -56,9 +61,11 @@ public:
     //Save And Load
 private:
     const FString IniFilePath = "editor.ini";
+
 public:
     void LoadConfig();
     void SaveConfig();
+
 private:
     TMap<FString, FString> ReadIniFile(const FString& filePath);
     void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
@@ -77,4 +84,3 @@ private:
         return defaultValue;
     }
 };
-

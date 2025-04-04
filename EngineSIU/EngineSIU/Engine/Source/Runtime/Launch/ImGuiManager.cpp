@@ -36,21 +36,21 @@ void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
     PreferenceStyle();
 }
 
-void UImGuiManager::BeginFrame()
+void UImGuiManager::BeginFrame() const
 {
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 }
 
-void UImGuiManager::EndFrame()
+void UImGuiManager::EndFrame() const
 {
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
 /* GUI Style Preference */
-void UImGuiManager::PreferenceStyle()
+void UImGuiManager::PreferenceStyle() const
 {
     // Window
     ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.9f);

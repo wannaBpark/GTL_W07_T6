@@ -167,30 +167,30 @@ struct FPoint
 };
 struct FBoundingBox
 {
-    FBoundingBox(){}
+    FBoundingBox() = default;
     FBoundingBox(FVector _min, FVector _max) : min(_min), max(_max) {}
 	FVector min; // Minimum extents
 	float pad;
 	FVector max; // Maximum extents
 	float pad1;
-    bool Intersect(const FVector& rayOrigin, const FVector& rayDir, float& outDistance)
+    bool Intersect(const FVector& rayOrigin, const FVector& rayDir, float& outDistance) const
     {
         float tmin = -FLT_MAX;
         float tmax = FLT_MAX;
         const float epsilon = 1e-6f;
 
         // X축 처리
-        if (fabs(rayDir.x) < epsilon)
+        if (fabs(rayDir.X) < epsilon)
         {
             // 레이가 X축 방향으로 거의 평행한 경우,
-            // 원점의 x가 박스 [min.x, max.x] 범위 밖이면 교차 없음
-            if (rayOrigin.x < min.x || rayOrigin.x > max.x)
+            // 원점의 x가 박스 [min.X, max.X] 범위 밖이면 교차 없음
+            if (rayOrigin.X < min.X || rayOrigin.X > max.X)
                 return false;
         }
         else
         {
-            float t1 = (min.x - rayOrigin.x) / rayDir.x;
-            float t2 = (max.x - rayOrigin.x) / rayDir.x;
+            float t1 = (min.X - rayOrigin.X) / rayDir.X;
+            float t2 = (max.X - rayOrigin.X) / rayDir.X;
             if (t1 > t2)  std::swap(t1, t2);
 
             // tmin은 "현재까지의 교차 구간 중 가장 큰 min"
@@ -202,15 +202,15 @@ struct FBoundingBox
         }
 
         // Y축 처리
-        if (fabs(rayDir.y) < epsilon)
+        if (fabs(rayDir.Y) < epsilon)
         {
-            if (rayOrigin.y < min.y || rayOrigin.y > max.y)
+            if (rayOrigin.Y < min.Y || rayOrigin.Y > max.Y)
                 return false;
         }
         else
         {
-            float t1 = (min.y - rayOrigin.y) / rayDir.y;
-            float t2 = (max.y - rayOrigin.y) / rayDir.y;
+            float t1 = (min.Y - rayOrigin.Y) / rayDir.Y;
+            float t2 = (max.Y - rayOrigin.Y) / rayDir.Y;
             if (t1 > t2)  std::swap(t1, t2);
 
             tmin = (t1 > tmin) ? t1 : tmin;
@@ -220,15 +220,15 @@ struct FBoundingBox
         }
 
         // Z축 처리
-        if (fabs(rayDir.z) < epsilon)
+        if (fabs(rayDir.Z) < epsilon)
         {
-            if (rayOrigin.z < min.z || rayOrigin.z > max.z)
+            if (rayOrigin.Z < min.Z || rayOrigin.Z > max.Z)
                 return false;
         }
         else
         {
-            float t1 = (min.z - rayOrigin.z) / rayDir.z;
-            float t2 = (max.z - rayOrigin.z) / rayDir.z;
+            float t1 = (min.Z - rayOrigin.Z) / rayDir.Z;
+            float t2 = (max.Z - rayOrigin.Z) / rayDir.Z;
             if (t1 > t2)  std::swap(t1, t2);
 
             tmin = (t1 > tmin) ? t1 : tmin;

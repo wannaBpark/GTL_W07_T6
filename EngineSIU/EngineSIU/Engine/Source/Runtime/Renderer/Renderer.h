@@ -82,7 +82,7 @@ public:
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
     void UpdateLitUnlitConstant(int isLit) const;
     void UpdateSubMeshConstant(bool isSelected) const;
-    void UpdateTextureConstant(float UOffset, float VOffset);
+    void UpdateTextureConstant(float UOffset, float VOffset) const;
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
@@ -126,11 +126,11 @@ public: // line shader
     //Render Pass Demo
     void PrepareRender();
     void ClearRenderArr();
-    void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    void RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderBillboards(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;

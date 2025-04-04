@@ -7,8 +7,7 @@ class UGizmoRectangleComponent : public UGizmoBaseComponent
     DECLARE_CLASS(UGizmoRectangleComponent, UGizmoBaseComponent)
 
 public:
-    UGizmoRectangleComponent();
-    virtual ~UGizmoRectangleComponent() override;
+    UGizmoRectangleComponent() = default;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;

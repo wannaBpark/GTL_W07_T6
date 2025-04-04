@@ -22,14 +22,13 @@ private:
 	ShowFlags();
 
 public:
-	~ShowFlags();
-
 	static ShowFlags& GetInstance();
 
-	void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
-	uint64 ConvertSelectionToFlags(const bool selected[]);
+	void Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;
+	uint64 ConvertSelectionToFlags(const bool selected[]) const;
 	void OnResize(HWND hWnd);
-	void Toggle() override {
+
+    virtual void Toggle() override {
 		if (bWasOpen) {
 			bWasOpen = false;
 		}

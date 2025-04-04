@@ -64,7 +64,7 @@ int UPrimitiveComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
     return nIntersections;
 }
 
-bool UPrimitiveComponent::IntersectRayTriangle(const FVector& rayOrigin, const FVector& rayDirection, const FVector& v0, const FVector& v1, const FVector& v2, float& hitDistance)
+bool UPrimitiveComponent::IntersectRayTriangle(const FVector& rayOrigin, const FVector& rayDirection, const FVector& v0, const FVector& v1, const FVector& v2, float& hitDistance) const
 {
     const float epsilon = 1e-6f;
     FVector edge1 = v1 - v0;

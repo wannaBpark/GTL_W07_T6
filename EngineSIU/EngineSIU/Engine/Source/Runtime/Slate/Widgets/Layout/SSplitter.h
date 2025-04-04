@@ -9,13 +9,13 @@ public:
     SWindow* SideLT; // Left or Top
     SWindow* SideRB; // Right or Bottom
     
-    virtual void Initialize(FRect initRect);
+    virtual void Initialize(FRect initRect) override;
 
     virtual void OnDragStart(const FPoint& mousePos) { /* 초기화 */ }
     virtual void OnDrag(const FPoint& delta) = 0; // 가로/세로에 따라 구현 다름.
-    virtual void OnResize(float width, float height);
-    virtual bool OnPressed(FPoint coord);
-    virtual bool OnReleased();
+    virtual void OnResize(float width, float height) override;
+    virtual bool OnPressed(FPoint coord) override;
+    virtual bool OnReleased() override;
 
     virtual void OnDragEnd() {
 
@@ -50,14 +50,15 @@ public:
 
     virtual void LoadConfig(const TMap<FString, FString>& config) override;
     virtual void SaveConfig(TMap<FString, FString>& config) const override;
-    void OnDrag(const FPoint& delta) override {
+
+    virtual void OnDrag(const FPoint& delta) override {
         // 수평 스플리터의 경우, 좌우로 이동
         Rect.leftTopX += delta.x;
 
         UpdateChildRects();
     }
 
-    void UpdateChildRects() override {
+    virtual void UpdateChildRects() override {
 
         if (SideLT)
             SideLT->Rect.width = Rect.leftTopX - SideLT->Rect.leftTopX;
@@ -78,12 +79,14 @@ public:
 
     virtual void LoadConfig(const TMap<FString, FString>& config)   override;
     virtual void SaveConfig(TMap<FString, FString>& config) const   override;
-    void OnDrag(const FPoint& delta) override {
+
+    virtual void OnDrag(const FPoint& delta) override {
 
         Rect.leftTopY += delta.y;
         UpdateChildRects();
     }
-    void UpdateChildRects() override {
+
+    virtual void UpdateChildRects() override {
 
         if (SideLT)
             SideLT->Rect.height = Rect.leftTopY - SideLT->Rect.leftTopY;

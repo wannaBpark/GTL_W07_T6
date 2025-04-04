@@ -1,6 +1,6 @@
 #include "LightComponent.h"
 #include "UBillboardComponent.h"
-#include "Math/JungleMath.h"
+
 
 ULightComponentBase::ULightComponentBase()
 {

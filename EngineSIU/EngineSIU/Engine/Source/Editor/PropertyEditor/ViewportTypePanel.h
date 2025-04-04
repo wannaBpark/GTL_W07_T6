@@ -6,13 +6,14 @@ class ViewportTypePanel : public IWindowToggleable
 private:
     ViewportTypePanel();
 public:
-    ~ViewportTypePanel();
+    virtual ~ViewportTypePanel() override;
 
     static ViewportTypePanel& GetInstance();
 
-    void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;
     void OnResize(HWND hWnd);
-    void Toggle() override {
+
+    virtual void Toggle() override {
         if (bWasOpen) {
             bWasOpen = false;
         }

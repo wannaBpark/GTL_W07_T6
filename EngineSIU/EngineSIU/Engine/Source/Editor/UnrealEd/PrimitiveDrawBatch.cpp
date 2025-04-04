@@ -239,14 +239,14 @@ void UPrimitiveDrawBatch::ReleaseOBBBuffers()
 void UPrimitiveDrawBatch::AddAABBToBatch(const FBoundingBox& LocalAABB, const FVector& Center, const FMatrix& ModelMatrix)
 {
     FVector LocalVertices[8] = {
-        { LocalAABB.min.x, LocalAABB.min.y, LocalAABB.min.z },
-        { LocalAABB.max.x, LocalAABB.min.y, LocalAABB.min.z },
-        { LocalAABB.min.x, LocalAABB.max.y, LocalAABB.min.z },
-        { LocalAABB.max.x, LocalAABB.max.y, LocalAABB.min.z },
-        { LocalAABB.min.x, LocalAABB.min.y, LocalAABB.max.z },
-        { LocalAABB.max.x, LocalAABB.min.y, LocalAABB.max.z },
-        { LocalAABB.min.x, LocalAABB.max.y, LocalAABB.max.z },
-        { LocalAABB.max.x, LocalAABB.max.y, LocalAABB.max.z }
+        { LocalAABB.min.X, LocalAABB.min.Y, LocalAABB.min.Z },
+        { LocalAABB.max.X, LocalAABB.min.Y, LocalAABB.min.Z },
+        { LocalAABB.min.X, LocalAABB.max.Y, LocalAABB.min.Z },
+        { LocalAABB.max.X, LocalAABB.max.Y, LocalAABB.min.Z },
+        { LocalAABB.min.X, LocalAABB.min.Y, LocalAABB.max.Z },
+        { LocalAABB.max.X, LocalAABB.min.Y, LocalAABB.max.Z },
+        { LocalAABB.min.X, LocalAABB.max.Y, LocalAABB.max.Z },
+        { LocalAABB.max.X, LocalAABB.max.Y, LocalAABB.max.Z }
     };
 
     FVector WorldVertices[8];
@@ -257,12 +257,12 @@ void UPrimitiveDrawBatch::AddAABBToBatch(const FBoundingBox& LocalAABB, const FV
     for (int i = 1; i < 8; ++i)
     {
         WorldVertices[i] = Center + FMatrix::TransformVector(LocalVertices[i], ModelMatrix);
-        Min.x = (WorldVertices[i].x < Min.x) ? WorldVertices[i].x : Min.x;
-        Min.y = (WorldVertices[i].y < Min.y) ? WorldVertices[i].y : Min.y;
-        Min.z = (WorldVertices[i].z < Min.z) ? WorldVertices[i].z : Min.z;
-        Max.x = (WorldVertices[i].x > Max.x) ? WorldVertices[i].x : Max.x;
-        Max.y = (WorldVertices[i].y > Max.y) ? WorldVertices[i].y : Max.y;
-        Max.z = (WorldVertices[i].z > Max.z) ? WorldVertices[i].z : Max.z;
+        Min.X = (WorldVertices[i].X < Min.X) ? WorldVertices[i].X : Min.X;
+        Min.Y = (WorldVertices[i].Y < Min.Y) ? WorldVertices[i].Y : Min.Y;
+        Min.Z = (WorldVertices[i].Z < Min.Z) ? WorldVertices[i].Z : Min.Z;
+        Max.X = (WorldVertices[i].X > Max.X) ? WorldVertices[i].X : Max.X;
+        Max.Y = (WorldVertices[i].Y > Max.Y) ? WorldVertices[i].Y : Max.Y;
+        Max.Z = (WorldVertices[i].Z > Max.Z) ? WorldVertices[i].Z : Max.Z;
     }
     FBoundingBox BoundingBox;
     BoundingBox.min = Min;
@@ -273,14 +273,14 @@ void UPrimitiveDrawBatch::AddAABBToBatch(const FBoundingBox& LocalAABB, const FV
 void UPrimitiveDrawBatch::AddOBBToBatch(const FBoundingBox& LocalAABB, const FVector& Center, const FMatrix& ModelMatrix)
 {
     FVector LocalVertices[8] = {
-        { LocalAABB.min.x, LocalAABB.min.y, LocalAABB.min.z },
-        { LocalAABB.max.x, LocalAABB.min.y, LocalAABB.min.z },
-        { LocalAABB.min.x, LocalAABB.max.y, LocalAABB.min.z },
-        { LocalAABB.max.x, LocalAABB.max.y, LocalAABB.min.z },
-        { LocalAABB.min.x, LocalAABB.min.y, LocalAABB.max.z },
-        { LocalAABB.max.x, LocalAABB.min.y, LocalAABB.max.z },
-        { LocalAABB.min.x, LocalAABB.max.y, LocalAABB.max.z },
-        { LocalAABB.max.x, LocalAABB.max.y, LocalAABB.max.z }
+        { LocalAABB.min.X, LocalAABB.min.Y, LocalAABB.min.Z },
+        { LocalAABB.max.X, LocalAABB.min.Y, LocalAABB.min.Z },
+        { LocalAABB.min.X, LocalAABB.max.Y, LocalAABB.min.Z },
+        { LocalAABB.max.X, LocalAABB.max.Y, LocalAABB.min.Z },
+        { LocalAABB.min.X, LocalAABB.min.Y, LocalAABB.max.Z },
+        { LocalAABB.max.X, LocalAABB.min.Y, LocalAABB.max.Z },
+        { LocalAABB.min.X, LocalAABB.max.Y, LocalAABB.max.Z },
+        { LocalAABB.max.X, LocalAABB.max.Y, LocalAABB.max.Z }
     };
 
     FOBB OBB;

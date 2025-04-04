@@ -505,7 +505,7 @@ void FRenderer::UpdateSubMeshConstant(bool isSelected) const
     }
 }
 
-void FRenderer::UpdateTextureConstant(float UOffset, float VOffset)
+void FRenderer::UpdateTextureConstant(float UOffset, float VOffset) const
 {
     if (TextureConstantBufer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
@@ -841,7 +841,7 @@ void FRenderer::ClearRenderArr()
     LightObjs.Empty();
 }
 
-void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
 
@@ -866,7 +866,7 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
     ClearRenderArr();
 }
 
-void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     PrepareShader();
     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
@@ -979,7 +979,7 @@ void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorV
 #pragma endregion GizmoDepth
 }
 
-void FRenderer::RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderBillboards(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     PrepareTextureShader();
     PrepareSubUVConstant();

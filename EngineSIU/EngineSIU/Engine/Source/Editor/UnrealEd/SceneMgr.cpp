@@ -1,16 +1,16 @@
 #include "UnrealEd/SceneMgr.h"
-#include "JSON/json.hpp"
-#include "UObject/Object.h"
-#include "Components/SphereComp.h"
-#include "Components/CubeComp.h"
-#include "BaseGizmos/GizmoArrowComponent.h"
-#include "UObject/ObjectFactory.h"
 #include <fstream>
-#include "Components/UBillboardComponent.h"
+#include "BaseGizmos/GizmoArrowComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CubeComp.h"
 #include "Components/LightComponent.h"
 #include "Components/SkySphereComponent.h"
-#include "Camera/CameraComponent.h"
+#include "Components/SphereComp.h"
+#include "Components/UBillboardComponent.h"
+#include "JSON/json.hpp"
 #include "UObject/Casts.h"
+#include "UObject/Object.h"
+#include "UObject/ObjectFactory.h"
 
 using json = nlohmann::json;
 
@@ -153,9 +153,9 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     for (const auto& [Id, Obj] : sceneData.Primitives)
     {
         USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
-        std::vector<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
-        std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
-        std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
+        std::vector<float> Location = { primitive->GetWorldLocation().X,primitive->GetWorldLocation().Y,primitive->GetWorldLocation().Z };
+        std::vector<float> Rotation = { primitive->GetWorldRotation().X,primitive->GetWorldRotation().Y,primitive->GetWorldRotation().Z };
+        std::vector<float> Scale = { primitive->GetWorldScale().X,primitive->GetWorldScale().Y,primitive->GetWorldScale().Z };
 
         std::string primitiveName = *primitive->GetName();
         size_t pos = primitiveName.rfind('_');
@@ -173,8 +173,8 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     for (const auto& [id, camera] : sceneData.Cameras)
     {
         UCameraComponent* cameraComponent = static_cast<UCameraComponent*>(camera);
-        TArray<float> Location = { cameraComponent->GetWorldLocation().x, cameraComponent->GetWorldLocation().y, cameraComponent->GetWorldLocation().z };
-        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().y, cameraComponent->GetWorldRotation().z };
+        TArray<float> Location = { cameraComponent->GetWorldLocation().X, cameraComponent->GetWorldLocation().Y, cameraComponent->GetWorldLocation().Z };
+        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().Y, cameraComponent->GetWorldRotation().Z };
         float FOV = cameraComponent->GetFOV();
         float nearClip = cameraComponent->GetNearClip();
         float farClip = cameraComponent->GetFarClip();

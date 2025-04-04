@@ -7,7 +7,6 @@ class UCubeComp : public UStaticMeshComponent
 
 public:
     UCubeComp();
-    virtual ~UCubeComp() override;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;

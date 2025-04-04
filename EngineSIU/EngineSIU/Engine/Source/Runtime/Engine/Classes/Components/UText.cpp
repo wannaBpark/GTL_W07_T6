@@ -29,15 +29,15 @@ void UText::TickComponent(float DeltaTime)
 	Super::TickComponent(DeltaTime);
 
     //FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
-    //newCamera.z = 0;
-    //newCamera = newCamera.Normalize();
+    //newCamera.Z = 0;
+    //newCamera = newCamera.GetSafeNormal();
     //float tmp = FVector(1.0f, 0.0f, 0.0f).Dot(newCamera);
     //float rad = acosf(tmp);
     //float degree = JungleMath::RadToDeg(rad);
     //FVector vtmp = FVector(1.0f, 0.0f, 0.0f).Cross(GetWorld()->GetCamera()->GetForwardVector());
-    //if (vtmp.z < 0)
+    //if (vtmp.Z < 0)
     //	degree *= -1;
-    //RelativeRotation.z = degree + 90;
+    //RelativeRotation.Z = degree + 90;
 }
 
 void UText::ClearText()
@@ -264,7 +264,7 @@ void UText::TextMVPRendering()
     //FEngineLoop::renderer.PrepareSubUVConstant();
     FMatrix Model = CreateBillboardMatrix();
 
-    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix MVP = Model * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
     FVector4 UUIDColor = EncodeUUID() / 255.0f;
     if (this == GetWorld()->GetPickingGizmo()) {

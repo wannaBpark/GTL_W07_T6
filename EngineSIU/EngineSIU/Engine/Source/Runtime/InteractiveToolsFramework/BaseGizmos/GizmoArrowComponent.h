@@ -2,13 +2,13 @@
 #include "GizmoBaseComponent.h"
 #include "UObject/ObjectTypes.h"
 
+
 class UGizmoArrowComponent : public UGizmoBaseComponent
 {
     DECLARE_CLASS(UGizmoArrowComponent, UGizmoBaseComponent)
 
 public:
-    UGizmoArrowComponent();
-    virtual ~UGizmoArrowComponent() override;
+    UGizmoArrowComponent() = default;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
@@ -18,5 +18,5 @@ private:
 
 public:
     ARROW_DIR GetDir() const { return Dir; }
-    void SetDir(ARROW_DIR _Dir) { Dir = _Dir; }
+    void SetDir(ARROW_DIR InDir) { Dir = InDir; }
 };

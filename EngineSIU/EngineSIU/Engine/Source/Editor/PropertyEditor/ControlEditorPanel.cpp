@@ -2,18 +2,16 @@
 
 #include "World.h"
 #include "Actors/Player.h"
-#include "Components/CubeComp.h"
 #include "Components/LightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/UParticleSubUVComp.h"
 #include "Components/UText.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Engine/StaticMeshActor.h"
-#include "ImGUI/imgui_internal.h"
 #include "LevelEditor/SLevelEditor.h"
-#include "tinyfiledialogs/tinyfiledialogs.h"
-#include "UnrealEd/EditorViewportClient.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "UnrealEd/EditorViewportClient.h"
+#include "tinyfiledialogs/tinyfiledialogs.h"
 
 void ControlEditorPanel::Render()
 {
@@ -315,7 +313,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         
                 if (SpawnedActor)
                 {
-                    World->SetPickedActor(SpawnedActor);
+                    World->SetSelectedActor(SpawnedActor);
                 }
             }
         }

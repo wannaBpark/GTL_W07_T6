@@ -15,7 +15,7 @@ ViewportTypePanel& ViewportTypePanel::GetInstance()
 }
 
 
-void ViewportTypePanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void ViewportTypePanel::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const
 {
     float controllWindowWidth = static_cast<float>(width) * 0.12f;
     float controllWindowHeight = static_cast<float>(height) * 0.f;

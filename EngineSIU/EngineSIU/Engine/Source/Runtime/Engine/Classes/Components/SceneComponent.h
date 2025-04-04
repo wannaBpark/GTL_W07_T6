@@ -9,7 +9,6 @@ class USceneComponent : public UActorComponent
 
 public:
     USceneComponent();
-    virtual ~USceneComponent() override;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
@@ -32,9 +31,9 @@ protected:
 
 public:
     virtual FVector GetWorldRotation();
-    FVector GetWorldScale();
-    FVector GetWorldLocation();
-    FVector GetLocalRotation();
+    FVector GetWorldScale() const;
+    FVector GetWorldLocation() const;
+    FVector GetLocalRotation() const;
     FQuat GetQuat() const { return QuatRotation; }
 
     FVector GetLocalScale() const { return RelativeScale3D; }
@@ -45,9 +44,4 @@ public:
     void SetRotation(FQuat _newRot) { QuatRotation = _newRot; }
     void SetScale(FVector _newScale) { RelativeScale3D = _newScale; }
     void SetupAttachment(USceneComponent* InParent);
-
-private:
-    class UTextUUID* uuidText = nullptr;
-
-public:
 };

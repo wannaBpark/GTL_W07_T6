@@ -1,16 +1,5 @@
-#pragma once
 #include "UnrealClient.h"
 //#include "UnrealEd/EditorViewportClient.h"
-
-FViewport::FViewport()
-{
-}
-
-
-
-FViewport::~FViewport()
-{
-}
 
 void FViewport::Initialize()
 {

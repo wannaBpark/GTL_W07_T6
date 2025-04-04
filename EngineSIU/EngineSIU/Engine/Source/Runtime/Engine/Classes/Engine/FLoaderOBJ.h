@@ -332,9 +332,9 @@ struct FLoaderOBJ
             if (vertexMap.Find(key) == nullptr)
             {
                 FVertexSimple vertex {};
-                vertex.x = RawData.Vertices[vIdx].x;
-                vertex.y = RawData.Vertices[vIdx].y;
-                vertex.z = RawData.Vertices[vIdx].z;
+                vertex.x = RawData.Vertices[vIdx].X;
+                vertex.y = RawData.Vertices[vIdx].Y;
+                vertex.z = RawData.Vertices[vIdx].Z;
 
                 vertex.r = 1.0f; vertex.g = 1.0f; vertex.b = 1.0f; vertex.a = 1.0f; // 기본 색상
 
@@ -346,9 +346,9 @@ struct FLoaderOBJ
 
                 if (nIdx != UINT32_MAX && nIdx < RawData.Normals.Num())
                 {
-                    vertex.nx = RawData.Normals[nIdx].x;
-                    vertex.ny = RawData.Normals[nIdx].y;
-                    vertex.nz = RawData.Normals[nIdx].z;
+                    vertex.nx = RawData.Normals[nIdx].X;
+                    vertex.ny = RawData.Normals[nIdx].Y;
+                    vertex.nz = RawData.Normals[nIdx].Z;
                 }
 
                 for (int32 j = 0; j < OutStaticMesh.MaterialSubsets.Num(); j++)
@@ -405,13 +405,13 @@ struct FLoaderOBJ
         
         for (int32 i = 0; i < InVertices.Num(); i++)
         {
-            MinVector.x = std::min(MinVector.x, InVertices[i].x);
-            MinVector.y = std::min(MinVector.y, InVertices[i].y);
-            MinVector.z = std::min(MinVector.z, InVertices[i].z);
+            MinVector.X = std::min(MinVector.X, InVertices[i].x);
+            MinVector.Y = std::min(MinVector.Y, InVertices[i].y);
+            MinVector.Z = std::min(MinVector.Z, InVertices[i].z);
 
-            MaxVector.x = std::max(MaxVector.x, InVertices[i].x);
-            MaxVector.y = std::max(MaxVector.y, InVertices[i].y);
-            MaxVector.z = std::max(MaxVector.z, InVertices[i].z);
+            MaxVector.X = std::max(MaxVector.X, InVertices[i].x);
+            MaxVector.Y = std::max(MaxVector.Y, InVertices[i].y);
+            MaxVector.Z = std::max(MaxVector.Z, InVertices[i].z);
         }
 
         OutMinVector = MinVector;

@@ -188,6 +188,7 @@
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\JungleMath.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Vector.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Stats\Stats.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\ActorEditor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.cpp" />
@@ -206,6 +207,7 @@
     <ClCompile Include="Engine\Source\Runtime\Launch\EngineLoop.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Launch\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_demo.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_draw.cpp" />
@@ -240,6 +242,8 @@
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\Delegate.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\DelegateCombination.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Stats\Stats.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\StaticMeshActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h" />
     <ClInclude Include="Engine\Source\Editor\LevelEditor\SLevelEditor.h" />
@@ -284,6 +288,7 @@
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
     <ClInclude Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.h" />
     <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="Font\IconDefs.h" />
