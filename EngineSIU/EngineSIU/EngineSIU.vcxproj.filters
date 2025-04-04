@@ -679,6 +679,8 @@
       <Filter>Font</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
@@ -699,6 +701,12 @@
     <FxCompile Include="Shaders\VertexTextureShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />

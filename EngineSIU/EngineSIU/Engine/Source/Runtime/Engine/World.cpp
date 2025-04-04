@@ -7,6 +7,7 @@
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
 
+UWorld* GWorld = nullptr;
 
 void UWorld::Initialize()
 {

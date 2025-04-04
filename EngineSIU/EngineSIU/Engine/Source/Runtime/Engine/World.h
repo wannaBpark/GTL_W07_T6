@@ -81,3 +81,5 @@ T* UWorld::SpawnActor()
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
+
+extern UWorld* GWorld;
