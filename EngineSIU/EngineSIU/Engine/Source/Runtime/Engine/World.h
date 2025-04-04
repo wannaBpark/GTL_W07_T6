@@ -64,7 +64,7 @@ public:
 
     // EditorManager 같은데로 보내기
     AActor* GetSelectedActor() const { return SelectedActor; }
-    void SetPickedActor(AActor* InActor)
+    void SetSelectedActor(AActor* InActor)
     {
         SelectedActor = InActor;
     }

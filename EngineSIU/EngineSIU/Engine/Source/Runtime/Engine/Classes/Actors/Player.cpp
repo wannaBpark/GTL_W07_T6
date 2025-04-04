@@ -122,7 +122,7 @@ void AEditorPlayer::Input()
         if (AActor* PickedActor = World->GetSelectedActor())
         {
             World->DestroyActor(PickedActor);
-            World->SetPickedActor(nullptr);
+            World->SetSelectedActor(nullptr);
         }
     }
 }
@@ -259,7 +259,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     }
     if (Possible)
     {
-        GetWorld()->SetPickedActor(Possible->GetOwner());
+        GetWorld()->SetSelectedActor(Possible->GetOwner());
     }
 }
 

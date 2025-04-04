@@ -315,7 +315,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         
                 if (SpawnedActor)
                 {
-                    World->SetPickedActor(SpawnedActor);
+                    World->SetSelectedActor(SpawnedActor);
                 }
             }
         }
