@@ -1,8 +1,3 @@
 #include "EngineStatics.h"
 
-
-uint32 UEngineStatics::GenUUID()
-{
-    UE_LOG(LogLevel::Display, "Generate UUID : %d", NextUUID);
-    return NextUUID++;
-}
+std::atomic<uint32> UEngineStatics::NextUUID = 0;
