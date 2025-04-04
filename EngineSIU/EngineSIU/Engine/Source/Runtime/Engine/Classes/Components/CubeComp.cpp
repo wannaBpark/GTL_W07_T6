@@ -1,7 +1,6 @@
 #include "CubeComp.h"
 #include "Math/JungleMath.h"
 #include "World.h"
-#include "UnrealEd/PrimitiveBatch.h"
 #include "UObject/ObjectFactory.h"
 #include "PropertyEditor/ShowFlags.h"
 
