@@ -1,7 +1,7 @@
 #include "Renderer.h"
 #include <d3dcompiler.h>
 
-#include "World.h"
+#include "World/World.h"
 #include "Actors/Player.h"
 #include "BaseGizmos/GizmoBaseComponent.h"
 #include "Components/LightComponent.h"

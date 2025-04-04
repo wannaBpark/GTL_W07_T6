@@ -1,5 +1,4 @@
 #include "GizmoCircleComponent.h"
-#include "World.h"
 
 #define DISC_RESOLUTION 128
 

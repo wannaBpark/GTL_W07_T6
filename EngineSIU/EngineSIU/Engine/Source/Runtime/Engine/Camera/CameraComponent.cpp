@@ -1,6 +1,5 @@
 #include "CameraComponent.h"
 #include "Math/JungleMath.h"
-#include "Engine/World.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
 

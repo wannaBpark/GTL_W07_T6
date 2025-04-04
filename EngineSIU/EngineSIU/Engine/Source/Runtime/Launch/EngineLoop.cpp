@@ -1,13 +1,15 @@
 #include "EngineLoop.h"
 #include "ImGuiManager.h"
 #include "UnrealClient.h"
-#include "World.h"
+#include "World/World.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ViewportTypePanel.h"
 #include "Slate/Widgets/Layout/SSplitter.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
+
+#include "Engine/EditorEngine.h"
 
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -125,6 +127,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     resourceMgr.Initialize(&renderer, &graphicDevice);
     LevelEditor = new SLevelEditor();
     LevelEditor->Initialize();
+
+    GEngine = FObjectFactory::ConstructObject<UEditorEngine>();
+    GEngine->Init();
 
     GWorld = new UWorld;
     GWorld->Initialize();
