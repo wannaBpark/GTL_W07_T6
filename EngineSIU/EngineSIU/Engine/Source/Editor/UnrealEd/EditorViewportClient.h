@@ -82,10 +82,10 @@ class FEditorViewportClient : public FViewportClient
 {
 public:
     FEditorViewportClient();
-    ~FEditorViewportClient();
+    virtual ~FEditorViewportClient() override;
 
     virtual void        Draw(FViewport* Viewport) override;
-    virtual UWorld*     GetWorld() const { return NULL; };
+    virtual UWorld*     GetWorld() const override { return NULL; };
     void Initialize(int32 viewportIndex);
     void Tick(float DeltaTime);
     void Release() const;

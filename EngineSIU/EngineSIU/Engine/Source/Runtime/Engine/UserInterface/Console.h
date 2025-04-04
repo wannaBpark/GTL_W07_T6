@@ -98,7 +98,7 @@ class Console : public IWindowToggleable
 {
 private:
     Console();
-    ~Console();
+    virtual ~Console() override;
 public:
     static Console& GetInstance(); // 참조 반환으로 변경
 
@@ -107,7 +107,8 @@ public:
     void Draw();
     void ExecuteCommand(const std::string& command);
     void OnResize(HWND hWnd);
-    void Toggle() override { 
+
+    virtual void Toggle() override { 
         if (bWasOpen) {
             bWasOpen = false;
         }

@@ -7,7 +7,7 @@ class UMaterial : public UObject {
 
 public:
     UMaterial() {}
-    ~UMaterial() {}
+    virtual ~UMaterial() override {}
     FObjMaterialInfo& GetMaterialInfo() { return materialInfo; }
     void SetMaterialInfo(FObjMaterialInfo value) { materialInfo = value; }
 

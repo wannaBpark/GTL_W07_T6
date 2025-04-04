@@ -12,9 +12,9 @@ enum class EViewScreenLocation
 class FViewport
 {
 public:
-    FViewport();
+    FViewport() = default;
     FViewport(EViewScreenLocation _viewLocation) : viewLocation(_viewLocation) {}
-    ~FViewport();
+
     void Initialize();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
