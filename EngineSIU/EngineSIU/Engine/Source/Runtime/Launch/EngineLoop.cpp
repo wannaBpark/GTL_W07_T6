@@ -89,6 +89,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 FGraphicsDevice FEngineLoop::graphicDevice;
 FRenderer FEngineLoop::renderer;
+UPrimitiveDrawBatch FEngineLoop::PrimitiveDrawBatch;
 FResourceMgr FEngineLoop::resourceMgr;
 uint32 FEngineLoop::TotalAllocationBytes = 0;
 uint32 FEngineLoop::TotalAllocationCount = 0;
@@ -116,6 +117,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     WindowInit(hInstance);
     graphicDevice.Initialize(hWnd);
     renderer.Initialize(&graphicDevice);
+    PrimitiveDrawBatch.Initialize(&graphicDevice);
 
     UIMgr = new UImGuiManager;
     UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);

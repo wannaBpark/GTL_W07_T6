@@ -2,6 +2,7 @@
 #include "Core/HAL/PlatformType.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Renderer/Renderer.h"
+#include "UnrealEd/PrimitiveDrawBatch.h"
 #include "Engine/ResourceMgr.h"
 
 class UnrealEd;
@@ -31,6 +32,7 @@ private:
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
+    static UPrimitiveDrawBatch PrimitiveDrawBatch;
     static FResourceMgr resourceMgr;
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;

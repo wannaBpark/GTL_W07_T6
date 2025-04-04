@@ -3,7 +3,6 @@
 #include "World.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/ObjectFactory.h"
-#include "UnrealEd/PrimitiveBatch.h"
 
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
