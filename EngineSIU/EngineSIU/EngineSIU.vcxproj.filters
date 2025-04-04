@@ -384,12 +384,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h">
       <Filter>Engine\Source\Runtime\Engine</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\World.cpp">
-      <Filter>Engine\Source\Runtime\Engine</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\World.h">
-      <Filter>Engine\Source\Runtime\Engine</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Camera</Filter>
     </ClCompile>
@@ -681,6 +675,9 @@
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Stats\Stats.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
@@ -707,6 +704,12 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Stats\Stats.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />

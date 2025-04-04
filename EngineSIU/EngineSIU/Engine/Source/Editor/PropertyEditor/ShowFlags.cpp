@@ -1,5 +1,4 @@
 #include "PropertyEditor/ShowFlags.h"
-#include "World.h"
 
 ShowFlags::ShowFlags()
     : currentFlags(31)

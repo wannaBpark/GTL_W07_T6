@@ -1,5 +1,4 @@
 #include "Components/SceneComponent.h"
-#include "World.h"
 #include "Math/JungleMath.h"
 #include "UObject/ObjectFactory.h"
 

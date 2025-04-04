@@ -1,5 +1,4 @@
 #include "CubeComp.h"
-#include "World.h"
 #include "Engine/FLoaderOBJ.h"
 #include "UObject/ObjectFactory.h"
 

@@ -5,7 +5,7 @@
 #include "Math/JungleMath.h"
 #include "EngineLoop.h"
 #include "UnrealClient.h"
-#include "World.h"
+#include "World/World.h"
 #include "GameFramework/Actor.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
