@@ -11,6 +11,7 @@ class TArray
 {
 public:
     using SizeType = typename Allocator::SizeType;
+    using ElementType = T;
 
 private:
     std::vector<T, Allocator> ContainerPrivate;
