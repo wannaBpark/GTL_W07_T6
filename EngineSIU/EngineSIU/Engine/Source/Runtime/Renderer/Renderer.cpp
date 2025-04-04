@@ -933,23 +933,23 @@ void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorV
 
     for (auto GizmoComp : GizmoObjs)
     {
-
-        if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowX ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowY ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
+        if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowX
+                || GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowY
+                || GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
             && World->GetEditorPlayer()->GetControlMode() != CM_TRANSLATION)
             continue;
-        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleX ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleY ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
+        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleX
+                || GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleY
+                || GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
             && World->GetEditorPlayer()->GetControlMode() != CM_SCALE)
             continue;
-        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleX ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleY ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleZ)
+        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleX
+                || GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleY
+                || GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleZ)
             && World->GetEditorPlayer()->GetControlMode() != CM_ROTATION)
             continue;
-        FMatrix Model = JungleMath::CreateModelMatrix(GizmoComp->GetWorldLocation(),
+        FMatrix Model = JungleMath::CreateModelMatrix(
+            GizmoComp->GetWorldLocation(),
             GizmoComp->GetWorldRotation(),
             GizmoComp->GetWorldScale()
         );

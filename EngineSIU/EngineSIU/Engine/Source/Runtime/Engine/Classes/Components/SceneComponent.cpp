@@ -74,8 +74,7 @@ FVector USceneComponent::GetWorldRotation()
 	{
 		return FVector(AttachParent->GetLocalRotation() + GetLocalRotation());
 	}
-	else
-		return GetLocalRotation();
+    return GetLocalRotation();
 }
 
 FVector USceneComponent::GetWorldScale() const
@@ -84,8 +83,7 @@ FVector USceneComponent::GetWorldScale() const
 	{
 		return FVector(AttachParent->GetWorldScale() + GetLocalScale());
 	}
-	else
-		return GetLocalScale();
+    return GetLocalScale();
 }
 
 FVector USceneComponent::GetWorldLocation() const
@@ -94,8 +92,7 @@ FVector USceneComponent::GetWorldLocation() const
 	{
 		return FVector(AttachParent->GetWorldLocation() + GetLocalLocation());
 	}
-	else
-		return GetLocalLocation();
+    return GetLocalLocation();
 }
 
 FVector USceneComponent::GetLocalRotation() const

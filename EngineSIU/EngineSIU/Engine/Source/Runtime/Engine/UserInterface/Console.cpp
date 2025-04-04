@@ -250,7 +250,7 @@ void Console::ExecuteCommand(const std::string& command)
         AddLog(LogLevel::Display, " - stat memory: Toggle Memory display");
         AddLog(LogLevel::Display, " - stat none: Hide all stat overlays");
     }
-    else if (command.rfind("stat ", 0) == 0) { // stat 명령어 처리
+    else if (command.starts_with("stat ")) { // stat 명령어 처리
         overlay.ToggleStat(command);
     }
     else {
@@ -258,10 +258,10 @@ void Console::ExecuteCommand(const std::string& command)
     }
 }
 
-void Console::OnResize(HWND hWindow)
+void Console::OnResize(HWND hWnd)
 {
     RECT clientRect;
-    GetClientRect(hWindow, &clientRect);
+    GetClientRect(hWnd, &clientRect);
     width = clientRect.right - clientRect.left;
     height = clientRect.bottom - clientRect.top;
 }

@@ -268,22 +268,22 @@ void AEditorPlayer::AddCoordiMode()
     cdMode = static_cast<CoordiMode>((cdMode + 1) % CDM_END);
 }
 
-void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
+void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& rayOrigin)
 {
     D3D11_VIEWPORT viewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetD3DViewport();
     
     float viewportX = screenX - viewport.TopLeftX;
     float viewportY = screenY - viewport.TopLeftY;
 
-    pickPosition.X = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
-    pickPosition.Y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
+    rayOrigin.X = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
+    rayOrigin.Y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
     if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrtho())
     {
-        pickPosition.Z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
+        rayOrigin.Z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
     }
     else
     {
-        pickPosition.Z = 1.0f;  // 퍼스펙티브 모드: near plane
+        rayOrigin.Z = 1.0f;  // 퍼스펙티브 모드: near plane
     }
 }
 

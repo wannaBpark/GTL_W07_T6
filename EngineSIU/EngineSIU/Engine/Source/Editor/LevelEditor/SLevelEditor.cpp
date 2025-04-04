@@ -8,11 +8,12 @@
 #include "SlateCore/Widgets/SWindow.h"
 #include "UnrealEd/EditorViewportClient.h"
 
-extern FEngineLoop GEngineLoop;
-
-
-SLevelEditor::SLevelEditor() : bInitialize(false), HSplitter(nullptr), VSplitter(nullptr),
-World(nullptr), bMultiViewportMode(false)
+SLevelEditor::SLevelEditor()
+    : bInitialize(false)
+    , HSplitter(nullptr)
+    , VSplitter(nullptr)
+    , World(nullptr)
+    , bMultiViewportMode(false)
 {
 }
 

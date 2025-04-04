@@ -468,7 +468,7 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 
 uint64 ControlEditorPanel::ConvertSelectionToFlags(const bool selected[]) const
 {
-    uint64 flags = static_cast<uint64>(EEngineShowFlags::None);
+    uint64 flags = EEngineShowFlags::None;
 
     if (selected[0])
         flags |= static_cast<uint64>(EEngineShowFlags::SF_AABB);

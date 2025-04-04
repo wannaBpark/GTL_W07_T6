@@ -9,10 +9,7 @@
 #include "EngineBaseTypes.h"
 
 #define MIN_ORTHOZOOM				1.0							/* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
-#define MAX_ORTHOZOOM				1e25	
-
-extern FEngineLoop GEngineLoop;
-
+#define MAX_ORTHOZOOM				1e25
 
 
 struct FViewportCameraTransform
@@ -46,7 +43,7 @@ public:
     }
 
     /** Check if transition curve is playing. */
- /*    bool IsPlaying();*/
+    /*    bool IsPlaying();*/
 
     /** @return The transform's location */
     FORCEINLINE const FVector& GetLocation() const { return ViewLocation; }
@@ -66,10 +63,10 @@ public:
 
 public:
     /** Current viewport Position. */
-    FVector	ViewLocation;
+    FVector ViewLocation;
     /** Current Viewport orientation; valid only for perspective projections. */
     FVector ViewRotation;
-    FVector	DesiredLocation;
+    FVector DesiredLocation;
     /** When orbiting, the point we are looking at */
     FVector LookAt;
     /** Viewport start location when animating to another location */
@@ -84,8 +81,8 @@ public:
     FEditorViewportClient();
     virtual ~FEditorViewportClient() override;
 
-    virtual void        Draw(FViewport* Viewport) override;
-    virtual UWorld*     GetWorld() const override { return nullptr; };
+    virtual void Draw(FViewport* Viewport) override;
+    virtual UWorld* GetWorld() const override { return nullptr; }
     void Initialize(int32 viewportIndex);
     void Tick(float DeltaTime);
     void Release() const;
@@ -95,6 +92,7 @@ public:
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
     bool IsSelected(POINT point) const;
+
 protected:
     /** Camera speed setting */
     int32 CameraSpeedSetting = 1;
@@ -102,18 +100,17 @@ protected:
     float CameraSpeedScalar = 1.0f;
     float GridSize;
 
-public: 
+public:
     FViewport* Viewport;
     int32 ViewportIndex;
     FViewport* GetViewport() const { return Viewport; }
     D3D11_VIEWPORT& GetD3DViewport() const;
 
-
 public:
     //카메라
     /** Viewport camera transform data for perspective viewports */
-    FViewportCameraTransform		ViewTransformPerspective;
-    FViewportCameraTransform        ViewTransformOrthographic;
+    FViewportCameraTransform ViewTransformPerspective;
+    FViewportCameraTransform ViewTransformOrthographic;
     // 카메라 정보 
     float ViewFOV = 60.0f;
     /** Viewport's stored horizontal field of view (saved in ini files). */
@@ -129,6 +126,7 @@ public:
 
     FMatrix View;
     FMatrix Projection;
+
 public: //Camera Movement
     void CameraMoveForward(float _Value);
     void CameraMoveRight(float _Value);
@@ -138,7 +136,7 @@ public: //Camera Movement
     void PivotMoveRight(float _Value);
     void PivotMoveUp(float _Value);
 
-    FMatrix& GetViewMatrix() { return  View; }
+    FMatrix& GetViewMatrix() { return View; }
     FMatrix& GetProjectionMatrix() { return Projection; }
     void UpdateViewMatrix();
     void UpdateProjectionMatrix();
@@ -156,27 +154,29 @@ public: //Camera Movement
 
     //Flag Test Code
     static void SetOthoSize(float _Value);
+
 private: // Input
     POINT lastMousePos;
     bool bRightMouseDown = false;
-   
 
 public:
     void LoadConfig(const TMap<FString, FString>& config);
     void SaveConfig(TMap<FString, FString>& config) const;
+
 private:
     TMap<FString, FString> ReadIniFile(const FString& filePath) const;
     void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config) const;
-	
+
 public:
     PROPERTY(int32, CameraSpeedSetting)
     PROPERTY(float, GridSize)
-    float GetCameraSpeedScalar() const { return CameraSpeedScalar; };
+    float GetCameraSpeedScalar() const { return CameraSpeedScalar; }
     void SetCameraSpeedScalar(float value);
 
 private:
     template <typename T>
-    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
+    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue)
+    {
         if (const FString* Value = config.Find(key))
         {
             std::istringstream iss(**Value);
@@ -189,4 +189,3 @@ private:
         return defaultValue;
     }
 };
-

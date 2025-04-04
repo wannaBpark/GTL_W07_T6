@@ -57,11 +57,10 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 else if (TypeName == USkySphereComponent::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<USkySphereComponent>();
-                    USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
                 }
             }
 
-            USceneComponent* sceneComp = static_cast<USceneComponent*>(obj);
+            USceneComponent* sceneComp = Cast<USceneComponent>(obj);
             //Todo : 여기다가 Obj Maeh저장후 일기
             //if (value.contains("ObjStaticMeshAsset"))
             if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
@@ -91,7 +90,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             int id = std::stoi(it.key());  // Key는 문자열, 숫자로 변환
             const json& value = it.value();
             UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>();
-            UCameraComponent* camera = static_cast<UCameraComponent*>(obj);
+            UCameraComponent* camera = Cast<UCameraComponent>(obj);
             if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                     value["Location"].get<std::vector<float>>()[1],
                     value["Location"].get<std::vector<float>>()[2]));

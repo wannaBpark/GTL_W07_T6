@@ -131,7 +131,7 @@ FVector JungleMath::QuaternionToEuler(const FQuat& quat)
     float sinPitch = 2.0f * (q.w * q.y - q.z * q.x);
     if (fabs(sinPitch) >= 1.0f)
     {
-        euler.Y = FMath::RadiansToDegrees(static_cast<float>(copysign(PI / 2, sinPitch))); // 🔥 Gimbal Lock 방지
+        euler.Y = FMath::RadiansToDegrees(copysign(PI / 2, sinPitch)); // 🔥 Gimbal Lock 방지
     }
     else
     {

@@ -47,12 +47,8 @@ void FEditorViewportClient::Tick(float DeltaTime)
 
 void FEditorViewportClient::Release() const
 {
-    if (Viewport)
-        delete Viewport;
- 
+    delete Viewport;
 }
-
-
 
 void FEditorViewportClient::Input()
 {
@@ -264,7 +260,7 @@ void FEditorViewportClient::UpdateProjectionMatrix()
 {
     if (IsPerspective()) {
         Projection = JungleMath::CreateProjectionMatrix(
-            ViewFOV * (3.141592f / 180.0f),
+            ViewFOV * (PI / 180.0f),
             GetViewport()->GetViewport().Width/ GetViewport()->GetViewport().Height,
             nearPlane,
             farPlane

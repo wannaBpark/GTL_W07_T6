@@ -51,7 +51,7 @@ void ShowFlags::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewpor
 
 uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[]) const
 {
-	uint64 flags = static_cast<uint64>(EEngineShowFlags::None);
+	uint64 flags = EEngineShowFlags::None;
 
 	if (selected[0])
 		flags |= static_cast<uint64>(EEngineShowFlags::SF_AABB);

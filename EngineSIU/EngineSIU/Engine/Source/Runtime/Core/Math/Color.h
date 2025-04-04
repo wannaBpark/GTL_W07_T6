@@ -1,19 +1,18 @@
 #pragma once
-
-#include "HAL/PlatformType.h"
+#include "MathUtility.h"
 #include "Vector.h"
 #include "Vector4.h"
-#include "MathUtility.h"
 #include "Container/String.h"
+#include "HAL/PlatformType.h"
 
 
-/*
-    0~255 사이의 값을 가지는 색상 구조체
-    BGRA 순서로 저장됨
-    감마가 적용된 색상
-    sRGB 색상 공간을 사용
-    GPU 연산 시에는 이 값이 더 빠름.
-*/
+/**
+ * 0~255 사이의 값을 가지는 색상 구조체
+ * BGRA 순서로 저장됨
+ * 감마가 적용된 색상
+ * sRGB 색상 공간을 사용
+ * GPU 연산 시에는 이 값이 더 빠름.
+ */
 struct FColor
 {
     union
@@ -28,11 +27,11 @@ struct FColor
         uint32 Bits;
     };
 
-    uint32& DWColor(void) { return Bits; }
-    const uint32& DWColor(void) const { return Bits; }
+    uint32& DWColor() { return Bits; }
+    const uint32& DWColor() const { return Bits; }
 
     FColor() : B(0), G(0), R(0), A(255) {}
-    FColor(uint8 InR, uint8 InG, uint8 InB, uint8 InA = 255) : R(InR), G(InG), B(InB), A(InA) {}
+    FColor(uint8 InR, uint8 InG, uint8 InB, uint8 InA = 255) : B(InB), G(InG), R(InR), A(InA) {}
     FColor(uint32 InColor)
     {
         DWColor() = InColor;
@@ -257,5 +256,4 @@ struct FLinearColor
     }
 
     FString ToString() const;
-
 };

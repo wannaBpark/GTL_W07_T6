@@ -20,7 +20,7 @@ public:
 
     // 그리드 초기화 및 배치 준비 관련
     void InitializeGrid(float Spacing, int GridCount);
-    void PrepareBatch(const FMatrix& View, const FMatrix& Projection, FLinePrimitiveBatchArgs& OutArgs);
+    void PrepareBatch(const FMatrix& View, const FMatrix& Projection, FLinePrimitiveBatchArgs& OutLinePrimitiveBatchArgs);
     void RemoveArr();
 
     // 버퍼 초기화
