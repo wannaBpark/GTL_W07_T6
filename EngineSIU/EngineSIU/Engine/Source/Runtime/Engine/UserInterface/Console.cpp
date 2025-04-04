@@ -5,17 +5,107 @@
 #include "UnrealEd/EditorViewportClient.h"
 
 
+void StatOverlay::ToggleStat(const std::string& command)
+{
+    if (command == "stat fps")
+    {
+        showFPS = true;
+        showRender = true;
+    }
+    else if (command == "stat memory")
+    {
+        showMemory = true;
+        showRender = true;
+    }
+    else if (command == "stat none")
+    {
+        showFPS = false;
+        showMemory = false;
+        showRender = false;
+    }
+}
+
+void StatOverlay::Render(ID3D11DeviceContext* context, UINT width, UINT height) const
+{
+
+    if (!showRender)
+        return;
+    ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+    // 창 크기를 화면의 50%로 설정합니다.
+    ImVec2 windowSize(displaySize.x * 0.5f, displaySize.y * 0.5f);
+    // 창을 중앙에 배치하기 위해 위치를 계산합니다.
+    ImVec2 windowPos((displaySize.x - windowSize.x) * 0.5f, (displaySize.y - windowSize.y) * 0.5f);
+
+    
+    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+    ImGui::Begin("Stat Overlay", nullptr,
+                 ImGuiWindowFlags_NoTitleBar |
+                 ImGuiWindowFlags_NoResize |
+                 ImGuiWindowFlags_NoMove |
+                 ImGuiWindowFlags_NoScrollbar);
+    if (showFPS) {
+        static float lastTime = ImGui::GetTime();
+        static int frameCount = 0;
+        static float fps = 0.0f;
+
+        frameCount++;
+        float currentTime = ImGui::GetTime();
+        float deltaTime = currentTime - lastTime;
+
+        if (deltaTime >= 1.0f) { // 1초마다 FPS 업데이트
+            fps = frameCount / deltaTime;
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+        ImGui::Text("FPS: %.2f", fps);
+    }
+
+
+    if (showMemory)
+    {
+        ImGui::Text("Allocated Object Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Object>());
+        ImGui::Text("Allocated Object Memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Object>());
+        ImGui::Text("Allocated Container Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Container>());
+        ImGui::Text("Allocated Container memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Container>());
+    }
+    ImGui::PopStyleColor();
+    ImGui::End();
+}
+
+float StatOverlay::CalculateFPS() const
+{
+    static int frameCount = 0;
+    static float elapsedTime = 0.0f;
+    static float lastTime = 0.0f;
+
+    float currentTime = GetTickCount64() / 1000.0f;
+    elapsedTime += (currentTime - lastTime);
+    lastTime = currentTime;
+    frameCount++;
+
+    if (elapsedTime > 1.0f) {
+        float fps = frameCount / elapsedTime;
+        frameCount = 0;
+        elapsedTime = 0.0f;
+        return fps;
+    }
+    return 0.0f;
+}
+
+void StatOverlay::DrawTextOverlay(const std::string& text, int x, int y) const
+{
+    // ImGui 사용 시
+    ImGui::SetNextWindowPos(ImVec2(x, y));
+    ImGui::Text("%s", text.c_str());
+}
+
 // 싱글톤 인스턴스 반환
 Console& Console::GetInstance() {
     static Console instance;
     return instance;
 }
-
-// 생성자
-Console::Console() {}
-
-// 소멸자
-Console::~Console() {}
 
 // 로그 초기화
 void Console::Clear() {

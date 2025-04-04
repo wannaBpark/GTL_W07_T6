@@ -6,8 +6,7 @@ class UMaterial : public UObject {
     DECLARE_CLASS(UMaterial, UObject)
 
 public:
-    UMaterial() {}
-    virtual ~UMaterial() override {}
+    UMaterial() = default;
     FObjMaterialInfo& GetMaterialInfo() { return materialInfo; }
     void SetMaterialInfo(FObjMaterialInfo value) { materialInfo = value; }
 

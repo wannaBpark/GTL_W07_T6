@@ -5,9 +5,9 @@
 class SWindow
 {
 public:
-    SWindow();
+    SWindow() = default;
     SWindow(FRect initRect);
-    virtual ~SWindow();
+    virtual ~SWindow() = default;
 
     virtual void Initialize(FRect initRect);
     virtual void OnResize(float width, float height);

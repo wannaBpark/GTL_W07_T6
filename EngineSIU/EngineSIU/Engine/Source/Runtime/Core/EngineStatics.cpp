@@ -1,14 +1,5 @@
 #include "EngineStatics.h"
-#include "Define.h"
-uint32 UEngineStatics::NextUUID = 0;
 
-UEngineStatics::UEngineStatics()
-{
-}
-
-UEngineStatics::~UEngineStatics()
-{
-}
 
 uint32 UEngineStatics::GenUUID()
 {

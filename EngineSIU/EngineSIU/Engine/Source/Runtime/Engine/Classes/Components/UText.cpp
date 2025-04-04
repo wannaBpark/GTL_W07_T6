@@ -86,8 +86,8 @@ void UText::SetText(FWString _text)
 	int textSize = static_cast<int>(_text.size());
 
 
-	uint32 BitmapWidth = Texture->width;
-	uint32 BitmapHeight = Texture->height;
+	uint32 BitmapWidth = Texture->Width;
+	uint32 BitmapHeight = Texture->Height;
 
 	float CellWidth =  float(BitmapWidth)/ColumnCount;
 	float CellHeight = float(BitmapHeight)/RowCount;

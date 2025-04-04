@@ -9,11 +9,6 @@
 
 extern FEngineLoop GEngineLoop;
 
-UPrimitiveDrawBatch::UPrimitiveDrawBatch()
-{
-
-}
-
 UPrimitiveDrawBatch::~UPrimitiveDrawBatch()
 {
     if (VertexBuffer)

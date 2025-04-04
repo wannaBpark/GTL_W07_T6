@@ -9,7 +9,7 @@ class UStaticMesh : public UObject
     DECLARE_CLASS(UStaticMesh, UObject)
 
 public:
-    UStaticMesh();
+    UStaticMesh() = default;
     virtual ~UStaticMesh() override;
     const TArray<FStaticMaterial*>& GetMaterials() const { return materials; }
     uint32 GetMaterialIndex(FName MaterialSlotName) const;

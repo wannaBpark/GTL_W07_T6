@@ -4,13 +4,6 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
 
-UCameraComponent::UCameraComponent()
-{
-}
-
-UCameraComponent::~UCameraComponent()
-{
-}
 
 void UCameraComponent::InitializeComponent()
 {
