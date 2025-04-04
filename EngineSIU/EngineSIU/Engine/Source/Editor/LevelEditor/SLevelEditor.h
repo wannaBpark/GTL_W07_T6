@@ -49,7 +49,7 @@ public:
     {
         return ActiveViewportClient;
     }
-    void SetViewportClient(std::shared_ptr<FEditorViewportClient> viewportClient)
+    void SetViewportClient(const std::shared_ptr<FEditorViewportClient>& viewportClient)
     {
         ActiveViewportClient = viewportClient;
     }

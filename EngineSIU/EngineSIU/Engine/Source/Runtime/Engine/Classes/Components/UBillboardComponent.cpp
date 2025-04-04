@@ -54,7 +54,7 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 }
 
 
-void UBillboardComponent::SetTexture(FWString _fileName)
+void UBillboardComponent::SetTexture(const FWString& _fileName)
 {
 	Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
 }

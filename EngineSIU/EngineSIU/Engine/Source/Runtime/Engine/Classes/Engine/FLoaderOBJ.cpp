@@ -3,7 +3,7 @@
 #include "Components/Material/Material.h"
 #include "Components/Mesh/StaticMesh.h"
 
-UMaterial* FManagerOBJ::CreateMaterial(FObjMaterialInfo materialInfo)
+UMaterial* FManagerOBJ::CreateMaterial(const FObjMaterialInfo& materialInfo)
 {
     if (materialMap[materialInfo.MTLName] != nullptr)
         return materialMap[materialInfo.MTLName];
@@ -14,14 +14,13 @@ UMaterial* FManagerOBJ::CreateMaterial(FObjMaterialInfo materialInfo)
     return newMaterial;
 }
 
-UMaterial* FManagerOBJ::GetMaterial(FString name)
+UMaterial* FManagerOBJ::GetMaterial(const FString& name)
 {
     return materialMap[name];
 }
 
-UStaticMesh* FManagerOBJ::CreateStaticMesh(FString filePath)
+UStaticMesh* FManagerOBJ::CreateStaticMesh(const FString& filePath)
 {
-
     OBJ::FStaticMeshRenderData* staticMeshRenderData = FManagerOBJ::LoadObjStaticMeshAsset(filePath);
 
     if (staticMeshRenderData == nullptr) return nullptr;
@@ -35,9 +34,10 @@ UStaticMesh* FManagerOBJ::CreateStaticMesh(FString filePath)
     staticMesh->SetData(staticMeshRenderData);
 
     staticMeshMap.Add(staticMeshRenderData->ObjectName, staticMesh);
+    return staticMesh;
 }
 
-UStaticMesh* FManagerOBJ::GetStaticMesh(FWString name)
+UStaticMesh* FManagerOBJ::GetStaticMesh(const FWString& name)
 {
     return staticMeshMap[name];
 }

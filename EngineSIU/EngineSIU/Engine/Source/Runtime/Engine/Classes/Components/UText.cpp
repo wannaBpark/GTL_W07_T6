@@ -65,7 +65,7 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 }
 
 
-void UText::SetText(FWString _text)
+void UText::SetText(const FWString& _text)
 {
 	text = _text;
 	if (_text.empty())
