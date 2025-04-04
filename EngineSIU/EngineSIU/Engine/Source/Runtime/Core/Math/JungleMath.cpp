@@ -14,8 +14,6 @@ FVector4 JungleMath::ConvertV3ToV4(FVector vec3)
 	return newVec4;
 }
 
-
-
 FMatrix JungleMath::CreateModelMatrix(FVector translation, FVector rotation, FVector scale)
 {
     FMatrix Translation = FMatrix::CreateTranslationMatrix(translation);
@@ -92,9 +90,9 @@ FVector JungleMath::FVectorRotate(FVector& origin, const FVector& rotation)
 }
 FQuat JungleMath::EulerToQuaternion(const FVector& eulerDegrees)
 {
-    float yaw = DegToRad(eulerDegrees.Z);   // Z축 Yaw
-    float pitch = DegToRad(eulerDegrees.Y); // Y축 Pitch
-    float roll = DegToRad(eulerDegrees.X);  // X축 Roll
+    float yaw = FMath::DegreesToRadians(eulerDegrees.Z);   // Z축 Yaw
+    float pitch = FMath::DegreesToRadians(eulerDegrees.Y); // Y축 Pitch
+    float roll = FMath::DegreesToRadians(eulerDegrees.X);  // X축 Roll
 
     float halfYaw = yaw * 0.5f;
     float halfPitch = pitch * 0.5f;
@@ -127,23 +125,23 @@ FVector JungleMath::QuaternionToEuler(const FQuat& quat)
     // Yaw (Z 축 회전)
     float sinYaw = 2.0f * (q.w * q.z + q.x * q.y);
     float cosYaw = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
-    euler.Z = RadToDeg(atan2(sinYaw, cosYaw));
+    euler.Z = FMath::RadiansToDegrees(atan2(sinYaw, cosYaw));
 
     // Pitch (Y 축 회전, 짐벌락 방지)
     float sinPitch = 2.0f * (q.w * q.y - q.z * q.x);
     if (fabs(sinPitch) >= 1.0f)
     {
-        euler.Y = RadToDeg(static_cast<float>(copysign(PI / 2, sinPitch))); // 🔥 Gimbal Lock 방지
+        euler.Y = FMath::RadiansToDegrees(static_cast<float>(copysign(PI / 2, sinPitch))); // 🔥 Gimbal Lock 방지
     }
     else
     {
-        euler.Y = RadToDeg(asin(sinPitch));
+        euler.Y = FMath::RadiansToDegrees(asin(sinPitch));
     }
 
     // Roll (X 축 회전)
     float sinRoll = 2.0f * (q.w * q.x + q.y * q.z);
     float cosRoll = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
-    euler.X = RadToDeg(atan2(sinRoll, cosRoll));
+    euler.X = FMath::RadiansToDegrees(atan2(sinRoll, cosRoll));
     return euler;
 }
 FVector JungleMath::FVectorRotate(FVector& origin, const FQuat& rotation)
@@ -153,9 +151,9 @@ FVector JungleMath::FVectorRotate(FVector& origin, const FQuat& rotation)
 
 FMatrix JungleMath::CreateRotationMatrix(FVector rotation)
 {
-    XMVECTOR quatX = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 0), DegToRad(rotation.X));
-    XMVECTOR quatY = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 0), DegToRad(rotation.Y));
-    XMVECTOR quatZ = XMQuaternionRotationAxis(XMVectorSet(0, 0, 1, 0), DegToRad(rotation.Z));
+    XMVECTOR quatX = XMQuaternionRotationAxis(XMVectorSet(1, 0, 0, 0), FMath::DegreesToRadians(rotation.X));
+    XMVECTOR quatY = XMQuaternionRotationAxis(XMVectorSet(0, 1, 0, 0), FMath::DegreesToRadians(rotation.Y));
+    XMVECTOR quatZ = XMQuaternionRotationAxis(XMVectorSet(0, 0, 1, 0), FMath::DegreesToRadians(rotation.Z));
 
     XMVECTOR rotationQuat = XMQuaternionMultiply(quatZ, XMQuaternionMultiply(quatY, quatX));
     rotationQuat = XMQuaternionNormalize(rotationQuat);  // 정규화 필수
@@ -171,15 +169,4 @@ FMatrix JungleMath::CreateRotationMatrix(FVector rotation)
         }
     }
     return result;
-}
-
-
-float JungleMath::RadToDeg(float radian)
-{
-    return static_cast<float>(radian * (180.0f / PI));
-}
-
-float JungleMath::DegToRad(float degree)
-{
-    return static_cast<float>(degree * (PI / 180.0f));
 }
