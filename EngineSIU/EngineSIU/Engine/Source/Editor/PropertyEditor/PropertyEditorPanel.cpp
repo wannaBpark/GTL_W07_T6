@@ -88,10 +88,10 @@ void PropertyEditorPanel::Render()
         {
             FVector4 currColor = lightObj->GetColor();
 
-            float r = currColor.x;
-            float g = currColor.y;
-            float b = currColor.z;
-            float a = currColor.a;
+            float r = currColor.X;
+            float g = currColor.Y;
+            float b = currColor.Z;
+            float a = currColor.W;
             float h, s, v;
             float lightColor[4] = { r, g, b, a };
 
