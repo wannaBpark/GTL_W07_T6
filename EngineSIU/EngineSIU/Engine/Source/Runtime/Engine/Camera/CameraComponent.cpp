@@ -103,10 +103,5 @@ void UCameraComponent::RotateYaw(float _Value)
 
 void UCameraComponent::RotatePitch(float _Value)
 {
-
-	RelativeRotation.Y += _Value;
-	if (RelativeRotation.Y < -90.0f)
-		RelativeRotation.Y = -90.0f;
-	if (RelativeRotation.Y > 90.0f)
-		RelativeRotation.Y = 90.0f;
+	RelativeRotation.Y = FMath::Clamp(RelativeRotation.Y + _Value, -90.f, 90.f);
 }

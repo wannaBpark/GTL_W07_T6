@@ -198,7 +198,7 @@ bool FSceneMgr::SaveSceneToFile(const FString& filename, const SceneData& sceneD
     std::ofstream outFile(*filename);
     if (!outFile) {
         FString errorMessage = "Failed to open file for writing: ";
-        MessageBoxA(NULL, *errorMessage, "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(nullptr, *errorMessage, "Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
