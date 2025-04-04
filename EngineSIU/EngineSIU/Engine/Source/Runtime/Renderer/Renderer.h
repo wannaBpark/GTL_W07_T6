@@ -120,21 +120,9 @@ public: // line shader
     void PrepareLineShader() const;
     void CreateLineShader();
     void ReleaseLineShader() const;
-    void RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVertexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount) const;
-    void UpdateGridConstantBuffer(const FGridParameters& gridParams) const;
-    void UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones) const;
-    ID3D11Buffer* CreateStaticVerticesBuffer() const;
-    ID3D11Buffer* CreateBoundingBoxBuffer(UINT numBoundingBoxes) const;
-    ID3D11Buffer* CreateOBBBuffer(UINT numBoundingBoxes) const;
-    ID3D11Buffer* CreateConeBuffer(UINT numCones) const;
-    ID3D11ShaderResourceView* CreateBoundingBoxSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes);
-    ID3D11ShaderResourceView* CreateOBBSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes);
-    ID3D11ShaderResourceView* CreateConeSRV(ID3D11Buffer* pConeBuffer, UINT numCones);
-
-    void UpdateBoundingBoxBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FBoundingBox>& BoundingBoxes, int numBoundingBoxes) const;
-    void UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FOBB>& BoundingBoxes, int numBoundingBoxes) const;
-    void UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>& Cones, int numCones) const;
-
+    void ProcessLineRendering(const FMatrix& View, const FMatrix& Projection);
+    void DrawLineBatch(const FLinePrimitiveBatchArgs& linePrimitiveBatchArgs) const;
+   
     //Render Pass Demo
     void PrepareRender();
     void ClearRenderArr();
@@ -148,14 +136,9 @@ private:
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
     TArray<ULightComponentBase*> LightObjs;
-
-public:
     ID3D11VertexShader* VertexLineShader = nullptr;
+
     ID3D11PixelShader* PixelLineShader = nullptr;
-    ID3D11Buffer* GridConstantBuffer = nullptr;
-    ID3D11Buffer* LinePrimitiveBuffer = nullptr;
-    ID3D11ShaderResourceView* pBBSRV = nullptr;
-    ID3D11ShaderResourceView* pConeSRV = nullptr;
-    ID3D11ShaderResourceView* pOBBSRV = nullptr;
+
 };
 

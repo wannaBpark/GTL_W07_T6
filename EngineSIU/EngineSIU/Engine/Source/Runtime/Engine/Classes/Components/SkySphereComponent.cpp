@@ -5,7 +5,7 @@
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "UnrealEd/PrimitiveBatch.h"
+
 
 
 USkySphereComponent::USkySphereComponent()
