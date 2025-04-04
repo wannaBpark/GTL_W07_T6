@@ -678,6 +678,7 @@
     <ClInclude Include="Font\RawFonts.h">
       <Filter>Font</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
@@ -698,5 +699,8 @@
     <FxCompile Include="Shaders\VertexTextureShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />
   </ItemGroup>
 </Project>
