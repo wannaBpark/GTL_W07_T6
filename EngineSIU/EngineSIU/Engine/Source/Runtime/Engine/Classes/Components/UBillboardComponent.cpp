@@ -69,7 +69,7 @@ void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
 
 FMatrix UBillboardComponent::CreateBillboardMatrix()
 {
-	FMatrix CameraView = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+	FMatrix CameraView = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
 
 	CameraView.M[0][3] = 0.0f;
 	CameraView.M[1][3] = 0.0f;
@@ -129,7 +129,7 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	FVector pickPosition;
 	int screenX = mousePos.x;
 	int screenY = mousePos.y;
-    FMatrix projectionMatrix = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix projectionMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
 	pickPosition.X = ((2.0f * screenX / viewport.Width) - 1);
 	pickPosition.Y = -((2.0f * screenY / viewport.Height) - 1);
 	pickPosition.Z = 1.0f; // Near Plane

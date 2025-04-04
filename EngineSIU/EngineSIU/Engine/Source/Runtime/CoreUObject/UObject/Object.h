@@ -42,11 +42,6 @@ public:
         return GEngineLoop.GetWorld();
     }
 
-    FEngineLoop& GetEngine()
-    {
-        return GEngineLoop;
-    }
-
     FName GetFName() const { return NamePrivate; }
     FString GetName() const { return NamePrivate.ToString(); }
 

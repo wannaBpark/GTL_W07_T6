@@ -89,23 +89,23 @@ void UCameraComponent::Input()
 
 void UCameraComponent::MoveForward(float _Value)
 {
-	RelativeLocation = RelativeLocation + GetForwardVector() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() * _Value;
+	RelativeLocation = RelativeLocation + GetForwardVector() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() * _Value;
 }
 
 void UCameraComponent::MoveRight(float _Value)
 {
 	//FVector newRight = FVector(GetRightVector().X, GetRightVector().Y, 0.0f);
-	RelativeLocation = RelativeLocation + GetRightVector() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() * _Value;
+	RelativeLocation = RelativeLocation + GetRightVector() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() * _Value;
 }
 
 void UCameraComponent::MoveUp(float _Value)
 {
-	RelativeLocation.Z += _Value * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
+	RelativeLocation.Z += _Value * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotateYaw(float _Value)
 {
-	RelativeRotation.Z += _Value * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
+	RelativeRotation.Z += _Value * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotatePitch(float _Value)
