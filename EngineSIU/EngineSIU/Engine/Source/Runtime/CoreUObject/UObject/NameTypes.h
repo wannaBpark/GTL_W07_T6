@@ -3,6 +3,7 @@
 
 class FString;
 
+enum ENameNone : uint8 { NAME_None = 0 };
 
 class FName
 {
@@ -12,7 +13,8 @@ class FName
     uint32 ComparisonIndex; // 비교시 사용되는 Hash
 
 public:
-    FName() : DisplayIndex(0), ComparisonIndex(0) {}
+    FName() : DisplayIndex(NAME_None), ComparisonIndex(NAME_None) {}
+    FName(ENameNone) : DisplayIndex(NAME_None), ComparisonIndex(NAME_None) {}
     FName(const WIDECHAR* Name);
     FName(const ANSICHAR* Name);
     FName(const FString& Name);
@@ -22,4 +24,17 @@ public:
     uint32 GetComparisonIndex() const { return ComparisonIndex; }
 
     bool operator==(const FName& Other) const;
+    bool operator==(ENameNone) const;
+    bool operator!=(const FName& Other) const;
+    bool operator!=(ENameNone) const;
+};
+
+template<>
+struct std::hash<FName>
+{
+    size_t operator()(const FName& Key) const noexcept
+    {
+        // TODO: 나중에 FName에 Number 추가하면 살짝 수정
+        return hash<uint32>()(Key.GetComparisonIndex());
+    }
 };

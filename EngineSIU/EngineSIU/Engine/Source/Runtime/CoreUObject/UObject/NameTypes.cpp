@@ -444,3 +444,18 @@ bool FName::operator==(const FName& Other) const
 {
 	return ComparisonIndex == Other.ComparisonIndex;
 }
+
+bool FName::operator==(ENameNone) const
+{
+    return ComparisonIndex == NAME_None;
+}
+
+bool FName::operator!=(ENameNone) const
+{
+    return ComparisonIndex != NAME_None;
+}
+
+bool FName::operator!=(const FName& Other) const
+{
+    return ComparisonIndex != Other.ComparisonIndex;
+}
