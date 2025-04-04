@@ -41,13 +41,13 @@ void UWorld::ReleaseBaseObject()
 {
     if (LocalGizmo)
     {
-        delete LocalGizmo;
+        GUObjectArray.MarkRemoveObject(LocalGizmo);
         LocalGizmo = nullptr;
     }
 
     if (EditorPlayer)
     {
-        delete EditorPlayer;
+        GUObjectArray.MarkRemoveObject(EditorPlayer);
         EditorPlayer = nullptr;
     }
 }
