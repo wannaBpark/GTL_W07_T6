@@ -52,12 +52,6 @@ void UWorld::ReleaseBaseObject()
         LocalGizmo = nullptr;
     }
 
-    if (worldGizmo)
-    {
-        delete worldGizmo;
-        worldGizmo = nullptr;
-    }
-
     if (camera)
     {
         delete camera;

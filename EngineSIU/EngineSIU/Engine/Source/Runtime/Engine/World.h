@@ -55,8 +55,6 @@ private:
     AEditorPlayer* EditorPlayer = nullptr;
 
 public:
-    UObject* worldGizmo = nullptr;
-
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
@@ -71,7 +69,6 @@ public:
         SelectedActor = InActor;
     }
 
-    UObject* GetWorldGizmo() const { return worldGizmo; }
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void SetPickingGizmo(UObject* Object);
 };
