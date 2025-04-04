@@ -1,45 +1,49 @@
 #pragma once
 
 
-enum OBJECTS
+enum OBJECTS : uint8
 {
-	OBJ_SPHERE,
-	OBJ_CUBE,
-	OBJ_SpotLight,
-	OBJ_PARTICLE,
-	OBJ_Text,
-	OBJ_TRIANGLE,
-	OBJ_CAMERA,
-	OBJ_PLAYER,
-	OBJ_END
+    OBJ_SPHERE,
+    OBJ_CUBE,
+    OBJ_SpotLight,
+    OBJ_PARTICLE,
+    OBJ_Text,
+    OBJ_TRIANGLE,
+    OBJ_CAMERA,
+    OBJ_PLAYER,
+    OBJ_END
 };
-enum ARROW_DIR
+
+enum ARROW_DIR : uint8
 {
-	AD_X,
-	AD_Y,
-	AD_Z,
-	AD_END
+    AD_X,
+    AD_Y,
+    AD_Z,
+    AD_END
 };
-enum ControlMode
+
+enum ControlMode : uint8
 {
-	CM_TRANSLATION,
-	CM_ROTATION,
-	CM_SCALE,
-	CM_END
+    CM_TRANSLATION,
+    CM_ROTATION,
+    CM_SCALE,
+    CM_END
 };
-enum CoordiMode
+
+enum CoordiMode : uint8
 {
-	CDM_WORLD,
-	CDM_LOCAL,
-	CDM_END
+    CDM_WORLD,
+    CDM_LOCAL,
+    CDM_END
 };
-enum EPrimitiveColor
+
+enum EPrimitiveColor : uint8
 {
-	RED_X,
-	GREEN_Y,
-	BLUE_Z,
-	NONE,
-	RED_X_ROT,
-	GREEN_Y_ROT,
-	BLUE_Z_ROT
+    RED_X,
+    GREEN_Y,
+    BLUE_Z,
+    NONE,
+    RED_X_ROT,
+    GREEN_Y_ROT,
+    BLUE_Z_ROT
 };

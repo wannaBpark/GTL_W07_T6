@@ -4,8 +4,17 @@
 #include "PropertyEditor/IWindowToggleable.h"
 #include <windows.h>
 #include <psapi.h>
-enum class LogLevel { Display, Warning, Error };
-class StatOverlay {
+
+enum class LogLevel : uint8
+{
+    Display,
+    Warning,
+    Error
+};
+
+
+class StatOverlay
+{
 public:
     bool showFPS = false;
     bool showMemory = false;
@@ -97,6 +106,7 @@ private:
         ImGui::Text("%s", text.c_str());
     }
 };
+
 class Console : public IWindowToggleable
 {
 private:

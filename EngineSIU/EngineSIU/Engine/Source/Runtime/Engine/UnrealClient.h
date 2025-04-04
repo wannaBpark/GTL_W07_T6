@@ -3,7 +3,7 @@
 #include <d3d11.h>
 
 
-enum class EViewScreenLocation
+enum class EViewScreenLocation : uint8
 {
     TopLeft,
     TopRight,
