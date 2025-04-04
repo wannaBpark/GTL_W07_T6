@@ -19,6 +19,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UObject/UObjectIterator.h"
 #include "Components/SkySphereComponent.h"
+#include "Components/HeightFogComponent.h"
 
 void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
@@ -594,7 +595,7 @@ void FRenderer::PrepareTextureShader() const
     Graphics->DeviceContext->PSSetShader(PixelTextureShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(TextureInputLayout);
 
-    //�ؽ��Ŀ� ConstantBuffer �߰��ʿ��Ҽ���
+    //�ؽ��Ŀ� FogConstantBuffer �߰��ʿ��Ҽ���
     if (ConstantBuffer)
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
@@ -1021,6 +1022,38 @@ void FRenderer::RenderBillboards(const UWorld* World, const std::shared_ptr<FEdi
         }
     }
     PrepareShader();
+}
+
+void FRenderer::RenderFog(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, FFogRenderer* FogRenderData)
+{
+    Graphics->DeviceContext->VSSetShader(FogRenderData->GetVertexShader(), nullptr, 0);
+    Graphics->DeviceContext->PSSetShader(FogRenderData->GetPixelShader(), nullptr, 0);
+    Graphics->DeviceContext->IASetInputLayout(FogRenderData->GetInputLayout());
+
+    ID3D11Buffer* FogConstantBuffer = FogRenderData->GetConstantBuffer();
+    if (FogConstantBuffer)
+    {
+        Graphics->DeviceContext->VSSetConstantBuffers(0, 6, &FogConstantBuffer);
+    }
+
+    FMatrix View = ActiveViewport->View;
+    FMatrix Projection = ActiveViewport->GetProjectionMatrix();
+    FMatrix ViewProj = View * Projection;
+    FMatrix InverseViewProj = FMatrix::Inverse(ViewProj);
+    UHeightFogComponent* Fog = Cast<UHeightFogComponent>(World->GetFogActor()->GetRootComponent());
+    FFogConstants Constants
+    {
+        InverseViewProj,
+        Fog->GetFogColor(),
+        ActiveViewport->ViewTransformPerspective.GetLocation(),
+        Fog->GetFogDensity(),
+        Fog->GetFogHeightFalloff(),
+        Fog->GetStartDistance(),
+        Fog->GetFogCutoffDistance(),
+        Fog->GetFogMaxOpacity()
+    };
+    FogRenderData->UpdateConstant(Constants);
+    
 }
 
 void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)

@@ -117,6 +117,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     WindowInit(hInstance);
     graphicDevice.Initialize(hWnd);
     renderer.Initialize(&graphicDevice);
+    FogRenderer.Initialize(&graphicDevice);
     PrimitiveDrawBatch.Initialize(&graphicDevice);
 
     UIMgr = new UImGuiManager;
@@ -164,6 +165,8 @@ void FEngineLoop::Render() const
         renderer.PrepareRender();
         renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
     }
+    //지금까지 렌더된걸 기반으로 쿼드 생성 (안개 적용)
+
 }
 
 void FEngineLoop::Tick()
@@ -256,6 +259,7 @@ void FEngineLoop::Exit()
     resourceMgr.Release(&renderer);
     renderer.Release();
     graphicDevice.Release();
+    FogRenderer.Release();
 }
 
 

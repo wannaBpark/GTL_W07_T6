@@ -8,6 +8,7 @@
 #include "EngineBaseTypes.h"
 #include "Define.h"
 #include "Container/Set.h"
+#include "FogRenderer.h"
 
 class ULightComponentBase;
 class UWorld;
@@ -131,6 +132,7 @@ public: // line shader
     void RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderBillboards(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    void RenderFog(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, FFogRenderer* FogRenderData);
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;

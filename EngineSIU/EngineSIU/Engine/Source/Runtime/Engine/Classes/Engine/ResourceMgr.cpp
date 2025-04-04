@@ -11,7 +11,7 @@
 
 void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 {
-    //RegisterMesh(renderer, "Quad", quadVertices, sizeof(quadVertices) / sizeof(FVertexSimple), quadInices, sizeof(quadInices)/sizeof(uint32));
+    //RegisterMesh(renderer, "Quad", quadVertices, sizeof(quadVertices) / sizeof(FVertexSimple), quadIndices, sizeof(quadIndices)/sizeof(uint32));
 
     //FManagerOBJ::LoadObjStaticMeshAsset("Assets/AxisArrowX.obj");
     //FManagerOBJ::LoadObjStaticMeshAsset("Assets/AxisArrowY.obj");

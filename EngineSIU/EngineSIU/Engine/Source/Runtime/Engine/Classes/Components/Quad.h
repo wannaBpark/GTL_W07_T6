@@ -1,16 +1,16 @@
 #pragma once
 #include "Define.h"
-FVertexSimple quadVertices[] =
+FVertexTexture quadVertices[] =
 {
-    {-1.0f,1.0f,0.0f,0.0f,1.0f,0.0f,1.0f},
-    { 1.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f},
-    {-1.0f,-1.0f,0.0f,1.0f,1.0f,0.0f,1.0f},
-    { 1.0f,-1.0f,0.0f,1.0f,1.0f,1.0f,1.0f}
+    {-1.f, 1.f, 0.f, 0.f, 0.f},
+    {1.f, 1.f, 0.f, 1.f, 0.f },
+    {-1.f, -1.f, 0.f, 0.f, 1.f},
+    {1.f, -1.f, 0.f, 1.f, 1.f}
 };
 
-uint32 quadInices[] =
+uint32 quadIndices[] =
 {
     0,1,2,
-    1,3,2
+    2,1,3
 };
 

@@ -6,6 +6,7 @@
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
+#include "Components/HeightFogComponent.h"
 
 
 void UWorld::Initialize()
@@ -20,6 +21,10 @@ void UWorld::Initialize()
     USkySphereComponent* skySphere = SpawnedActor->AddComponent<USkySphereComponent>();
     skySphere->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"SkySphere.obj"));
     skySphere->GetStaticMesh()->GetMaterials()[0]->Material->SetDiffuse(FVector((float)32/255, (float)171/255, (float)191/255));
+
+    FogActor = SpawnActor<AActor>();
+    UHeightFogComponent* FogComp = FogActor->AddComponent<UHeightFogComponent>();
+    FogActor->SetActorLabel("Height Fog");
 }
 
 void UWorld::CreateBaseObject()

@@ -48,6 +48,8 @@ private:
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
+    AActor* FogActor = nullptr;
+
     AActor* SelectedActor = nullptr;
 
     USceneComponent* pickingGizmo = nullptr;
@@ -55,6 +57,8 @@ private:
 
 public:
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
+
+    const AActor* GetFogActor() const { return FogActor; }
 
     ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }

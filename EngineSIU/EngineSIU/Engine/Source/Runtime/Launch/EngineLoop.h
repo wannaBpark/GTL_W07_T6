@@ -4,6 +4,7 @@
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveDrawBatch.h"
 #include "Engine/ResourceMgr.h"
+#include "Renderer/FogRenderer.h"
 
 class UnrealEd;
 class UImGuiManager;
@@ -32,6 +33,7 @@ private:
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
+    FFogRenderer FogRenderer;
     static UPrimitiveDrawBatch PrimitiveDrawBatch;
     static FResourceMgr resourceMgr;
     static uint32 TotalAllocationBytes;
