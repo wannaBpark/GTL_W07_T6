@@ -51,23 +51,18 @@ private:
     AActor* SelectedActor = nullptr;
 
     USceneComponent* pickingGizmo = nullptr;
-    UCameraComponent* camera = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
 
 public:
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
-    UCameraComponent* GetCamera() const { return camera; }
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
 
     // EditorManager 같은데로 보내기
     AActor* GetSelectedActor() const { return SelectedActor; }
-    void SetSelectedActor(AActor* InActor)
-    {
-        SelectedActor = InActor;
-    }
+    void SetSelectedActor(AActor* InActor) { SelectedActor = InActor; }
 
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void SetPickingGizmo(UObject* Object);

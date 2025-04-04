@@ -43,7 +43,7 @@ void FEditorViewportClient::Tick(float DeltaTime)
 
 }
 
-void FEditorViewportClient::Release()
+void FEditorViewportClient::Release() const
 {
     if (Viewport)
         delete Viewport;
@@ -156,7 +156,7 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
-bool FEditorViewportClient::IsSelected(POINT point)
+bool FEditorViewportClient::IsSelected(POINT point) const
 {
     float TopLeftX = Viewport->GetViewport().TopLeftX;
     float TopLeftY = Viewport->GetViewport().TopLeftY;
@@ -170,7 +170,7 @@ bool FEditorViewportClient::IsSelected(POINT point)
     }
     return false;
 }
-D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport()
+D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
 {
     return Viewport->GetViewport();
 }
@@ -389,7 +389,7 @@ void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
     ViewMode = static_cast<EViewModeIndex>(GetValueFromConfig(config, "ViewMode" + ViewportNum, 0));
     ViewportType = static_cast<ELevelViewportType>(GetValueFromConfig(config, "ViewportType" + ViewportNum, 3));
 }
-void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config)
+void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config) const
 {
     FString ViewportNum = std::to_string(ViewportIndex);
     config["CameraSpeedSetting"+ ViewportNum] = std::to_string(CameraSpeedSetting);
@@ -405,7 +405,7 @@ void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config)
     config["ViewMode" + ViewportNum] = std::to_string(int32(ViewMode));
     config["ViewportType" + ViewportNum] = std::to_string(int32(ViewportType));
 }
-TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath)
+TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath) const
 {
     TMap<FString, FString> config;
     std::ifstream file(*filePath);
@@ -422,7 +422,7 @@ TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePat
     return config;
 }
 
-void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
+void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config) const
 {
     std::ofstream file(*filePath);
     for (const auto& pair : config) {
@@ -440,26 +440,22 @@ void FEditorViewportClient::SetCameraSpeedScalar(float value)
 }
 
 
-FVector FViewportCameraTransform::GetForwardVector()
+FVector FViewportCameraTransform::GetForwardVector() const
 {
     FVector Forward = FVector(1.f, 0.f, 0.0f);
     Forward = JungleMath::FVectorRotate(Forward, ViewRotation);
     return Forward;
 }
-FVector FViewportCameraTransform::GetRightVector()
+FVector FViewportCameraTransform::GetRightVector() const
 {
     FVector Right = FVector(0.f, 1.f, 0.0f);
 	Right = JungleMath::FVectorRotate(Right, ViewRotation);
 	return Right;
 }
 
-FVector FViewportCameraTransform::GetUpVector()
+FVector FViewportCameraTransform::GetUpVector() const
 {
     FVector Up = FVector(0.f, 0.f, 1.0f);
     Up = JungleMath::FVectorRotate(Up, ViewRotation);
     return Up;
-}
-
-FViewportCameraTransform::FViewportCameraTransform()
-{
 }

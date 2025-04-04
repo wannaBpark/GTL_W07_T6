@@ -2,6 +2,8 @@
 #include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ObjectTypes.h"
+
+
 class UGizmoBaseComponent;
 class UGizmoArrowComponent;
 class USceneComponent;
@@ -11,7 +13,7 @@ class AEditorPlayer : public AActor
 {
     DECLARE_CLASS(AEditorPlayer, AActor)
 
-    AEditorPlayer();
+    AEditorPlayer() = default;
 
     virtual void Tick(float DeltaTime) override;
 

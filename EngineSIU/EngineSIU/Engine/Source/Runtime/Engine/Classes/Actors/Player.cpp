@@ -18,10 +18,6 @@
 
 using namespace DirectX;
 
-AEditorPlayer::AEditorPlayer()
-{
-}
-
 void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -380,9 +376,14 @@ void AEditorPlayer::PickedObjControl()
 
 void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
-    FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
-    FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
-    FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
+    const auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    const FViewportCameraTransform* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
+                                                        ? &ActiveViewport->ViewTransformPerspective
+                                                        : &ActiveViewport->ViewTransformOrthographic;
+
+    FVector CameraForward = ViewTransform->GetForwardVector();
+    FVector CameraRight = ViewTransform->GetRightVector();
+    FVector CameraUp = ViewTransform->GetUpVector();
 
     FQuat currentRotation = pObj->GetQuat();
 
@@ -390,21 +391,21 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
 
     if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleX)
     {
-        float rotationAmount = (cameraUp.z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
-        rotationAmount = rotationAmount + (cameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
+        float rotationAmount = (CameraUp.z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
+        rotationAmount = rotationAmount + (CameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
 
         rotationDelta = FQuat(FVector(1.0f, 0.0f, 0.0f), rotationAmount); // ���� X �� ���� ȸ��
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleY)
     {
-        float rotationAmount = (cameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
-        rotationAmount = rotationAmount + (cameraUp.z >= 0 ? 1.0f : -1.0f) * deltaY * 0.01f;
+        float rotationAmount = (CameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
+        rotationAmount = rotationAmount + (CameraUp.z >= 0 ? 1.0f : -1.0f) * deltaY * 0.01f;
 
         rotationDelta = FQuat(FVector(0.0f, 1.0f, 0.0f), rotationAmount); // ���� Y �� ���� ȸ��
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleZ)
     {
-        float rotationAmount = (cameraForward.x <= 0 ? -1.0f : 1.0f) * deltaX * 0.01f;
+        float rotationAmount = (CameraForward.x <= 0 ? -1.0f : 1.0f) * deltaX * 0.01f;
         rotationDelta = FQuat(FVector(0.0f, 0.0f, 1.0f), rotationAmount); // ���� Z �� ���� ȸ��
     }
     if (cdMode == CDM_LOCAL)
@@ -421,14 +422,15 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
 {
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
-    auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    const auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    const FViewportCameraTransform* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
+                                                        ? &ActiveViewport->ViewTransformPerspective
+                                                        : &ActiveViewport->ViewTransformOrthographic;
 
-    FVector CamearRight = ActiveViewport->GetViewportType() == LVT_Perspective ?
-        ActiveViewport->ViewTransformPerspective.GetRightVector() : ActiveViewport->ViewTransformOrthographic.GetRightVector();
-    FVector CameraUp = ActiveViewport->GetViewportType() == LVT_Perspective ?
-        ActiveViewport->ViewTransformPerspective.GetUpVector() : ActiveViewport->ViewTransformOrthographic.GetUpVector();
+    FVector CameraRight = ViewTransform->GetRightVector();
+    FVector CameraUp = ViewTransform->GetUpVector();
     
-    FVector WorldMoveDirection = (CamearRight * DeltaX + CameraUp * -DeltaY) * 0.1f;
+    FVector WorldMoveDirection = (CameraRight * DeltaX + CameraUp * -DeltaY) * 0.1f;
     
     if (cdMode == CDM_LOCAL)
     {
@@ -454,13 +456,13 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
         if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
         {
             // 카메라의 오른쪽 방향을 X축 이동에 사용
-            FVector moveDir = CamearRight * DeltaX * 0.05f;
+            FVector moveDir = CameraRight * DeltaX * 0.05f;
             pObj->AddLocation(FVector(moveDir.x, 0.0f, 0.0f));
         }
         else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
         {
             // 카메라의 오른쪽 방향을 Y축 이동에 사용
-            FVector moveDir = CamearRight * DeltaX * 0.05f;
+            FVector moveDir = CameraRight * DeltaX * 0.05f;
             pObj->AddLocation(FVector(0.0f, moveDir.y, 0.0f));
         }
         else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
@@ -476,24 +478,24 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Giz
 {
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
-    auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
-
-    FVector CamearRight = ActiveViewport->GetViewportType() == LVT_Perspective ?
-        ActiveViewport->ViewTransformPerspective.GetRightVector() : ActiveViewport->ViewTransformOrthographic.GetRightVector();
-    FVector CameraUp = ActiveViewport->GetViewportType() == LVT_Perspective ?
-        ActiveViewport->ViewTransformPerspective.GetUpVector() : ActiveViewport->ViewTransformOrthographic.GetUpVector();
+    const auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    const FViewportCameraTransform* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
+                                                        ? &ActiveViewport->ViewTransformPerspective
+                                                        : &ActiveViewport->ViewTransformOrthographic;
+    FVector CameraRight = ViewTransform->GetRightVector();
+    FVector CameraUp = ViewTransform->GetUpVector();
     
     // 월드 좌표계에서 카메라 방향을 고려한 이동
     if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleX)
     {
         // 카메라의 오른쪽 방향을 X축 이동에 사용
-        FVector moveDir = CamearRight * DeltaX * 0.05f;
+        FVector moveDir = CameraRight * DeltaX * 0.05f;
         pObj->AddScale(FVector(moveDir.x, 0.0f, 0.0f));
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleY)
     {
         // 카메라의 오른쪽 방향을 Y축 이동에 사용
-        FVector moveDir = CamearRight * DeltaX * 0.05f;
+        FVector moveDir = CameraRight * DeltaX * 0.05f;
         pObj->AddScale(FVector(0.0f, moveDir.y, 0.0f));
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
