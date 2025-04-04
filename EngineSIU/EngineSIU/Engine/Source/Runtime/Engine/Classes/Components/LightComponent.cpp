@@ -1,7 +1,7 @@
 #include "LightComponent.h"
 #include "UBillboardComponent.h"
-#include "Math/JungleMath.h"
 #include "UnrealEd/PrimitiveBatch.h"
+
 
 ULightComponentBase::ULightComponentBase()
 {

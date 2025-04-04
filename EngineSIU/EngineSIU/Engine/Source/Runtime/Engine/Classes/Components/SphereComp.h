@@ -8,7 +8,6 @@ class USphereComp : public UStaticMeshComponent
 
 public:
     USphereComp();
-    virtual ~USphereComp() override;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;

@@ -1,19 +1,8 @@
 #include "GizmoCircleComponent.h"
-
 #include "World.h"
-#include "Math/JungleMath.h"
-#include "Actors/Player.h"
-#include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
+
 #define DISC_RESOLUTION 128
 
-UGizmoCircleComponent::UGizmoCircleComponent()
-{
-}
-
-UGizmoCircleComponent::~UGizmoCircleComponent()
-{
-}
 
 bool UGizmoCircleComponent::IntersectsRay(const FVector& rayOrigin, const FVector& rayDir, float& dist)
 {

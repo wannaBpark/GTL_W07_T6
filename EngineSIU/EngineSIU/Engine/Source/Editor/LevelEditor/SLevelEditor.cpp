@@ -1,21 +1,18 @@
-#pragma once
 #include "SLevelEditor.h"
-#include "SlateCore/Widgets/SWindow.h"
-#include "Slate/Widgets/Layout/SSplitter.h"
-#include "UnrealClient.h"
-#include "UnrealEd/EditorViewportClient.h"
+#include <fstream>
+#include <ostream>
+#include <sstream>
 #include "EngineLoop.h"
-#include "fstream"
-#include "sstream"
-#include "ostream"
+#include "UnrealClient.h"
+#include "Slate/Widgets/Layout/SSplitter.h"
+#include "SlateCore/Widgets/SWindow.h"
+#include "UnrealEd/EditorViewportClient.h"
+
 extern FEngineLoop GEngineLoop;
+
 
 SLevelEditor::SLevelEditor() : bInitialize(false), HSplitter(nullptr), VSplitter(nullptr),
 World(nullptr), bMultiViewportMode(false)
-{
-}
-
-SLevelEditor::~SLevelEditor()
 {
 }
 

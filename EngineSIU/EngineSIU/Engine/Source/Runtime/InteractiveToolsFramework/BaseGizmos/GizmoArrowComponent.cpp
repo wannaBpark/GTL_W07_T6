@@ -1,19 +1,5 @@
 #include "GizmoArrowComponent.h"
 
-#include "World.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
-#include "Actors/Player.h"
-#include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
-
-
-UGizmoArrowComponent::UGizmoArrowComponent()
-{
-}
-
-UGizmoArrowComponent::~UGizmoArrowComponent()
-{
-}
 
 void UGizmoArrowComponent::InitializeComponent()
 {

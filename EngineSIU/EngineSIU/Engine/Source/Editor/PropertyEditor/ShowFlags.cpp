@@ -2,11 +2,7 @@
 #include "World.h"
 
 ShowFlags::ShowFlags()
-{
-    currentFlags = 31;
-}
-
-ShowFlags::~ShowFlags()
+    : currentFlags(31)
 {
 }
 

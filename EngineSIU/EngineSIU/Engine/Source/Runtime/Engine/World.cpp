@@ -3,11 +3,9 @@
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
-#include "LevelEditor/SLevelEditor.h"
-#include "Engine/FLoaderOBJ.h"
 #include "Classes/Components/StaticMeshComponent.h"
-#include "Engine/StaticMeshActor.h"
 #include "Components/SkySphereComponent.h"
+#include "Engine/FLoaderOBJ.h"
 
 
 void UWorld::Initialize()

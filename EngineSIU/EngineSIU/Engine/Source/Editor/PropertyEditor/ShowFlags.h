@@ -22,8 +22,6 @@ private:
 	ShowFlags();
 
 public:
-    virtual ~ShowFlags() override;
-
 	static ShowFlags& GetInstance();
 
 	void Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;

@@ -1,14 +1,12 @@
 #include "UBillboardComponent.h"
-#include "Actors/Player.h"
-#include "QuadTexture.h"
-#include "Define.h"
 #include <DirectXMath.h>
-
+#include "Define.h"
+#include "QuadTexture.h"
 #include "World.h"
+#include "Actors/Player.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
-#include "PropertyEditor/ShowFlags.h"
 
 
 UBillboardComponent::UBillboardComponent()

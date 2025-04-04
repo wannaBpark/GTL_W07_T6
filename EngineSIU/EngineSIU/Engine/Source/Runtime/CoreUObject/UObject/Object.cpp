@@ -1,7 +1,5 @@
-#include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
-
+#include "Object.h"
 #include "UClass.h"
-#include "UObjectHash.h"
 
 
 UClass* UObject::StaticClass()

@@ -1,9 +1,8 @@
 #pragma once
-#include "ImGUI/imgui.h"
 #include "Define.h"
+#include "ImGUI/imgui.h"
 #include "PropertyEditor/IWindowToggleable.h"
-#include <windows.h>
-#include <psapi.h>
+
 
 enum class LogLevel : uint8
 {
@@ -19,10 +18,21 @@ public:
     bool showFPS = false;
     bool showMemory = false;
     bool showRender = false;
-    void ToggleStat(const std::string& command) {
-        if (command == "stat fps") {showFPS = true; showRender = true;}
-        else if (command == "stat memory") {showMemory = true; showRender = true;}
-        else if (command == "stat none") {
+
+    void ToggleStat(const std::string& command)
+    {
+        if (command == "stat fps")
+        {
+            showFPS = true;
+            showRender = true;
+        }
+        else if (command == "stat memory")
+        {
+            showMemory = true;
+            showRender = true;
+        }
+        else if (command == "stat none")
+        {
             showFPS = false;
             showMemory = false;
             showRender = false;
