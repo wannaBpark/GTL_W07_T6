@@ -1,4 +1,6 @@
 #include "Define.h"
+#include "MathSSE.h"
+
 
 // 단위 행렬 정의
 const FMatrix FMatrix::Identity = { {
@@ -29,19 +31,20 @@ FMatrix FMatrix::operator-(const FMatrix& Other) const {
 // 행렬 곱셈
 FMatrix FMatrix::operator*(const FMatrix& Other) const {
     FMatrix Result = {};
-    for (int32 i = 0; i < 4; i++)
-        for (int32 j = 0; j < 4; j++)
-            for (int32 k = 0; k < 4; k++)
-                Result.M[i][j] += M[i][k] * Other.M[k][j];
+    SSE::VectorMatrixMultiply(&Result, this, &Other);
     return Result;
 }
 
 // 스칼라 곱셈
 FMatrix FMatrix::operator*(float Scalar) const {
     FMatrix Result;
-    for (int32 i = 0; i < 4; i++)
-        for (int32 j = 0; j < 4; j++)
-            Result.M[i][j] = M[i][j] * Scalar;
+    for (int32 i = 0; i < 4; ++i)
+    {
+        Result.M[i][0] = M[i][0] * Scalar;
+        Result.M[i][1] = M[i][1] * Scalar;
+        Result.M[i][2] = M[i][2] * Scalar;
+        Result.M[i][3] = M[i][3] * Scalar;
+    }
     return Result;
 }
 
@@ -72,69 +75,99 @@ FMatrix FMatrix::Transpose(const FMatrix& Mat) {
     return Result;
 }
 
-// 행렬식 계산 (라플라스 전개, 4x4 행렬)
-float FMatrix::Determinant(const FMatrix& Mat) {
-    float det = 0.0f;
-    for (int32 i = 0; i < 4; i++) {
-        float subMat[3][3];
-        for (int32 j = 1; j < 4; j++) {
-            int32 colIndex = 0;
-            for (int32 k = 0; k < 4; k++) {
-                if (k == i) continue;
-                subMat[j - 1][colIndex] = Mat.M[j][k];
-                colIndex++;
-            }
-        }
-        float minorDet =
-            subMat[0][0] * (subMat[1][1] * subMat[2][2] - subMat[1][2] * subMat[2][1]) -
-            subMat[0][1] * (subMat[1][0] * subMat[2][2] - subMat[1][2] * subMat[2][0]) +
-            subMat[0][2] * (subMat[1][0] * subMat[2][1] - subMat[1][1] * subMat[2][0]);
-        det += (i % 2 == 0 ? 1 : -1) * Mat.M[0][i] * minorDet;
-    }
-    return det;
-}
+FMatrix FMatrix::Inverse(const FMatrix& Mat)
+{
+	FMatrix Result;
+	FMatrix Tmp;
+	float Det[4];
 
-// 역행렬 (가우스-조던 소거법)
-FMatrix FMatrix::Inverse(const FMatrix& Mat) {
-    float det = Determinant(Mat);
-    if (fabs(det) < 1e-6) {
-        return Identity;
-    }
+	Tmp[0][0] = Mat[2][2] * Mat[3][3] - Mat[2][3] * Mat[3][2];
+	Tmp[0][1] = Mat[1][2] * Mat[3][3] - Mat[1][3] * Mat[3][2];
+	Tmp[0][2] = Mat[1][2] * Mat[2][3] - Mat[1][3] * Mat[2][2];
 
-    FMatrix Inv;
-    float invDet = 1.0f / det;
+	Tmp[1][0] = Mat[2][2] * Mat[3][3] - Mat[2][3] * Mat[3][2];
+	Tmp[1][1] = Mat[0][2] * Mat[3][3] - Mat[0][3] * Mat[3][2];
+	Tmp[1][2] = Mat[0][2] * Mat[2][3] - Mat[0][3] * Mat[2][2];
 
-    // 여인수 행렬 계산 후 전치하여 역행렬 계산
-    for (int32 i = 0; i < 4; i++) {
-        for (int32 j = 0; j < 4; j++) {
-            float subMat[3][3];
-            int32 subRow = 0;
-            for (int32 r = 0; r < 4; r++) {
-                if (r == i) continue;
-                int32 subCol = 0;
-                for (int32 c = 0; c < 4; c++) {
-                    if (c == j) continue;
-                    subMat[subRow][subCol] = Mat.M[r][c];
-                    subCol++;
-                }
-                subRow++;
-            }
-            float minorDet =
-                subMat[0][0] * (subMat[1][1] * subMat[2][2] - subMat[1][2] * subMat[2][1]) -
-                subMat[0][1] * (subMat[1][0] * subMat[2][2] - subMat[1][2] * subMat[2][0]) +
-                subMat[0][2] * (subMat[1][0] * subMat[2][1] - subMat[1][1] * subMat[2][0]);
+	Tmp[2][0] = Mat[1][2] * Mat[3][3] - Mat[1][3] * Mat[3][2];
+	Tmp[2][1] = Mat[0][2] * Mat[3][3] - Mat[0][3] * Mat[3][2];
+	Tmp[2][2] = Mat[0][2] * Mat[1][3] - Mat[0][3] * Mat[1][2];
 
-            Inv.M[j][i] = ((i + j) % 2 == 0 ? 1 : -1) * minorDet * invDet;
-        }
-    }
-    return Inv;
+	Tmp[3][0] = Mat[1][2] * Mat[2][3] - Mat[1][3] * Mat[2][2];
+	Tmp[3][1] = Mat[0][2] * Mat[2][3] - Mat[0][3] * Mat[2][2];
+	Tmp[3][2] = Mat[0][2] * Mat[1][3] - Mat[0][3] * Mat[1][2];
+
+	Det[0] = Mat[1][1] * Tmp[0][0] - Mat[2][1] * Tmp[0][1] + Mat[3][1] * Tmp[0][2];
+	Det[1] = Mat[0][1] * Tmp[1][0] - Mat[2][1] * Tmp[1][1] + Mat[3][1] * Tmp[1][2];
+	Det[2] = Mat[0][1] * Tmp[2][0] - Mat[1][1] * Tmp[2][1] + Mat[3][1] * Tmp[2][2];
+	Det[3] = Mat[0][1] * Tmp[3][0] - Mat[1][1] * Tmp[3][1] + Mat[2][1] * Tmp[3][2];
+
+	const float Determinant = Mat[0][0] * Det[0] - Mat[1][0] * Det[1] + Mat[2][0] * Det[2] - Mat[3][0] * Det[3];
+	
+	if ( Determinant == 0.0f || !_finite(Determinant) )
+	{
+		return Identity;
+	}
+
+	const float	RDet = 1.0f / Determinant;
+
+	Result[0][0] = RDet * Det[0];
+	Result[0][1] = -RDet * Det[1];
+	Result[0][2] = RDet * Det[2];
+	Result[0][3] = -RDet * Det[3];
+	Result[1][0] = -RDet * (Mat[1][0] * Tmp[0][0] - Mat[2][0] * Tmp[0][1] + Mat[3][0] * Tmp[0][2]);
+	Result[1][1] = RDet * (Mat[0][0] * Tmp[1][0] - Mat[2][0] * Tmp[1][1] + Mat[3][0] * Tmp[1][2]);
+	Result[1][2] = -RDet * (Mat[0][0] * Tmp[2][0] - Mat[1][0] * Tmp[2][1] + Mat[3][0] * Tmp[2][2]);
+	Result[1][3] = RDet * (Mat[0][0] * Tmp[3][0] - Mat[1][0] * Tmp[3][1] + Mat[2][0] * Tmp[3][2]);
+	Result[2][0] = RDet * (
+		Mat[1][0] * (Mat[2][1] * Mat[3][3] - Mat[2][3] * Mat[3][1]) -
+		Mat[2][0] * (Mat[1][1] * Mat[3][3] - Mat[1][3] * Mat[3][1]) +
+		Mat[3][0] * (Mat[1][1] * Mat[2][3] - Mat[1][3] * Mat[2][1])
+    );
+	Result[2][1] = -RDet * (
+		Mat[0][0] * (Mat[2][1] * Mat[3][3] - Mat[2][3] * Mat[3][1]) -
+		Mat[2][0] * (Mat[0][1] * Mat[3][3] - Mat[0][3] * Mat[3][1]) +
+		Mat[3][0] * (Mat[0][1] * Mat[2][3] - Mat[0][3] * Mat[2][1])
+    );
+	Result[2][2] = RDet * (
+		Mat[0][0] * (Mat[1][1] * Mat[3][3] - Mat[1][3] * Mat[3][1]) -
+		Mat[1][0] * (Mat[0][1] * Mat[3][3] - Mat[0][3] * Mat[3][1]) +
+		Mat[3][0] * (Mat[0][1] * Mat[1][3] - Mat[0][3] * Mat[1][1])
+    );
+	Result[2][3] = -RDet * (
+		Mat[0][0] * (Mat[1][1] * Mat[2][3] - Mat[1][3] * Mat[2][1]) -
+		Mat[1][0] * (Mat[0][1] * Mat[2][3] - Mat[0][3] * Mat[2][1]) +
+		Mat[2][0] * (Mat[0][1] * Mat[1][3] - Mat[0][3] * Mat[1][1])
+    );
+	Result[3][0] = -RDet * (
+		Mat[1][0] * (Mat[2][1] * Mat[3][2] - Mat[2][2] * Mat[3][1]) -
+		Mat[2][0] * (Mat[1][1] * Mat[3][2] - Mat[1][2] * Mat[3][1]) +
+		Mat[3][0] * (Mat[1][1] * Mat[2][2] - Mat[1][2] * Mat[2][1])
+    );
+	Result[3][1] = RDet * (
+		Mat[0][0] * (Mat[2][1] * Mat[3][2] - Mat[2][2] * Mat[3][1]) -
+		Mat[2][0] * (Mat[0][1] * Mat[3][2] - Mat[0][2] * Mat[3][1]) +
+		Mat[3][0] * (Mat[0][1] * Mat[2][2] - Mat[0][2] * Mat[2][1])
+    );
+	Result[3][2] = -RDet * (
+		Mat[0][0] * (Mat[1][1] * Mat[3][2] - Mat[1][2] * Mat[3][1]) -
+		Mat[1][0] * (Mat[0][1] * Mat[3][2] - Mat[0][2] * Mat[3][1]) +
+		Mat[3][0] * (Mat[0][1] * Mat[1][2] - Mat[0][2] * Mat[1][1])
+    );
+	Result[3][3] = RDet * (
+		Mat[0][0] * (Mat[1][1] * Mat[2][2] - Mat[1][2] * Mat[2][1]) -
+		Mat[1][0] * (Mat[0][1] * Mat[2][2] - Mat[0][2] * Mat[2][1]) +
+		Mat[2][0] * (Mat[0][1] * Mat[1][2] - Mat[0][2] * Mat[1][1])
+    );
+
+    return Result;
 }
 
 FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
 {
-    float radRoll = roll * (3.14159265359f / 180.0f);
-    float radPitch = pitch * (3.14159265359f / 180.0f);
-    float radYaw = yaw * (3.14159265359f / 180.0f);
+    float radRoll = roll * (PI / 180.0f);
+    float radPitch = pitch * (PI / 180.0f);
+    float radYaw = yaw * (PI / 180.0f);
 
     float cosRoll = cos(radRoll), sinRoll = sin(radRoll);
     float cosPitch = cos(radPitch), sinPitch = sin(radPitch);
@@ -206,10 +239,10 @@ FVector FMatrix::TransformVector(const FVector& v, const FMatrix& m)
 FVector4 FMatrix::TransformVector(const FVector4& v, const FMatrix& m)
 {
     FVector4 result;
-    result.X = v.X * m.M[0][0] + v.Y * m.M[1][0] + v.Z * m.M[2][0] + v.A * m.M[3][0];
-    result.Y = v.X * m.M[0][1] + v.Y * m.M[1][1] + v.Z * m.M[2][1] + v.A * m.M[3][1];
-    result.Z = v.X * m.M[0][2] + v.Y * m.M[1][2] + v.Z * m.M[2][2] + v.A * m.M[3][2];
-    result.A = v.X * m.M[0][3] + v.Y * m.M[1][3] + v.Z * m.M[2][3] + v.A * m.M[3][3];
+    result.X = v.X * m.M[0][0] + v.Y * m.M[1][0] + v.Z * m.M[2][0] + v.W * m.M[3][0];
+    result.Y = v.X * m.M[0][1] + v.Y * m.M[1][1] + v.Z * m.M[2][1] + v.W * m.M[3][1];
+    result.Z = v.X * m.M[0][2] + v.Y * m.M[1][2] + v.Z * m.M[2][2] + v.W * m.M[3][2];
+    result.W = v.X * m.M[0][3] + v.Y * m.M[1][3] + v.Z * m.M[2][3] + v.W * m.M[3][3];
     return result;
 }
 
