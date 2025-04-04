@@ -1,6 +1,23 @@
 #include "EditorEngine.h"
 #include "World/World.h"
 
+void UEditorEngine::Init()
+{
+    Super::Init();
+}
+
+void UEditorEngine::Tick(float DeltaTime)
+{
+    for (FWorldContext& WorldContext : WorldList)
+    {
+        UWorld* EditorWorld = WorldContext.World();
+        if (EditorWorld && WorldContext.WorldType == EWorldType::Editor)
+        {
+            
+        }
+    }
+}
+
 FWorldContext& UEditorEngine::GetEditorWorldContext(/*bool bEnsureIsGWorld*/)
 {
     for (FWorldContext& WorldContext : WorldList)

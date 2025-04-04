@@ -2,6 +2,10 @@
 
 UEngine* GEngine = nullptr;
 
+void UEngine::Init()
+{
+}
+
 FWorldContext* UEngine::GetWorldContextFromWorld(UWorld* InWorld)
 {
     for (FWorldContext& WorldContext : WorldList)

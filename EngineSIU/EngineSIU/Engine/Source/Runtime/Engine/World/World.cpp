@@ -7,8 +7,6 @@
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
 
-UWorld* GWorld = nullptr;
-
 void UWorld::Initialize()
 {
     // TODO: Load Scene
@@ -68,6 +66,19 @@ void UWorld::Tick(float DeltaTime)
 	{
 	    Actor->Tick(DeltaTime);
 	}
+}
+
+void UWorld::BeginPlay()
+{
+    /*
+    for (AActor* Actor : ActorsArray)
+    {
+        if (Actor->GetWorld() == this)
+        {
+            Actor->BeginPlay();
+        }
+    }
+    */
 }
 
 void UWorld::Release()
