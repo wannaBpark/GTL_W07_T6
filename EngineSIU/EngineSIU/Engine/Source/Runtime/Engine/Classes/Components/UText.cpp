@@ -29,15 +29,15 @@ void UText::TickComponent(float DeltaTime)
 	Super::TickComponent(DeltaTime);
 
     //FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
-    //newCamera.z = 0;
-    //newCamera = newCamera.Normalize();
+    //newCamera.Z = 0;
+    //newCamera = newCamera.GetSafeNormal();
     //float tmp = FVector(1.0f, 0.0f, 0.0f).Dot(newCamera);
     //float rad = acosf(tmp);
     //float degree = JungleMath::RadToDeg(rad);
     //FVector vtmp = FVector(1.0f, 0.0f, 0.0f).Cross(GetWorld()->GetCamera()->GetForwardVector());
-    //if (vtmp.z < 0)
+    //if (vtmp.Z < 0)
     //	degree *= -1;
-    //RelativeRotation.z = degree + 90;
+    //RelativeRotation.Z = degree + 90;
 }
 
 void UText::ClearText()

@@ -276,29 +276,29 @@ void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& v
     float viewportX = screenX - viewport.TopLeftX;
     float viewportY = screenY - viewport.TopLeftY;
 
-    pickPosition.x = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
-    pickPosition.y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
+    pickPosition.X = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
+    pickPosition.Y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
     if (GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho())
     {
-        pickPosition.z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
+        pickPosition.Z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
     }
     else
     {
-        pickPosition.z = 1.0f;  // 퍼스펙티브 모드: near plane
+        pickPosition.Z = 1.0f;  // 퍼스펙티브 모드: near plane
     }
 }
 
 int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount)
 {
 	FMatrix scaleMatrix = FMatrix::CreateScale(
-		obj->GetWorldScale().x,
-		obj->GetWorldScale().y,
-		obj->GetWorldScale().z
+		obj->GetWorldScale().X,
+		obj->GetWorldScale().Y,
+		obj->GetWorldScale().Z
 	);
 	FMatrix rotationMatrix = FMatrix::CreateRotation(
-		obj->GetWorldRotation().x,
-		obj->GetWorldRotation().y,
-		obj->GetWorldRotation().z
+		obj->GetWorldRotation().X,
+		obj->GetWorldRotation().Y,
+		obj->GetWorldRotation().Z
 	);
 
 	FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
@@ -319,12 +319,12 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         // 오쏘에서는 픽킹 원점은 unproject된 픽셀의 위치
         FVector rayOrigin = worldPickPos;
         // 레이 방향은 카메라의 정면 방향 (평행)
-        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
+        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().GetSafeNormal();
 
         // 객체의 로컬 좌표계로 변환
         FMatrix localMatrix = FMatrix::Inverse(worldMatrix);
         FVector localRayOrigin = localMatrix.TransformPosition(rayOrigin);
-        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).Normalize();
+        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).GetSafeNormal();
         
         intersectCount = obj->CheckRayIntersection(localRayOrigin, localRayDir, hitDistance);
         return intersectCount;
@@ -336,7 +336,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
         // 퍼스펙티브 모드의 기존 로직 사용
         FVector transformedPick = inverseMatrix.TransformPosition(pickPosition);
-        FVector rayDirection = (transformedPick - pickRayOrigin).Normalize();
+        FVector rayDirection = (transformedPick - pickRayOrigin).GetSafeNormal();
         
         intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
         return intersectCount;
@@ -391,21 +391,21 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
 
     if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleX)
     {
-        float rotationAmount = (CameraUp.z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
-        rotationAmount = rotationAmount + (CameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
+        float rotationAmount = (CameraUp.Z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
+        rotationAmount = rotationAmount + (CameraRight.X >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
 
         rotationDelta = FQuat(FVector(1.0f, 0.0f, 0.0f), rotationAmount); // ���� X �� ���� ȸ��
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleY)
     {
-        float rotationAmount = (CameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
-        rotationAmount = rotationAmount + (CameraUp.z >= 0 ? 1.0f : -1.0f) * deltaY * 0.01f;
+        float rotationAmount = (CameraRight.X >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
+        rotationAmount = rotationAmount + (CameraUp.Z >= 0 ? 1.0f : -1.0f) * deltaY * 0.01f;
 
         rotationDelta = FQuat(FVector(0.0f, 1.0f, 0.0f), rotationAmount); // ���� Y �� ���� ȸ��
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleZ)
     {
-        float rotationAmount = (CameraForward.x <= 0 ? -1.0f : 1.0f) * deltaX * 0.01f;
+        float rotationAmount = (CameraForward.X <= 0 ? -1.0f : 1.0f) * deltaX * 0.01f;
         rotationDelta = FQuat(FVector(0.0f, 0.0f, 1.0f), rotationAmount); // ���� Z �� ���� ȸ��
     }
     if (cdMode == CDM_LOCAL)
@@ -457,19 +457,19 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
         {
             // 카메라의 오른쪽 방향을 X축 이동에 사용
             FVector moveDir = CameraRight * DeltaX * 0.05f;
-            pObj->AddLocation(FVector(moveDir.x, 0.0f, 0.0f));
+            pObj->AddLocation(FVector(moveDir.X, 0.0f, 0.0f));
         }
         else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
         {
             // 카메라의 오른쪽 방향을 Y축 이동에 사용
             FVector moveDir = CameraRight * DeltaX * 0.05f;
-            pObj->AddLocation(FVector(0.0f, moveDir.y, 0.0f));
+            pObj->AddLocation(FVector(0.0f, moveDir.Y, 0.0f));
         }
         else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
         {
             // 카메라의 위쪽 방향을 Z축 이동에 사용
             FVector moveDir = CameraUp * -DeltaY * 0.05f;
-            pObj->AddLocation(FVector(0.0f, 0.0f, moveDir.z));
+            pObj->AddLocation(FVector(0.0f, 0.0f, moveDir.Z));
         }
     }
 }
@@ -490,18 +490,18 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Giz
     {
         // 카메라의 오른쪽 방향을 X축 이동에 사용
         FVector moveDir = CameraRight * DeltaX * 0.05f;
-        pObj->AddScale(FVector(moveDir.x, 0.0f, 0.0f));
+        pObj->AddScale(FVector(moveDir.X, 0.0f, 0.0f));
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleY)
     {
         // 카메라의 오른쪽 방향을 Y축 이동에 사용
         FVector moveDir = CameraRight * DeltaX * 0.05f;
-        pObj->AddScale(FVector(0.0f, moveDir.y, 0.0f));
+        pObj->AddScale(FVector(0.0f, moveDir.Y, 0.0f));
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
     {
         // 카메라의 위쪽 방향을 Z축 이동에 사용
         FVector moveDir = CameraUp * -DeltaY * 0.05f;
-        pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
+        pObj->AddScale(FVector(0.0f, 0.0f, moveDir.Z));
     }
 }

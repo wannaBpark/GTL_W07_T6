@@ -134,14 +134,14 @@ void UPrimitiveBatch::ReleaseOBBResources()
 void UPrimitiveBatch::RenderAABB(const FBoundingBox& localAABB, const FVector& center, const FMatrix& modelMatrix)
 {
     FVector localVertices[8] = {
-         { localAABB.min.x, localAABB.min.y, localAABB.min.z },
-         { localAABB.max.x, localAABB.min.y, localAABB.min.z },
-         { localAABB.min.x, localAABB.max.y, localAABB.min.z },
-         { localAABB.max.x, localAABB.max.y, localAABB.min.z },
-         { localAABB.min.x, localAABB.min.y, localAABB.max.z },
-         { localAABB.max.x, localAABB.min.y, localAABB.max.z },
-         { localAABB.min.x, localAABB.max.y, localAABB.max.z },
-         { localAABB.max.x, localAABB.max.y, localAABB.max.z }
+         { localAABB.min.X, localAABB.min.Y, localAABB.min.Z },
+         { localAABB.max.X, localAABB.min.Y, localAABB.min.Z },
+         { localAABB.min.X, localAABB.max.Y, localAABB.min.Z },
+         { localAABB.max.X, localAABB.max.Y, localAABB.min.Z },
+         { localAABB.min.X, localAABB.min.Y, localAABB.max.Z },
+         { localAABB.max.X, localAABB.min.Y, localAABB.max.Z },
+         { localAABB.min.X, localAABB.max.Y, localAABB.max.Z },
+         { localAABB.max.X, localAABB.max.Y, localAABB.max.Z }
     };
 
     FVector worldVertices[8];
@@ -154,13 +154,13 @@ void UPrimitiveBatch::RenderAABB(const FBoundingBox& localAABB, const FVector& c
     {
         worldVertices[i] = center + FMatrix::TransformVector(localVertices[i], modelMatrix);
 
-        min.x = (worldVertices[i].x < min.x) ? worldVertices[i].x : min.x;
-        min.y = (worldVertices[i].y < min.y) ? worldVertices[i].y : min.y;
-        min.z = (worldVertices[i].z < min.z) ? worldVertices[i].z : min.z;
+        min.X = (worldVertices[i].X < min.X) ? worldVertices[i].X : min.X;
+        min.Y = (worldVertices[i].Y < min.Y) ? worldVertices[i].Y : min.Y;
+        min.Z = (worldVertices[i].Z < min.Z) ? worldVertices[i].Z : min.Z;
 
-        max.x = (worldVertices[i].x > max.x) ? worldVertices[i].x : max.x;
-        max.y = (worldVertices[i].y > max.y) ? worldVertices[i].y : max.y;
-        max.z = (worldVertices[i].z > max.z) ? worldVertices[i].z : max.z;
+        max.X = (worldVertices[i].X > max.X) ? worldVertices[i].X : max.X;
+        max.Y = (worldVertices[i].Y > max.Y) ? worldVertices[i].Y : max.Y;
+        max.Z = (worldVertices[i].Z > max.Z) ? worldVertices[i].Z : max.Z;
     }
     FBoundingBox BoundingBox;
     BoundingBox.min = min;
@@ -172,14 +172,14 @@ void UPrimitiveBatch::RenderOBB(const FBoundingBox& localAABB, const FVector& ce
     // 1) 로컬 AABB의 8개 꼭짓점
     FVector localVertices[8] =
     {
-        { localAABB.min.x, localAABB.min.y, localAABB.min.z },
-        { localAABB.max.x, localAABB.min.y, localAABB.min.z },
-        { localAABB.min.x, localAABB.max.y, localAABB.min.z },
-        { localAABB.max.x, localAABB.max.y, localAABB.min.z },
-        { localAABB.min.x, localAABB.min.y, localAABB.max.z },
-        { localAABB.max.x, localAABB.min.y, localAABB.max.z },
-        { localAABB.min.x, localAABB.max.y, localAABB.max.z },
-        { localAABB.max.x, localAABB.max.y, localAABB.max.z }
+        { localAABB.min.X, localAABB.min.Y, localAABB.min.Z },
+        { localAABB.max.X, localAABB.min.Y, localAABB.min.Z },
+        { localAABB.min.X, localAABB.max.Y, localAABB.min.Z },
+        { localAABB.max.X, localAABB.max.Y, localAABB.min.Z },
+        { localAABB.min.X, localAABB.min.Y, localAABB.max.Z },
+        { localAABB.max.X, localAABB.min.Y, localAABB.max.Z },
+        { localAABB.min.X, localAABB.max.Y, localAABB.max.Z },
+        { localAABB.max.X, localAABB.max.Y, localAABB.max.Z }
     };
 
     FOBB faceBB;

@@ -94,26 +94,26 @@ void UCameraComponent::MoveForward(float _Value)
 
 void UCameraComponent::MoveRight(float _Value)
 {
-	//FVector newRight = FVector(GetRightVector().x, GetRightVector().y, 0.0f);
+	//FVector newRight = FVector(GetRightVector().X, GetRightVector().Y, 0.0f);
 	RelativeLocation = RelativeLocation + GetRightVector() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() * _Value;
 }
 
 void UCameraComponent::MoveUp(float _Value)
 {
-	RelativeLocation.z += _Value * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
+	RelativeLocation.Z += _Value * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotateYaw(float _Value)
 {
-	RelativeRotation.z += _Value * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
+	RelativeRotation.Z += _Value * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotatePitch(float _Value)
 {
 
-	RelativeRotation.y += _Value;
-	if (RelativeRotation.y < -90.0f)
-		RelativeRotation.y = -90.0f;
-	if (RelativeRotation.y > 90.0f)
-		RelativeRotation.y = 90.0f;
+	RelativeRotation.Y += _Value;
+	if (RelativeRotation.Y < -90.0f)
+		RelativeRotation.Y = -90.0f;
+	if (RelativeRotation.Y > 90.0f)
+		RelativeRotation.Y = 90.0f;
 }
