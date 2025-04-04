@@ -79,7 +79,7 @@ FVector USceneComponent::GetWorldRotation()
 		return GetLocalRotation();
 }
 
-FVector USceneComponent::GetWorldScale()
+FVector USceneComponent::GetWorldScale() const
 {
 	if (AttachParent)
 	{
@@ -89,7 +89,7 @@ FVector USceneComponent::GetWorldScale()
 		return GetLocalScale();
 }
 
-FVector USceneComponent::GetWorldLocation()
+FVector USceneComponent::GetWorldLocation() const
 {
 	if (AttachParent)
 	{
@@ -99,7 +99,7 @@ FVector USceneComponent::GetWorldLocation()
 		return GetLocalLocation();
 }
 
-FVector USceneComponent::GetLocalRotation()
+FVector USceneComponent::GetLocalRotation() const
 {
 	return JungleMath::QuaternionToEuler(QuatRotation);
 }

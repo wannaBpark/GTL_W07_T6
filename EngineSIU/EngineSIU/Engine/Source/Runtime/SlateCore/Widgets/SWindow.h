@@ -17,7 +17,8 @@ public:
     bool IsHover(FPoint coord);
     virtual bool OnPressed(FPoint coord);
     virtual bool OnReleased();
-    bool IsPressing() { return bIsPressed; }
+    bool IsPressing() const { return bIsPressed; }
+
 protected:
     bool bIsHoverd = false;
     bool bIsPressed = false;

@@ -26,8 +26,8 @@ public:
 
 	static ShowFlags& GetInstance();
 
-	void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
-	uint64 ConvertSelectionToFlags(const bool selected[]);
+	void Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;
+	uint64 ConvertSelectionToFlags(const bool selected[]) const;
 	void OnResize(HWND hWnd);
 
     virtual void Toggle() override {

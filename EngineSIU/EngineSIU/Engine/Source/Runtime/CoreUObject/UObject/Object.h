@@ -37,7 +37,7 @@ public:
     UObject();
     virtual ~UObject() = default;
 
-    UWorld* GetWorld()
+    UWorld* GetWorld() const
     {
         return GEngineLoop.GetWorld();
     }

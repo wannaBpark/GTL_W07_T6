@@ -14,7 +14,7 @@ public:
 public:
     void Release();
     void ClearGrid() {};
-    float GetSpacing() { return GridParam.gridSpacing; }
+    float GetSpacing() const { return GridParam.gridSpacing; }
     void GenerateGrid(float spacing, int gridCount);
     void RenderBatch(const FMatrix& View, const FMatrix& Projection);
     void InitializeVertexBuffer();

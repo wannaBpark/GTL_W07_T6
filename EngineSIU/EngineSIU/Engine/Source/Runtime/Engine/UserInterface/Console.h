@@ -20,7 +20,8 @@ public:
         }
     }
 
-    void Render(ID3D11DeviceContext* context, UINT width, UINT height) {
+    void Render(ID3D11DeviceContext* context, UINT width, UINT height) const
+    {
 
         if (!showRender)
             return;
@@ -69,7 +70,8 @@ public:
     }
 
 private:
-    float CalculateFPS() {
+    float CalculateFPS() const
+    {
         static int frameCount = 0;
         static float elapsedTime = 0.0f;
         static float lastTime = 0.0f;
@@ -88,7 +90,8 @@ private:
         return 0.0f;
     }
 
-    void DrawTextOverlay(const std::string& text, int x, int y) {
+    void DrawTextOverlay(const std::string& text, int x, int y) const
+    {
         // ImGui 사용 시
         ImGui::SetNextWindowPos(ImVec2(x, y));
         ImGui::Text("%s", text.c_str());

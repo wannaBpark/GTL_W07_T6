@@ -10,7 +10,7 @@ public:
 
     static ViewportTypePanel& GetInstance();
 
-    void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;
     void OnResize(HWND hWnd);
 
     virtual void Toggle() override {

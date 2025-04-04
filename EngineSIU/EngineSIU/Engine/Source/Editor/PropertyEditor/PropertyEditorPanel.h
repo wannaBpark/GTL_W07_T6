@@ -16,7 +16,7 @@ private:
     void HSVToRGB(float h, float s, float v, float& r, float& g, float& b) const;
 
     /* Static Mesh Settings */
-    void RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp);
+    void RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp) const;
     
     /* Materials Settings */
     void RenderForMaterial(UStaticMeshComponent* StaticMeshComp);

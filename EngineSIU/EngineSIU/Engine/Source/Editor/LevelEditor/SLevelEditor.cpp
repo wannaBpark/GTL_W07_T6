@@ -187,7 +187,7 @@ void SLevelEditor::OffMultiViewport()
     bMultiViewportMode = false;
 }
 
-bool SLevelEditor::IsMultiViewport()
+bool SLevelEditor::IsMultiViewport() const
 {
     return bMultiViewportMode;
 }

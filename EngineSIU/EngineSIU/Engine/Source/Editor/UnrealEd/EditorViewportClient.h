@@ -105,7 +105,7 @@ protected:
 public: 
     FViewport* Viewport;
     int32 ViewportIndex;
-    FViewport* GetViewport() { return Viewport; }
+    FViewport* GetViewport() const { return Viewport; }
     D3D11_VIEWPORT& GetD3DViewport() const;
 
 
@@ -148,11 +148,11 @@ public: //Camera Movement
     ELevelViewportType GetViewportType() const;
     void SetViewportType(ELevelViewportType InViewportType);
     void UpdateOrthoCameraLoc();
-    EViewModeIndex GetViewMode() { return ViewMode; }
+    EViewModeIndex GetViewMode() const { return ViewMode; }
     void SetViewMode(EViewModeIndex newMode) { ViewMode = newMode; }
-    uint64 GetShowFlag() { return ShowFlag; }
+    uint64 GetShowFlag() const { return ShowFlag; }
     void SetShowFlag(uint64 newMode) { ShowFlag = newMode; }
-    bool GetIsOnRBMouseClick() { return bRightMouseDown; }
+    bool GetIsOnRBMouseClick() const { return bRightMouseDown; }
 
     //Flag Test Code
     static void SetOthoSize(float _Value);

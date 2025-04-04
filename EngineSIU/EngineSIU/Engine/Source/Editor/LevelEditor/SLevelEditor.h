@@ -22,7 +22,7 @@ public:
     void ResizeViewports();
     void OnMultiViewport();
     void OffMultiViewport();
-    bool IsMultiViewport();
+    bool IsMultiViewport() const;
 private:
     bool bInitialize;
     SSplitterH* HSplitter;

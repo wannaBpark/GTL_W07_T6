@@ -32,9 +32,9 @@ protected:
 
 public:
     virtual FVector GetWorldRotation();
-    FVector GetWorldScale();
-    FVector GetWorldLocation();
-    FVector GetLocalRotation();
+    FVector GetWorldScale() const;
+    FVector GetWorldLocation() const;
+    FVector GetLocalRotation() const;
     FQuat GetQuat() const { return QuatRotation; }
 
     FVector GetLocalScale() const { return RelativeScale3D; }

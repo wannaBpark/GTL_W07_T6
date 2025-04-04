@@ -131,7 +131,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 }
 
 
-void FEngineLoop::Render()
+void FEngineLoop::Render() const
 {
     graphicDevice.Prepare();
     if (LevelEditor->IsMultiViewport())

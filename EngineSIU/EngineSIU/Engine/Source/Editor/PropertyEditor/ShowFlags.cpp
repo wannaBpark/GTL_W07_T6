@@ -16,7 +16,7 @@ ShowFlags& ShowFlags::GetInstance()
 	return instance;
 }
 
-void ShowFlags::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void ShowFlags::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const
 {
 	float controllWindowWidth = static_cast<float>(width) * 0.12f;
 	float controllWindowHeight = static_cast<float>(height) * 0.f;
@@ -52,7 +52,8 @@ void ShowFlags::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 	}
 	ImGui::End(); // 윈도우 종료
 }
-uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[])
+
+uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[]) const
 {
 	uint64 flags = static_cast<uint64>(EEngineShowFlags::None);
 
