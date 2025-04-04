@@ -186,6 +186,19 @@ public:
 
     FORCEINLINE bool operator==(const FString& Rhs) const;
     FORCEINLINE bool operator==(const ElementType* Rhs) const;
+
+public:
+    static FString Printf(const ElementType* Format, ...)
+    {
+        va_list Args;
+        va_start(Args, Format);
+        int32 len = _vscprintf(Format, Args);
+        FString Result;
+        Result.PrivateString.resize(len + 1);
+        vsnprintf(Result.PrivateString.data(), len + 1, Format, Args);
+        va_end(Args);
+        return Result;
+    }
 };
 
 template <typename Number>
