@@ -38,7 +38,7 @@ public:
 
 public:
     /** 이 컴포넌트를 소유하고 있는 Actor를 반환합니다. */
-    AActor* GetOwner() const { return Owner; }
+    AActor* GetOwner() const { return OwnerPrivate; }
 
     /** 이 컴포넌트를 제거합니다. */
     virtual void DestroyComponent();
@@ -56,7 +56,7 @@ public:
     void Deactivate();
 
 private:
-    AActor* Owner;
+    AActor* OwnerPrivate;
 
     /** InitializeComponent가 호출 되었는지 여부 */
     uint8 bHasBeenInitialized : 1;

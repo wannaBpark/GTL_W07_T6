@@ -123,7 +123,7 @@ T* AActor::AddComponent()
 {
     T* Component = FObjectFactory::ConstructObject<T>();
     OwnedComponents.Add(Component);
-    Component->Owner = this;
+    Component->OwnerPrivate = this;
 
     // 만약 SceneComponent를 상속 받았다면
     if (USceneComponent* NewSceneComp = Cast<USceneComponent>(Component))
