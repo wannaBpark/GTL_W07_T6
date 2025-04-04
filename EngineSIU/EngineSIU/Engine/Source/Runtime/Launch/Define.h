@@ -137,9 +137,9 @@ struct FVertexTexture
 };
 struct FGridParameters
 {
-	float gridSpacing;
-	int   numGridLines;
-	FVector gridOrigin;
+	float GridSpacing;
+	int   NumGridLines;
+	FVector GridOrigin;
 	float pad;
 };
 struct FSimpleVertex
@@ -315,4 +315,14 @@ struct FTextureConstants {
     float VOffset;
     float pad0;
     float pad1;
+};
+
+struct FLinePrimitiveBatchArgs
+{
+    FGridParameters GridParam;
+    ID3D11Buffer* VertexBuffer;
+    int BoundingBoxCount;
+    int ConeCount;
+    int ConeSegmentCount;
+    int OBBCount;
 };

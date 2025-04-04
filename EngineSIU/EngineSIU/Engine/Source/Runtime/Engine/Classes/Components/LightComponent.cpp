@@ -1,6 +1,5 @@
 #include "LightComponent.h"
 #include "UBillboardComponent.h"
-#include "UnrealEd/PrimitiveBatch.h"
 
 
 ULightComponentBase::ULightComponentBase()
