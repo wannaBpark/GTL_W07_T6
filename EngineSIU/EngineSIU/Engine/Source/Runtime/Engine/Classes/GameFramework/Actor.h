@@ -98,7 +98,7 @@ private:
 
 
     /** 현재 Actor가 삭제 처리중인지 여부 */
-    uint8 bActorIsBeingDestroyed : 1;
+    uint8 bActorIsBeingDestroyed : 1 = false;
 
 #if 1 // TODO: WITH_EDITOR 추가
 public:
