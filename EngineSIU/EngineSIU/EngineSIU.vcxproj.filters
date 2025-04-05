@@ -679,11 +679,17 @@
       <Filter>Font</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Stats\Stats.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDBufferManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDShaderManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\StaticMeshRenderPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\BillboardRenderPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\GizmoRenderPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\LightRenderPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\LineRenderPass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\PixelTextureShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\ShaderLine.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -696,11 +702,28 @@
     <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\VertexTextureShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
+    <FxCompile Include="Shaders\PixelBillBoardShader.hlsl" />
+    <FxCompile Include="Shaders\VertexBillBoardShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Stats\Stats.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\IRenderPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\RendererHelpers.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDBufferManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDShaderManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\StaticMeshRenderPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\BillboardRenderPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\GizmoRenderPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\LightRenderPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\LineRenderPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="EngineSIU.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Light.hlsli" />
   </ItemGroup>
 </Project>

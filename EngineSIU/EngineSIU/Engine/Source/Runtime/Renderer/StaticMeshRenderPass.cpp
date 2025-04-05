@@ -142,35 +142,6 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
 }
 
-void FStaticMeshRenderPass::UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const
-{
-    FMaterialConstants data;
-    data.DiffuseColor = MaterialInfo.Diffuse;
-    data.TransparencyScalar = MaterialInfo.TransparencyScalar;
-    data.AmbientColor = MaterialInfo.Ambient;
-    data.DensityScalar = MaterialInfo.DensityScalar;
-    data.SpecularColor = MaterialInfo.Specular;
-    data.SpecularScalar = MaterialInfo.SpecularScalar;
-    data.EmmisiveColor = MaterialInfo.Emissive;
-
-
-    BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), data);
-
-    if (MaterialInfo.bHasTexture)
-    {
-        std::shared_ptr<FTexture> texture = FEngineLoop::resourceMgr.GetTexture(MaterialInfo.DiffuseTexturePath);
-        Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
-        Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
-    }
-    else
-    {
-        ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
-        ID3D11SamplerState* nullSampler[1] = { nullptr };
-        Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
-        Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
-    }
-}
-
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
 {
     FLitUnlitConstants Data;
@@ -200,9 +171,9 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
         BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), SubMeshData);
 
         if (OverrideMaterials[materialIndex] != nullptr)
-            UpdateMaterial(OverrideMaterials[materialIndex]->GetMaterialInfo());
+            MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[materialIndex]->GetMaterialInfo());
         else
-            UpdateMaterial(Materials[materialIndex]->Material->GetMaterialInfo());
+            MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[materialIndex]->Material->GetMaterialInfo());
 
         uint64 startIndex = RenderData->MaterialSubsets[subMeshIndex].IndexStart;
         uint64 indexCount = RenderData->MaterialSubsets[subMeshIndex].IndexCount;
@@ -228,8 +199,8 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
 
 void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)) return;
- 
+    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
+
     PrepareRenderState();
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs) {
@@ -261,43 +232,3 @@ void FStaticMeshRenderPass::ClearRenderArr()
     StaticMeshObjs.Empty();
 }
 
-//void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex = -1) const
-//{
-//    UINT offset = 0;
-//    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
-//
-//    if (renderData->IndexBuffer)
-//        Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-//
-//    if (renderData->MaterialSubsets.Num() == 0)
-//    {
-//        Graphics->DeviceContext->DrawIndexed(renderData->Indices.Num(), 0, 0);
-//    }
-//
-//    for (int subMeshIndex = 0; subMeshIndex < renderData->MaterialSubsets.Num(); subMeshIndex++)
-//    {
-//        int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
-//
-//        FSubMeshConstants data;
-//
-//        if (subMeshIndex == selectedSubMeshIndex)
-//            data = FSubMeshConstants(true);
-//        else
-//            data = FSubMeshConstants(false);
-//
-//        BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), data);
-//
-//        if (overrideMaterial[materialIndex] != nullptr)
-//            UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo());
-//        else
-//            UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
-//
-//        if (renderData->IndexBuffer)
-//        {
-//            // index draw
-//            uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
-//            uint64 indexCount = renderData->MaterialSubsets[subMeshIndex].IndexCount;
-//            Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
-//        }
-//    }
-//}

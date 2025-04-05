@@ -300,6 +300,11 @@ struct FPerObjectConstantBuffer {
     bool IsSelected;
     FVector pad;
 };
+struct FSubUVConstant
+{
+    float indexU;
+    float indexV;
+};
 struct FLitUnlitConstants {
     int isLit; // 1 = Lit, 0 = Unlit 
     FVector pad;
