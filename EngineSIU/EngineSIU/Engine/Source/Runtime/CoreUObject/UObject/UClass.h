@@ -7,8 +7,16 @@
  */
 class UClass : public UObject
 {
+    using UObjectCTOR = UObject*(*)();
+
 public:
-    UClass(const char* InClassName, uint32 InClassSize, uint32 InAlignment, UClass* InSuperClass);
+    UClass(
+        const char* InClassName,
+        uint32 InClassSize,
+        uint32 InAlignment,
+        UClass* InSuperClass,
+        UObjectCTOR InCTOR
+    );
 
     // 복사 & 이동 생성자 제거
     UClass(const UClass&) = delete;
@@ -52,13 +60,11 @@ protected:
     virtual UObject* CreateDefaultObject();
 
 private:
-    [[maybe_unused]]
     uint32 ClassSize;
-
-    [[maybe_unused]]
     uint32 ClassAlignment;
 
     UClass* SuperClass = nullptr;
-
     UObject* ClassDefaultObject = nullptr;
+
+    UObjectCTOR ObjectCTOR;
 };
