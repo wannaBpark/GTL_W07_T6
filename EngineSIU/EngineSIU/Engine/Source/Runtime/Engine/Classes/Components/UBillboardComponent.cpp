@@ -14,18 +14,19 @@ UBillboardComponent::UBillboardComponent()
     SetType(StaticClass()->GetName());
 }
 
-UBillboardComponent::~UBillboardComponent()
+UObject* UBillboardComponent::Duplicate()
 {
-	if (vertexTextureBuffer)
-	{
-		vertexTextureBuffer->Release();
-		vertexTextureBuffer = nullptr;
-	}
-	if (indexTextureBuffer)
-	{
-		indexTextureBuffer->Release();
-		indexTextureBuffer = nullptr;
-	}
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    // TODO: 나중에 Buffer 다른데로 옮기기
+    NewComponent->vertexTextureBuffer = vertexTextureBuffer;
+    NewComponent->indexTextureBuffer = indexTextureBuffer;
+    NewComponent->numVertices = numVertices;
+    NewComponent->finalIndexU = finalIndexU;
+    NewComponent->finalIndexV = finalIndexV;
+    NewComponent->Texture = Texture;
+
+    return NewComponent;
 }
 
 void UBillboardComponent::InitializeComponent()

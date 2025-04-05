@@ -1,5 +1,6 @@
 #include "UParticleSubUVComp.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UObject/Casts.h"
 
 
 UParticleSubUVComp::UParticleSubUVComp()
@@ -8,13 +9,18 @@ UParticleSubUVComp::UParticleSubUVComp()
     bIsLoop = true;
 }
 
-UParticleSubUVComp::~UParticleSubUVComp()
+UObject* UParticleSubUVComp::Duplicate()
 {
-	if (vertexSubUVBuffer)
-	{
-		vertexSubUVBuffer->Release();
-		vertexSubUVBuffer = nullptr;
-	}
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    // TODO: Buffer 다른데로 옮기기
+    NewComponent->vertexSubUVBuffer = vertexSubUVBuffer;
+    NewComponent->numTextVertices = numTextVertices;
+    NewComponent->bIsLoop = bIsLoop;
+    NewComponent->CellsPerRow = CellsPerRow;
+    NewComponent->CellsPerColumn = CellsPerColumn;
+
+    return NewComponent;
 }
 
 void UParticleSubUVComp::InitializeComponent()
