@@ -10,12 +10,12 @@ UClass::UClass(
     uint32 InClassSize,
     uint32 InAlignment,
     UClass* InSuperClass,
-    UObjectCTOR InCTOR
+    ClassConstructorType InCTOR
 )
     : ClassSize(InClassSize)
     , ClassAlignment(InAlignment)
     , SuperClass(InSuperClass)
-    , ObjectCTOR(InCTOR)
+    , ClassCTOR(InCTOR)
 {
     NamePrivate = InClassName;
 }
@@ -36,13 +36,24 @@ bool UClass::IsChildOf(const UClass* SomeBase) const
     return false;
 }
 
+UObject* UClass::GetDefaultObject() const
+{
+    if (!ClassDefaultObject)
+    {
+        const_cast<UClass*>(this)->CreateDefaultObject();
+    }
+    return ClassDefaultObject;
+}
+
 UObject* UClass::CreateDefaultObject()
 {
     if (!ClassDefaultObject)
     {
-        // TODO: CDO 객체 만들기
-        ClassDefaultObject = ObjectCTOR();
-        if (!ClassDefaultObject) return nullptr;
+        ClassDefaultObject = ClassCTOR();
+        if (!ClassDefaultObject)
+        {
+            return nullptr;
+        }
 
         ClassDefaultObject->ClassPrivate = this;
         ClassDefaultObject->NamePrivate = GetName() + "_CDO";
