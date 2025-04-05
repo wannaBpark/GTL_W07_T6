@@ -1,5 +1,5 @@
 // MatrixBuffer: 변환 행렬 관리
-cbuffer MatrixConstants : register(b0)
+cbuffer PerObjectConstantBuffer : register(b0)
 {
     row_major float4x4 MVP;
     row_major float4x4 MInverseTranspose;
@@ -49,7 +49,7 @@ PS_INPUT mainVS(VS_INPUT input)
     else
     {
         //output.normal = normalize(input.normal);
-        output.normal = mul(input.normal, MInverseTranspose);
+        output.normal = mul(input.normal, (float3x3) MInverseTranspose);
         output.normalFlag = 1.0;
     }
     output.texcoord = input.texcoord;

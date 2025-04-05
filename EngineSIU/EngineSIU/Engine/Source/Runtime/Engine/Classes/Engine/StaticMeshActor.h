@@ -1,7 +1,7 @@
-﻿#pragma once
+#pragma once
 #include "GameFramework/Actor.h"
 
-
+class UStaticMeshComponent;
 class AStaticMeshActor : public AActor
 {
     DECLARE_CLASS(AStaticMeshActor, AActor)
@@ -9,8 +9,7 @@ class AStaticMeshActor : public AActor
 public:
     AStaticMeshActor();
 
-    UStaticMeshComponent* GetStaticMeshComponent() const { return StaticMeshComponent; }
-
+    UStaticMeshComponent* GetStaticMeshComponent() const;
 private:
     UStaticMeshComponent* StaticMeshComponent = nullptr;
 };
