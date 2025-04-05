@@ -20,7 +20,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     {
         return true;
     }
-    int zDelta = 0;
+    int zDelta;
     switch (message)
     {
     case WM_DESTROY:
@@ -45,12 +45,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 }
             }
         }
-     Console::GetInstance().OnResize(hWnd);
-    // ControlPanel::GetInstance().OnResize(hWnd);
-    // PropertyPanel::GetInstance().OnResize(hWnd);
-    // Outliner::GetInstance().OnResize(hWnd);
-    // ViewModeDropdown::GetInstance().OnResize(hWnd);
-    // ShowFlags::GetInstance().OnResize(hWnd);
+        Console::GetInstance().OnResize(hWnd);
+        // ControlPanel::GetInstance().OnResize(hWnd);
+        // PropertyPanel::GetInstance().OnResize(hWnd);
+        // Outliner::GetInstance().OnResize(hWnd);
+        // ViewModeDropdown::GetInstance().OnResize(hWnd);
+        // ShowFlags::GetInstance().OnResize(hWnd);
         if (GEngineLoop.GetUnrealEditor())
         {
             GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
@@ -270,7 +270,7 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 
     WCHAR Title[] = L"Game Tech Lab";
 
-    WNDCLASSW wndclass = {0};
+    WNDCLASSW wndclass{};
     wndclass.lpfnWndProc = WndProc;
     wndclass.hInstance = hInstance;
     wndclass.lpszClassName = WindowClass;

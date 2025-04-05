@@ -156,7 +156,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-        if (ImGui::BeginPopupModal("프로그램 종료", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        if (ImGui::BeginPopupModal("프로그램 종료", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("정말 프로그램을 종료하시겠습니까?");
             ImGui::Separator();
@@ -468,7 +468,7 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 
 uint64 ControlEditorPanel::ConvertSelectionToFlags(const bool selected[]) const
 {
-    uint64 flags = static_cast<uint64>(EEngineShowFlags::None);
+    uint64 flags = EEngineShowFlags::None;
 
     if (selected[0])
         flags |= static_cast<uint64>(EEngineShowFlags::SF_AABB);

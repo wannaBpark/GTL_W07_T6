@@ -25,7 +25,7 @@ void UWorld::CreateBaseObject()
 {
     if (EditorPlayer == nullptr)
     {
-        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();;
+        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();
     }
 
     if (LocalGizmo == nullptr)

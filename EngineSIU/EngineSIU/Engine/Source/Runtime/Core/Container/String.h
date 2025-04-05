@@ -30,7 +30,7 @@ enum Type : uint8
     /** Ignore case. Upper/lower casing does not matter when making a comparison. */
     IgnoreCase,
 };
-};
+}
 
 /** Determines search direction for string operations. */
 namespace ESearchDir

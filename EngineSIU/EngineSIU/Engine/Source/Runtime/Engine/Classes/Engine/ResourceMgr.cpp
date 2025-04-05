@@ -193,8 +193,8 @@ HRESULT FResourceMgr::LoadTextureFromDDS(ID3D11Device* device, ID3D11DeviceConte
 	// 🔹 텍스처 크기 가져오기
 	D3D11_TEXTURE2D_DESC texDesc;
 	texture2D->GetDesc(&texDesc);
-	uint32 width = static_cast<uint32>(texDesc.Width);
-	uint32 height = static_cast<uint32>(texDesc.Height);
+	uint32 width = texDesc.Width;
+	uint32 height = texDesc.Height;
 
 #pragma endregion WidthHeight
 

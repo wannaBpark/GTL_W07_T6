@@ -71,9 +71,9 @@ struct FQuat
 	static FQuat CreateRotation(float roll, float pitch, float yaw)
 	{
 		// 각도를 라디안으로 변환
-		float radRoll = roll * (3.14159265359f / 180.0f);
-		float radPitch = pitch * (3.14159265359f / 180.0f);
-		float radYaw = yaw * (3.14159265359f / 180.0f);
+		float radRoll = roll * (PI / 180.0f);
+		float radPitch = pitch * (PI / 180.0f);
+		float radYaw = yaw * (PI / 180.0f);
 
 		// 각 축에 대한 회전 쿼터니언 계산
 		FQuat qRoll = FQuat(FVector(1.0f, 0.0f, 0.0f), radRoll);  // X축 회전
