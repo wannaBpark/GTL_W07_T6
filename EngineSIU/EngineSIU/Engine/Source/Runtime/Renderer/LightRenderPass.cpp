@@ -55,18 +55,21 @@ void FLightRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
 
         //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
 
-        if (LightCount < MAX_LIGHTS)
+        if (LightCount < MAX_LIGHTS) //TODO LightObj가 정보를 갖도록 분리
         {
-
+            LightBufferData.gLights[LightCount] = FLight{};
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Range = 50.f;
-            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.1,0.1,0.1);
+            LightBufferData.gLights[LightCount].Range = 100.f;
+            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.5,0.5,0.5);
             LightBufferData.gLights[LightCount].DiffuseColor = FVector(0.1,0.1,0.1);
-            LightBufferData.gLights[LightCount].Attenuation = FVector(0.1,0.1,0.1);
-            LightBufferData.gLights[LightCount].Falloff = 0.f;
+            LightBufferData.gLights[LightCount].Attenuation = FVector(0.5f,0.5f,0.5f);
+            LightBufferData.gLights[LightCount].Direction = FVector(0.f,0.f,0.f);
+            LightBufferData.gLights[LightCount].Type = 1;
+            LightBufferData.gLights[LightCount].Falloff = 0.4f;
 
             LightBufferData.gLights[LightCount].Enabled = 1;
+
             LightCount++;
         } 
 

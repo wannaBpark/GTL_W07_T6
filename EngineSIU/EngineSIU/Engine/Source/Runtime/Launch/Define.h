@@ -276,7 +276,7 @@ struct FPrimitiveCounts
 struct FLight
 {
     // 색상 데이터 (float3와 패딩)
-    FVector AmbientColor;    
+    FVector AmbientColor;
     float pad0;
     FVector DiffuseColor;    
     float pad1;
@@ -291,10 +291,12 @@ struct FLight
 
     FVector Attenuation;    
     float pad4;
+    
     int Enabled = 0;
+    int Type = 1;
+
     float Range;
     float pad5;
-    float pad6;
 };
 
 struct FLightBuffer
