@@ -38,6 +38,12 @@ FGizmoRenderPass::FGizmoRenderPass()
 
 FGizmoRenderPass::~FGizmoRenderPass()
 {
+    ReleaseShader();
+    if (ShaderManager)
+    {
+        delete ShaderManager;
+        ShaderManager = nullptr;
+    }
 }
 
 void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
@@ -47,9 +53,65 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     ShaderManager = InShaderManager;
 }
 
-void FGizmoRenderPass::PrepareRender()
+void FGizmoRenderPass::CreateShader()
+{
+    D3D11_INPUT_ELEMENT_DESC GizmoInputLayout[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    Stride = sizeof(FVertexSimple);
+
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"GizmoVertexShader", L"Shaders/GizmoVertexShader.hlsl", "mainVS", GizmoInputLayout, ARRAYSIZE(GizmoInputLayout));
+
+    hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
+
+    VertexShader = ShaderManager->GetVertexShaderByKey(L"GizmoVertexShader");
+
+    PixelShader = ShaderManager->GetPixelShaderByKey(L"GizmoPixelShader");
+
+    InputLayout = ShaderManager->GetInputLayoutByKey(L"GizmoVertexShader");
+
+}
+void FGizmoRenderPass::ReleaseShader()
+{
+    FDXDBufferManager::SafeRelease(InputLayout);
+    FDXDBufferManager::SafeRelease(PixelShader);
+    FDXDBufferManager::SafeRelease(VertexShader);
+}
+
+
+void FGizmoRenderPass::ClearRenderArr()
 {
     GizmoObjs.Empty();
+}
+
+void FGizmoRenderPass::PrepareRenderState() const
+{
+    Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
+    Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
+    Graphics->DeviceContext->IASetInputLayout(InputLayout);
+
+    // 상수 버퍼 바인딩 예시
+    ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
+    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
+    Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
+    Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
+
+    TArray<FString> PSBufferKeys = {
+                                  TEXT("FPerObjectConstantBuffer"),
+                                   TEXT("FMaterialConstants"),
+                                  TEXT("FLitUnlitConstants")
+    };
+
+    BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+}
+
+void FGizmoRenderPass::PrepareRender()
+{
     for (const auto iter : TObjectRange<UGizmoBaseComponent>())
     {
         GizmoObjs.Add(iter);
@@ -58,6 +120,7 @@ void FGizmoRenderPass::PrepareRender()
 
 void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    PrepareRenderState();
 
     for (UGizmoBaseComponent* GizmoComp : GizmoObjs)
     {
@@ -162,10 +225,4 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
             Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
         }
     }
-}
-
-
-void FGizmoRenderPass::ClearRenderArr()
-{
-    GizmoObjs.Empty();
 }

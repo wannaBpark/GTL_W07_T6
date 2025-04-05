@@ -777,6 +777,8 @@
     <FxCompile Include="Shaders\Light.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\GizmoVertexShader.hlsl" />
+    <FxCompile Include="Shaders\GizmoPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.h" />

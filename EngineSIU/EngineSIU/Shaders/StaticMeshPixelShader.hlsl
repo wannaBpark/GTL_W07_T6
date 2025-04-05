@@ -54,6 +54,7 @@ cbuffer TextureConstants : register(b6)
 
 #include "Light.hlsl"
 
+
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // 클립 공간 화면 좌표
@@ -77,17 +78,21 @@ PS_OUTPUT mainPS(PS_INPUT input)
     PS_OUTPUT output;
     output.UUID = UUID;
 
-    // 1) 알베도(텍스처) 샘플링
-    float3 albedo = Textures.Sample(Sampler, input.texcoord);
+    // 1) 알베도 샘플링
+    float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
+    // 2) 머티리얼 디퓨즈
+    float3 matDiffuse = Material.DiffuseColor.rgb;
+    // 3) 라이트 계산
+    float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
 
-        // 3) 라이트 계산 (항상)
-    float4 lightCol = Lighting(input.worldPos, input.normal);
+    // 4) 텍스처가 있으면 albedo × matDiffuse, 없으면 matDiffuse만
+    bool hasTexture = any(albedo != float3(0, 0, 0));
+    float3 baseColor = hasTexture
+        ? albedo 
+        : matDiffuse;
 
-    // 4) 최종 컬러 = 알베도 × 라이트
-    float3 finalColor = albedo * lightCol.rgb;
-
-    // 5) 알파 (필요하면 1.0f 고정)
-    output.color = float4(finalColor, 1);
-
+    // 5) 최종 컬러
+    float3 litColor = baseColor * lightRgb;
+    output.color = float4(litColor, 1);
     return output;
 }

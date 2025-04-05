@@ -2,6 +2,9 @@
 
 #define MAX_LIGHTS 16 
 
+#define POINT_LIGHT			1
+#define SPOT_LIGHT			2
+
 struct LIGHT
 {
     // Ambient (float3) + padding
@@ -30,8 +33,9 @@ struct LIGHT
 
     // Enable + Range + padding (총 16바이트)
     int m_bEnable;
+    int m_nType;
+    
     float m_fRange;
-    float pad6;
     float pad7;
 };
 
@@ -42,6 +46,7 @@ cbuffer cbLights : register(b2)
     int gnLights;
     float3 padCB;
 };
+
 float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
 {
     // 광원과 픽셀 위치 간 벡터 계산
@@ -71,6 +76,31 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
     return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
+float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
+{
+    float3 vToLight = gLights[nIndex].m_vPosition - vPosition;
+    float fDistance = length(vToLight);
+    if (fDistance <= gLights[nIndex].m_fRange)
+    {
+        float fSpecularFactor = 0.0f;
+        vToLight /= fDistance;
+        float fDiffuseFactor = dot(vToLight, vNormal);
+        if (fDiffuseFactor > 0.0f)
+        {
+           
+            float3 vHalf = float3(0.0f, 1.0f, 0.0f);
+            fSpecularFactor = pow(max(dot(vHalf, vNormal), 0.0f), 1);
+            
+        }
+        float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
+
+        float3 lit = (((gLights[nIndex].m_cAmbient * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor)) * fAttenuationFactor);
+        return float4(lit, 1);
+    }
+    return (float4(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+
 float4 Lighting(float3 vPosition, float3 vNormal)
 {
     
@@ -80,7 +110,14 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     {
         if (gLights[i].m_bEnable)
         {
-            cColor += SpotLight(i, vPosition, vNormal);
+            if (gLights[i].m_nType == POINT_LIGHT)
+            {
+                cColor += PointLight(i, vPosition, vNormal);
+            }
+            else if (gLights[i].m_nType == SPOT_LIGHT)
+            {
+                cColor += SpotLight(i, vPosition, vNormal);
+            }
         }
     }
     

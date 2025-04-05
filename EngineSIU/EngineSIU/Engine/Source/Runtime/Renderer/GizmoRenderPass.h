@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Define.h"
 #include "IRenderPass.h"
 #include "EngineBaseTypes.h"
 #include "Container/Set.h"
@@ -30,14 +31,24 @@ public:
 
     virtual void ClearRenderArr() override;
 
+    void PrepareRenderState() const;
     // Gizmo 한 개 렌더링 함수
     void RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World);
 
+    void CreateShader();
+    void ReleaseShader();
 private:
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
 
+    ID3D11VertexShader* VertexShader;
+
+    ID3D11PixelShader* PixelShader;
+
+    ID3D11InputLayout* InputLayout;
+
+    uint32 Stride;
     // 수집된 Gizmo 객체 배열
     TArray<UGizmoBaseComponent*> GizmoObjs;
 };

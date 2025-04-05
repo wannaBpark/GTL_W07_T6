@@ -35,6 +35,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     StaticMeshRenderPass->CreateShader();
     BillboardRenderPass->CreateShader();
     LineRenderPass->CreateShader();
+    GizmoRenderPass->CreateShader();
 
     CreateConstantBuffers();
 }
@@ -112,9 +113,7 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     LineRenderPass->Render(World, ActiveViewport);
     StaticMeshRenderPass->Render(World, ActiveViewport);
     GizmoRenderPass->Render(World, ActiveViewport);
-    StaticMeshRenderPass->PrepareRenderState();
     LightRenderPass->Render(World, ActiveViewport);
-    StaticMeshRenderPass->PrepareRenderState();
     BillboardRenderPass->Render(World, ActiveViewport);
 
     ClearRenderArr();
