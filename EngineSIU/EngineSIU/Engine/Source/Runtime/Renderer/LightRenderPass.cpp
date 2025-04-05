@@ -42,36 +42,46 @@ void FLightRenderPass::PrepareRender()
 
 void FLightRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    FLightBuffer LightBufferData = {};
+    int LightCount = 0;
 
-    // 각 라이트에 대해 디버깅용 렌더링 수행 (예: 원뿔, OBB)
+    LightBufferData.GlobalAmbientLight = FVector4(0.1, 0.1, 0.1,1);
     for (auto Light : LightObjs)
     {
         // 월드 변환 행렬 계산 (스케일 1로 가정)
-        FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
+        //FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
 
-        // 디버깅용 원뿔 렌더링: 라이트 위치, 반지름, 분할 수, 각도, 색상, 모델 행렬
-        FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
+        //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
 
-        // 디버깅용 OBB 렌더링: 라이트의 바운딩 박스, 위치, 모델 행렬
-        FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
+        //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
+
+        if (LightCount < MAX_LIGHTS)
+        {
+
+            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
+            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
+            LightBufferData.gLights[LightCount].Range = 50.f;
+            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.1,0.1,0.1);
+            LightBufferData.gLights[LightCount].DiffuseColor = FVector(0.1,0.1,0.1);
+            LightBufferData.gLights[LightCount].Attenuation = FVector(0.1,0.1,0.1);
+            LightBufferData.gLights[LightCount].Falloff = 0.f;
+
+            LightBufferData.gLights[LightCount].Enabled = 1;
+            LightCount++;
+        } 
+
     }
-}
+    LightBufferData.nLights = LightCount;
+
+    BufferManager->UpdateConstantBuffer(TEXT("FLightBuffer"), LightBufferData);
+}    
 
 void FLightRenderPass::ClearRenderArr()
 {
     LightObjs.Empty();
 }
 
-void FLightRenderPass::UpdateLightBuffer() const
-{ 
-    FLighting data;
-    data.lightDirX = 1.0f;
-    data.lightDirY = 1.0f;
-    data.lightDirZ = 1.0f;
-    data.lightColorX = 1.0f;
-    data.lightColorY = 1.0f;
-    data.lightColorZ = 1.0f;
-    data.AmbientFactor = 0.06f;
+void FLightRenderPass::UpdateLightBuffer(FLight Light) const
+{
 
-    BufferManager->UpdateConstantBuffer(TEXT("FLighting"), data);
 }

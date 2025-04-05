@@ -4,33 +4,44 @@
 
 struct LIGHT
 {
-    float4 m_cAmbient;
-    float4 m_cDiffuse;
-    float4 m_cSpecular;
+    // Ambient (float3) + padding
+    float3 m_cAmbient;
+    float pad1;
 
+    // Diffuse (float3) + padding
+    float3 m_cDiffuse;
+    float pad2;
+
+    // Specular (float3) + padding
+    float3 m_cSpecular;
+    float pad3;
+
+    // Position (float3) + Falloff
     float3 m_vPosition;
     float m_fFalloff;
 
+    // Direction (float3) + padding
     float3 m_vDirection;
-    float pad1;
+    float pad4;
 
+    // Attenuation (float3) + padding
     float3 m_vAttenuation;
-    float pad2;
-    
-    bool m_bEnable;
-    float m_fRange;
-    float padding;
-    float pad3;
-};
+    float pad5;
 
+    // Enable + Range + padding (총 16바이트)
+    int m_bEnable;
+    float m_fRange;
+    float pad6;
+    float pad7;
+};
 
 cbuffer cbLights : register(b2)
 {
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
     int gnLights;
+    float3 padCB;
 };
-
 float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
 {
     // 광원과 픽셀 위치 간 벡터 계산
@@ -42,38 +53,29 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance; // 정규화
         
-        // 확산 조명 계산
         float fDiffuseFactor = dot(vToLight, vNormal);
         if (fDiffuseFactor > 0.0f)
         {
-            if (Material.SpecularColor.a != 0.0f)
-            {
-                // 하프 벡터 대신 고정 벡터 사용(향후 수정 가능)
-                float3 vHalf = float3(0.0f, 1.0f, 0.0f);
-                fSpecularFactor = pow(max(dot(vHalf, vNormal), 0.0f), Material.SpecularColor.a);
-            }
+            float3 vHalf = float3(0.0f, 1.0f, 0.0f);
+            fSpecularFactor = pow(max(dot(vHalf, vNormal), 0.0f), 1);
         }
         
         float fSpotFactor = pow(max(dot(-vToLight, gLights[nIndex].m_vDirection), 0.0f), gLights[nIndex].m_fFalloff);
         
-        // 거리 감쇠 계산
         float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
         
-        // 최종 조명 색상 반환
-        return ((gLights[nIndex].m_cAmbient * Material.AmbientColor) +
-                (gLights[nIndex].m_cDiffuse * fDiffuseFactor * Material.DiffuseColor) +
-                (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor))
-                * fAttenuationFactor * fSpotFactor;
+        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
+
+        return float4(lit * fAttenuationFactor * fSpotFactor, 1.0f);
     }
     return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 float4 Lighting(float3 vPosition, float3 vNormal)
 {
-    // 카메라 방향 계산
     
     float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    [unroll(MAX_LIGHTS)]
+      [unroll(MAX_LIGHTS)]
     for (int i = 0; i < gnLights; i++)
     {
         if (gLights[i].m_bEnable)
@@ -84,7 +86,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     
     // 전역 환경광 추가
     cColor += (gcGlobalAmbientLight * Material.AmbientColor);
-    cColor.a = Material.DiffuseColor.a;
+    cColor.a = 1;
     
     return cColor;
 }

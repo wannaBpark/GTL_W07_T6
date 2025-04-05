@@ -5,44 +5,48 @@ SamplerState Sampler : register(s0);
 
 cbuffer MatrixConstants : register(b0)
 {
-    row_major float4x4 MVP;
+    row_major float4x4 Model;
     row_major float4x4 MInverseTranspose;
     float4 UUID;
     bool isSelected;
     float3 MatrixPad0;
 };
+cbuffer CameraConstants : register(b1)
+{
+    row_major float4x4 View;
+    row_major float4x4 Projection;
+    float3 CameraPosition;
+    float pad;
+};
 
 struct FMaterial
 {
-    float4 DiffuseColor;
+    float3 DiffuseColor;
     float TransparencyScalar;
     float4 AmbientColor;
     float DensityScalar;
-    float4 SpecularColor;
+    float3 SpecularColor;
     float SpecularScalar;
     float3 EmissiveColor;
     float MaterialPad0;
 };
-
-cbuffer MaterialConstants : register(b1)
+cbuffer MaterialConstants : register(b3)
 {
     FMaterial Material;
 }
-
-
-cbuffer FlagConstants : register(b3)
+cbuffer FlagConstants : register(b4)
 {
     bool IsLit;
     float3 flagPad0;
 }
 
-cbuffer SubMeshConstants : register(b4)
+cbuffer SubMeshConstants : register(b5)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
 }
 
-cbuffer TextureConstants : register(b5)
+cbuffer TextureConstants : register(b6)
 {
     float2 UVOffset;
     float2 TexturePad0;
@@ -52,12 +56,13 @@ cbuffer TextureConstants : register(b5)
 
 struct PS_INPUT
 {
-    float4 position : SV_POSITION; // 변환된 화면 좌표,    
-    float4 color : COLOR; // 전달할 색상      
-    float3 normal : NORMAL; // 정규화된 노멀 벡터
-    bool normalFlag : TEXCOORD0; // 노멀 유효성 플래그 (1.0: 유효, 0.0: 무효)
-    float2 texcoord : TEXCOORD1;
-    int materialIndex : MATERIAL_INDEX;
+    float4 position : SV_POSITION; // 클립 공간 화면 좌표
+    float3 worldPos : TEXCOORD0; // 월드 공간 위치
+    float4 color : COLOR; // 전달된 베이스 컬러
+    float3 normal : NORMAL; // 월드 공간 노멀
+    float normalFlag : TEXCOORD1; // 노멀 유효 플래그
+    float2 texcoord : TEXCOORD2; // UV 좌표
+    int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
 };
 
 struct PS_OUTPUT
@@ -71,51 +76,18 @@ PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
     output.UUID = UUID;
-    
-    // 텍스처 샘플링 및 기본 색상 계산
-    float3 texColor = Textures.Sample(Sampler, input.texcoord + UVOffset);
-    float3 color;
-    if (texColor.g == 0)
-    {
-        color = saturate(Material.DiffuseColor);
-    }
-    else
-    {
-        color = texColor + Material.DiffuseColor.xyz;
-    }
-    
-    // 선택된 객체에 하이라이트 적용
-    if (isSelected)
-    {
-        color += float3(0.2, 0.2, 0.0); // 노란색 틴트
-        if (IsSelectedSubMesh)
-            color = float3(1, 1, 1);
-    }
-    
-    // 조명 계산 및 발광 색상 추가
-    if (IsLit)
-    {
-        if (input.normalFlag > 0.5)
-        {
-            color += Lighting(input.position.xyz, input.normal);
-        }
-        color += Material.EmissiveColor;
-        
-        output.color = float4(color, Material.TransparencyScalar);
-        
-        return output;
-    }
-    else // unlit 상태: PaperTexture 효과 적용
-    {
-        if (input.normalFlag < 0.5)
-        {
-            output.color = float4(color, Material.TransparencyScalar);
-            return output;
-        }
-        output.color = float4(color, 1.0);
-        
-        output.color.a = Material.TransparencyScalar;
-        
-        return output;
-    }
+
+    // 1) 알베도(텍스처) 샘플링
+    float3 albedo = Textures.Sample(Sampler, input.texcoord);
+
+        // 3) 라이트 계산 (항상)
+    float4 lightCol = Lighting(input.worldPos, input.normal);
+
+    // 4) 최종 컬러 = 알베도 × 라이트
+    float3 finalColor = albedo * lightCol.rgb;
+
+    // 5) 알파 (필요하면 1.0f 고정)
+    output.color = float4(finalColor, 1);
+
+    return output;
 }

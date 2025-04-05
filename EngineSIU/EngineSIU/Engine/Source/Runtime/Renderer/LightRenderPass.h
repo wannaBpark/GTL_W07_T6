@@ -20,7 +20,7 @@ public:
     virtual void PrepareRender() override;
     virtual void Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     virtual void ClearRenderArr() override;
-    void UpdateLightBuffer() const;
+    void UpdateLightBuffer(FLight Light) const;
 
 private:
     TArray<ULightComponentBase*> LightObjs;

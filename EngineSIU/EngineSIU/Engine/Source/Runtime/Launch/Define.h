@@ -23,7 +23,7 @@ struct FVertexSimple
     float x, y, z;    // Position
     float r, g, b, a; // Color
     float nx, ny, nz;
-    float u=0, v=0;
+    float u = 0, v = 0;
     uint32 MaterialIndex;
 };
 
@@ -50,16 +50,16 @@ struct FObjInfo
     FWString PathName; // OBJ File Paths
     FString DisplayName; // Display Name
     FString MatName; // OBJ MTL File Name
-    
+
     // Group
     uint32 NumOfGroup = 0; // token 'g' or 'o'
     TArray<FString> GroupName;
-    
+
     // Vertex, UV, Normal List
     TArray<FVector> Vertices;
     TArray<FVector> Normals;
     TArray<FVector2D> UVs;
-    
+
     // Faces
     TArray<int32> Faces;
 
@@ -67,7 +67,7 @@ struct FObjInfo
     TArray<uint32> VertexIndices;
     TArray<uint32> NormalIndices;
     TArray<uint32> TextureIndices;
-    
+
     // Material
     TArray<FMaterialSubset> MaterialSubsets;
 };
@@ -93,16 +93,16 @@ struct FObjMaterialInfo
     /* Texture */
     FString DiffuseTextureName;  // map_Kd : Diffuse texture
     FWString DiffuseTexturePath;
-    
+
     FString AmbientTextureName;  // map_Ka : Ambient texture
     FWString AmbientTexturePath;
-    
+
     FString SpecularTextureName; // map_Ks : Specular texture
     FWString SpecularTexturePath;
-    
+
     FString BumpTextureName;     // map_Bump : Bump texture
     FWString BumpTexturePath;
-    
+
     FString AlphaTextureName;    // map_d : Alpha texture
     FWString AlphaTexturePath;
 };
@@ -115,13 +115,13 @@ namespace OBJ
         FWString ObjectName;
         FWString PathName;
         FString DisplayName;
-        
+
         TArray<FVertexSimple> Vertices;
         TArray<UINT> Indices;
 
         ID3D11Buffer* VertexBuffer;
         ID3D11Buffer* IndexBuffer;
-        
+
         TArray<FObjMaterialInfo> Materials;
         TArray<FMaterialSubset> MaterialSubsets;
 
@@ -132,19 +132,19 @@ namespace OBJ
 
 struct FVertexTexture
 {
-	float x, y, z;    // Position
-	float u, v; // Texture
+    float x, y, z;    // Position
+    float u, v; // Texture
 };
 struct FGridParameters
 {
-	float GridSpacing;
-	int   NumGridLines;
-	FVector GridOrigin;
-	float pad;
+    float GridSpacing;
+    int   NumGridLines;
+    FVector GridOrigin;
+    float pad;
 };
 struct FSimpleVertex
 {
-	float dummy; // 내용은 사용되지 않음
+    float dummy; // 내용은 사용되지 않음
     float padding[11];
 };
 struct FOBB {
@@ -169,10 +169,10 @@ struct FBoundingBox
 {
     FBoundingBox() = default;
     FBoundingBox(FVector _min, FVector _max) : min(_min), max(_max) {}
-	FVector min; // Minimum extents
-	float pad;
-	FVector max; // Maximum extents
-	float pad1;
+    FVector min; // Minimum extents
+    float pad;
+    FVector max; // Maximum extents
+    float pad1;
     bool Intersect(const FVector& rayOrigin, const FVector& rayDir, float& outDistance) const
     {
         float tmin = -FLT_MAX;
@@ -263,24 +263,48 @@ struct FCone
     float pad[3];
 
 };
-struct FPrimitiveCounts 
+struct FPrimitiveCounts
 {
-	int BoundingBoxCount;
-	int pad;
-	int ConeCount; 
-	int pad1;
+    int BoundingBoxCount;
+    int pad;
+    int ConeCount;
+    int pad1;
 };
-struct FLighting
+
+#define MAX_LIGHTS 16
+
+struct FLight
 {
-	float lightDirX, lightDirY, lightDirZ; // 조명 방향
-	float pad1;                      // 16바이트 정렬용 패딩
-	float lightColorX, lightColorY, lightColorZ;    // 조명 색상
-	float pad2;                      // 16바이트 정렬용 패딩
-	float AmbientFactor;             // ambient 계수
-	float pad3; // 16바이트 정렬 맞춤 추가 패딩
-	float pad4; // 16바이트 정렬 맞춤 추가 패딩
-	float pad5; // 16바이트 정렬 맞춤 추가 패딩
+    // 색상 데이터 (float3와 패딩)
+    FVector AmbientColor;    
+    float pad0;
+    FVector DiffuseColor;    
+    float pad1;
+    FVector SpecularColor;   
+    float pad2;
+
+    FVector Position;        
+    float Falloff;
+
+    FVector Direction;      
+    float pad3;
+
+    FVector Attenuation;    
+    float pad4;
+    int Enabled = 0;
+    float Range;
+    float pad5;
+    float pad6;
 };
+
+struct FLightBuffer
+{
+    FLight gLights[MAX_LIGHTS];
+    FVector4 GlobalAmbientLight;
+    int nLights;
+    float    pad0, pad1, pad2;
+};
+
 
 struct FMaterialConstants {
     FVector DiffuseColor;
@@ -291,15 +315,25 @@ struct FMaterialConstants {
     float SpecularScalar;
     FVector EmmisiveColor;
     float MaterialPad0;
+    float MaterialPad1;
 };
 
 struct FPerObjectConstantBuffer {
-    FMatrix MVP;      // 모델
+    FMatrix Model;      // 모델
     FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
     FVector4 UUIDColor;
     bool IsSelected;
     FVector pad;
 };
+
+struct FCameraConstantBuffer
+{
+    FMatrix View;
+    FMatrix Projection;
+    FVector CameraPosition;
+    float pad;
+};
+
 struct FSubUVConstant
 {
     float indexU;

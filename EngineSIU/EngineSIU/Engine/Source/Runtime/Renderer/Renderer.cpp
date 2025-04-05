@@ -56,6 +56,9 @@ void FRenderer::CreateConstantBuffers()
 {
     UINT perObjectBufferSize = sizeof(FPerObjectConstantBuffer);
     BufferManager->CreateBufferGeneric<FPerObjectConstantBuffer>("FPerObjectConstantBuffer", nullptr, perObjectBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+   
+    UINT cameraConstantBufferSize = sizeof(FCameraConstantBuffer);
+    BufferManager->CreateBufferGeneric<FCameraConstantBuffer>("FCameraConstantBuffer", nullptr, cameraConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
     UINT subUVBufferSize = sizeof(FSubUVConstant);
     BufferManager->CreateBufferGeneric<FSubUVConstant>("FSubUVConstant", nullptr, subUVBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -69,8 +72,8 @@ void FRenderer::CreateConstantBuffers()
     UINT textureBufferSize = sizeof(FTextureConstants);
     BufferManager->CreateBufferGeneric<FTextureConstants>("FTextureConstants", nullptr, textureBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT lightingBufferSize = sizeof(FLighting);
-    BufferManager->CreateBufferGeneric<FLighting>("FLighting", nullptr, lightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT lightingBufferSize = sizeof(FLightBuffer);
+    BufferManager->CreateBufferGeneric<FLightBuffer>("FLightBuffer", nullptr, lightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
     UINT litUnlitBufferSize = sizeof(FLitUnlitConstants);
     BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, litUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -105,13 +108,14 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
-    LightRenderPass->UpdateLightBuffer();
-
+    
     LineRenderPass->Render(World, ActiveViewport);
     StaticMeshRenderPass->Render(World, ActiveViewport);
     GizmoRenderPass->Render(World, ActiveViewport);
-    BillboardRenderPass->Render(World, ActiveViewport);
+    StaticMeshRenderPass->PrepareRenderState();
     LightRenderPass->Render(World, ActiveViewport);
+    StaticMeshRenderPass->PrepareRenderState();
+    BillboardRenderPass->Render(World, ActiveViewport);
 
     ClearRenderArr();
 }

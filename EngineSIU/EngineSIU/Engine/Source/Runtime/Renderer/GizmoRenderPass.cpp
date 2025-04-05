@@ -110,13 +110,14 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
     bool Selected = (GizmoComp == World->GetPickingGizmo());
 
-    FMatrix MVP = RendererHelpers::CalculateMVP(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());
-
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
 
-    FPerObjectConstantBuffer Data(MVP, NormalMatrix, UUIDColor, Selected);
+    FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
+
+    FCameraConstantBuffer CameraData(Viewport->View,Viewport->Projection);
 
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
+    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
     // Gizmo가 렌더링할 StaticMesh가 없으면 렌더링하지 않음
     if (!GizmoComp->GetStaticMesh()) return;

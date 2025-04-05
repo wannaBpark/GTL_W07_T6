@@ -13,24 +13,14 @@ ULightComponentBase::~ULightComponentBase()
 {
     delete texture2D;
 }
-void ULightComponentBase::SetColor(FVector4 newColor)
+void ULightComponentBase::SetColor(FVector4 NewColor)
 {
-    color = newColor;
-}
-
-FVector4 ULightComponentBase::GetColor() const
-{
-    return color;
-}
-
-float ULightComponentBase::GetRadius() const
-{
-    return radius;
+    Light.AmbientColor = FVector(NewColor.X, NewColor.Y, NewColor.Z);
 }
 
 void ULightComponentBase::SetRadius(float r)
 {
-    radius = r;
+    Light.Range = r;
 }
 
 void ULightComponentBase::InitializeLight()
@@ -40,8 +30,7 @@ void ULightComponentBase::InitializeLight()
     texture2D->InitializeComponent();
     AABB.max = { 1.f,1.f,0.1f };
     AABB.min = { -1.f,-1.f,-0.1f };
-    color = { 1,1,1,1 };
-    radius = 5;
+
 }
 
 void ULightComponentBase::TickComponent(float DeltaTime)

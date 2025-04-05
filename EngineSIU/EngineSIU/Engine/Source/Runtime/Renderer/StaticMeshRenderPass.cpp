@@ -120,26 +120,30 @@ void FStaticMeshRenderPass::PrepareRenderState() const
 
     // 상수 버퍼 바인딩 예시
     ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
+    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
     Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
+    Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
 
     TArray<FString> PSBufferKeys = {
-                                  TEXT("FPerObjectConstantBuffer"),
+                                  TEXT("FCameraConstantBuffer"),
+                                  TEXT("FLightBuffer"),
                                   TEXT("FMaterialConstants"),
-                                  TEXT("FLighting"),
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
                                   TEXT("FTextureConstants")
     };
 
-    BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+    BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
 }
 
 void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const
 {
     FMatrix MVP = RendererHelpers::CalculateMVP(Model, View, Projection);
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
-    FPerObjectConstantBuffer Data(MVP, NormalMatrix, UUIDColor, Selected);
+    FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
+    FCameraConstantBuffer CameraData(View, Projection, {}, 0);
+    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 }
 
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const

@@ -1,11 +1,18 @@
 // MatrixBuffer: 변환 행렬 관리
-cbuffer PerObjectConstantBuffer : register(b0)
+cbuffer MatrixConstants : register(b0)
 {
-    row_major float4x4 MVP;
+    row_major float4x4 Model;
     row_major float4x4 MInverseTranspose;
     float4 UUID;
     bool isSelected;
     float3 MatrixPad0;
+};
+cbuffer CameraConstants : register(b1)
+{
+    row_major float4x4 View;
+    row_major float4x4 Projection;
+    float3 CameraPosition;
+    float pad;
 };
 
 struct VS_INPUT
@@ -19,12 +26,13 @@ struct VS_INPUT
 
 struct PS_INPUT
 {
-    float4 position : SV_POSITION; // 변환된 화면 좌표
-    float4 color : COLOR; // 전달할 색상
-    float3 normal : NORMAL; // 정규화된 노멀 벡터
-    bool normalFlag : TEXCOORD0; // 노멀 유효성 플래그 (1.0: 유효, 0.0: 무효)
-    float2 texcoord : TEXCOORD1;
-    int materialIndex : MATERIAL_INDEX;
+    float4 position : SV_POSITION; // 클립 공간으로 변환된 화면 좌표
+    float3 worldPos : TEXCOORD0; // 월드 공간 위치 (조명용)
+    float4 color : COLOR; // 버텍스 컬러 또는 머티리얼 베이스 컬러
+    float3 normal : NORMAL; // 월드 공간 노멀
+    float normalFlag : TEXCOORD1; // 노멀 유효 플래그 (1.0 또는 0.0)
+    float2 texcoord : TEXCOORD2; // UV 좌표
+    int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
 };
 
 PS_INPUT mainVS(VS_INPUT input)
@@ -33,11 +41,16 @@ PS_INPUT mainVS(VS_INPUT input)
     
     output.materialIndex = input.materialIndex;
     
-    // 위치 변환
-    output.position = mul(input.position, MVP);
+    float4 worldPosition = mul(input.position, Model);
+    
+    output.worldPos = worldPosition.xyz;
+    
+    float4 viewPosition = mul(worldPosition, View);
+    
+    output.position = mul(viewPosition, Projection);
+    
     output.color = input.color;
-    if (isSelected)
-        output.color *= 0.5;
+  
     // 입력 normal 값의 길이 확인
     float normalThreshold = 0.001;
     float normalLen = length(input.normal);
@@ -49,7 +62,7 @@ PS_INPUT mainVS(VS_INPUT input)
     else
     {
         //output.normal = normalize(input.normal);
-        output.normal = mul(input.normal, (float3x3) MInverseTranspose);
+        output.normal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
         output.normalFlag = 1.0;
     }
     output.texcoord = input.texcoord;
