@@ -6,12 +6,17 @@
 #include "Container/Array.h"
 #include "World/WorldContext.h"
 
+class UWorld;
+
 class UEngine : public UObject
 {
     DECLARE_CLASS(UEngine, UObject)
 
 public:
     UEngine() = default;
+
+public:
+    std::shared_ptr<UWorld> ActiveWorld;
 
 protected:
     TArray<FWorldContext> WorldList;

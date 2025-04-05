@@ -42,6 +42,7 @@ public:
 
 private:
     UImGuiManager* UIMgr;
+    //TODO: GWorld 제거, Editor들 EditorEngine으로 넣기
     UWorld* GWorld;
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
