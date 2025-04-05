@@ -20,10 +20,7 @@ void UWorld::InitializeNewWorld()
 {
     ActiveLevel.reset(FObjectFactory::ConstructObject<ULevel>());
     ActiveLevel->InitLevel(this);
-}
 
-void UWorld::Initialize()
-{
     // TODO: BaseObject 제거 필요.
     CreateBaseObject();
 }

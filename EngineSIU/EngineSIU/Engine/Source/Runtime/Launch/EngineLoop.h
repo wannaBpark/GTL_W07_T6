@@ -43,7 +43,7 @@ public:
 private:
     UImGuiManager* UIMgr;
     //TODO: GWorld 제거, Editor들 EditorEngine으로 넣기
-    UWorld* GWorld;
+    
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
     bool bIsExit = false;
@@ -51,7 +51,6 @@ private:
     bool bTestInput = false;
 
 public:
-    UWorld* GetWorld() const { return GWorld; }
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
 };

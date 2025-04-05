@@ -19,7 +19,7 @@ public:
     std::shared_ptr<UWorld> ActiveWorld;
 
 protected:
-    TArray<FWorldContext> WorldList;
+    TArray<FWorldContext*> WorldList;
     int32 NextWorldContextHandle = 0;
 
 public:

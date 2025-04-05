@@ -12,40 +12,43 @@ void UEditorEngine::Init()
     GEngine = this;
 
     FWorldContext& EditorWorldContext = CreateNewWorldContext(EWorldType::Editor);
-    WorldList.Add(EditorWorldContext);
 
-    EditorWorld.reset(UWorld::CreateWorld(EWorldType::Editor, TEXT("EditorWorld")));
+    EditorWorld.reset(UWorld::CreateWorld(EWorldType::Editor, FString("EditorWorld")));
     EditorWorld->InitializeNewWorld();
 
     EditorWorldContext.SetCurrentWorld(EditorWorld.get());
-
+    ActiveWorld = EditorWorld;
 }
 
 void UEditorEngine::Tick(float DeltaTime)
 {
-    for (FWorldContext& WorldContext : WorldList)
+    for (FWorldContext* WorldContext : WorldList)
     {
-        UWorld* EditorWorld = WorldContext.World();
-        if (EditorWorld && WorldContext.WorldType == EWorldType::Editor)
+        if (WorldContext->WorldType == EWorldType::Editor)
         {
-            std::shared_ptr<ULevel> Level = EditorWorld->GetActiveLevel().lock();
-            if (Level)
+            if (UWorld* World = WorldContext->World())
             {
-                for (AActor* Actor : Level->Actors)
+                // TODO: World에서 EditorPlayer 제거 후 Tick 호출 제거 필요.
+                World->Tick(DeltaTime);
+                std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
+                if (Level)
                 {
-                    if (Actor)
+                    for (AActor* Actor : Level->Actors)
                     {
-                        Actor->Tick(DeltaTime);
+                        if (Actor)
+                        {
+                            Actor->Tick(DeltaTime);
+                        }
                     }
                 }
             }
         }
-        else if (WorldContext.WorldType == EWorldType::PIE)
+        else if (WorldContext->WorldType == EWorldType::PIE)
         {
-            UWorld* PIEWorld = WorldContext.World();
-            if (PIEWorld)
+            if (UWorld* World = WorldContext->World())
             {
-                std::shared_ptr<ULevel> Level = PIEWorld->GetActiveLevel().lock();
+                World->Tick(DeltaTime);
+                std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
                 if (Level)
                 {
                     for (AActor* Actor : Level->Actors)
@@ -88,11 +91,11 @@ void UEditorEngine::EndPIE()
 
 FWorldContext& UEditorEngine::GetEditorWorldContext(/*bool bEnsureIsGWorld*/)
 {
-    for (FWorldContext& WorldContext : WorldList)
+    for (FWorldContext* WorldContext : WorldList)
     {
-        if (WorldContext.WorldType == EWorldType::Editor)
+        if (WorldContext->WorldType == EWorldType::Editor)
         {
-            return WorldContext;
+            return *WorldContext;
         }
     }
     return CreateNewWorldContext(EWorldType::Editor);
@@ -100,11 +103,11 @@ FWorldContext& UEditorEngine::GetEditorWorldContext(/*bool bEnsureIsGWorld*/)
 
 FWorldContext* UEditorEngine::GetPIEWorldContext(/*int32 WorldPIEInstance*/)
 {
-    for (FWorldContext& WorldContext : WorldList)
+    for (FWorldContext* WorldContext : WorldList)
     {
-        if (WorldContext.WorldType == EWorldType::PIE)
+        if (WorldContext->WorldType == EWorldType::PIE)
         {
-            return &WorldContext;
+            return WorldContext;
         }
     }
     return nullptr;

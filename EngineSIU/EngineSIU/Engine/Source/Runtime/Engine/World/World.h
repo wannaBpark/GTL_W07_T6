@@ -30,7 +30,6 @@ public:
     void Tick(float DeltaTime);
     void BeginPlay();
 
-    void Initialize();
     void CreateBaseObject();
     void ReleaseBaseObject();
     void Release();
