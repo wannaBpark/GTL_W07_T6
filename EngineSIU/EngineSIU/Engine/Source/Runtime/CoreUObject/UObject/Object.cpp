@@ -22,7 +22,7 @@ UClass* UObject::StaticClass()
 UObject::UObject()
     : UUID(0)
     // TODO: Object를 생성할 때 직접 설정하기
-    , InternalIndex(std::numeric_limits<uint32>::max())
+    , InternalIndex(-1)
     , NamePrivate("None")
 {
 }
