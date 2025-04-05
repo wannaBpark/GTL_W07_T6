@@ -109,6 +109,6 @@ void UParticleSubUVComp::CreateSubUVVertexBuffer()
 	vertices[3].u = normalWidthOffset;
 	vertices[3].v = normalHeightOffset;
 
-	vertexSubUVBuffer = FEngineLoop::renderer.CreateVertexBuffer(vertices.GetData(), static_cast<UINT>(vertices.Num() * sizeof(FVertexTexture)));
+	vertexSubUVBuffer = FEngineLoop::renderer.CreateImmutableVertexBuffer(TEXT("UParticleSubUVComp"), vertices);
 	numTextVertices = static_cast<UINT>(vertices.Num());
 }

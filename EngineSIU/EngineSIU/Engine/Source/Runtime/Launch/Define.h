@@ -293,7 +293,7 @@ struct FMaterialConstants {
     float MaterialPad0;
 };
 
-struct FConstants {
+struct FPerObjectConstantBuffer {
     FMatrix MVP;      // 모델
     FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
     FVector4 UUIDColor;
@@ -325,4 +325,22 @@ struct FLinePrimitiveBatchArgs
     int ConeCount;
     int ConeSegmentCount;
     int OBBCount;
+};
+
+struct FVertexInfo
+{
+    uint32_t NumVertices;
+    ID3D11Buffer* VertexBuffer;
+};
+
+struct FIndexInfo
+{
+    uint32_t NumIndices;
+    ID3D11Buffer* IndexBuffer;
+};
+
+struct FBufferInfo
+{
+    FVertexInfo VertexInfo;
+    FIndexInfo IndexInfo;
 };

@@ -77,15 +77,9 @@ void UPrimitiveDrawBatch::InitializeGrid(float Spacing, int GridCount)
     GridParameters.GridOrigin = { 0, 0, 0 };
 }
 
-void UPrimitiveDrawBatch::PrepareBatch(const FMatrix& View, const FMatrix& Projection, FLinePrimitiveBatchArgs& OutLinePrimitiveBatchArgs)
+void UPrimitiveDrawBatch::PrepareBatch(FLinePrimitiveBatchArgs& OutLinePrimitiveBatchArgs)
 {
     InitializeVertexBuffer();
-
-    FMatrix Model = FMatrix::Identity;
-    FMatrix MVP = Model * View * Projection;
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, FVector4(0, 0, 0, 0), false);
-
     UpdateGridConstantBuffer(GridParameters);
     UpdateBoundingBoxBuffers();
     UpdateConeBuffers();

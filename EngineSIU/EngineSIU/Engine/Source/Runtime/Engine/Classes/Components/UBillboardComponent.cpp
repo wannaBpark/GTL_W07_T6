@@ -1,12 +1,26 @@
 #include "UBillboardComponent.h"
 #include <DirectXMath.h>
 #include "Define.h"
-#include "QuadTexture.h"
+
 #include "World.h"
 #include "Actors/Player.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
+
+TArray<uint32> QuadTextureInices =
+{
+    0,1,2,
+    1,3,2
+};
+
+TArray<FVertexTexture> QuadTextureVertices =
+{
+    {-1.0f,1.0f,0.0f,0.0f,0.0f},
+    { 1.0f,1.0f,0.0f,1.0f,0.0f},
+    {-1.0f,-1.0f,0.0f,0.0f,1.0f},
+    { 1.0f,-1.0f,0.0f,1.0f,1.0f}
+};
 
 
 UBillboardComponent::UBillboardComponent()
@@ -47,8 +61,8 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 	TArray<FVector> quad;
 	for (int i = 0; i < 4; i++)
 	{
-		quad.Add(FVector(quadTextureVertices[i].x, 
-			quadTextureVertices[i].y, quadTextureVertices[i].z));
+		quad.Add(FVector(QuadTextureVertices[i].x,
+            QuadTextureVertices[i].y, QuadTextureVertices[i].z));
 	}
 	return CheckPickingOnNDC(quad,pfNearHitDistance);
 }
@@ -98,16 +112,14 @@ FMatrix UBillboardComponent::CreateBillboardMatrix()
 
 void UBillboardComponent::CreateQuadTextureVertexBuffer()
 {
-	numVertices = sizeof(quadTextureVertices) / sizeof(FVertexTexture);
-	numIndices = sizeof(quadTextureInices) / sizeof(uint32);
-	vertexTextureBuffer = FEngineLoop::renderer.CreateVertexBuffer(quadTextureVertices, sizeof(quadTextureVertices));
-	indexTextureBuffer = FEngineLoop::renderer.CreateIndexBuffer(quadTextureInices, sizeof(quadTextureInices));
+	vertexTextureBuffer = FEngineLoop::renderer.CreateImmutableVertexBuffer(TEXT("UBillboardComponent"), QuadTextureVertices);
+	indexTextureBuffer = FEngineLoop::renderer.CreateImmutableIndexBuffer(TEXT("UBillboardComponent"), QuadTextureInices);
 
 	if (!vertexTextureBuffer) {
 		Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
 	}
 	if (!indexTextureBuffer) {
-		Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
+        Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
 	}
 }
 
