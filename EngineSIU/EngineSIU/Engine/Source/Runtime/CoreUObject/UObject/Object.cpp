@@ -1,4 +1,6 @@
 #include "Object.h"
+
+#include "ObjectFactory.h"
 #include "UClass.h"
 
 
@@ -25,6 +27,11 @@ UObject::UObject()
     , InternalIndex(-1)
     , NamePrivate("None")
 {
+}
+
+UObject* UObject::Duplicate()
+{
+    return FObjectFactory::ConstructObject(GetClass());
 }
 
 bool UObject::IsA(const UClass* SomeBase) const
