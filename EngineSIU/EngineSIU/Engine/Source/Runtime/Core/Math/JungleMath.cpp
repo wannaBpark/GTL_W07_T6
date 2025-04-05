@@ -106,10 +106,10 @@ FQuat JungleMath::EulerToQuaternion(const FVector& eulerDegrees)
     float sinRoll = sin(halfRoll);
 
     FQuat quat;
-    quat.w = cosYaw * cosPitch * cosRoll + sinYaw * sinPitch * sinRoll;
-    quat.x = cosYaw * cosPitch * sinRoll - sinYaw * sinPitch * cosRoll;
-    quat.y = cosYaw * sinPitch * cosRoll + sinYaw * cosPitch * sinRoll;
-    quat.z = sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll;
+    quat.W = cosYaw * cosPitch * cosRoll + sinYaw * sinPitch * sinRoll;
+    quat.X = cosYaw * cosPitch * sinRoll - sinYaw * sinPitch * cosRoll;
+    quat.Y = cosYaw * sinPitch * cosRoll + sinYaw * cosPitch * sinRoll;
+    quat.Z = sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll;
 
     quat.Normalize();
     return quat;
@@ -123,12 +123,12 @@ FVector JungleMath::QuaternionToEuler(const FQuat& quat)
     q.Normalize();
 
     // Yaw (Z 축 회전)
-    float sinYaw = 2.0f * (q.w * q.z + q.x * q.y);
-    float cosYaw = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
+    float sinYaw = 2.0f * (q.W * q.Z + q.X * q.Y);
+    float cosYaw = 1.0f - 2.0f * (q.Y * q.Y + q.Z * q.Z);
     euler.Z = FMath::RadiansToDegrees(atan2(sinYaw, cosYaw));
 
     // Pitch (Y 축 회전, 짐벌락 방지)
-    float sinPitch = 2.0f * (q.w * q.y - q.z * q.x);
+    float sinPitch = 2.0f * (q.W * q.Y - q.Z * q.X);
     if (fabs(sinPitch) >= 1.0f)
     {
         euler.Y = FMath::RadiansToDegrees(copysign(PI / 2, sinPitch)); // 🔥 Gimbal Lock 방지
@@ -139,8 +139,8 @@ FVector JungleMath::QuaternionToEuler(const FQuat& quat)
     }
 
     // Roll (X 축 회전)
-    float sinRoll = 2.0f * (q.w * q.x + q.y * q.z);
-    float cosRoll = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+    float sinRoll = 2.0f * (q.W * q.X + q.Y * q.Z);
+    float cosRoll = 1.0f - 2.0f * (q.X * q.X + q.Y * q.Y);
     euler.X = FMath::RadiansToDegrees(atan2(sinRoll, cosRoll));
     return euler;
 }

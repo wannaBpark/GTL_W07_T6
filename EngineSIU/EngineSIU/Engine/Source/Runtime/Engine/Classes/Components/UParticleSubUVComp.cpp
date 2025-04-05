@@ -1,6 +1,5 @@
 #include "UParticleSubUVComp.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "World.h"
 
 
 UParticleSubUVComp::UParticleSubUVComp()

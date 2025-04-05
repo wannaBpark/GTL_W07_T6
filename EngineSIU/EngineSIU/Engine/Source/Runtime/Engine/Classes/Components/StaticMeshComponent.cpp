@@ -1,6 +1,5 @@
 #include "Components/StaticMeshComponent.h"
 
-#include "World.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/ObjectFactory.h"
 

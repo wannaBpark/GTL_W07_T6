@@ -1,5 +1,4 @@
 #include "SkySphereComponent.h"
-#include "World.h"
 
 
 USkySphereComponent::USkySphereComponent()

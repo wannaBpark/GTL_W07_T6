@@ -1,6 +1,6 @@
-﻿#include "ControlEditorPanel.h"
+#include "ControlEditorPanel.h"
 
-#include "World.h"
+#include "World/World.h"
 #include "Actors/Player.h"
 #include "Components/LightComponent.h"
 #include "Components/SphereComp.h"
