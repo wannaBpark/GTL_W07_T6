@@ -8,7 +8,7 @@
 #include "Slate/Widgets/Layout/SSplitter.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
-
+#include "D3D11RHI/GraphicDevice.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -43,12 +43,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 }
             }
         }
-     Console::GetInstance().OnResize(hWnd);
-    // ControlPanel::GetInstance().OnResize(hWnd);
-    // PropertyPanel::GetInstance().OnResize(hWnd);
-    // Outliner::GetInstance().OnResize(hWnd);
-    // ViewModeDropdown::GetInstance().OnResize(hWnd);
-    // ShowFlags::GetInstance().OnResize(hWnd);
+        Console::GetInstance().OnResize(hWnd);
+        // ControlPanel::GetInstance().OnResize(hWnd);
+        // PropertyPanel::GetInstance().OnResize(hWnd);
+        // Outliner::GetInstance().OnResize(hWnd);
+        // ViewModeDropdown::GetInstance().OnResize(hWnd);
+        // ShowFlags::GetInstance().OnResize(hWnd);
         if (GEngineLoop.GetUnrealEditor())
         {
             GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
@@ -111,25 +111,37 @@ int32 FEngineLoop::PreInit()
 int32 FEngineLoop::Init(HINSTANCE hInstance)
 {
     /* must be initialized before window. */
-    UnrealEditor = new UnrealEd();
-    UnrealEditor->Initialize();
-
     WindowInit(hInstance);
-    graphicDevice.Initialize(hWnd);
-    renderer.Initialize(&graphicDevice);
-    PrimitiveDrawBatch.Initialize(&graphicDevice);
 
+    UnrealEditor = new UnrealEd();
+    
+    bufferManager = new FDXDBufferManager();
+    
     UIMgr = new UImGuiManager;
-    UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
-
-    resourceMgr.Initialize(&renderer, &graphicDevice);
+    
     LevelEditor = new SLevelEditor();
+    
+    GWorld = new UWorld;
+    
+    UnrealEditor->Initialize();
+    
+    graphicDevice.Initialize(hWnd);
+    
+    bufferManager->Initialize(graphicDevice.Device, graphicDevice.DeviceContext);
+    
+    renderer.Initialize(&graphicDevice, bufferManager);
+    
+    PrimitiveDrawBatch.Initialize(&graphicDevice);
+    
+    UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
+    
+    resourceMgr.Initialize(&renderer, &graphicDevice);
+    
     LevelEditor->Initialize();
 
-    GWorld = new UWorld;
     GWorld->Initialize();
 
-    return 0;
+    return 0; 
 }
 
 
@@ -149,7 +161,7 @@ void FEngineLoop::Render() const
             // renderer.UpdateLightBuffer();
             // RenderWorld();
             renderer.PrepareRender();
-            renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+            renderer.Render(GetWorld(), LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -162,7 +174,7 @@ void FEngineLoop::Render() const
         // renderer.UpdateLightBuffer();
         // RenderWorld();
         renderer.PrepareRender();
-        renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+        renderer.Render(GetWorld(), LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -174,7 +186,7 @@ void FEngineLoop::Tick()
     QueryPerformanceFrequency(&frequency);
 
     LARGE_INTEGER startTime, endTime;
-    double elapsedTime = 1.0;
+    double elapsedTime = 0.0;
 
     while (bIsExit == false)
     {
@@ -194,8 +206,8 @@ void FEngineLoop::Tick()
         }
 
         Input();
-        GWorld->Tick(elapsedTime);
-        LevelEditor->Tick(elapsedTime);
+        GWorld->Tick(1000 / elapsedTime);
+        LevelEditor->Tick(1000 / elapsedTime);
         Render();
         UIMgr->BeginFrame();
         UnrealEditor->Render();
@@ -213,8 +225,7 @@ void FEngineLoop::Tick()
             Sleep(0);
             QueryPerformanceCounter(&endTime);
             elapsedTime = (endTime.QuadPart - startTime.QuadPart) * 1000.0 / frequency.QuadPart;
-        }
-        while (elapsedTime < targetFrameTime);
+        } while (elapsedTime < targetFrameTime);
     }
 }
 
@@ -265,7 +276,7 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 
     WCHAR Title[] = L"Game Tech Lab";
 
-    WNDCLASSW wndclass = {0};
+    WNDCLASSW wndclass = { 0 };
     wndclass.lpfnWndProc = WndProc;
     wndclass.hInstance = hInstance;
     wndclass.lpszClassName = WindowClass;
