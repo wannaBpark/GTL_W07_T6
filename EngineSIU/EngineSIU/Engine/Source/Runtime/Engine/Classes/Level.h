@@ -11,8 +11,8 @@ class ULevel : public UObject
     DECLARE_CLASS(ULevel, UObject)
 
 public:
-    TArray<AActor*> Actors;
+    ULevel() = default;
 
     UWorld* OwningWorld;
+    TArray<AActor*> Actors;
 };
-
