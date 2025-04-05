@@ -2,6 +2,11 @@
 
 #include "World/World.h"
 
+UObject* AActor::Duplicate()
+{
+    return Super::Duplicate();
+}
+
 void AActor::BeginPlay()
 {
     // TODO: 나중에 삭제를 Pending으로 하던가 해서 복사비용 줄이기

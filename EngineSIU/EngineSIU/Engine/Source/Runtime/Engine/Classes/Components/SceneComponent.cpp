@@ -1,5 +1,6 @@
 #include "Components/SceneComponent.h"
 #include "Math/JungleMath.h"
+#include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 
 USceneComponent::USceneComponent()
@@ -7,6 +8,25 @@ USceneComponent::USceneComponent()
     , RelativeRotation(FVector(0.f, 0.f, 0.f))
     , RelativeScale3D(FVector(1.f, 1.f, 1.f))
 {
+}
+
+UObject* USceneComponent::Duplicate()
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    NewComponent->RelativeLocation = RelativeLocation;
+    NewComponent->RelativeRotation = RelativeRotation;
+    NewComponent->QuatRotation = QuatRotation;
+    NewComponent->RelativeScale3D = RelativeScale3D;
+
+    for (const auto& Child : AttachChildren)
+    {
+        USceneComponent* NewChildComponent = Cast<USceneComponent>(Child->Duplicate());
+        NewChildComponent->AttachParent = NewComponent;
+        NewComponent->AttachChildren.Add(NewChildComponent);
+    }
+
+    return NewComponent;
 }
 
 void USceneComponent::InitializeComponent()

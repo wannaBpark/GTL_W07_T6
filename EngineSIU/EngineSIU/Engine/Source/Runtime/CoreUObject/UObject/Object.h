@@ -33,12 +33,11 @@ private:
     FName NamePrivate;
     UClass* ClassPrivate = nullptr;
 
-protected:
-    virtual UObject* Duplicate();
-
 public:
     UObject();
     virtual ~UObject() = default;
+
+    virtual UObject* Duplicate();
 
     UWorld* GetWorld() const
     {

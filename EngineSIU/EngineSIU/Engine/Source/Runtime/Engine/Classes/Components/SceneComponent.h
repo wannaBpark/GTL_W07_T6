@@ -10,6 +10,8 @@ class USceneComponent : public UActorComponent
 public:
     USceneComponent();
 
+    virtual UObject* Duplicate() override;
+
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);

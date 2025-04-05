@@ -65,6 +65,7 @@ void UWorld::Tick(float DeltaTime)
 	for (AActor* Actor : ActorsArray)
 	{
 	    Actor->Tick(DeltaTime);
+	    Actor->Duplicate();
 	}
 }
 
