@@ -36,7 +36,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     BillboardRenderPass->CreateShader();
     LineRenderPass->CreateShader();
 
-    CreateConstantBuffer();
+    CreateConstantBuffers();
 }
 
 void FRenderer::Release()
@@ -52,7 +52,7 @@ void FRenderer::ChangeViewMode(EViewModeIndex evi) const
 //------------------------------------------------------------------------------
 // 상수 버퍼 및 기타 버퍼 생성/해제 함수
 //------------------------------------------------------------------------------
-void FRenderer::CreateConstantBuffer()
+void FRenderer::CreateConstantBuffers()
 {
     UINT perObjectBufferSize = sizeof(FPerObjectConstantBuffer);
     BufferManager->CreateBufferGeneric<FPerObjectConstantBuffer>("FPerObjectConstantBuffer", nullptr, perObjectBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);

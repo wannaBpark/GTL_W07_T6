@@ -56,8 +56,7 @@ public:
     ID3D11Buffer* CreateImmutableIndexBuffer(const FString& key, const TArray<uint32>& indices);
     
     // 상수 버퍼 생성/해제
-    void CreateConstantBuffer();
-
+    void CreateConstantBuffers();
     void ReleaseConstantBuffer();
 
 public:
