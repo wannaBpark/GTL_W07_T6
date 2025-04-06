@@ -10,11 +10,11 @@ class UWorld;
 class FEditorViewportClient;
 class ULightComponentBase;
 
-class FLightRenderPass : public IRenderPass
+class FUpdateLightBufferPass : public IRenderPass
 {
 public:
-    FLightRenderPass();
-    ~FLightRenderPass();
+    FUpdateLightBufferPass();
+    ~FUpdateLightBufferPass();
 
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager) override;
     virtual void PrepareRender() override;

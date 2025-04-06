@@ -621,10 +621,10 @@
     <ClInclude Include="Engine\Source\Runtime\Renderer\IRenderPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Renderer\LightRenderPass.cpp">
+    <ClCompile Include="Engine\Source\Runtime\Renderer\UpdateLightBufferPass.cpp">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Renderer\LightRenderPass.h">
+    <ClInclude Include="Engine\Source\Runtime\Renderer\UpdateLightBufferPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\LineRenderPass.cpp">
@@ -751,6 +751,7 @@
       <Filter>Font</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -779,8 +780,11 @@
     </FxCompile>
     <FxCompile Include="Shaders\GizmoVertexShader.hlsl" />
     <FxCompile Include="Shaders\GizmoPixelShader.hlsl" />
+    <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl" />
+    <FxCompile Include="Shaders\DepthBufferVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h" />
   </ItemGroup>
 </Project>

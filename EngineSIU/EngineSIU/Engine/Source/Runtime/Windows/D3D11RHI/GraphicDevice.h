@@ -50,11 +50,13 @@ public:
     void SwapBuffer() const;
     void Prepare() const;
     void Prepare(D3D11_VIEWPORT* viewport) const;
+    void PrepareForDepthDebug() const;
     void OnResize(HWND hWindow);
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }
     void ChangeRasterizer(EViewModeIndex evi);
     void ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil) const;
 
+    void PrintCenterDepth();
     uint32 GetPixelUUID(POINT pt) const;
     uint32 DecodeUUIDColor(FVector4 UUIDColor) const;
 private:

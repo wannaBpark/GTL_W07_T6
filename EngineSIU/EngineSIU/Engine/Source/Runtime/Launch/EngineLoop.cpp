@@ -114,34 +114,34 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     WindowInit(hInstance);
 
     UnrealEditor = new UnrealEd();
-    
+
     bufferManager = new FDXDBufferManager();
-    
+
     UIMgr = new UImGuiManager;
-    
+
     LevelEditor = new SLevelEditor();
-    
+
     GWorld = new UWorld;
-    
+
     UnrealEditor->Initialize();
-    
+
     graphicDevice.Initialize(hWnd);
-    
+
     bufferManager->Initialize(graphicDevice.Device, graphicDevice.DeviceContext);
-    
+
     renderer.Initialize(&graphicDevice, bufferManager);
-    
+
     PrimitiveDrawBatch.Initialize(&graphicDevice);
-    
+
     UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
-    
+
     resourceMgr.Initialize(&renderer, &graphicDevice);
-    
+
     LevelEditor->Initialize();
 
     GWorld->Initialize();
 
-    return 0; 
+    return 0;
 }
 
 

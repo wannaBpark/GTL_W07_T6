@@ -1,5 +1,5 @@
 #include "Define.h"
-#include "LightRenderPass.h"
+#include "UpdateLightBufferPass.h"
 #include "D3D11RHI/DXDBufferManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
@@ -14,25 +14,25 @@
 //------------------------------------------------------------------------------
 // 생성자/소멸자
 //------------------------------------------------------------------------------
-FLightRenderPass::FLightRenderPass()
+FUpdateLightBufferPass::FUpdateLightBufferPass()
     : BufferManager(nullptr)
     , Graphics(nullptr)
     , ShaderManager(nullptr)
 {
 }
 
-FLightRenderPass::~FLightRenderPass()
+FUpdateLightBufferPass::~FUpdateLightBufferPass()
 {
 }
 
-void FLightRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
+void FUpdateLightBufferPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
 {
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
 }
 
-void FLightRenderPass::PrepareRender()
+void FUpdateLightBufferPass::PrepareRender()
 {
     for (const auto iter : TObjectRange<ULightComponentBase>())
     {
@@ -40,7 +40,7 @@ void FLightRenderPass::PrepareRender()
     }
 }
 
-void FLightRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FUpdateLightBufferPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     FLightBuffer LightBufferData = {};
     int LightCount = 0;
@@ -79,12 +79,12 @@ void FLightRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
     BufferManager->UpdateConstantBuffer(TEXT("FLightBuffer"), LightBufferData);
 }    
 
-void FLightRenderPass::ClearRenderArr()
+void FUpdateLightBufferPass::ClearRenderArr()
 {
     LightObjs.Empty();
 }
 
-void FLightRenderPass::UpdateLightBuffer(FLight Light) const
+void FUpdateLightBufferPass::UpdateLightBuffer(FLight Light) const
 {
 
 }

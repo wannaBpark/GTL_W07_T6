@@ -8,8 +8,9 @@
 #include "StaticMeshRenderPass.h"
 #include "BillboardRenderPass.h"
 #include "GizmoRenderPass.h"
-#include "LightRenderPass.h"
+#include "UpdateLightBufferPass.h"
 #include "LineRenderPass.h"
+#include "DepthBufferDebugPass.h"
 
 //------------------------------------------------------------------------------
 // 초기화 및 해제 관련 함수
@@ -23,19 +24,22 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     StaticMeshRenderPass = new FStaticMeshRenderPass();
     BillboardRenderPass = new FBillboardRenderPass();
     GizmoRenderPass = new FGizmoRenderPass();
-    LightRenderPass = new FLightRenderPass();
+    UpdateLightBufferPass = new FUpdateLightBufferPass();
     LineRenderPass = new FLineRenderPass();
+    DepthBufferDebugPass = new FDepthBufferDebugPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     GizmoRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-    LightRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     StaticMeshRenderPass->CreateShader();
     BillboardRenderPass->CreateShader();
     LineRenderPass->CreateShader();
     GizmoRenderPass->CreateShader();
+    DepthBufferDebugPass->CreateShader();
 
     CreateConstantBuffers();
 }
@@ -57,7 +61,7 @@ void FRenderer::CreateConstantBuffers()
 {
     UINT perObjectBufferSize = sizeof(FPerObjectConstantBuffer);
     BufferManager->CreateBufferGeneric<FPerObjectConstantBuffer>("FPerObjectConstantBuffer", nullptr, perObjectBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-   
+
     UINT cameraConstantBufferSize = sizeof(FCameraConstantBuffer);
     BufferManager->CreateBufferGeneric<FCameraConstantBuffer>("FCameraConstantBuffer", nullptr, cameraConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
@@ -78,6 +82,9 @@ void FRenderer::CreateConstantBuffers()
 
     UINT litUnlitBufferSize = sizeof(FLitUnlitConstants);
     BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, litUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT ScreenConstantsBufferSize = sizeof(FScreenConstants);
+    BufferManager->CreateBufferGeneric<FScreenConstants>("FScreenConstants", nullptr, ScreenConstantsBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 
 void FRenderer::ReleaseConstantBuffer()
@@ -90,7 +97,7 @@ void FRenderer::PrepareRender()
     StaticMeshRenderPass->PrepareRender();
     GizmoRenderPass->PrepareRender();
     BillboardRenderPass->PrepareRender();
-    LightRenderPass->PrepareRender();
+    UpdateLightBufferPass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -98,7 +105,7 @@ void FRenderer::ClearRenderArr()
     StaticMeshRenderPass->ClearRenderArr();
     BillboardRenderPass->ClearRenderArr();
     GizmoRenderPass->ClearRenderArr();
-    LightRenderPass->ClearRenderArr();
+    UpdateLightBufferPass->ClearRenderArr();
 }
 
 void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
@@ -109,12 +116,20 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
-    
-    LineRenderPass->Render(World, ActiveViewport);
+
     StaticMeshRenderPass->Render(World, ActiveViewport);
-    GizmoRenderPass->Render(World, ActiveViewport);
-    LightRenderPass->Render(World, ActiveViewport);
+    LineRenderPass->Render(World, ActiveViewport);
+    UpdateLightBufferPass->Render(World, ActiveViewport);
     BillboardRenderPass->Render(World, ActiveViewport);
 
+
+    if (ActiveViewport->GetViewportType() == ELevelViewportType::LVT_Perspective)
+    {
+        DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+
+    }
+
+  
+    GizmoRenderPass->Render(World, ActiveViewport);
     ClearRenderArr();
 }

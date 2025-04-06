@@ -62,11 +62,11 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
     descDepth.Height = height;                        // 텍스처 높이 설정
     descDepth.MipLevels = 1;                          // 미맵 레벨 수 (1로 설정하여 미맵 없음)
     descDepth.ArraySize = 1;                          // 텍스처 배열의 크기 (1로 단일 텍스처)
-    descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // 24비트 깊이와 8비트 스텐실을 위한 포맷
+    descDepth.Format = DXGI_FORMAT_R32_TYPELESS; // 24비트 깊이와 8비트 스텐실을 위한 포맷
     descDepth.SampleDesc.Count = 1;                   // 멀티샘플링 설정 (1로 단일 샘플)
     descDepth.SampleDesc.Quality = 0;                 // 샘플 퀄리티 설정
     descDepth.Usage = D3D11_USAGE_DEFAULT;            // 텍스처 사용 방식
-    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;   // 깊이 스텐실 뷰로 바인딩 설정
+    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;   // 깊이 스텐실 뷰로 바인딩 설정
     descDepth.CPUAccessFlags = 0;                     // CPU 접근 방식 설정
     descDepth.MiscFlags = 0;                          // 기타 플래그 설정
 
@@ -81,7 +81,7 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
 
     D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
     ZeroMemory(&descDSV, sizeof(descDSV));
-    descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;        // 깊이 스텐실 포맷
+    descDSV.Format = DXGI_FORMAT_D32_FLOAT;        // 깊이 스텐실 포맷
     descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D; // 뷰 타입 설정 (2D 텍스처)
     descDSV.Texture2D.MipSlice = 0;                        // 사용할 미맵 슬라이스 설정
 
@@ -146,6 +146,7 @@ void FGraphicsDevice::CreateRasterizerState()
 {
     D3D11_RASTERIZER_DESC rasterizerdesc = {};
     rasterizerdesc.FillMode = D3D11_FILL_SOLID;
+    rasterizerdesc.ScissorEnable = FALSE;
     rasterizerdesc.CullMode = D3D11_CULL_BACK;
     Device->CreateRasterizerState(&rasterizerdesc, &RasterizerStateSOLID);
 
@@ -332,6 +333,25 @@ void FGraphicsDevice::Prepare(D3D11_VIEWPORT* viewport) const
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);            // 블렌뎅 상태 설정, 기본블렌딩 상태임
 }
 
+void FGraphicsDevice::PrepareForDepthDebug() const
+{
+    // 1) 백버퍼만 초기화 (깊이는 유지)
+    DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
+
+    // 2) DSV 완전 언바인드
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, nullptr);
+
+    // 3) 깊이 테스트·쓰기 모두 비활성화
+    DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
+
+    // 4) 레스터·토폴로지 설정
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    DeviceContext->RSSetState(CurrentRasterizer);
+
+    // 5) 블렌드 기본
+    DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+}
+
 
 void FGraphicsDevice::OnResize(HWND hWindow)
 {
@@ -394,6 +414,57 @@ void FGraphicsDevice::ChangeRasterizer(EViewModeIndex evi)
 void FGraphicsDevice::ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil) const
 {
     DeviceContext->OMSetDepthStencilState(newDetptStencil, 0);
+}
+
+void FGraphicsDevice::PrintCenterDepth()
+{
+    // 1) 원본 깊이 텍스처 정보 조회
+    D3D11_TEXTURE2D_DESC desc = {};
+    DepthStencilBuffer->GetDesc(&desc);
+
+    // 2) CPU 읽기용 스테이징 텍스처 생성 (Typeless 포맷 그대로 사용)
+    D3D11_TEXTURE2D_DESC stagingDesc = desc;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.BindFlags = 0;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingDesc.MiscFlags = 0;
+    ID3D11Texture2D* stagingTex = nullptr;
+    HRESULT hr =  Device->CreateTexture2D(&stagingDesc, nullptr, &stagingTex);
+    if (FAILED(hr) || !stagingTex) {
+        return; // 생성 실패 시 즉시 반환
+    }
+
+    // 3) GPU → CPU 스테이징으로 복사
+    DeviceContext->CopyResource(stagingTex, DepthStencilBuffer);
+
+    // 4) 매핑하여 데이터 접근
+    D3D11_MAPPED_SUBRESOURCE mapped = {};
+    hr = DeviceContext->Map(stagingTex, 0, D3D11_MAP_READ, 0, &mapped);
+    if (FAILED(hr)) {
+        stagingTex->Release();
+        return;
+    }
+
+    // 5) 화면 중앙 픽셀 좌표 계산
+    UINT cx = desc.Width / 2;
+    UINT cy = desc.Height / 2;
+
+    // 6) 매핑된 데이터에서 32비트 값 읽기 (R24G8 typeless → 하위 24비트가 깊이)
+    BYTE* row = reinterpret_cast<BYTE*>(mapped.pData) + mapped.RowPitch * cy;
+    uint32_t raw = *reinterpret_cast<uint32_t*>(row + cx * 4);
+    uint32_t depth24 = raw & 0x00FFFFFF;
+
+    // 7) 24비트 UNORM 깊이를 [0,1] 구간의 float로 변환
+    float depthValue = depth24 / 16777215.0f;
+
+    // 8) 디버그 출력
+    wchar_t buf[128];
+    swprintf_s(buf, L"Center Depth: %f (raw=0x%06X)\n", depthValue, depth24);
+    OutputDebugStringW(buf);
+
+    // 9) 정리
+    DeviceContext->Unmap(stagingTex, 0);
+    stagingTex->Release();
 }
 
 uint32 FGraphicsDevice::GetPixelUUID(POINT pt) const

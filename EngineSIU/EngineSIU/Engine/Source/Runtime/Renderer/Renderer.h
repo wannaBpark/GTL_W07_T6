@@ -24,7 +24,8 @@ class FEditorViewportClient;
 class FStaticMeshRenderPass;
 class FBillboardRenderPass;
 class FGizmoRenderPass;
-class FLightRenderPass;
+class FUpdateLightBufferPass;
+class FDepthBufferDebugPass;
 class FLineRenderPass;
 
 class FRenderer
@@ -45,16 +46,15 @@ public:
 
     // 뷰 모드 변경
     void ChangeViewMode(EViewModeIndex evi) const;
-
     //==========================================================================
     // 버퍼 생성/해제 함수 (템플릿 포함)
     //==========================================================================
 public:
     template<typename T>
     ID3D11Buffer* CreateImmutableVertexBuffer(const FString& key, const TArray<T>& Vertices);
-   
+
     ID3D11Buffer* CreateImmutableIndexBuffer(const FString& key, const TArray<uint32>& indices);
-    
+
     // 상수 버퍼 생성/해제
     void CreateConstantBuffers();
     void ReleaseConstantBuffer();
@@ -67,10 +67,10 @@ public:
     FStaticMeshRenderPass* StaticMeshRenderPass = nullptr;
     FBillboardRenderPass* BillboardRenderPass = nullptr;
     FGizmoRenderPass* GizmoRenderPass = nullptr;
-    FLightRenderPass* LightRenderPass = nullptr;
+    FUpdateLightBufferPass* UpdateLightBufferPass = nullptr;
     FLineRenderPass* LineRenderPass = nullptr;
+    FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
 
-  
 };
 
 template<typename T>

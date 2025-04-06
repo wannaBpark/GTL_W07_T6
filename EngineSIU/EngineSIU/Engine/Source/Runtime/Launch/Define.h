@@ -278,20 +278,20 @@ struct FLight
     // 색상 데이터 (float3와 패딩)
     FVector AmbientColor;
     float pad0;
-    FVector DiffuseColor;    
+    FVector DiffuseColor;
     float pad1;
-    FVector SpecularColor;   
+    FVector SpecularColor;
     float pad2;
 
-    FVector Position;        
+    FVector Position;
     float Falloff;
 
-    FVector Direction;      
+    FVector Direction;
     float pad3;
 
-    FVector Attenuation;    
+    FVector Attenuation;
     float pad4;
-    
+
     int Enabled = 0;
     int Type = 1;
 
@@ -384,4 +384,12 @@ struct FBufferInfo
 {
     FVertexInfo VertexInfo;
     FIndexInfo IndexInfo;
+};
+
+struct FScreenConstants
+{
+    FVector2D ScreenSize;   // 화면 전체 크기 (w, h)
+    FVector2D UVOffset;     // 뷰포트 시작 UV (x/sw, y/sh)
+    FVector2D UVScale;      // 뷰포트 크기 비율 (w/sw, h/sh)
+    FVector2D Padding;      // 정렬용 (사용 안 해도 무방)
 };

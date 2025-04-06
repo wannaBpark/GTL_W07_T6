@@ -49,6 +49,9 @@ public:
     void UpdateConstantBuffer(const FString& key, const T& data) const;
 
     template<typename T>
+    void UpdateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices) const;
+
+    template<typename T>
     static void SafeRelease(T*& comObject);
 
     FVertexInfo GetVertexBuffer(const FString& InName)const;
@@ -164,7 +167,7 @@ inline HRESULT FDXDBufferManager::CreateDynamicVertexBuffer(const FString& KeyNa
     if (FAILED(hr))
         return hr;
 
-    OutVertexInfo.NumVertices = static_cast<uint32>(vertices.size());
+    OutVertexInfo.NumVertices = static_cast<uint32>(vertices.Num());
     OutVertexInfo.VertexBuffer = NewVertexBuffer;
 
     VertexBufferPool[KeyName] = OutVertexInfo;
@@ -221,6 +224,33 @@ void FDXDBufferManager::UpdateConstantBuffer(const FString& key, const T& data) 
 
     memcpy(mappedResource.pData, &data, sizeof(T));
     DXDeviceContext->Unmap(buffer, 0);
+}
+template<typename T>
+void FDXDBufferManager::UpdateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices) const
+{
+    // 1) 풀에서 버퍼 정보 조회
+    FVertexInfo vbInfo;
+    if (!VertexBufferPool.Contains(KeyName))
+    {
+        UE_LOG(LogLevel::Error, "UpdateDynamicVertexBuffer 호출: 키 %s에 해당하는 버텍스 버퍼가 없습니다.", *KeyName);
+        return;
+    }
+    vbInfo = VertexBufferPool[KeyName];
+
+    // 2) 맵핑
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    HRESULT hr = DXDeviceContext->Map(vbInfo.VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    if (FAILED(hr))
+    {
+        UE_LOG(LogLevel::Error, "VertexBuffer Map 실패, HRESULT: 0x%X", hr);
+        return;
+    }
+
+    // 3) 데이터 복사
+    memcpy(mapped.pData, vertices.GetData(), sizeof(T) * vertices.Num());
+
+    // 4) 언맵
+    DXDeviceContext->Unmap(vbInfo.VertexBuffer, 0);
 }
 
 template<typename T>
