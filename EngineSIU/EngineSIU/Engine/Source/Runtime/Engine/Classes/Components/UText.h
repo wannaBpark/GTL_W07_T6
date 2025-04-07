@@ -1,4 +1,8 @@
 #pragma once
+
+#define _TCHAR_DEFINED
+#include <wrl.h>
+
 #include "UBillboardComponent.h"
 
 class UText : public UBillboardComponent
@@ -7,7 +11,8 @@ class UText : public UBillboardComponent
 
 public:
     UText();
-    virtual ~UText() override;
+
+    virtual UObject* Duplicate() override;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
@@ -17,7 +22,7 @@ public:
     void SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn);
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
 
-    ID3D11Buffer* vertexTextBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexTextBuffer;
     TArray<FVertexTexture> vertexTextureArr;
     UINT numTextVertices;
 protected:
@@ -25,7 +30,7 @@ protected:
 
     TArray<FVector> quad;
 
-    const int quadSize = 2;
+    int quadSize = 2;
 
     int RowCount;
     int ColumnCount;

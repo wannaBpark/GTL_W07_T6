@@ -1,5 +1,16 @@
 #include "PrimitiveComponent.h"
 
+#include "UObject/Casts.h"
+
+
+UObject* UPrimitiveComponent::Duplicate()
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    NewComponent->AABB = AABB;
+
+    return NewComponent;
+}
 
 void UPrimitiveComponent::InitializeComponent()
 {

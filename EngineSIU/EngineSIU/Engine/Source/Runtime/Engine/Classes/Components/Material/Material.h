@@ -7,6 +7,9 @@ class UMaterial : public UObject {
 
 public:
     UMaterial() = default;
+
+    virtual UObject* Duplicate() override;
+
     FObjMaterialInfo& GetMaterialInfo() { return materialInfo; }
     void SetMaterialInfo(const FObjMaterialInfo& value) { materialInfo = value; }
 

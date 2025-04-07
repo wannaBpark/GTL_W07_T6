@@ -1,5 +1,4 @@
 #pragma once
-
 #include "EngineLoop.h"
 #include "NameTypes.h"
 
@@ -37,6 +36,8 @@ private:
 public:
     UObject();
     virtual ~UObject() = default;
+
+    virtual UObject* Duplicate();
 
     UWorld* GetWorld() const;
 
