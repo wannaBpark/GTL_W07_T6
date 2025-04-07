@@ -1,6 +1,8 @@
 #pragma once
 #include <concepts>
 #include "Object.h"
+#include "Property.h"
+
 
 /**
  * UObject의 RTTI를 가지고 있는 클래스
@@ -57,10 +59,20 @@ public:
         return static_cast<T*>(Ret);
     }
 
-    ClassConstructorType ClassCTOR;
+    const TArray<FProperty>& GetProperties() const { return Properties; }
+
+    /**
+     * UClass에 Property를 추가합니다
+     * @param Prop 추가할 Property
+     */
+    void RegisterProperty(const FProperty& Prop);
 
 protected:
     virtual UObject* CreateDefaultObject();
+
+
+public:
+    ClassConstructorType ClassCTOR;
 
 private:
     uint32 ClassSize;
@@ -68,4 +80,6 @@ private:
 
     UClass* SuperClass = nullptr;
     UObject* ClassDefaultObject = nullptr;
+
+    TArray<FProperty> Properties;
 };

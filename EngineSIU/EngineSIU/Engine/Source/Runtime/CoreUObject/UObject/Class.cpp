@@ -45,6 +45,11 @@ UObject* UClass::GetDefaultObject() const
     return ClassDefaultObject;
 }
 
+void UClass::RegisterProperty(const FProperty& Prop)
+{
+    Properties.Add(Prop);
+}
+
 UObject* UClass::CreateDefaultObject()
 {
     if (!ClassDefaultObject)

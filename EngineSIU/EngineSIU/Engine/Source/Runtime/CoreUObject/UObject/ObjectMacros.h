@@ -54,14 +54,27 @@ public: \
     }
 
 
-// #define PROPERTY(Type, VarName, DefaultValue) \
-// private: \
-//     Type VarName DefaultValue; \
-// public: \
-//     Type Get##VarName() const { return VarName; } \
-//     void Set##VarName(const Type& New##VarName) { VarName = New##VarName; }
-
-// Getter & Setter 생성
-#define PROPERTY(type, name) \
-    void Set##name(const type& value) { name = value; } \
-    type Get##name() const { return name; }
+/**
+ * UClass에 Property를 등록합니다.
+ * @param Type 선언할 타입
+ * @param VarName 변수 이름
+ * @param DefaultExpr 기본값
+ *
+ * Example Code
+ * ```
+ * UPROPERTY
+ * (int, Value, = 10)
+ * ```
+ */
+#define UPROPERTY(Type, VarName, DefaultExpr) \
+    Type VarName DefaultExpr; \
+    inline static struct VarName##_PropRegistrar \
+    { \
+        VarName##_PropRegistrar() \
+        { \
+            constexpr size_t Offset = offsetof(ThisClass, VarName); \
+            ThisClass::StaticClass()->RegisterProperty( \
+                { #VarName, sizeof(Type), Offset } \
+            ); \
+        } \
+    } VarName##_PropRegistrar_{};
