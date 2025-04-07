@@ -1001,22 +1001,22 @@ void FRenderer::RenderBillboards(const UWorld* World, const std::shared_ptr<FEdi
         if (UParticleSubUVComp* SubUVParticle = Cast<UParticleSubUVComp>(BillboardComp))
         {
             RenderTexturePrimitive(
-                SubUVParticle->vertexSubUVBuffer, SubUVParticle->numTextVertices,
-                SubUVParticle->indexTextureBuffer, SubUVParticle->numIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState
+                SubUVParticle->vertexSubUVBuffer.Get(), SubUVParticle->numTextVertices,
+                SubUVParticle->indexTextureBuffer.Get(), SubUVParticle->numIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState
             );
         }
         else if (UText* Text = Cast<UText>(BillboardComp))
         {
             FEngineLoop::renderer.RenderTextPrimitive(
-                Text->vertexTextBuffer, Text->numTextVertices,
+                Text->vertexTextBuffer.Get(), Text->numTextVertices,
                 Text->Texture->TextureSRV, Text->Texture->SamplerState
             );
         }
         else
         {
             RenderTexturePrimitive(
-                BillboardComp->vertexTextureBuffer, BillboardComp->numVertices,
-                BillboardComp->indexTextureBuffer, BillboardComp->numIndices, BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState
+                BillboardComp->vertexTextureBuffer.Get(), BillboardComp->numVertices,
+                BillboardComp->indexTextureBuffer.Get(), BillboardComp->numIndices, BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState
             );
         }
     }

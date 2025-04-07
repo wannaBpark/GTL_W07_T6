@@ -1,5 +1,8 @@
 #pragma once
+
+#define _TCHAR_DEFINED
 #include <wrl.h>
+
 #include "PrimitiveComponent.h"
 #include "UTexture.h"
 

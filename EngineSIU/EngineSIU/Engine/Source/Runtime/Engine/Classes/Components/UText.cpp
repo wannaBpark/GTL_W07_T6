@@ -4,19 +4,29 @@
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "UObject/Casts.h"
 
 UText::UText()
 {
     SetType(StaticClass()->GetName());
 }
 
-UText::~UText()
+UObject* UText::Duplicate()
 {
-	if (vertexTextBuffer)
-	{
-		vertexTextBuffer->Release();
-		vertexTextBuffer = nullptr;
-	}
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    NewComponent->vertexTextBuffer = vertexTextBuffer;
+    NewComponent->vertexTextureArr = vertexTextureArr;
+    NewComponent->numTextVertices = numTextVertices;
+    NewComponent->text = text;
+    NewComponent->quad = quad;
+    NewComponent->quadSize = quadSize;
+    NewComponent->RowCount = RowCount;
+    NewComponent->ColumnCount = ColumnCount;
+    NewComponent->quadWidth = quadWidth;
+    NewComponent->quadHeight = quadHeight;
+
+    return NewComponent;
 }
 
 void UText::InitializeComponent()
@@ -274,7 +284,7 @@ void UText::TextMVPRendering()
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-        FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer, numTextVertices,
+        FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer.Get(), numTextVertices,
             Texture->TextureSRV, Texture->SamplerState);
     }
     //Super::Render();

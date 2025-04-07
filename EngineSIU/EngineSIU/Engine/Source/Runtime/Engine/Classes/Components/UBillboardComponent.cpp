@@ -22,6 +22,7 @@ UObject* UBillboardComponent::Duplicate()
     NewComponent->vertexTextureBuffer = vertexTextureBuffer;
     NewComponent->indexTextureBuffer = indexTextureBuffer;
     NewComponent->numVertices = numVertices;
+    NewComponent->numIndices = numIndices;
     NewComponent->finalIndexU = finalIndexU;
     NewComponent->finalIndexV = finalIndexV;
     NewComponent->Texture = Texture;
