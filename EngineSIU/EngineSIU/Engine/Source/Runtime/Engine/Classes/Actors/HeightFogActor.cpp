@@ -5,4 +5,6 @@
 AHeightFogActor::AHeightFogActor()
 {
     HeightFogComponent = AddComponent<UHeightFogComponent>();
+
+    
 }

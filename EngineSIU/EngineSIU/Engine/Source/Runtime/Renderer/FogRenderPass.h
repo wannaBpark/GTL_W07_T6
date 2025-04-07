@@ -30,7 +30,7 @@ public:
 
     void PrepareRenderState(ID3D11ShaderResourceView* DepthSRV);
     // Fog를 화면에 렌더링
-    void RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, AActor* Fog);
+    void RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, UHeightFogComponent* Fog);
 
     void UpdateSceneSRV();
 

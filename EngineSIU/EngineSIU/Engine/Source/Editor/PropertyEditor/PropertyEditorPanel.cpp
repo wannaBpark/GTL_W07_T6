@@ -249,7 +249,7 @@ void PropertyEditorPanel::Render()
             }
 
             float FogDensity = FogComponent->GetFogDensity();
-            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 0.10f))
+            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 0.2f))
             {
                 FogComponent->SetFogDensity(FogDensity);
             }

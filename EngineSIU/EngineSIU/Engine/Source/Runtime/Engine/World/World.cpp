@@ -24,12 +24,6 @@ void UWorld::InitializeNewWorld()
 
     // TODO: BaseObject 제거 필요.
     CreateBaseObject();
-
-    if (FogActor == nullptr)
-    {
-        FogActor = SpawnActor<AHeightFogActor>();
-
-    }
 }
 
 void UWorld::CreateBaseObject()

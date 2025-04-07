@@ -141,7 +141,7 @@ void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
 
-void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, AActor* Fog)
+void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, UHeightFogComponent* Fog)
 {
     D3D11_VIEWPORT vp = ActiveViewport->GetD3DViewport();
     UpdateSceneSRV();
@@ -150,7 +150,7 @@ void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& Act
 
     PrepareRenderState(DepthSRV);
 
-    UpdateFogConstant(ActiveViewport, Cast<UHeightFogComponent>(Fog->GetRootComponent()));
+    UpdateFogConstant(ActiveViewport, Fog);
 
     UINT stride = sizeof(Vertex), offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &SpriteVertexBuffer, &stride, &offset);

@@ -12,6 +12,7 @@ enum OBJECTS : uint8
     OBJ_TRIANGLE,
     OBJ_CAMERA,
     OBJ_PLAYER,
+    OBJ_Fog,
     OBJ_END
 };
 

@@ -36,7 +36,6 @@ struct PS_INPUT
 float4 mainPS(PS_INPUT input) : SV_Target
 {
     float2 UV = input.UV * UVScale + UVOffset;
-    //return float4(input.UV, 0, 1);
     
     //픽셀 월드 위치 계산
     float depth = SceneDepth.Sample(Sampler, UV).r;

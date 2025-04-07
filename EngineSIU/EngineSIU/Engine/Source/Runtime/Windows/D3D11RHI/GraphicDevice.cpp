@@ -231,7 +231,7 @@ void FGraphicsDevice::CreateFrameBuffer()
 
     Device->CreateRenderTargetView(SceneColorBuffer, &SceneColorRTVDesc, &SceneColorRTV);
 
-    RTVs[0] = SceneColorRTV;
+    RTVs[0] = FrameBufferRTV;
     RTVs[1] = UUIDFrameBufferRTV;
 }
 

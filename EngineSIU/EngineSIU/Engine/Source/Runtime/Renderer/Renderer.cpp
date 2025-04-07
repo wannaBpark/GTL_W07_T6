@@ -12,6 +12,9 @@
 #include "LineRenderPass.h"
 #include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
+#include <UObject/UObjectIterator.h>
+#include <UObject/Casts.h>
+#include "GameFrameWork/Actor.h"
 
 //------------------------------------------------------------------------------
 // 초기화 및 해제 관련 함수
@@ -126,8 +129,26 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
     ChangeViewMode(ActiveViewport->GetViewMode());
+    bool bIsFog = false;
+    UHeightFogComponent* Fog = nullptr;
+    for (UHeightFogComponent* iter : TObjectRange<UHeightFogComponent>())
+    {
+        if(iter)
+        {
+            UWorld* FogWorld = iter->GetOwner()->GetWorld();
+            if (FogWorld == World && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
+            {
+                Fog = iter;
+                bIsFog = true;
+                break;
+            }
+        }
+    }
 
-    Graphics->PrepareTexture();
+    if (bIsFog) 
+    {
+        Graphics->PrepareTexture();
+    }
 
     StaticMeshRenderPass->Render(World, ActiveViewport);
     LineRenderPass->Render(World, ActiveViewport);
@@ -137,11 +158,11 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     if (IsSceneDepth)
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
 
-    if (!IsSceneDepth) 
+    if (!IsSceneDepth && bIsFog) 
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
         
-        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), World->GetFogActor());
+        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fog);
     }
 
     GizmoRenderPass->Render(World, ActiveViewport);
