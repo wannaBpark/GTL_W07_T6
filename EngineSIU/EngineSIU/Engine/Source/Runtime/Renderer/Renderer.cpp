@@ -120,14 +120,15 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
-
     StaticMeshRenderPass->Render(World, ActiveViewport);
     LineRenderPass->Render(World, ActiveViewport);
     UpdateLightBufferPass->Render(World, ActiveViewport);
-    BillboardRenderPass->Render(World, ActiveViewport);
+    BillboardRenderPass->Render(ActiveViewport);
 
-    if (IsSceneDepth)
+    if (IsSceneDepth) 
+    {
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+    }
 
     GizmoRenderPass->Render(World, ActiveViewport);
 

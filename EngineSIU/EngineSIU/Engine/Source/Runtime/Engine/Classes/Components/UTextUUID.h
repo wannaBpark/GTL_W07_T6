@@ -1,5 +1,5 @@
 #pragma once
-#include "UText.h"
+#include "UTextComponent.h"
 
 class UTextUUID : public UText
 {

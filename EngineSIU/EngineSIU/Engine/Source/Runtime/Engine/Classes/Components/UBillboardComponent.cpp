@@ -1,27 +1,21 @@
 #include "UBillboardComponent.h"
 #include <DirectXMath.h>
 #include "Define.h"
-#include "QuadTexture.h"
 #include "World/World.h"
 #include "Actors/Player.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "EngineLoop.h"
 
-TArray<uint32> QuadTextureInices =
-{
-    0,1,2,
-    1,3,2
+// 정적 상수: 기본 빌보드 쿼드 데이터
+static const TArray<uint32> QuadTextureIndices = { 0, 1, 2, 1, 3, 2 };
+static const TArray<FVertexTexture> QuadTextureVertices = {
+    { -1.0f,  1.0f, 0.0f, 0.0f, 0.0f },
+    {  1.0f,  1.0f, 0.0f, 1.0f, 0.0f },
+    { -1.0f, -1.0f, 0.0f, 0.0f, 1.0f },
+    {  1.0f, -1.0f, 0.0f, 1.0f, 1.0f }
 };
-
-TArray<FVertexTexture> QuadTextureVertices =
-{
-    {-1.0f,1.0f,0.0f,0.0f,0.0f},
-    { 1.0f,1.0f,0.0f,1.0f,0.0f},
-    {-1.0f,-1.0f,0.0f,0.0f,1.0f},
-    { 1.0f,-1.0f,0.0f,1.0f,1.0f}
-};
-
 
 UBillboardComponent::UBillboardComponent()
 {
@@ -30,159 +24,130 @@ UBillboardComponent::UBillboardComponent()
 
 UObject* UBillboardComponent::Duplicate()
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
-
-    // TODO: 나중에 Buffer 다른데로 옮기기
-    NewComponent->vertexTextureBuffer = vertexTextureBuffer;
-    NewComponent->indexTextureBuffer = indexTextureBuffer;
-    NewComponent->numVertices = numVertices;
-    NewComponent->numIndices = numIndices;
-    NewComponent->finalIndexU = finalIndexU;
-    NewComponent->finalIndexV = finalIndexV;
-    NewComponent->Texture = Texture;
-
+    // GPU 버퍼는 공유하지 않고, 상태 값만 복사하여 새로 초기화하도록 함
+    UBillboardComponent* NewComponent = Cast<UBillboardComponent>(Super::Duplicate());
+    if (NewComponent)
+    {
+        NewComponent->finalIndexU = finalIndexU;
+        NewComponent->finalIndexV = finalIndexV;
+        NewComponent->Texture = Texture;
+        NewComponent->BufferKey = BufferKey;
+        NewComponent->m_parent = m_parent;
+    }
     return NewComponent;
 }
 
 void UBillboardComponent::InitializeComponent()
 {
     Super::InitializeComponent();
-	CreateQuadTextureVertexBuffer();
+    CreateQuadTextureVertexBuffer();
 }
-
-
 
 void UBillboardComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
+    // 빌보드는 별도의 애니메이션이 없으면 Tick에서 특별한 처리가 없도록 함
 }
-
+FString UBillboardComponent::GetBufferKey()
+{
+    return BufferKey;
+}
 
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-    TArray<FVector> quad;
-    for (auto& quadTextureVertice : QuadTextureVertices)
+    // 기본 빌보드 쿼드 정점을 월드 좌표로 변환하여 픽킹 판별
+    TArray<FVector> quadWorld;
+    for (const FVertexTexture& vt : QuadTextureVertices)
     {
-        quad.Emplace(quadTextureVertice.x, quadTextureVertice.y, quadTextureVertice.z);
-	}
-	return CheckPickingOnNDC(quad,pfNearHitDistance);
+        quadWorld.Add(FVector(vt.x, vt.y, vt.z));
+    }
+    return CheckPickingOnNDC(quadWorld, pfNearHitDistance) ? 1 : 0;
 }
-
 
 void UBillboardComponent::SetTexture(const FWString& _fileName)
 {
-	Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+    Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+    std::string str(_fileName.begin(), _fileName.end());
+    BufferKey = FString(str);
 }
 
 void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
 {
-	m_parent = _parent;
+    m_parent = _parent;
 }
 
-
-FMatrix UBillboardComponent::CreateBillboardMatrix()
+FMatrix UBillboardComponent::CreateBillboardMatrix() const
 {
-	FMatrix CameraView = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    // 카메라 뷰 행렬을 가져와서 위치 정보를 제거한 후 전치하여 LookAt 행렬 생성
+    FMatrix CameraView = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    CameraView.M[0][3] = CameraView.M[1][3] = CameraView.M[2][3] = 0.0f;
+    CameraView.M[3][0] = CameraView.M[3][1] = CameraView.M[3][2] = 0.0f;
+    CameraView.M[3][3] = 1.0f;
+    CameraView.M[0][2] = -CameraView.M[0][2];
+    CameraView.M[1][2] = -CameraView.M[1][2];
+    CameraView.M[2][2] = -CameraView.M[2][2];
+    FMatrix LookAtCamera = FMatrix::Transpose(CameraView);
 
-	CameraView.M[0][3] = 0.0f;
-	CameraView.M[1][3] = 0.0f;
-	CameraView.M[2][3] = 0.0f;
-
-
-	CameraView.M[3][0] = 0.0f;
-	CameraView.M[3][1] = 0.0f;
-	CameraView.M[3][2] = 0.0f;
-	CameraView.M[3][3] = 1.0f;
-
-
-	CameraView.M[0][2] = -CameraView.M[0][2];
-	CameraView.M[1][2] = -CameraView.M[1][2];
-	CameraView.M[2][2] = -CameraView.M[2][2];
-	FMatrix LookAtCamera = FMatrix::Transpose(CameraView);
-	
-	FVector worldLocation = RelativeLocation;
-	if (m_parent) worldLocation = RelativeLocation + m_parent->GetWorldLocation();
-	FVector worldScale = RelativeScale3D;
-	FMatrix S = FMatrix::CreateScale(worldScale.X, worldScale.Y, worldScale.Z);
-	FMatrix R = LookAtCamera;
-	FMatrix T = FMatrix::CreateTranslationMatrix(worldLocation);
-	FMatrix M = S * R * T;
-
-	return M;
+    FVector worldLocation = RelativeLocation;
+    if (m_parent)
+        worldLocation += m_parent->GetWorldLocation();
+    FVector worldScale = RelativeScale3D;
+    FMatrix S = FMatrix::CreateScale(worldScale.X, worldScale.Y, worldScale.Z);
+    FMatrix T = FMatrix::CreateTranslationMatrix(worldLocation);
+    // 최종 빌보드 행렬 = Scale * Rotation(LookAt) * Translation
+    return S * LookAtCamera * T;
 }
 
 void UBillboardComponent::CreateQuadTextureVertexBuffer()
 {
-	vertexTextureBuffer = FEngineLoop::renderer.CreateImmutableVertexBuffer(TEXT("UBillboardComponent"), QuadTextureVertices);
-	indexTextureBuffer = FEngineLoop::renderer.CreateImmutableIndexBuffer(TEXT("UBillboardComponent"), QuadTextureInices);
-
-	if (!vertexTextureBuffer) {
-		Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
-	}
-	if (!indexTextureBuffer) {
-        Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
-	}
+    FEngineLoop::renderer.CreateImmutableVertexBuffer(BufferKey, QuadTextureVertices);
+    FEngineLoop::renderer.CreateImmutableIndexBuffer(BufferKey, QuadTextureIndices);
 }
 
-bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, float& hitDistance)
+bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& quadVertices, float& hitDistance) const
 {
-	bool result = false;
-	POINT mousePos;
-	GetCursorPos(&mousePos);
-	ScreenToClient(GEngineLoop.hWnd, &mousePos);
+    // 마우스 위치를 클라이언트 좌표로 가져온 후 NDC 좌표로 변환
+    POINT mousePos;
+    GetCursorPos(&mousePos);
+    ScreenToClient(GEngineLoop.hWnd, &mousePos);
 
-	D3D11_VIEWPORT viewport;
-	UINT numViewports = 1;
-	FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
-	float screenWidth = viewport.Width;
-	float screenHeight = viewport.Height;
+    D3D11_VIEWPORT viewport;
+    UINT numViewports = 1;
+    FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 
-	FVector pickPosition;
-	int screenX = mousePos.x;
-	int screenY = mousePos.y;
-    FMatrix projectionMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-	pickPosition.X = ((2.0f * screenX / viewport.Width) - 1);
-	pickPosition.Y = -((2.0f * screenY / viewport.Height) - 1);
-	pickPosition.Z = 1.0f; // Near Plane
+    // NDC 좌표 계산: X, Y는 [-1,1] 범위로 매핑
+    float ndcX = (2.0f * mousePos.x / viewport.Width) - 1.0f;
+    float ndcY = -((2.0f * mousePos.y / viewport.Height) - 1.0f);
 
-	FMatrix M = CreateBillboardMatrix();
+    // MVP 행렬 계산
+    FMatrix M = CreateBillboardMatrix();
     FMatrix V = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
-	FMatrix P = projectionMatrix;
-	FMatrix MVP = M * V * P;
+    FMatrix P = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix MVP = M * V * P;
 
-	float minX = FLT_MAX;
-	float maxX = FLT_MIN;
-	float minY = FLT_MAX;
-	float maxY = FLT_MIN;
-	float avgZ = 0.0f;
-	for (int i = 0; i < checkQuad.Num(); i++)
-	{
-		FVector4 v = FVector4(checkQuad[i].X, checkQuad[i].Y, checkQuad[i].Z, 1.0f);
-		FVector4 clipPos = FMatrix::TransformVector(v, MVP);
-		
-		if (clipPos.W != 0)	clipPos = clipPos/clipPos.W;
+    // quadVertices를 MVP로 변환하여 NDC 공간에서의 최소/최대값 구하기
+    float minX = FLT_MAX, maxX = -FLT_MAX;
+    float minY = FLT_MAX, maxY = -FLT_MAX;
+    float avgZ = 0.0f;
+    for (const FVector& v : quadVertices)
+    {
+        FVector4 clipPos = FMatrix::TransformVector(FVector4(v, 1.0f), MVP);
+        if (clipPos.W != 0.0f)
+            clipPos = clipPos / clipPos.W;
+        minX = FMath::Min(minX, clipPos.X);
+        maxX = FMath::Max(maxX, clipPos.X);
+        minY = FMath::Min(minY, clipPos.Y);
+        maxY = FMath::Max(maxY, clipPos.Y);
+        avgZ += clipPos.Z;
+    }
+    avgZ /= quadVertices.Num();
 
-		minX = FMath::Min(minX, clipPos.X);
-		maxX = FMath::Max(maxX, clipPos.X);
-		minY = FMath::Min(minY, clipPos.Y);
-		maxY = FMath::Max(maxY, clipPos.Y);
-		avgZ += clipPos.Z;
-	}
-
-	avgZ /= checkQuad.Num();
-
-	if (pickPosition.X >= minX && pickPosition.X <= maxX &&
-		pickPosition.Y >= minY && pickPosition.Y <= maxY)
-	{
-		float A = P.M[2][2];  // Projection Matrix의 A값 (Z 변환 계수)
-		float B = P.M[3][2];  // Projection Matrix의 B값 (Z 변환 계수)
-
-		float z_view_pick = (pickPosition.Z - B) / A; // 마우스 클릭 View 공간 Z
-		float z_view_billboard = (avgZ - B) / A; // Billboard View 공간 Z
-
-		hitDistance = 1000.0f;
-		result = true;
-	}
-
-	return result;
+    // 마우스 NDC 좌표가 quad의 NDC 경계 사각형 내에 있는지 검사
+    if (ndcX >= minX && ndcX <= maxX && ndcY >= minY && ndcY <= maxY)
+    {
+        // 임의로 hitDistance 설정 (필요 시 실제 깊이 계산)
+        hitDistance = 1000.0f;
+        return true;
+    }
+    return false;
 }

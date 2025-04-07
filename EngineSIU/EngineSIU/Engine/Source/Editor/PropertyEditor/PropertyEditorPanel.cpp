@@ -6,7 +6,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/UText.h"
+#include "Components/UTextComponent.h"
 #include "Engine/EditorEngine.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Math/MathUtility.h"

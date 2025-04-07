@@ -1,4 +1,4 @@
-#include "UText.h"
+#include "UTextComponent.h"
 
 #include "World/World.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
