@@ -54,6 +54,7 @@ public:
     void Prepare(D3D11_VIEWPORT* viewport) const;
     void PrepareUI() const;
     void PrepareFog() const;
+    void PrepareTexture() const;
     void OnResize(HWND hWindow);
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }
     void ChangeRasterizer(EViewModeIndex evi);

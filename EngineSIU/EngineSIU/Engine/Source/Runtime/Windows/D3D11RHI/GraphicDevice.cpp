@@ -373,6 +373,10 @@ void FGraphicsDevice::PrepareFog() const
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
 }
 
+void FGraphicsDevice::PrepareTexture() const
+{
+    DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView);
+}
 
 void FGraphicsDevice::OnResize(HWND hWindow)
 {

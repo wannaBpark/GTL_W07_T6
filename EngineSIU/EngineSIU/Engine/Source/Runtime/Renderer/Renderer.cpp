@@ -127,6 +127,7 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
+    Graphics->PrepareTexture();
 
     StaticMeshRenderPass->Render(World, ActiveViewport);
     LineRenderPass->Render(World, ActiveViewport);
