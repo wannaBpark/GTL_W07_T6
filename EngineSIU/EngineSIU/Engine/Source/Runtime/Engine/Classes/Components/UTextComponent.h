@@ -5,42 +5,51 @@
 
 #include "UBillboardComponent.h"
 
-class UText : public UBillboardComponent
+class UTextComponent : public UBillboardComponent
 {
-    DECLARE_CLASS(UText, UBillboardComponent)
+    DECLARE_CLASS(UTextComponent, UBillboardComponent)
 
 public:
-    UText();
+    UTextComponent();
 
     virtual UObject* Duplicate() override;
 
     virtual void InitializeComponent() override;
+    
     virtual void TickComponent(float DeltaTime) override;
+    
     void ClearText();
-    void SetText(const FWString& _text);
-    FWString GetText() { return text; }
-    void SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn);
+    
+    void SetText(const FWString& text);
+    
+    FString GetBufferKey() { return TextAtlasBufferKey; }
+    
+    FWString GetText() { return Text; }
+    
+    void SetRowColumnCount(int cellsPerRow, int cellsPerColumn);
+
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexTextBuffer;
-    TArray<FVertexTexture> vertexTextureArr;
-    UINT numTextVertices;
+private:
+    void SetStartUV(char alphabet, float& outStartU, float& outStartV);
+    void SetStartUV(wchar_t hangul, float& outStartU, float& outStartV);
+    void CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex);
+
 protected:
-    FWString text;
 
-    TArray<FVector> quad;
+    FWString Text;
 
-    int quadSize = 2;
+    TArray<FVector> Quad;
+
+    TArray<FVertexTexture> vertexTextureArr;
+
+    int QuadSize = 2;
 
     int RowCount;
     int ColumnCount;
 
-    float quadWidth = 2.0f;
-    float quadHeight = 2.0f;
-
-    void setStartUV(char alphabet, float& outStartU, float& outStartV);
-    void setStartUV(wchar_t hangul, float& outStartU, float& outStartV);
-    void CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex, UINT byteWidth);
-
-    void TextMVPRendering();
+    float QuadWidth = 2.0f;
+    float QuadHeight = 2.0f;
+private:
+    FString TextAtlasBufferKey;
 };

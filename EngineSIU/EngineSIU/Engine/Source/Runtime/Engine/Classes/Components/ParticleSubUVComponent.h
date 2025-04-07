@@ -4,12 +4,12 @@
 #include "UBillboardComponent.h"
 
 // ParticleSubUVComponent: 서브UV 파티클 컴포넌트 (Billboard 컴포넌트를 상속)
-class ParticleSubUVComponent : public UBillboardComponent
+class UParticleSubUVComponent : public UBillboardComponent
 {
-    DECLARE_CLASS(ParticleSubUVComponent, UBillboardComponent)
+    DECLARE_CLASS(UParticleSubUVComponent, UBillboardComponent)
 
 public:
-    ParticleSubUVComponent();
+    UParticleSubUVComponent();
 
     virtual UObject* Duplicate() override;
     virtual void InitializeComponent() override;

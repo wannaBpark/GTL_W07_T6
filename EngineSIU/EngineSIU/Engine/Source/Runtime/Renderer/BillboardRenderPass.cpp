@@ -150,16 +150,16 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
         
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
 
-        if (ParticleSubUVComponent* SubUVParticle = Cast<ParticleSubUVComponent>(BillboardComp))
+        if (UParticleSubUVComponent* SubUVParticle = Cast<UParticleSubUVComponent>(BillboardComp))
         {
             FVertexInfo VertexInfo =  BufferManager->GetVertexBuffer(SubUVParticle->GetBufferKey());
             FIndexInfo IndexInfo =  BufferManager->GetIndexBuffer(SubUVParticle->GetBufferKey());
             RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer, IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
         }
-        else if (UText* Text = Cast<UText>(BillboardComp))
+        else if (UTextComponent* TextComp = Cast<UTextComponent>(BillboardComp))
         {
-            RenderTextPrimitive(Text->vertexTextBuffer.Get(), Text->numTextVertices,
-                Text->Texture->TextureSRV, Text->Texture->SamplerState);
+            FVertexInfo VertexInfo = BufferManager->GetVertexBuffer(TextComp->GetBufferKey());
+            RenderTextPrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
         }
         else
         {

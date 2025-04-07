@@ -35,14 +35,7 @@ public:
         D3D11_USAGE usage, UINT cpuAccessFlags);
 
     HRESULT CreateIndexBuffer(const FString& KeyName, const TArray<uint32>& indices, FIndexInfo& OutIndexInfo);
-
-    HRESULT CreateTextureVertexBuffer(const FWString& KeyName, const TArray<FVertexTexture>& vertices, FVertexInfo& OutVertexInfo);
-    HRESULT CreateTextureIndexBuffer(const FWString& KeyName, const TArray<uint32>& indices, FIndexInfo& OutIndexInfo);
-
-    void GetStartUV(wchar_t ch, float& outStartU, float& outStartV, int ColumnCount);
-
-    HRESULT CreateASCIITextBuffer(const FWString& Text, FTexture& Texture, uint16_t RowCount, uint16_t ColumnCount, int quadWidth, FBufferInfo& OutBufferInfo, float WidthOffset, float HeightOffset);
-
+    
     void ReleaseBuffers();
     void ReleaseConstantBuffer();
 
@@ -63,8 +56,6 @@ public:
 
     FVertexInfo GetVertexBuffer(const FString& InName) const;
     FIndexInfo GetIndexBuffer(const FString& InName) const;
-    FVertexInfo GetTextVertexBuffer(const FWString& InName) const;
-    FVertexInfo GetTextureIndexBuffer(const FWString& InName) const;
     ID3D11Buffer* GetConstantBuffer(const FString& InName) const;
 
 private:
@@ -77,7 +68,6 @@ private:
 
     TMap<FString, FVertexInfo> VertexBufferPool;
     TMap<FString, FIndexInfo> IndexBufferPool;
-    TMap<FWString, FBufferInfo> TextAtlasBufferPool;
     TMap<FString, ID3D11Buffer*> ConstantBufferPool;
 };
 

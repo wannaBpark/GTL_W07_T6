@@ -4,16 +4,16 @@
 #include "D3D11RHI/DXDBufferManager.h"
 
 // 생성자: 기본 값 설정
-ParticleSubUVComponent::ParticleSubUVComponent()
+UParticleSubUVComponent::UParticleSubUVComponent()
 {
     SetType(StaticClass()->GetName());
     bIsLoop = true;
 }
 
 // Duplicate: 버퍼 포인터는 복사하지 않고 애니메이션 상태만 복제
-UObject* ParticleSubUVComponent::Duplicate()
+UObject* UParticleSubUVComponent::Duplicate()
 {
-    ParticleSubUVComponent* NewComponent = Cast<ParticleSubUVComponent>(Super::Duplicate());
+    UParticleSubUVComponent* NewComponent = Cast<UParticleSubUVComponent>(Super::Duplicate());
     if (NewComponent)
     {
         NewComponent->bIsLoop = bIsLoop;
@@ -29,12 +29,13 @@ UObject* ParticleSubUVComponent::Duplicate()
 }
 
 // InitializeComponent: 초기화 시 버텍스 버퍼 생성
-void ParticleSubUVComponent::InitializeComponent()
+void UParticleSubUVComponent::InitializeComponent()
 {
+
 }
 
 // TickComponent: 매 프레임 애니메이션 업데이트 및 UV 오프셋 계산
-void ParticleSubUVComponent::TickComponent(float DeltaTime)
+void UParticleSubUVComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
     if (!IsActive() || !Texture)
@@ -77,14 +78,14 @@ void ParticleSubUVComponent::TickComponent(float DeltaTime)
 }
 
 // SetRowColumnCount: 셀 수 변경 시 버텍스 버퍼 재생성
-void ParticleSubUVComponent::SetRowColumnCount(int cellsPerRow, int cellsPerColumn)
+void UParticleSubUVComponent::SetRowColumnCount(int cellsPerRow, int cellsPerColumn)
 {
     CellsPerRow = cellsPerRow;
     CellsPerColumn = cellsPerColumn;
     CreateOrUpdateVertexBuffer();
 }
 
-void ParticleSubUVComponent::SetTexture(const FWString& _fileName)
+void UParticleSubUVComponent::SetTexture(const FWString& _fileName)
 {
     Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
     std::string str(_fileName.begin(), _fileName.end());
@@ -93,11 +94,11 @@ void ParticleSubUVComponent::SetTexture(const FWString& _fileName)
 }
 
 // CreateOrUpdateVertexBuffer: 쿼드 버텍스 데이터를 생성하고, BufferManager를 통해 버텍스 버퍼 생성
-void ParticleSubUVComponent::CreateOrUpdateVertexBuffer()
+void UParticleSubUVComponent::CreateOrUpdateVertexBuffer()
 {
     if (!Texture)
     {
-       UE_LOG(LogLevel::Warning, "ParticleSubUVComponent: Texture가 설정되지 않았습니다.");
+       UE_LOG(LogLevel::Warning, "UParticleSubUVComponent: Texture가 설정되지 않았습니다.");
         return;
     }
 

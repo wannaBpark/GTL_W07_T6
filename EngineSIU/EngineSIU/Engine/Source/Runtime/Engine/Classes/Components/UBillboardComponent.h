@@ -11,7 +11,7 @@ class UBillboardComponent : public UPrimitiveComponent
 
 public:
     UBillboardComponent();
-
+    virtual ~UBillboardComponent();
     virtual UObject* Duplicate() override;
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;

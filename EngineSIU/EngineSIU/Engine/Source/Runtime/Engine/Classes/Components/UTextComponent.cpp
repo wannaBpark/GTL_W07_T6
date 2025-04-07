@@ -6,152 +6,136 @@
 #include "LevelEditor/SLevelEditor.h"
 #include "UObject/Casts.h"
 
-UText::UText()
+UTextComponent::UTextComponent()
 {
     SetType(StaticClass()->GetName());
 }
 
-UObject* UText::Duplicate()
+UObject* UTextComponent::Duplicate()
 {
     ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
 
-    NewComponent->vertexTextBuffer = vertexTextBuffer;
-    NewComponent->vertexTextureArr = vertexTextureArr;
-    NewComponent->numTextVertices = numTextVertices;
-    NewComponent->text = text;
-    NewComponent->quad = quad;
-    NewComponent->quadSize = quadSize;
+    NewComponent->TextAtlasBufferKey = TextAtlasBufferKey;
+    NewComponent->Text = Text;
+    NewComponent->Quad = Quad;
+    NewComponent->QuadSize = QuadSize;
     NewComponent->RowCount = RowCount;
     NewComponent->ColumnCount = ColumnCount;
-    NewComponent->quadWidth = quadWidth;
-    NewComponent->quadHeight = quadHeight;
+    NewComponent->QuadWidth = QuadWidth;
+    NewComponent->QuadHeight = QuadHeight;
 
     return NewComponent;
 }
 
-void UText::InitializeComponent()
+void UTextComponent::InitializeComponent()
 {
     Super::InitializeComponent();
 }
 
-void UText::TickComponent(float DeltaTime)
+void UTextComponent::TickComponent(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime);
-
-    //FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
-    //newCamera.Z = 0;
-    //newCamera = newCamera.GetSafeNormal();
-    //float tmp = FVector(1.0f, 0.0f, 0.0f).Dot(newCamera);
-    //float rad = acosf(tmp);
-    //float degree = JungleMath::RadToDeg(rad);
-    //FVector vtmp = FVector(1.0f, 0.0f, 0.0f).Cross(GetWorld()->GetCamera()->GetForwardVector());
-    //if (vtmp.Z < 0)
-    //	degree *= -1;
-    //RelativeRotation.Z = degree + 90;
+    Super::TickComponent(DeltaTime);
 }
 
-void UText::ClearText()
+void UTextComponent::ClearText()
 {
     vertexTextureArr.Empty();
 }
-void UText::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn) 
+void UTextComponent::SetRowColumnCount(int cellsPerRow, int cellsPerColumn)
 {
-    RowCount = _cellsPerRow;
-    ColumnCount = _cellsPerColumn;
+    RowCount = cellsPerRow;
+    ColumnCount = cellsPerColumn;
 }
 
-int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
+int UTextComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-	if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
-		return 0;
-	}
-	for (int i = 0; i < vertexTextureArr.Num(); i++)
-	{
-		quad.Add(FVector(vertexTextureArr[i].x,
-			vertexTextureArr[i].y, vertexTextureArr[i].z));
-	}
+    if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
+        return 0;
+    }
+    for (int i = 0; i < vertexTextureArr.Num(); i++)
+    {
+        Quad.Add(FVector(vertexTextureArr[i].x,
+            vertexTextureArr[i].y, vertexTextureArr[i].z));
+    }
 
-	return CheckPickingOnNDC(quad,pfNearHitDistance);
+    return CheckPickingOnNDC(Quad, pfNearHitDistance);
 }
 
-
-void UText::SetText(const FWString& _text)
+void UTextComponent::SetText(const FWString& text)
 {
-	text = _text;
-	if (_text.empty())
-	{
-		Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
+    Text = text;
+    if (Text.empty())
+    {
+        Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
 
-		vertexTextureArr.Empty();
-		quad.Empty();
+        vertexTextureArr.Empty();
+        Quad.Empty();
 
-		// 기존 버텍스 버퍼가 있다면 해제
-		if (vertexTextBuffer)
-		{
-			vertexTextBuffer->Release();
-			vertexTextBuffer = nullptr;
-		}
-		return;
-	}
-	int textSize = static_cast<int>(_text.size());
+        return;
+    }
+    int textSize = static_cast<int>(Text.size());
 
 
-	uint32 BitmapWidth = Texture->Width;
-	uint32 BitmapHeight = Texture->Height;
+    uint32 BitmapWidth = Texture->Width;
+    uint32 BitmapHeight = Texture->Height;
 
-	float CellWidth =  float(BitmapWidth)/ColumnCount;
-	float CellHeight = float(BitmapHeight)/RowCount;
+    float CellWidth = float(BitmapWidth) / ColumnCount;
+    float CellHeight = float(BitmapHeight) / RowCount;
 
-	float nTexelUOffset = CellWidth / BitmapWidth;
-	float nTexelVOffset = CellHeight/ BitmapHeight;
+    float nTexelUOffset = CellWidth / BitmapWidth;
+    float nTexelVOffset = CellHeight / BitmapHeight;
 
-	for (int i = 0; i < _text.size(); i++)
-	{
-		FVertexTexture leftUP = { -1.0f,1.0f,0.0f,0.0f,0.0f };
-		FVertexTexture rightUP = { 1.0f,1.0f,0.0f,1.0f,0.0f };
-		FVertexTexture leftDown = { -1.0f,-1.0f,0.0f,0.0f,1.0f };
-		FVertexTexture rightDown = { 1.0f,-1.0f,0.0f,1.0f,1.0f };
-		rightUP.u *= nTexelUOffset;
-		leftDown.v *= nTexelVOffset;
-		rightDown.u *= nTexelUOffset;
-		rightDown.v *= nTexelVOffset;
+    for (int i = 0; i < Text.size(); i++)
+    {
+        FVertexTexture leftUP = { -1.0f,1.0f,0.0f,0.0f,0.0f };
+        FVertexTexture rightUP = { 1.0f,1.0f,0.0f,1.0f,0.0f };
+        FVertexTexture leftDown = { -1.0f,-1.0f,0.0f,0.0f,1.0f };
+        FVertexTexture rightDown = { 1.0f,-1.0f,0.0f,1.0f,1.0f };
+        rightUP.u *= nTexelUOffset;
+        leftDown.v *= nTexelVOffset;
+        rightDown.u *= nTexelUOffset;
+        rightDown.v *= nTexelVOffset;
 
-		leftUP.x += quadWidth * i;
-		rightUP.x += quadWidth * i;
-		leftDown.x += quadWidth * i;
-		rightDown.x += quadWidth * i;
+        leftUP.x += QuadWidth * i;
+        rightUP.x += QuadWidth * i;
+        leftDown.x += QuadWidth * i;
+        rightDown.x += QuadWidth * i;
 
-		float startU = 0.0f;
-		float startV = 0.0f;
+        float startU = 0.0f;
+        float startV = 0.0f;
 
-		setStartUV(_text[i], startU, startV);
-		leftUP.u += (nTexelUOffset * startU);
-		leftUP.v += (nTexelVOffset * startV);
-		rightUP.u += (nTexelUOffset * startU);
-		rightUP.v += (nTexelVOffset * startV);
-		leftDown.u += (nTexelUOffset * startU);
-		leftDown.v += (nTexelVOffset * startV);
-		rightDown.u += (nTexelUOffset * startU);
-		rightDown.v += (nTexelVOffset * startV);
+        SetStartUV(Text[i], startU, startV);
+        leftUP.u += (nTexelUOffset * startU);
+        leftUP.v += (nTexelVOffset * startV);
+        rightUP.u += (nTexelUOffset * startU);
+        rightUP.v += (nTexelVOffset * startV);
+        leftDown.u += (nTexelUOffset * startU);
+        leftDown.v += (nTexelVOffset * startV);
+        rightDown.u += (nTexelUOffset * startU);
+        rightDown.v += (nTexelVOffset * startV);
 
-		vertexTextureArr.Add(leftUP);
-		vertexTextureArr.Add(rightUP);
-		vertexTextureArr.Add(leftDown);
-		vertexTextureArr.Add(rightUP);
-		vertexTextureArr.Add(rightDown);
-		vertexTextureArr.Add(leftDown);
-	}
-	UINT byteWidth = static_cast<UINT>(vertexTextureArr.Num() * sizeof(FVertexTexture));
+        vertexTextureArr.Add(leftUP);
+        vertexTextureArr.Add(rightUP);
+        vertexTextureArr.Add(leftDown);
+        vertexTextureArr.Add(rightUP);
+        vertexTextureArr.Add(rightDown);
+        vertexTextureArr.Add(leftDown);
+    }
 
-	float lastX = -1.0f + quadSize* _text.size();
-	quad.Add(FVector(-1.0f,1.0f,0.0f));
-	quad.Add(FVector(-1.0f,-1.0f,0.0f));
-	quad.Add(FVector(lastX,1.0f,0.0f));
-	quad.Add(FVector(lastX,-1.0f,0.0f));
+    float lastX = -1.0f + QuadWidth * Text.size();
+    Quad.Add(FVector(-1.0f, 1.0f, 0.0f));
+    Quad.Add(FVector(-1.0f, -1.0f, 0.0f));
+    Quad.Add(FVector(lastX, 1.0f, 0.0f));
+    Quad.Add(FVector(lastX, -1.0f, 0.0f));
+    std::string key;
 
-	CreateTextTextureVertexBuffer(vertexTextureArr,byteWidth);
+    key.assign(text.begin(), text.end());
+    
+    TextAtlasBufferKey = FString(key);
+
+    CreateTextTextureVertexBuffer(vertexTextureArr);
 }
-void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
+void UTextComponent::SetStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 {
     //대문자만 받는중
     int StartU = 0;
@@ -189,7 +173,7 @@ void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 
     if (offset == -1)
     {
-        Console::GetInstance().AddLog(LogLevel::Warning, "Text Error");
+        UE_LOG(LogLevel::Warning, "Text Error");
     }
 
     int offsetV = (offset + StartU) / ColumnCount;
@@ -198,11 +182,11 @@ void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
     outStartU = static_cast<float>(offsetU);
     outStartV = static_cast<float>(StartV + offsetV);
 }
-void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
+void UTextComponent::SetStartUV(char alphabet, float& outStartU, float& outStartV)
 {
     //대문자만 받는중
-    int StartU=0;
-    int StartV=0;
+    int StartU = 0;
+    int StartV = 0;
     int offset = -1;
 
 
@@ -231,7 +215,7 @@ void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
 
     if (offset == -1)
     {
-        Console::GetInstance().AddLog(LogLevel::Warning, "Text Error");
+       UE_LOG(LogLevel::Warning, "Text Error");
     }
 
     int offsetV = (offset + StartU) / ColumnCount;
@@ -241,58 +225,7 @@ void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
     outStartV = static_cast<float>(StartV + offsetV);
 
 }
-void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,UINT byteWidth)
+void UTextComponent::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& Vertex)
 {
-	numTextVertices = static_cast<UINT>(_vertex.Num());
-	// 2. Create a vertex buffer
-	D3D11_BUFFER_DESC vertexbufferdesc = {};
-	vertexbufferdesc.ByteWidth = byteWidth;
-	vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE; // will never be updated 
-	vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-	D3D11_SUBRESOURCE_DATA vertexbufferSRD = { _vertex.GetData()};
-
-	ID3D11Buffer* vertexBuffer;
-	
-	HRESULT hr = FEngineLoop::graphicDevice.Device->CreateBuffer(&vertexbufferdesc, &vertexbufferSRD, &vertexBuffer);
-	if (FAILED(hr))
-	{
-		UE_LOG(LogLevel::Warning, "VertexBuffer Creation faild");
-	}
-	vertexTextBuffer = vertexBuffer;
-
-	//FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer, "JungleText", _vertex, _vertex.Num() * sizeof(FVertexTexture),
-	//	nullptr, 0);
-
-}
-
-/*
-
-ToDo; TextRender 살리기
-BufferManager 적용해야함.
-
-*/
-void UText::TextMVPRendering()
-{
-    //FEngineLoop::renderer.PrepareTextureShader();
-    ////FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-    ////FEngineLoop::renderer.PrepareSubUVConstant();
-    //FMatrix Model = CreateBillboardMatrix();
-
-    //FMatrix MVP = Model * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    //FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    //FVector4 UUIDColor = EncodeUUID() / 255.0f;
-    //if (this == GetWorld()->GetPickingGizmo()) {
-    //    FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-    //}
-    //else
-    //    FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
-
-    //if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-    //    FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer.Get(), numTextVertices,
-    //        Texture->TextureSRV, Texture->SamplerState);
-    //}
-    ////Super::Render();
-
-    //FEngineLoop::renderer.PrepareStaticMeshRenderState();
+    FEngineLoop::renderer.CreateImmutableVertexBuffer(TextAtlasBufferKey, Vertex);
 }

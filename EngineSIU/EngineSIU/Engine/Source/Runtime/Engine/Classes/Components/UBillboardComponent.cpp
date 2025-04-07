@@ -22,6 +22,10 @@ UBillboardComponent::UBillboardComponent()
     SetType(StaticClass()->GetName());
 }
 
+UBillboardComponent::~UBillboardComponent()
+{
+}
+
 UObject* UBillboardComponent::Duplicate()
 {
     // GPU 버퍼는 공유하지 않고, 상태 값만 복사하여 새로 초기화하도록 함
@@ -30,7 +34,7 @@ UObject* UBillboardComponent::Duplicate()
     {
         NewComponent->finalIndexU = finalIndexU;
         NewComponent->finalIndexV = finalIndexV;
-        NewComponent->Texture = Texture;
+        NewComponent->Texture = FEngineLoop::resourceMgr.GetTexture(BufferKey.ToWideString());
         NewComponent->BufferKey = BufferKey;
         NewComponent->m_parent = m_parent;
     }
@@ -40,13 +44,12 @@ UObject* UBillboardComponent::Duplicate()
 void UBillboardComponent::InitializeComponent()
 {
     Super::InitializeComponent();
-    CreateQuadTextureVertexBuffer();
+
 }
 
 void UBillboardComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
-    // 빌보드는 별도의 애니메이션이 없으면 Tick에서 특별한 처리가 없도록 함
 }
 FString UBillboardComponent::GetBufferKey()
 {
@@ -69,6 +72,7 @@ void UBillboardComponent::SetTexture(const FWString& _fileName)
     Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
     std::string str(_fileName.begin(), _fileName.end());
     BufferKey = FString(str);
+    CreateQuadTextureVertexBuffer();
 }
 
 void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
@@ -129,17 +133,21 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& quadVertices,
     float minX = FLT_MAX, maxX = -FLT_MAX;
     float minY = FLT_MAX, maxY = -FLT_MAX;
     float avgZ = 0.0f;
+
     for (const FVector& v : quadVertices)
     {
         FVector4 clipPos = FMatrix::TransformVector(FVector4(v, 1.0f), MVP);
         if (clipPos.W != 0.0f)
+        {
             clipPos = clipPos / clipPos.W;
+        }
         minX = FMath::Min(minX, clipPos.X);
         maxX = FMath::Max(maxX, clipPos.X);
         minY = FMath::Min(minY, clipPos.Y);
         maxY = FMath::Max(maxY, clipPos.Y);
         avgZ += clipPos.Z;
     }
+
     avgZ /= quadVertices.Num();
 
     // 마우스 NDC 좌표가 quad의 NDC 경계 사각형 내에 있는지 검사

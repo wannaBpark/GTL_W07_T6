@@ -31,9 +31,7 @@ public:
 protected:
 
     FBoundingBox AABB;
-    
-    UBillboardComponent* texture2D;
-
+   
     FLight Light;
 
 public:
@@ -43,5 +41,4 @@ public:
     
     FVector4 GetColor() const { return FVector4(Light.AmbientColor.X, Light.AmbientColor.Y, Light.AmbientColor.Z, 1); }
 
-    UBillboardComponent* GetTexture2D() const {return texture2D;}
 };
