@@ -63,7 +63,7 @@ void FGizmoRenderPass::CreateShader()
         {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
-    Stride = sizeof(FVertexSimple);
+    Stride = sizeof(FStaticMeshVertex);
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"GizmoVertexShader", L"Shaders/GizmoVertexShader.hlsl", "mainVS", GizmoInputLayout, ARRAYSIZE(GizmoInputLayout));
 
@@ -146,7 +146,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
 
         ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
         Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-        Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
+        Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
 
         RenderGizmoComponent(GizmoComp, Viewport, World);
 
@@ -189,7 +189,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
     if (!RenderData) return;
 
-    UINT stride = sizeof(FVertexSimple);
+    UINT stride = sizeof(FStaticMeshVertex);
 
     UINT offset = 0;
 

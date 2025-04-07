@@ -3,7 +3,7 @@
 #include "HAL/PlatformType.h"
 
 
-inline FVertexSimple quadVertices[] =
+inline FStaticMeshVertex quadVertices[] =
 {
     {-1.0f,1.0f,0.0f,0.0f,1.0f,0.0f,1.0f},
     { 1.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f},

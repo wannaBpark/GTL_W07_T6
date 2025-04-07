@@ -254,7 +254,7 @@ void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,
 
 	ID3D11Buffer* vertexBuffer;
 	
-	HRESULT hr = FEngineLoop::graphicDevice.Device->CreateBuffer(&vertexbufferdesc, &vertexbufferSRD, &vertexBuffer);
+	HRESULT hr = FEngineLoop::GraphicDevice.Device->CreateBuffer(&vertexbufferdesc, &vertexbufferSRD, &vertexBuffer);
 	if (FAILED(hr))
 	{
 		UE_LOG(LogLevel::Warning, "VertexBuffer Creation faild");

@@ -32,10 +32,10 @@ private:
     void WindowInit(HINSTANCE hInstance);
 
 public:
-    static FGraphicsDevice graphicDevice;
-    static FRenderer renderer;
+    static FGraphicsDevice GraphicDevice;
+    static FRenderer Renderer;
     static UPrimitiveDrawBatch PrimitiveDrawBatch;
-    static FResourceMgr resourceMgr;
+    static FResourceMgr ResourceManager;
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
