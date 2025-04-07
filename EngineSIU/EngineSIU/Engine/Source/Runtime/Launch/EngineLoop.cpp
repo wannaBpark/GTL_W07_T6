@@ -99,7 +99,6 @@ uint32 FEngineLoop::TotalAllocationCount = 0;
 FEngineLoop::FEngineLoop()
     : hWnd(nullptr)
     , UIMgr(nullptr)
-    , GWorld(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
 {
@@ -131,9 +130,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GEngine = FObjectFactory::ConstructObject<UEditorEngine>();
     GEngine->Init();
 
-    GWorld = new UWorld;
-    GWorld->Initialize();
-
     return 0;
 }
 
@@ -154,7 +150,7 @@ void FEngineLoop::Render() const
             // renderer.UpdateLightBuffer();
             // RenderWorld();
             renderer.PrepareRender();
-            renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+            renderer.Render(GEngine->ActiveWorld.get(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -167,7 +163,8 @@ void FEngineLoop::Render() const
         // renderer.UpdateLightBuffer();
         // RenderWorld();
         renderer.PrepareRender();
-        renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+        
+        renderer.Render(GEngine->ActiveWorld.get(), LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -199,7 +196,7 @@ void FEngineLoop::Tick()
         }
 
         Input();
-        GWorld->Tick(elapsedTime);
+        GEngine->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
         UIMgr->BeginFrame();
@@ -254,8 +251,6 @@ void FEngineLoop::Input()
 void FEngineLoop::Exit()
 {
     LevelEditor->Release();
-    GWorld->Release();
-    delete GWorld;
     UIMgr->Shutdown();
     delete UIMgr;
     resourceMgr.Release(&renderer);

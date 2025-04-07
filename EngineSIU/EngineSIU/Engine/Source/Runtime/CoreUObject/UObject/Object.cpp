@@ -1,6 +1,6 @@
 #include "Object.h"
 #include "UClass.h"
-
+#include "Engine/Engine.h"
 
 UClass* UObject::StaticClass()
 {
@@ -14,6 +14,11 @@ UObject::UObject()
     , InternalIndex(std::numeric_limits<uint32>::max())
     , NamePrivate("None")
 {
+}
+
+UWorld* UObject::GetWorld() const
+{
+    return GEngine->ActiveWorld.get();
 }
 
 bool UObject::IsA(const UClass* SomeBase) const
