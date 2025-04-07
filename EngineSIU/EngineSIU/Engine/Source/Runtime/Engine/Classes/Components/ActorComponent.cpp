@@ -3,6 +3,17 @@
 #include "GameFramework/Actor.h"
 
 
+UObject* UActorComponent::Duplicate()
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    NewComponent->OwnerPrivate = OwnerPrivate;
+    NewComponent->bIsActive = bIsActive;
+    NewComponent->bAutoActive = bAutoActive;
+
+    return NewComponent;
+}
+
 void UActorComponent::InitializeComponent()
 {
     assert(!bHasBeenInitialized);

@@ -151,19 +151,19 @@ void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorVi
 
         if (UParticleSubUVComp* SubUVParticle = Cast<UParticleSubUVComp>(BillboardComp))
         {
-            RenderTexturePrimitive(SubUVParticle->vertexSubUVBuffer, SubUVParticle->numTextVertices,
-                SubUVParticle->indexTextureBuffer, SubUVParticle->numIndices,
+            RenderTexturePrimitive(SubUVParticle->vertexSubUVBuffer.Get(), SubUVParticle->numTextVertices,
+                SubUVParticle->indexTextureBuffer.Get(), SubUVParticle->numIndices,
                 SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
         }
         else if (UText* Text = Cast<UText>(BillboardComp))
         {
-            RenderTextPrimitive(Text->vertexTextBuffer, Text->numTextVertices,
+            RenderTextPrimitive(Text->vertexTextBuffer.Get(), Text->numTextVertices,
                 Text->Texture->TextureSRV, Text->Texture->SamplerState);
         }
         else
         {
-            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer, BillboardComp->numVertices,
-                BillboardComp->indexTextureBuffer, BillboardComp->numIndices,
+            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer.Get(), BillboardComp->numVertices,
+                BillboardComp->indexTextureBuffer.Get(), BillboardComp->numIndices,
                 BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState);
         }
     }

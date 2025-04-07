@@ -1,10 +1,10 @@
 #pragma once
-
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
 class AActor;
 class UWorld;
+
 
 class ULevel : public UObject
 {
@@ -15,8 +15,8 @@ public:
 
     void InitLevel(UWorld* InOwningWorld);
 
-public:
+    virtual UObject* Duplicate() override;
+
     TArray<AActor*> Actors;
     UWorld* OwningWorld;
 };
-

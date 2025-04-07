@@ -1,5 +1,6 @@
 #include "Components/SceneComponent.h"
 #include "Math/JungleMath.h"
+#include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 
 USceneComponent::USceneComponent()
@@ -7,6 +8,18 @@ USceneComponent::USceneComponent()
     , RelativeRotation(FVector(0.f, 0.f, 0.f))
     , RelativeScale3D(FVector(1.f, 1.f, 1.f))
 {
+}
+
+UObject* USceneComponent::Duplicate()
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    NewComponent->RelativeLocation = RelativeLocation;
+    NewComponent->RelativeRotation = RelativeRotation;
+    NewComponent->QuatRotation = QuatRotation;
+    NewComponent->RelativeScale3D = RelativeScale3D;
+
+    return NewComponent;
 }
 
 void USceneComponent::InitializeComponent()
@@ -67,6 +80,32 @@ void USceneComponent::AddScale(FVector _added)
 
 }
 
+void USceneComponent::AttachToComponent(USceneComponent* InParent)
+{
+    // 기존 부모와 연결을 끊기
+    if (AttachParent)
+    {
+        AttachParent->AttachChildren.Remove(this);
+    }
+
+    // InParent도 nullptr이면 부모를 nullptr로 설정
+    if (InParent == nullptr)
+    {
+        AttachParent = nullptr;
+        return;
+    }
+
+
+    // 새로운 부모 설정
+    AttachParent = InParent;
+
+    // 부모의 자식 리스트에 추가
+    if (!InParent->AttachChildren.Contains(this))
+    {
+        InParent->AttachChildren.Add(this);
+    }
+}
+
 FVector USceneComponent::GetWorldRotation()
 {
 	if (AttachParent)
@@ -113,10 +152,12 @@ void USceneComponent::SetupAttachment(USceneComponent* InParent)
         && InParent != nullptr                                    // InParent가 유효한 포인터 이며
         && (
             AttachParent == nullptr                               // AttachParent도 유효하며
-            || !AttachParent->AttachChildren.Contains(this)  // 이미 AttachParent의 자식이 아닌 경우
+            || !AttachParent->AttachChildren.Contains(this)  // 한번이라도 SetupAttachment가 호출된적이 없는 경우
         ) 
     ) {
         AttachParent = InParent;
+
+        // TODO: .AddUnique의 실행 위치를 RegisterComponent로 바꾸거나 해야할 듯
         InParent->AttachChildren.AddUnique(this);
     }
 }

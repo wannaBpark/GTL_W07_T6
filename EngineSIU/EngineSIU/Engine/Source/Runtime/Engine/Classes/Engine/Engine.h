@@ -10,7 +10,7 @@ class UWorld;
 
 class UEngine : public UObject
 {
-    DECLARE_CLASS(UEngine, UObject)
+    DECLARE_ABSTRACT_CLASS(UEngine, UObject)
 
 public:
     UEngine() = default;
@@ -28,7 +28,7 @@ public:
 
     // TODO: UObject->GetWorld() 구현 이후 추가.
     UWorld* GetWorldFromContextObject(const UObject* Object) const;
-    FWorldContext* GetWorldContextFromWorld(UWorld* InWorld);
+    FWorldContext* GetWorldContextFromWorld(const UWorld* InWorld);
 
     FWorldContext& CreateNewWorldContext(EWorldType InWorldType);
 };

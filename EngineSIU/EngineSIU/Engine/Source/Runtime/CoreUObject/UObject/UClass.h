@@ -7,8 +7,16 @@
  */
 class UClass : public UObject
 {
+    using ClassConstructorType = UObject*(*)();
+
 public:
-    UClass(const char* InClassName, uint32 InClassSize, uint32 InAlignment, UClass* InSuperClass);
+    UClass(
+        const char* InClassName,
+        uint32 InClassSize,
+        uint32 InAlignment,
+        UClass* InSuperClass,
+        ClassConstructorType InCTOR
+    );
 
     // 복사 & 이동 생성자 제거
     UClass(const UClass&) = delete;
@@ -39,26 +47,25 @@ public:
         return SuperClass;
     }
 
-    UObject* GetDefaultObject() const
+    UObject* GetDefaultObject() const;
+
+    template <typename T>
+    T* GetDefaultObject() const
     {
-        if (!ClassDefaultObject)
-        {
-            const_cast<UClass*>(this)->CreateDefaultObject();
-        }
-        return ClassDefaultObject;
+        UObject* Ret = GetDefaultObject();
+        assert(Ret->IsA<T>());
+        return static_cast<T*>(Ret);
     }
+
+    ClassConstructorType ClassCTOR;
 
 protected:
     virtual UObject* CreateDefaultObject();
 
 private:
-    [[maybe_unused]]
     uint32 ClassSize;
-
-    [[maybe_unused]]
     uint32 ClassAlignment;
 
     UClass* SuperClass = nullptr;
-
     UObject* ClassDefaultObject = nullptr;
 };
