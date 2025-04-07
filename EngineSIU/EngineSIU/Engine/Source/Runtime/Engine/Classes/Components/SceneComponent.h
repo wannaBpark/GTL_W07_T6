@@ -22,6 +22,11 @@ public:
     void AddRotation(FVector _added);
     void AddScale(FVector _added);
 
+    USceneComponent* GetAttachParent() const { return AttachParent; }
+    const TArray<USceneComponent*>& GetAttachChildren() const { return AttachChildren; }
+
+    void AttachToComponent(USceneComponent* InParent);
+
 protected:
     FVector RelativeLocation;
     FVector RelativeRotation;
