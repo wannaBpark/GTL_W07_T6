@@ -100,3 +100,8 @@ void ATransformGizmo::Tick(float DeltaTime)
             SetActorRotation(FVector(0.0f, 0.0f, 0.0f));
     }
 }
+
+void ATransformGizmo::Initialize(FEditorViewportClient* InViewport)
+{
+    AttachedViewport = InViewport;
+}

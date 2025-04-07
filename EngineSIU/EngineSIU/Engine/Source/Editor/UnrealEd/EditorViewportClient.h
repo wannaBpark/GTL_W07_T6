@@ -93,7 +93,7 @@ public:
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
-    bool IsSelected(POINT point) const;
+    bool IsSelected(POINT InPoint) const;
 
 protected:
     /** Camera speed setting */
@@ -130,13 +130,13 @@ public:
     FMatrix Projection;
 
 public: //Camera Movement
-    void CameraMoveForward(float _Value);
-    void CameraMoveRight(float _Value);
-    void CameraMoveUp(float _Value);
-    void CameraRotateYaw(float _Value);
-    void CameraRotatePitch(float _Value);
-    void PivotMoveRight(float _Value);
-    void PivotMoveUp(float _Value);
+    void CameraMoveForward(float InValue);
+    void CameraMoveRight(float InValue);
+    void CameraMoveUp(float InValue);
+    void CameraRotateYaw(float InValue);
+    void CameraRotatePitch(float InValue);
+    void PivotMoveRight(float InValue);
+    void PivotMoveUp(float InValue);
 
     FMatrix& GetViewMatrix() { return View; }
     FMatrix& GetProjectionMatrix() { return Projection; }
@@ -155,7 +155,7 @@ public: //Camera Movement
     bool GetIsOnRBMouseClick() const { return bRightMouseDown; }
 
     //Flag Test Code
-    static void SetOthoSize(float _Value);
+    static void SetOthoSize(float InValue);
 
 private: // Input
     POINT lastMousePos;
