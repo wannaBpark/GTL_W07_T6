@@ -213,7 +213,7 @@ void FEngineLoop::Tick()
         GEngine->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
-        graphicDevice.PrepareUI();
+        GraphicDevice.PrepareUI();
         UIMgr->BeginFrame();
         UnrealEditor->Render();
 
