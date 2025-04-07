@@ -23,10 +23,13 @@ struct FMaterial
 {
     float3 DiffuseColor;
     float TransparencyScalar;
-    float4 AmbientColor;
+    
+    float3 AmbientColor;
     float DensityScalar;
+    
     float3 SpecularColor;
     float SpecularScalar;
+    
     float3 EmissiveColor;
     float MaterialPad0;
 };
@@ -83,7 +86,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
     // 3) 라이트 계산
-    float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
 
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
@@ -91,7 +93,9 @@ PS_OUTPUT mainPS(PS_INPUT input)
 
     if (IsLit)
     {
+        float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
         float3 litColor = baseColor * lightRgb;
+        litColor = pow(litColor, 1.0f / 2.2f);
         output.color = float4(litColor, 1);
     }
     else

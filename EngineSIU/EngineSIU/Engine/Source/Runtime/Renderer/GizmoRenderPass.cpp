@@ -121,7 +121,8 @@ void FGizmoRenderPass::PrepareRender()
 void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareRenderState();
-
+    Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+    Graphics->DeviceContext->OMSetDepthStencilState( Graphics->DepthStencilState, 0);
     for (UGizmoBaseComponent* GizmoComp : GizmoObjs)
     {
         auto controlMode = World->GetEditorPlayer()->GetControlMode();
@@ -144,9 +145,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
             continue;
         }
 
-        ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
-        Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-        Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
+       Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
 
         RenderGizmoComponent(GizmoComp, Viewport, World);
 
@@ -177,7 +176,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
 
-    FCameraConstantBuffer CameraData(Viewport->View,Viewport->Projection);
+    FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection, {});
 
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);

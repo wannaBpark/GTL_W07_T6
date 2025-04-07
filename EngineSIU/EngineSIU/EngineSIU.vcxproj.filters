@@ -789,6 +789,12 @@
     <ClInclude Include="Font\RawFonts.h">
       <Filter>Font</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -827,5 +833,13 @@
     <FxCompile Include="Shaders\Light.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
