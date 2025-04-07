@@ -4,10 +4,9 @@
 class ViewportTypePanel : public IWindowToggleable
 {
 private:
-    ViewportTypePanel();
-public:
-    virtual ~ViewportTypePanel() override;
+    ViewportTypePanel() = default;
 
+public:
     static ViewportTypePanel& GetInstance();
 
     void Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;

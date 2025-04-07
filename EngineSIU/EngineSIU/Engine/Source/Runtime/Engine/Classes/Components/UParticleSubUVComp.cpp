@@ -1,6 +1,5 @@
 #include "UParticleSubUVComp.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "World.h"
 
 
 UParticleSubUVComp::UParticleSubUVComp()
@@ -30,8 +29,8 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
     Super::TickComponent(DeltaTime);
     if (!IsActive()) return;
 
-	uint32 CellWidth = Texture->width / CellsPerColumn;
-	uint32 CellHeight = Texture->height / CellsPerColumn;
+	uint32 CellWidth = Texture->Width / CellsPerColumn;
+	uint32 CellHeight = Texture->Height / CellsPerColumn;
 
 
 	second += DeltaTime;
@@ -61,8 +60,8 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 	}
 
 
-	float normalWidthOffset = float(CellWidth) / float(Texture->width);
-	float normalHeightOffset = float(CellHeight) / float(Texture->height);
+	float normalWidthOffset = float(CellWidth) / float(Texture->Width);
+	float normalHeightOffset = float(CellHeight) / float(Texture->Height);
 
 	finalIndexU = float(indexU) * normalWidthOffset;
 	finalIndexV = float(indexV) * normalHeightOffset;
@@ -92,10 +91,10 @@ void UParticleSubUVComp::UpdateVertexBuffer(const TArray<FVertexTexture>& vertic
 void UParticleSubUVComp::CreateSubUVVertexBuffer()
 {
 
-	uint32 CellWidth = Texture->width/CellsPerColumn;
-	uint32 CellHeight = Texture->height/ CellsPerColumn;
-	float normalWidthOffset = float(CellWidth) / float(Texture->width);
-	float normalHeightOffset = float(CellHeight) / float(Texture->height);
+	uint32 CellWidth = Texture->Width/CellsPerColumn;
+	uint32 CellHeight = Texture->Height/ CellsPerColumn;
+	float normalWidthOffset = float(CellWidth) / float(Texture->Width);
+	float normalHeightOffset = float(CellHeight) / float(Texture->Height);
 
 	TArray<FVertexTexture> vertices =
 	{

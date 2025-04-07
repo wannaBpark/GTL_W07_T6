@@ -7,7 +7,6 @@ class UTextUUID : public UText
 
 public:
     UTextUUID();
-    virtual ~UTextUUID() override;
 
     virtual int CheckRayIntersection(
         FVector& rayOrigin,

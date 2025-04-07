@@ -5,7 +5,7 @@
 #include "Math/JungleMath.h"
 #include "EngineLoop.h"
 #include "UnrealClient.h"
-#include "World.h"
+#include "World/World.h"
 #include "GameFramework/Actor.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
@@ -33,7 +33,7 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
-    ResizeViewport(GEngineLoop.graphicDevice.SwapchainDesc);
+    ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
     ViewportIndex = viewportIndex;
 }
 
@@ -47,12 +47,8 @@ void FEditorViewportClient::Tick(float DeltaTime)
 
 void FEditorViewportClient::Release() const
 {
-    if (Viewport)
-        delete Viewport;
- 
+    delete Viewport;
 }
-
-
 
 void FEditorViewportClient::Input()
 {
@@ -142,7 +138,7 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -154,7 +150,7 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -224,11 +220,7 @@ void FEditorViewportClient::CameraRotateYaw(float _Value)
 void FEditorViewportClient::CameraRotatePitch(float _Value)
 {
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
-    curCameraRot.Y += _Value;
-    if (curCameraRot.Y <= -89.0f)
-        curCameraRot.Y = -89.0f;
-    if (curCameraRot.Y >= 89.0f)
-        curCameraRot.Y = 89.0f;
+    curCameraRot.Y = FMath::Clamp(curCameraRot.Y + _Value, -89.f, 89.f);
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
@@ -268,7 +260,7 @@ void FEditorViewportClient::UpdateProjectionMatrix()
 {
     if (IsPerspective()) {
         Projection = JungleMath::CreateProjectionMatrix(
-            ViewFOV * (3.141592f / 180.0f),
+            ViewFOV * (PI / 180.0f),
             GetViewport()->GetViewport().Width/ GetViewport()->GetViewport().Height,
             nearPlane,
             farPlane

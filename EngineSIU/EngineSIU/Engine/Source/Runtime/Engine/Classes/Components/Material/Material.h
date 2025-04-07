@@ -6,10 +6,9 @@ class UMaterial : public UObject {
     DECLARE_CLASS(UMaterial, UObject)
 
 public:
-    UMaterial() {}
-    virtual ~UMaterial() override {}
+    UMaterial() = default;
     FObjMaterialInfo& GetMaterialInfo() { return materialInfo; }
-    void SetMaterialInfo(FObjMaterialInfo value) { materialInfo = value; }
+    void SetMaterialInfo(const FObjMaterialInfo& value) { materialInfo = value; }
 
     // 색상 및 재질 속성 설정자
     void SetDiffuse(const FVector& DiffuseIn) { materialInfo.Diffuse = DiffuseIn; }

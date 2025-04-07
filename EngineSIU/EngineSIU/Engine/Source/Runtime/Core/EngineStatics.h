@@ -1,11 +1,15 @@
 #pragma once
-#include "Define.h"
+#include <atomic>
+#include "HAL/PlatformType.h"
+
+
 class UEngineStatics
 {
-public:
-    UEngineStatics();
-    ~UEngineStatics();
-    static uint32 GenUUID();
-    static uint32 NextUUID;
-};
+    static std::atomic<uint32> NextUUID;
 
+public:
+    static uint32 GenUUID()
+    {
+        return NextUUID.fetch_add(1, std::memory_order_relaxed);
+    }
+};

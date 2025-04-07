@@ -2,7 +2,7 @@
 #include <DirectXMath.h>
 #include "Define.h"
 #include "QuadTexture.h"
-#include "World.h"
+#include "World/World.h"
 #include "Actors/Player.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/MathUtility.h"
@@ -44,17 +44,16 @@ void UBillboardComponent::TickComponent(float DeltaTime)
 
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-	TArray<FVector> quad;
-	for (int i = 0; i < 4; i++)
-	{
-		quad.Add(FVector(quadTextureVertices[i].x, 
-			quadTextureVertices[i].y, quadTextureVertices[i].z));
+    TArray<FVector> quad;
+    for (auto& quadTextureVertice : quadTextureVertices)
+    {
+        quad.Emplace(quadTextureVertice.x, quadTextureVertice.y, quadTextureVertice.z);
 	}
 	return CheckPickingOnNDC(quad,pfNearHitDistance);
 }
 
 
-void UBillboardComponent::SetTexture(FWString _fileName)
+void UBillboardComponent::SetTexture(const FWString& _fileName)
 {
 	Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
 }
@@ -133,7 +132,7 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	pickPosition.Z = 1.0f; // Near Plane
 
 	FMatrix M = CreateBillboardMatrix();
-    FMatrix V = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();;
+    FMatrix V = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
 	FMatrix P = projectionMatrix;
 	FMatrix MVP = M * V * P;
 

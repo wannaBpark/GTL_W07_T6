@@ -9,6 +9,8 @@ class TSet
 {
 private:
     using SetType = std::unordered_set<T, Hasher, std::equal_to<>, Allocator>;
+    using ElementType = T;
+
     SetType ContainerPrivate;
 
 	friend struct FNamePool;

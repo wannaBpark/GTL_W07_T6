@@ -1,4 +1,4 @@
-#include "Engine/Source/Runtime/Engine/World.h"
+#include "World.h"
 
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
@@ -7,7 +7,6 @@
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Components/HeightFogComponent.h"
-
 
 void UWorld::Initialize()
 {
@@ -31,7 +30,7 @@ void UWorld::CreateBaseObject()
 {
     if (EditorPlayer == nullptr)
     {
-        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();;
+        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();
     }
 
     if (LocalGizmo == nullptr)
@@ -72,6 +71,19 @@ void UWorld::Tick(float DeltaTime)
 	{
 	    Actor->Tick(DeltaTime);
 	}
+}
+
+void UWorld::BeginPlay()
+{
+    /*
+    for (AActor* Actor : ActorsArray)
+    {
+        if (Actor->GetWorld() == this)
+        {
+            Actor->BeginPlay();
+        }
+    }
+    */
 }
 
 void UWorld::Release()

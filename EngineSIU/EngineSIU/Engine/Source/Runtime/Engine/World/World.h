@@ -21,13 +21,16 @@ class UWorld : public UObject
 public:
     UWorld() = default;
 
+
+    void Tick(float DeltaTime);
+    void BeginPlay();
+
     void Initialize();
     void CreateBaseObject();
     void ReleaseBaseObject();
-    void Tick(float DeltaTime);
     void Release();
 
-    /**
+    /** 
      * World에 Actor를 Spawn합니다.
      * @tparam T AActor를 상속받은 클래스
      * @return Spawn된 Actor의 포인터

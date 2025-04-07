@@ -409,6 +409,10 @@ struct FNameHelper
 	}
 };
 
+#if defined(_DEBUG)
+// .natvis에서 사용하는 디버그용 변수
+namespace { [[maybe_unused]] const FNamePool& GDebugNamePool = FNamePool::Get(); }
+#endif
 
 FName::FName(const WIDECHAR* Name)
 	: FName(FNameHelper::MakeFName(Name))

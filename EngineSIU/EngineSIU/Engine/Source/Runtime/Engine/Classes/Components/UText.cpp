@@ -1,6 +1,6 @@
 #include "UText.h"
 
-#include "World.h"
+#include "World/World.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
@@ -65,7 +65,7 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 }
 
 
-void UText::SetText(FWString _text)
+void UText::SetText(const FWString& _text)
 {
 	text = _text;
 	if (_text.empty())
@@ -86,8 +86,8 @@ void UText::SetText(FWString _text)
 	int textSize = static_cast<int>(_text.size());
 
 
-	uint32 BitmapWidth = Texture->width;
-	uint32 BitmapHeight = Texture->height;
+	uint32 BitmapWidth = Texture->Width;
+	uint32 BitmapHeight = Texture->Height;
 
 	float CellWidth =  float(BitmapWidth)/ColumnCount;
 	float CellHeight = float(BitmapHeight)/RowCount;

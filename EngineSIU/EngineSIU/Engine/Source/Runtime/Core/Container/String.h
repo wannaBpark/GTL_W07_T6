@@ -30,7 +30,7 @@ enum Type : uint8
     /** Ignore case. Upper/lower casing does not matter when making a comparison. */
     IgnoreCase,
 };
-};
+}
 
 /** Determines search direction for string operations. */
 namespace ESearchDir
@@ -194,9 +194,10 @@ public:
         va_start(Args, Format);
         int32 len = _vscprintf(Format, Args);
         FString Result;
-        Result.PrivateString.resize(len + 1);
+        Result.PrivateString.resize(len + 1); // null문자를 포함해서 받음
         vsnprintf(Result.PrivateString.data(), len + 1, Format, Args);
         va_end(Args);
+        Result.PrivateString.resize(len); // 여기서 null문자를 지움
         return Result;
     }
 };
