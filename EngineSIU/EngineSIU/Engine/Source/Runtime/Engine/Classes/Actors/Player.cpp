@@ -365,7 +365,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleX)
     {
         float rotationAmount = (CameraUp.Z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
-        rotationAmount = rotationAmount + (CameraRight.X >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
+        rotationAmount = rotationAmount - (CameraRight.X >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
 
         rotationDelta = FQuat(FVector(1.0f, 0.0f, 0.0f), rotationAmount); // ���� X �� ���� ȸ��
     }
