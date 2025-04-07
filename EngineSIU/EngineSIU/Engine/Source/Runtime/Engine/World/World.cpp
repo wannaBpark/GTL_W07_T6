@@ -32,21 +32,10 @@ void UWorld::CreateBaseObject()
     {
         EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();
     }
-
-    if (LocalGizmo == nullptr)
-    {
-        LocalGizmo = FObjectFactory::ConstructObject<ATransformGizmo>();
-    }
 }
 
 void UWorld::ReleaseBaseObject()
 {
-    if (LocalGizmo)
-    {
-        GUObjectArray.MarkRemoveObject(LocalGizmo);
-        LocalGizmo = nullptr;
-    }
-
     if (EditorPlayer)
     {
         GUObjectArray.MarkRemoveObject(EditorPlayer);
@@ -70,7 +59,6 @@ void UWorld::Tick(float DeltaTime)
     }
 
     EditorPlayer->Tick(DeltaTime);
-	LocalGizmo->Tick(DeltaTime);
 
     // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
     for (AActor* Actor : PendingBeginPlayActors)
@@ -109,7 +97,6 @@ void UWorld::Release()
         ActiveLevel.reset();
     }
 
-	pickingGizmo = nullptr;
 	ReleaseBaseObject();
 
     GUObjectArray.ProcessPendingDestroyObjects();
@@ -147,9 +134,4 @@ bool UWorld::DestroyActor(AActor* ThisActor)
     // 제거 대기열에 추가
     GUObjectArray.MarkRemoveObject(ThisActor);
     return true;
-}
-
-void UWorld::SetPickingGizmo(UObject* Object)
-{
-	pickingGizmo = Cast<USceneComponent>(Object);
 }

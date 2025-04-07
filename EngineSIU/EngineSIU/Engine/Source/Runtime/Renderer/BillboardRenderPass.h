@@ -23,8 +23,10 @@ public:
 
     virtual void PrepareRender() override;
 
+    virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport);
     virtual void Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport) override;
 
+    
     virtual void ClearRenderArr() override;
 
 

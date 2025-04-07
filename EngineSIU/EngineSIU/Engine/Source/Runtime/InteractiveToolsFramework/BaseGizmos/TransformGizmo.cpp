@@ -4,11 +4,14 @@
 #include "GizmoCircleComponent.h"
 #include "Actors/Player.h"
 #include "GizmoRectangleComponent.h"
+#include "Engine/EditorEngine.h"
 #include "World/World.h"
 #include "Engine/FLoaderOBJ.h"
 
 ATransformGizmo::ATransformGizmo()
 {
+    static int a = 0;
+    UE_LOG(LogLevel::Error, "Gizmo Created %d", a++);
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_loc_x.obj");
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_loc_y.obj");
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_loc_z.obj");
@@ -82,7 +85,10 @@ void ATransformGizmo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    if (const AActor* PickedActor = GetWorld()->GetSelectedActor())
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+    if (const AActor* PickedActor = Engine->GetSelectedActor())
     {
         SetActorLocation(PickedActor->GetActorLocation());
         if (GetWorld()->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
@@ -93,4 +99,9 @@ void ATransformGizmo::Tick(float DeltaTime)
         else if (GetWorld()->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
             SetActorRotation(FVector(0.0f, 0.0f, 0.0f));
     }
+}
+
+void ATransformGizmo::Initialize(FEditorViewportClient* InViewport)
+{
+    AttachedViewport = InViewport;
 }

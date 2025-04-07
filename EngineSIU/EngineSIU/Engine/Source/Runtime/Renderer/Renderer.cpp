@@ -143,5 +143,6 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     }
 
     GizmoRenderPass->Render(World, ActiveViewport);
+
     ClearRenderArr();
 }
