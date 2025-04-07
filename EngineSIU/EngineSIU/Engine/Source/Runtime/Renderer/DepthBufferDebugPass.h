@@ -24,13 +24,13 @@ public:
 
     void CreateDepthBufferSrv();
   
-    void PrepareRenderState(const D3D11_VIEWPORT& viewport);
+    void PrepareRenderState();
     // Depth Buffer를 화면에 렌더링
     void RenderDepthBuffer(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
     void UpdateDepthBufferSRV();
 
-    void UpdateScreenConstant();
+    void UpdateScreenConstant(const D3D11_VIEWPORT& viewport);
 
 private:
     ID3D11SamplerState* DepthSampler = nullptr;

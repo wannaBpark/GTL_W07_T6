@@ -138,62 +138,21 @@ void FDepthBufferDebugPass::CreateDepthBufferSrv()
 
 }
 
-void FDepthBufferDebugPass::PrepareRenderState(const D3D11_VIEWPORT& viewport)
+void FDepthBufferDebugPass::PrepareRenderState()
 {
     // 셰이더 설정
-   //Graphics->DeviceContext->ClearRenderTargetView(Graphics->FrameBufferRTV, Graphics->ClearColor);
-   
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-    Graphics->DeviceContext->RSSetViewports(1, &viewport);
-    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
     
     Graphics->DeviceContext->VSSetShader(SpriteVertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(DepthBufferPixelShader, nullptr, 0);
-
 
     // SRV & Sampler 바인딩
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &DepthBufferSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &DepthSampler);
 
 
-    float sw = float(Graphics->screenWidth);
-    float sh = float(Graphics->screenHeight);
-
-    FScreenConstants sc;
-    sc.ScreenSize = { sw, sh };
-    sc.UVOffset = { viewport.TopLeftX / sw,         viewport.TopLeftY / sh };
-    sc.UVScale = { viewport.Width / sw,         viewport.Height / sh };
-    sc.Padding = { 0.0f, 0.0f };
-
-
-    BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
-
-    BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 0, EShaderStage::Pixel);
-}
-
-void FDepthBufferDebugPass::RenderDepthBuffer(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
-{
-    UpdateDepthBufferSRV();
-
-    D3D11_VIEWPORT vp = ActiveViewport->GetD3DViewport();
-
    
-    PrepareRenderState(vp);
-    
-
-   
-      // 정점·인덱스·입력 레이아웃 바인딩
-    UINT stride = sizeof(Vertex), offset = 0;
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &SpriteVertexBuffer, &stride, &offset);
-    Graphics->DeviceContext->IASetIndexBuffer(SpriteIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    Graphics->DeviceContext->IASetInputLayout(InputLayout);
-
-    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
-    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
-
-    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
-
 }
 
 void FDepthBufferDebugPass::UpdateDepthBufferSRV()
@@ -215,12 +174,42 @@ void FDepthBufferDebugPass::UpdateDepthBufferSRV()
         }
         screenWidth = Graphics->screenWidth;
         screenHeight = Graphics->screenHeight;
-        UpdateScreenConstant();
+
     }
 }
 
-void FDepthBufferDebugPass::UpdateScreenConstant()
+void FDepthBufferDebugPass::UpdateScreenConstant(const D3D11_VIEWPORT& viewport)
 {
-  /*  FScreenConstants ScreenConstants = FScreenConstants(FVector2D(screenWidth, screenHeight), FVector2D());
-    BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), ScreenConstants);*/
+    float sw = float(screenWidth);
+    float sh = float(screenHeight);
+
+    FScreenConstants sc;
+    sc.ScreenSize = { sw, sh };
+    sc.UVOffset = { viewport.TopLeftX / sw, viewport.TopLeftY / sh };
+    sc.UVScale = { viewport.Width / sw, viewport.Height / sh };
+    sc.Padding = { 0.0f, 0.0f };
+
+    BufferManager->UpdateConstantBuffer(TEXT("FScreenConstants"), sc);
+    BufferManager->BindConstantBuffer(TEXT("FScreenConstants"), 0, EShaderStage::Pixel);
+}
+
+void FDepthBufferDebugPass::RenderDepthBuffer(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
+{
+    if (!ActiveViewport->GetViewportType() == ELevelViewportType::LVT_Perspective) return;
+    D3D11_VIEWPORT vp = ActiveViewport->GetD3DViewport();
+    UpdateDepthBufferSRV();
+    
+    PrepareRenderState();
+
+    UpdateScreenConstant(vp);
+  
+    UINT stride = sizeof(Vertex), offset = 0;
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &SpriteVertexBuffer, &stride, &offset);
+    Graphics->DeviceContext->IASetIndexBuffer(SpriteIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    Graphics->DeviceContext->IASetInputLayout(InputLayout);
+
+    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
+    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
+
 }

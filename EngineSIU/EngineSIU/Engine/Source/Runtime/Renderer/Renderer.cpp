@@ -122,14 +122,8 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     UpdateLightBufferPass->Render(World, ActiveViewport);
     BillboardRenderPass->Render(World, ActiveViewport);
 
+    DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
 
-    if (ActiveViewport->GetViewportType() == ELevelViewportType::LVT_Perspective)
-    {
-        DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
-
-    }
-
-  
     GizmoRenderPass->Render(World, ActiveViewport);
     ClearRenderArr();
 }
