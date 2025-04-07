@@ -168,8 +168,10 @@ private:
     void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config) const;
 
 public:
-    PROPERTY(int32, CameraSpeedSetting)
-    PROPERTY(float, GridSize)
+    void SetCameraSpeedSetting(const int32& value) { CameraSpeedSetting = value; }
+    int32 GetCameraSpeedSetting() const { return CameraSpeedSetting; }
+    void SetGridSize(const float& value) { GridSize = value; }
+    float GetGridSize() const { return GridSize; }
     float GetCameraSpeedScalar() const { return CameraSpeedScalar; }
     void SetCameraSpeedScalar(float value);
 
