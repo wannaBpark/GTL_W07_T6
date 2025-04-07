@@ -1,7 +1,7 @@
 #include "Object.h"
 
 #include "ObjectFactory.h"
-#include "UClass.h"
+#include "Class.h"
 #include "Engine/Engine.h"
 
 

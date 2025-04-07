@@ -1,6 +1,6 @@
 // ReSharper disable CppClangTidyBugproneMacroParentheses
 #pragma once
-#include "UClass.h"
+#include "Class.h"
 
 // name을 문자열화 해주는 매크로
 #define INLINE_STRINGIFY(name) #name

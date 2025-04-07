@@ -1,4 +1,4 @@
-#include "UClass.h"
+#include "Class.h"
 #include <cassert>
 
 #include "EngineStatics.h"
