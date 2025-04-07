@@ -6,6 +6,10 @@
     UEngine을 상속받아 Editor에서 사용 될 기능 구현.
     내부적으로 PIE, Editor World 두 가지 형태로 관리.
 */
+
+class AActor;
+class USceneComponent;
+
 class UEditorEngine : public UEngine
 {
     DECLARE_CLASS(UEditorEngine, UEngine)
@@ -25,6 +29,21 @@ public:
     // 주석은 UE에서 사용하던 매개변수.
     FWorldContext& GetEditorWorldContext(/*bool bEnsureIsGWorld = false*/);
     FWorldContext* GetPIEWorldContext(/*int32 WorldPIEInstance = 0*/);
+
+public:
+    void SelectActor(AActor* InActor);
+    void DeselectActor(AActor* InActor);
+    bool CanSelectActor(AActor* InActor) const;
+    AActor* GetSelectedActor() const;
+
+    void HoverActor(AActor* InActor);
+
+    void SelectComponent(USceneComponent* InComponent);
+    void DeselectComponent(USceneComponent* InComponent);
+    bool CanSelectComponent(USceneComponent* InComponent) const;
+    USceneComponent* GetSelectedComponent() const;
+
+    void HoverComponent(USceneComponent* InComponent);
 
 };
 

@@ -3,6 +3,8 @@
 #include "World/World.h"
 #include "Actors/Player.h"
 #include "Components/LightComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/UParticleSubUVComp.h"
 #include "Components/UText.h"
@@ -13,7 +15,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
 
 void ControlEditorPanel::Render()
 {
@@ -249,6 +251,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             { .label= "Cube",      .obj= OBJ_CUBE },
             { .label= "Sphere",    .obj= OBJ_SPHERE },
             { .label= "SpotLight", .obj= OBJ_SpotLight },
+            { .label= "PointLight", .obj= OBJ_PointLight },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
             { .label= "Text",      .obj= OBJ_Text }
         };
@@ -282,7 +285,14 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 {
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_SpotLight"));
-                    SpawnedActor->AddComponent<ULightComponentBase>();
+                    SpawnedActor->AddComponent<USpotLightComponent>();
+                    break;
+                } 
+                case OBJ_PointLight:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_PointLight"));
+                    SpawnedActor->AddComponent<UPointLightComponent>();
                     break;
                 }
                 case OBJ_PARTICLE:
@@ -315,7 +325,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         
                 if (SpawnedActor)
                 {
-                    World->SetSelectedActor(SpawnedActor);
+                    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+                    Engine->SelectActor(Engine->GetSelectedActor());
                 }
             }
         }

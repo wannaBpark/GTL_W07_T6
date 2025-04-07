@@ -13,6 +13,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
+#include "Engine/EditorEngine.h"
 
 
 using namespace DirectX;
@@ -39,7 +40,7 @@ void AEditorPlayer::Input()
 
             uint32 UUID = FEngineLoop::GraphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
-            for ( const auto obj : TObjectRange<USceneComponent>())
+            for ( const USceneComponent* obj : TObjectRange<USceneComponent>())
             {
                 if (obj->GetUUID() != UUID) continue;
 
@@ -49,9 +50,9 @@ void AEditorPlayer::Input()
 
             FVector pickPosition;
 
-            const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            bool res = PickGizmo(pickPosition);
+            bool res = PickGizmo(pickPosition, ActiveViewport.get());
             if (!res) PickActor(pickPosition);
         }
         else
@@ -64,7 +65,8 @@ void AEditorPlayer::Input()
         if (bLeftMouseDown)
         {
             bLeftMouseDown = false; // ���콺 ������ ��ư�� ���� ���� �ʱ�ȭ
-            GetWorld()->SetPickingGizmo(nullptr);
+            std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            ActiveViewport->SetPickedGizmoComponent(nullptr);
         }
     }
     if (GetAsyncKeyState(VK_SPACE) & 0x8000)
@@ -113,100 +115,70 @@ void AEditorPlayer::Input()
 
     if (GetAsyncKeyState(VK_DELETE) & 0x8000)
     {
-        UWorld* World = GetWorld();
-        if (AActor* PickedActor = World->GetSelectedActor())
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        if (Engine)
         {
-            World->DestroyActor(PickedActor);
-            World->SetSelectedActor(nullptr);
+            if (AActor* SelectedActor = Engine->GetSelectedActor())
+            {
+                Engine->DeselectActor(SelectedActor);
+                GEngine->ActiveWorld->DestroyActor(SelectedActor);
+            }
         }
     }
 }
 
-bool AEditorPlayer::PickGizmo(FVector& pickPosition)
+void AEditorPlayer::ProcessGizmoIntersection(UStaticMeshComponent* iter, const FVector& pickPosition, FEditorViewportClient* InActiveViewport, bool& isPickedGizmo)
+{
+    int maxIntersect = 0;
+    float minDistance = FLT_MAX;
+    float Distance = 0.0f;
+    int currentIntersectCount = 0;
+    if (!iter) return;
+    if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+    {
+        if (Distance < minDistance)
+        {
+            minDistance = Distance;
+            maxIntersect = currentIntersectCount;
+            //GetWorld()->SetPickingGizmo(iter);
+            InActiveViewport->SetPickedGizmoComponent(iter);
+            isPickedGizmo = true;
+        }
+        else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
+        {
+            maxIntersect = currentIntersectCount;
+            //GetWorld()->SetPickingGizmo(iter);
+            InActiveViewport->SetPickedGizmoComponent(iter);
+            isPickedGizmo = true;
+        }
+    }
+}
+
+bool AEditorPlayer::PickGizmo(FVector& pickPosition, FEditorViewportClient* InActiveViewport)
 {
     bool isPickedGizmo = false;
-    if (GetWorld()->GetSelectedActor())
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (Engine->GetSelectedActor())
     {
         if (cMode == CM_TRANSLATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr())
+            for (UStaticMeshComponent* iter : InActiveViewport->GetGizmoActor()->GetArrowArr())
             {
-                int maxIntersect = 0;
-                float minDistance = FLT_MAX;
-                float Distance = 0.0f;
-                int currentIntersectCount = 0;
-                if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
-                {
-                    if (Distance < minDistance)
-                    {
-                        minDistance = Distance;
-                        maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
-                        isPickedGizmo = true;
-                    }
-                    else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
-                    {
-                        maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
-                        isPickedGizmo = true;
-                    }
-                }
+                ProcessGizmoIntersection(iter, pickPosition, InActiveViewport, isPickedGizmo);
             }
         }
         else if (cMode == CM_ROTATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())
+            for (UStaticMeshComponent* iter : InActiveViewport->GetGizmoActor()->GetDiscArr())
             {
-                int maxIntersect = 0;
-                float minDistance = FLT_MAX;
-                float Distance = 0.0f;
-                int currentIntersectCount = 0;
-                //UPrimitiveComponent* localGizmo = dynamic_cast<UPrimitiveComponent*>(GetWorld()->LocalGizmo[i]);
-                if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
-                {
-                    if (Distance < minDistance)
-                    {
-                        minDistance = Distance;
-                        maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
-                        isPickedGizmo = true;
-                    }
-                    else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
-                    {
-                        maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
-                        isPickedGizmo = true;
-                    }
-                }
+                ProcessGizmoIntersection(iter, pickPosition, InActiveViewport, isPickedGizmo);
             }
         }
         else if (cMode == CM_SCALE)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetScaleArr())
+            for (UStaticMeshComponent* iter : InActiveViewport->GetGizmoActor()->GetScaleArr())
             {
-                int maxIntersect = 0;
-                float minDistance = FLT_MAX;
-                float Distance = 0.0f;
-                int currentIntersectCount = 0;
-                if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
-                {
-                    if (Distance < minDistance)
-                    {
-                        minDistance = Distance;
-                        maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
-                        isPickedGizmo = true;
-                    }
-                    else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
-                    {
-                        maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
-                        isPickedGizmo = true;
-                    }
-                }
+                ProcessGizmoIntersection(iter, pickPosition, InActiveViewport, isPickedGizmo);
             }
         }
     }
@@ -254,7 +226,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     }
     if (Possible)
     {
-        GetWorld()->SetSelectedActor(Possible->GetOwner());
+        Cast<UEditorEngine>(GEngine)->SelectActor(Possible->GetOwner());
     }
 }
 
@@ -344,7 +316,9 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 
 void AEditorPlayer::PickedObjControl()
 {
-    if (GetWorld()->GetSelectedActor() && GetWorld()->GetPickingGizmo())
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    FEditorViewportClient* ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient().get();
+    if (Engine && Engine->GetSelectedActor() && ActiveViewport->GetPickedGizmoComponent())
     {
         POINT currentMousePos;
         GetCursorPos(&currentMousePos);
@@ -352,8 +326,8 @@ void AEditorPlayer::PickedObjControl()
         int32 deltaY = currentMousePos.y - m_LastMousePos.y;
 
         // USceneComponent* pObj = GetWorld()->GetPickingObj();
-        AActor* PickedActor = GetWorld()->GetSelectedActor();
-        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetPickingGizmo());
+        AActor* PickedActor = Engine->GetSelectedActor();
+        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(ActiveViewport->GetPickedGizmoComponent());
         switch (cMode)
         {
         case CM_TRANSLATION:

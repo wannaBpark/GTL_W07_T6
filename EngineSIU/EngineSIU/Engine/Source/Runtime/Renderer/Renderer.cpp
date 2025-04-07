@@ -130,5 +130,6 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
 
     GizmoRenderPass->Render(World, ActiveViewport);
+
     ClearRenderArr();
 }

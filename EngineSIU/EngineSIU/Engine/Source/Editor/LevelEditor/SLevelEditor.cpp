@@ -21,10 +21,10 @@ void SLevelEditor::Initialize()
 {
     for (size_t i = 0; i < 4; i++)
     {
-        viewportClients[i] = std::make_shared<FEditorViewportClient>();
-        viewportClients[i]->Initialize(i);
+        ViewportClients[i] = std::make_shared<FEditorViewportClient>();
+        ViewportClients[i]->Initialize(i);
     }
-    ActiveViewportClient = viewportClients[0];
+    ActiveViewportClient = ViewportClients[0];
     OnResize();
     VSplitter = new SSplitterV();
     VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
@@ -54,8 +54,12 @@ void SLevelEditor::Tick(double deltaTime)
     }
     //Test Code Cursor icon End
     OnResize();
+    ActiveViewportClient->Input();
+    for (std::shared_ptr<FEditorViewportClient> Viewport : ViewportClients)
+    {
+        Viewport->Tick(deltaTime);
+    }
 
-    ActiveViewportClient->Tick(deltaTime);
 }
 
 void SLevelEditor::Input()
@@ -134,7 +138,7 @@ void SLevelEditor::SelectViewport(POINT point)
 {
     for (int i = 0; i < 4; i++)
     {
-        if (viewportClients[i]->IsSelected(point))
+        if (ViewportClients[i]->IsSelected(point))
         {
             SetViewportClient(i);
             break;
@@ -202,7 +206,7 @@ void SLevelEditor::LoadConfig()
     bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
     for (size_t i = 0; i < 4; i++)
     {
-        viewportClients[i]->LoadConfig(config);
+        ViewportClients[i]->LoadConfig(config);
     }
     if (HSplitter)
         HSplitter->LoadConfig(config);
@@ -220,7 +224,7 @@ void SLevelEditor::SaveConfig()
         VSplitter->SaveConfig(config);
     for (size_t i = 0; i < 4; i++)
     {
-        viewportClients[i]->SaveConfig(config);
+        ViewportClients[i]->SaveConfig(config);
     }
     ActiveViewportClient->SaveConfig(config);
     config["bMutiView"] = std::to_string(bMultiViewportMode);

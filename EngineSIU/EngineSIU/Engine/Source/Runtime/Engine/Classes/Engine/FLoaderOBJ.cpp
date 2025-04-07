@@ -23,9 +23,12 @@ bool FLoaderOBJ::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
 
     // 마지막 '.'을 찾아 확장자를 제거
     size_t dotPos = fileName.find_last_of('.');
-    if (dotPos != std::string::npos) {
+    if (dotPos != std::string::npos)
+    {
         OutObjInfo.DisplayName = fileName.substr(0, dotPos);
-    } else {
+    }
+    else
+    {
         OutObjInfo.DisplayName = fileName;
     }
 
