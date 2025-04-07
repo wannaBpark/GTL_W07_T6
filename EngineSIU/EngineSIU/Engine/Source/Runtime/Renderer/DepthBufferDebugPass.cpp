@@ -195,7 +195,6 @@ void FDepthBufferDebugPass::UpdateScreenConstant(const D3D11_VIEWPORT& viewport)
 
 void FDepthBufferDebugPass::RenderDepthBuffer(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
-    if (!ActiveViewport->GetViewportType() == ELevelViewportType::LVT_Perspective) return;
     D3D11_VIEWPORT vp = ActiveViewport->GetD3DViewport();
     UpdateDepthBufferSRV();
     
