@@ -134,10 +134,11 @@ T* AActor::AddComponent()
         {
             RootComponent = NewSceneComp;
         }
-        else
-        {
-            NewSceneComp->SetupAttachment(RootComponent);
-        }
+        // TODO: 나중에 RegisterComponent() 생기면 주석 해제
+        // else
+        // {
+        //     NewSceneComp->SetupAttachment(RootComponent);
+        // }
     }
 
     // TODO: RegisterComponent() 생기면 제거
