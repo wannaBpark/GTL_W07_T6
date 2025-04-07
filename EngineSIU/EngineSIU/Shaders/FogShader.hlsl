@@ -38,7 +38,13 @@ PS_INPUT mainVS(VS_INPUT input)
 
 float4 mainPS(PS_INPUT input) : SV_Target
 {
-    float4 FinalColor = float4(1, 0, 0, 1);
+    float depth = 1; //SceneDepth.Sample(Sampler, input.UV).r;
+    float2 ndc = input.UV * 2.0 - 1.0;
+    float4 clipPos = float4(ndc, depth, 1.0);
+    float4 worldPos4 = mul(clipPos, InvViewProj);
+    worldPos4 /= worldPos4.w;
+    float3 worldPos = worldPos4.xyz;
     
-    return FinalColor;
+    float4 SceneColorValue = SceneColor.Sample(Sampler, input.UV);
+    return SceneColorValue;// * float4(worldPos, 1.01);
 }

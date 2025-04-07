@@ -34,12 +34,15 @@ public:
     ID3D11Buffer* GetIndexBuffer() { return FogIndexBuffer; }
     ID3D11InputLayout* GetInputLayout() { return InputLayout; }
     ID3D11Buffer* GetConstantBuffer() { return FogConstantBuffer; }
+    uint32 GetStride() { return Stride; }
+    ID3D11SamplerState* GetSamplerState() { return FogSampler; }
 
 private:
     void CreateShader();
     void CreateConstantBuffer();
     void CreateVertexBuffer();
     void CreateIndexBuffer();
+    void CreateSamplerState();
 
 private:
     FGraphicsDevice* Graphics = nullptr;
@@ -49,6 +52,7 @@ private:
     ID3D11Buffer* FogIndexBuffer = nullptr;
     ID3D11InputLayout* InputLayout = nullptr;
     ID3D11Buffer* FogConstantBuffer = nullptr;
+    ID3D11SamplerState* FogSampler = nullptr;
 
     uint32 Stride;
 };

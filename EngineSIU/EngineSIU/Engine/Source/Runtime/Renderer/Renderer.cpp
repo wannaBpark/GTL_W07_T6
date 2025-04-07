@@ -31,6 +31,7 @@ void FRenderer::Initialize(FGraphicsDevice* graphics)
     CreateLightingBuffer();
     CreateLitUnlitBuffer();
     UpdateLitUnlitConstant(1);
+    FogRenderer.Initialize(graphics);
 }
 
 void FRenderer::Release()
@@ -39,6 +40,7 @@ void FRenderer::Release()
     ReleaseTextureShader();
     ReleaseLineShader();
     ReleaseConstantBuffer();
+    FogRenderer.Release();
 }
 
 void FRenderer::CreateShader()
@@ -864,6 +866,8 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
     RenderLight(World, ActiveViewport);
 
+    RenderFog(World, ActiveViewport, &FogRenderer);
+
     ClearRenderArr();
 }
 
@@ -1026,21 +1030,28 @@ void FRenderer::RenderBillboards(const UWorld* World, const std::shared_ptr<FEdi
 
 void FRenderer::RenderFog(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, FFogRenderer* FogRenderData)
 {
+    Graphics->PrepareFog();
     Graphics->DeviceContext->VSSetShader(FogRenderData->GetVertexShader(), nullptr, 0);
     Graphics->DeviceContext->PSSetShader(FogRenderData->GetPixelShader(), nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(FogRenderData->GetInputLayout());
+    Graphics->DeviceContext->PSSetShaderResources(126, 1, &Graphics->SceneColorSRV);
+    Graphics->DeviceContext->PSSetShaderResources(127, 1, &Graphics->SceneDepthSRV);
+    ID3D11SamplerState* FogSampler = FogRenderData->GetSamplerState();
+    Graphics->DeviceContext->PSSetSamplers(0, 1, &FogSampler);
 
     ID3D11Buffer* FogConstantBuffer = FogRenderData->GetConstantBuffer();
     if (FogConstantBuffer)
     {
-        Graphics->DeviceContext->VSSetConstantBuffers(0, 6, &FogConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(6, 1, &FogConstantBuffer);
     }
 
     FMatrix View = ActiveViewport->View;
     FMatrix Projection = ActiveViewport->GetProjectionMatrix();
     FMatrix ViewProj = View * Projection;
     FMatrix InverseViewProj = FMatrix::Inverse(ViewProj);
+    FMatrix identiry = ViewProj * InverseViewProj;
     UHeightFogComponent* Fog = Cast<UHeightFogComponent>(World->GetFogActor()->GetRootComponent());
+
     FFogConstants Constants
     {
         InverseViewProj,
@@ -1053,7 +1064,16 @@ void FRenderer::RenderFog(const UWorld* World, const std::shared_ptr<FEditorView
         Fog->GetFogMaxOpacity()
     };
     FogRenderData->UpdateConstant(Constants);
-    
+
+    ID3D11Buffer* VertexBuffer = FogRenderData->GetVertexBuffer();
+    ID3D11Buffer* IndexBuffer = FogRenderData->GetIndexBuffer();
+    uint32 FogStride = FogRenderData->GetStride();
+    uint32 FogOffset = 0;
+
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &FogStride, &FogOffset);
+    Graphics->DeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
 }
 
 void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)

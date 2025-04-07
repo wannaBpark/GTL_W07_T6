@@ -67,6 +67,7 @@ public:
     ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
+    AActor* GetFogActor() const { return FogActor; }
 
     // EditorManager 같은데로 보내기
     AActor* GetSelectedActor() const { return SelectedActor; }

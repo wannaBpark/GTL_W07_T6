@@ -33,7 +33,6 @@ private:
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
-    FFogRenderer FogRenderer;
     static UPrimitiveDrawBatch PrimitiveDrawBatch;
     static FResourceMgr resourceMgr;
     static uint32 TotalAllocationBytes;

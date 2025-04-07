@@ -142,5 +142,6 @@ private:
 
     ID3D11PixelShader* PixelLineShader = nullptr;
 
+    FFogRenderer FogRenderer;
 };
 

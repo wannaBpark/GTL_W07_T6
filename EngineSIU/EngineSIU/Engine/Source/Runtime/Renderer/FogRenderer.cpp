@@ -9,6 +9,7 @@ void FFogRenderer::Initialize(FGraphicsDevice* device)
     CreateConstantBuffer();
     CreateVertexBuffer();
     CreateIndexBuffer();
+    CreateSamplerState();
 }
 
 void FFogRenderer::UpdateConstant(FFogConstants Constant)
@@ -28,10 +29,15 @@ void FFogRenderer::UpdateConstant(FFogConstants Constant)
 
 void FFogRenderer::CreateShader()
 {
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
     ID3DBlob* VertexShaderCSO;
     ID3DBlob* PixelShaderCSO;
 
-    HRESULT hr = D3DCompileFromFile(L"Shaders/FogShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", 0, 0, &VertexShaderCSO, nullptr);
+    HRESULT hr = D3DCompileFromFile(L"Shaders/FogShader.hlsl", nullptr, nullptr, "mainVS", "vs_5_0", shaderFlags, 0, &VertexShaderCSO, nullptr);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"Failed to compile vertex shader", L"Error", MB_OK | MB_ICONERROR);
@@ -39,7 +45,7 @@ void FFogRenderer::CreateShader()
     }
     Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &VertexShader);
 
-    hr = D3DCompileFromFile(L"Shaders/FogShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", 0, 0, &PixelShaderCSO, nullptr);
+    hr = D3DCompileFromFile(L"Shaders/FogShader.hlsl", nullptr, nullptr, "mainPS", "ps_5_0", shaderFlags, 0, &PixelShaderCSO, nullptr);
     if (FAILED(hr))
     {
         MessageBox(nullptr, L"Failed to compile pixel shader", L"Error", MB_OK | MB_ICONERROR);
@@ -56,7 +62,7 @@ void FFogRenderer::CreateShader()
         layout, ARRAYSIZE(layout), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &InputLayout
     );
 
-    Stride = sizeof(FVertexSimple);
+    Stride = sizeof(FVertexTexture);
     VertexShaderCSO->Release();
     PixelShaderCSO->Release();
 }
@@ -66,12 +72,17 @@ void FFogRenderer::CreateConstantBuffer()
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     bufferDesc.ByteWidth = sizeof(FFogConstants);
-    bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-    bufferDesc.StructureByteStride = sizeof(FCone);
+    bufferDesc.MiscFlags = 0;
+    bufferDesc.StructureByteStride = 0;
 
-    Graphics->Device->CreateBuffer(&bufferDesc, nullptr, &FogConstantBuffer);
+    HRESULT hr = Graphics->Device->CreateBuffer(&bufferDesc, nullptr, &FogConstantBuffer);
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"Failed to create Constant Buffer", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
 }
 
 void FFogRenderer::CreateVertexBuffer()
@@ -85,7 +96,12 @@ void FFogRenderer::CreateVertexBuffer()
     D3D11_SUBRESOURCE_DATA InitData = {};
     InitData.pSysMem = quadVertices;
 
-    Graphics->Device->CreateBuffer(&BufferDesc, &InitData, &FogVertexBuffer);
+    HRESULT hr = Graphics->Device->CreateBuffer(&BufferDesc, &InitData, &FogVertexBuffer);
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"Failed to create Vertex Buffer", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
 }
 
 void FFogRenderer::CreateIndexBuffer()
@@ -93,11 +109,30 @@ void FFogRenderer::CreateIndexBuffer()
     D3D11_BUFFER_DESC BufferDesc = {};
     BufferDesc.ByteWidth = sizeof(uint32) * 6;
     BufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
+    BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     D3D11_SUBRESOURCE_DATA InitData = {};
     InitData.pSysMem = quadIndices;
 
-    Graphics->Device->CreateBuffer(&BufferDesc, &InitData, &FogIndexBuffer);
+    HRESULT hr = Graphics->Device->CreateBuffer(&BufferDesc, &InitData, &FogIndexBuffer);
+    if (FAILED(hr))
+    {
+        MessageBox(nullptr, L"Failed to create Index Buffer", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
+}
+
+void FFogRenderer::CreateSamplerState()
+{
+    D3D11_SAMPLER_DESC sampDesc = {};
+    sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    sampDesc.MinLOD = 0;
+    sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+    Graphics->Device->CreateSamplerState(&sampDesc, &FogSampler);
 }
 
 void FFogRenderer::Release()

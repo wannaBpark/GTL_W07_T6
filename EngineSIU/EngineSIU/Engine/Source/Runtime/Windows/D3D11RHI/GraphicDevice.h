@@ -19,10 +19,11 @@ public:
     ID3D11Texture2D* FrameBuffer = nullptr;
     ID3D11Texture2D* UUIDFrameBuffer = nullptr;
     ID3D11Texture2D* SceneColorBuffer = nullptr;
-    ID3D11RenderTargetView* RTVs[4];
+    ID3D11RenderTargetView* RTVs[3];
     ID3D11RenderTargetView* FrameBufferRTV = nullptr;
     ID3D11RenderTargetView* UUIDFrameBufferRTV = nullptr;
     ID3D11RenderTargetView* SceneColorRTV = nullptr;
+    ID3D11ShaderResourceView* SceneColorSRV = nullptr;
     ID3D11ShaderResourceView* SceneDepthSRV = nullptr;
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
@@ -53,6 +54,8 @@ public:
     void SwapBuffer() const;
     void Prepare() const;
     void Prepare(D3D11_VIEWPORT* viewport) const;
+    void PrepareUI() const;
+    void PrepareFog() const;
     void OnResize(HWND hWindow);
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }
     void ChangeRasterizer(EViewModeIndex evi);

@@ -118,7 +118,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     WindowInit(hInstance);
     graphicDevice.Initialize(hWnd);
     renderer.Initialize(&graphicDevice);
-    FogRenderer.Initialize(&graphicDevice);
     PrimitiveDrawBatch.Initialize(&graphicDevice);
 
     UIMgr = new UImGuiManager;
@@ -202,6 +201,7 @@ void FEngineLoop::Tick()
         GEngine->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
+        graphicDevice.PrepareUI();
         UIMgr->BeginFrame();
         UnrealEditor->Render();
 
@@ -259,7 +259,6 @@ void FEngineLoop::Exit()
     resourceMgr.Release(&renderer);
     renderer.Release();
     graphicDevice.Release();
-    FogRenderer.Release();
 }
 
 
