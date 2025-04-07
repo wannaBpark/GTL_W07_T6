@@ -5,6 +5,7 @@
 #include "Components/LightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
+#include "Engine/EditorEngine.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
@@ -41,7 +42,11 @@ void PropertyEditorPanel::Render()
     
     
     AEditorPlayer* player = GEngine->ActiveWorld->GetEditorPlayer();
-    AActor* PickedActor = GEngine->ActiveWorld->GetSelectedActor();
+    
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+    AActor* PickedActor = Engine->GetSelectedActor();
     if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();

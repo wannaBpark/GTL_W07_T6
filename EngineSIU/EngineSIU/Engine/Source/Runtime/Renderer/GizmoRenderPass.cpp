@@ -26,6 +26,7 @@
 #include "UObject/ObjectTypes.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Engine/EditorEngine.h"
 
 
 // 생성자/소멸자
@@ -157,11 +158,9 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
 
 void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World)
 {
-    bool selected = World->GetSelectedActor();
-    if (!selected)
-    {
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (Engine && !Engine->GetSelectedActor())
         return;
-    }
     // 모델 행렬 계산
     FMatrix Model = JungleMath::CreateModelMatrix(
         GizmoComp->GetWorldLocation(),
@@ -170,8 +169,8 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     );
 
     FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
-
-    bool Selected = (GizmoComp == World->GetPickingGizmo());
+    
+    bool Selected = (GizmoComp == Viewport->GetPickedGizmoComponent());
 
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
 
