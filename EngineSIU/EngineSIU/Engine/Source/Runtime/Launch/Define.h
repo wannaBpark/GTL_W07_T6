@@ -17,6 +17,7 @@
 #include <d3d11.h>
 
 #include "UserInterface/Console.h"
+#include <Math/Color.h>
 
 struct FVertexSimple
 {
@@ -392,4 +393,17 @@ struct FScreenConstants
     FVector2D UVOffset;     // 뷰포트 시작 UV (x/sw, y/sh)
     FVector2D UVScale;      // 뷰포트 크기 비율 (w/sw, h/sh)
     FVector2D Padding;      // 정렬용 (사용 안 해도 무방)
+};
+
+
+struct FFogConstants
+{
+    FMatrix InvViewProj;
+    FLinearColor FogColor;
+    FVector CameraPos;
+    float FogDensity;
+    float FogHeightFalloff;
+    float StartDistance;
+    float FogCutoffDistance;
+    float FogMaxOpacity;
 };

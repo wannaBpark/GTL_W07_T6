@@ -3,7 +3,6 @@
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveDrawBatch.h"
 #include "Engine/ResourceMgr.h"
-#include "Renderer/FogRenderer.h"
 
 class UnrealEd;
 class UImGuiManager;

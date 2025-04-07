@@ -23,8 +23,6 @@ public:
     ID3D11RenderTargetView* FrameBufferRTV = nullptr;
     ID3D11RenderTargetView* UUIDFrameBufferRTV = nullptr;
     ID3D11RenderTargetView* SceneColorRTV = nullptr;
-    ID3D11ShaderResourceView* SceneColorSRV = nullptr;
-    ID3D11ShaderResourceView* SceneDepthSRV = nullptr;
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;

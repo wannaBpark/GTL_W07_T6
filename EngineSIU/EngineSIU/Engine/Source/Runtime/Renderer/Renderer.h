@@ -10,7 +10,6 @@
 #include "EngineBaseTypes.h"
 #include "Define.h"
 #include "Container/Set.h"
-#include "FogRenderer.h"
 
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDBufferManager.h"
@@ -28,6 +27,7 @@ class FGizmoRenderPass;
 class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
 class FLineRenderPass;
+class FFogRenderPass;
 
 class FRenderer
 {
@@ -71,11 +71,11 @@ public:
     FUpdateLightBufferPass* UpdateLightBufferPass = nullptr;
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
+    FFogRenderPass* FogRenderPass = nullptr;
+
     bool IsSceneDepth = false;
 };
 
-    FFogRenderer FogRenderer;
-};
 template<typename T>
 inline ID3D11Buffer* FRenderer::CreateImmutableVertexBuffer(const FString& key, const TArray<T>& Vertices)
 {

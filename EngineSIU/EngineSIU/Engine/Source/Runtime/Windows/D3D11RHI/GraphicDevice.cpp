@@ -231,18 +231,6 @@ void FGraphicsDevice::CreateFrameBuffer()
 
     Device->CreateRenderTargetView(SceneColorBuffer, &SceneColorRTVDesc, &SceneColorRTV);
 
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;               // 텍스처와 동일한 포맷
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    srvDesc.Texture2D.MipLevels = 1;
-
-    HRESULT hr = Device->CreateShaderResourceView(SceneColorBuffer, &srvDesc, &SceneColorSRV);
-    if (FAILED(hr)) {
-        MessageBox(nullptr, L"Failed to create SceneColorSRV", L"Error", MB_OK | MB_ICONERROR);
-        return;
-    }
-
     RTVs[0] = SceneColorRTV;
     RTVs[1] = UUIDFrameBufferRTV;
 }
