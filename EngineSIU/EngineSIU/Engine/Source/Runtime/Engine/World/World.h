@@ -21,6 +21,7 @@ class UWorld : public UObject
 public:
     UWorld() = default;
 
+    virtual UObject* Duplicate() override;
 
     void Tick(float DeltaTime);
     void BeginPlay();
@@ -41,6 +42,16 @@ public:
 
     /** World에 존재하는 Actor를 제거합니다. */
     bool DestroyActor(AActor* ThisActor);
+
+    template <typename T>
+        requires std::derived_from<T, AActor>
+    T* DuplicateActor(T* InActor)
+    {
+        T* NewActor = static_cast<T*>(InActor->Duplicate());
+        ActorsArray.Add(NewActor);
+        PendingBeginPlayActors.Add(NewActor);
+        return NewActor;
+    }
 
 private:
     const FString defaultMapName = "Default";

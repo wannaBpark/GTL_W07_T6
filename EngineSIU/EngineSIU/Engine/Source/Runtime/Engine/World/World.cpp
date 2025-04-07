@@ -49,6 +49,12 @@ void UWorld::ReleaseBaseObject()
     }
 }
 
+UObject* UWorld::Duplicate()
+{
+    // TODO: UWorld의 Duplicate는 역할 분리후 만드는것이 좋을듯
+    return nullptr;
+}
+
 void UWorld::Tick(float DeltaTime)
 {
     EditorPlayer->Tick(DeltaTime);
@@ -65,7 +71,6 @@ void UWorld::Tick(float DeltaTime)
 	for (AActor* Actor : ActorsArray)
 	{
 	    Actor->Tick(DeltaTime);
-	    Actor->Duplicate();
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "StaticMesh.h"
 #include "Engine/FLoaderOBJ.h"
+#include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 
 
@@ -16,6 +17,13 @@ UStaticMesh::~UStaticMesh()
         staticMeshRenderData->IndexBuffer->Release();
         staticMeshRenderData->IndexBuffer = nullptr;
     }
+}
+
+UObject* UStaticMesh::Duplicate()
+{
+    // TODO: Context->CopyResource를 사용해서 Buffer복사
+    // ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    return nullptr;
 }
 
 uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const
