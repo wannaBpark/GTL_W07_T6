@@ -85,7 +85,7 @@ void PropertyEditorPanel::Render()
     {
         if (ImGui::Button("Duplicate"))
         {
-            UWorld* World = GEngineLoop.GetWorld();
+            UWorld* World = GEngine->GetWorld();
             AActor* NewActor = World->DuplicateActor(PickedActor);
             World->SetSelectedActor(NewActor);
         }
