@@ -13,7 +13,8 @@
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
-#include "Engine/EditorEngine.h"
+#include "Engine/Engine.h"
+#include <Components/HeightFogComponent.h>
 
 void PropertyEditorPanel::Render()
 {
@@ -179,6 +180,95 @@ void PropertyEditorPanel::Render()
     {
         RenderForStaticMesh(StaticMeshComponent);
         RenderForMaterial(StaticMeshComponent);
+    }
+
+    if(PickedActor)
+    if (UHeightFogComponent* FogComponent = Cast<UHeightFogComponent>(PickedActor->GetRootComponent()))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+        if (ImGui::TreeNodeEx("Exponential Height Fog", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+        {
+            FLinearColor currColor = FogComponent->GetFogColor();
+
+            float r = currColor.R;
+            float g = currColor.G;
+            float b = currColor.B;
+            float a = currColor.A;
+            float h, s, v;
+            float lightColor[4] = { r, g, b, a };
+
+            // SpotLight Color
+            if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
+                ImGuiColorEditFlags_DisplayRGB |
+                ImGuiColorEditFlags_NoSidePreview |
+                ImGuiColorEditFlags_NoInputs |
+                ImGuiColorEditFlags_Float))
+
+            {
+
+                r = lightColor[0];
+                g = lightColor[1];
+                b = lightColor[2];
+                a = lightColor[3];
+                FogComponent->SetFogColor(FLinearColor(r, g, b, a));
+            }
+            RGBToHSV(r, g, b, h, s, v);
+            // RGB/HSV
+            bool changedRGB = false;
+            bool changedHSV = false;
+
+            // RGB
+            ImGui::PushItemWidth(50.0f);
+            if (ImGui::DragFloat("R##R", &r, 0.001f, 0.f, 1.f)) changedRGB = true;
+            ImGui::SameLine();
+            if (ImGui::DragFloat("G##G", &g, 0.001f, 0.f, 1.f)) changedRGB = true;
+            ImGui::SameLine();
+            if (ImGui::DragFloat("B##B", &b, 0.001f, 0.f, 1.f)) changedRGB = true;
+            ImGui::Spacing();
+
+            // HSV
+            if (ImGui::DragFloat("H##H", &h, 0.1f, 0.f, 360)) changedHSV = true;
+            ImGui::SameLine();
+            if (ImGui::DragFloat("S##S", &s, 0.001f, 0.f, 1)) changedHSV = true;
+            ImGui::SameLine();
+            if (ImGui::DragFloat("V##V", &v, 0.001f, 0.f, 1)) changedHSV = true;
+            ImGui::PopItemWidth();
+            ImGui::Spacing();
+
+            if (changedRGB && !changedHSV)
+            {
+                // RGB -> HSV
+                RGBToHSV(r, g, b, h, s, v);
+                FogComponent->SetFogColor(FLinearColor(r, g, b, a));
+            }
+            else if (changedHSV && !changedRGB)
+            {
+                // HSV -> RGB
+                HSVToRGB(h, s, v, r, g, b);
+                FogComponent->SetFogColor(FLinearColor(r, g, b, a));
+            }
+
+            float FogDensity = FogComponent->GetFogDensity();
+            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 0.2f))
+            {
+                FogComponent->SetFogDensity(FogDensity);
+            }
+
+            float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
+            if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
+            {
+                FogComponent->SetFogMaxOpacity(FogMaxOpacity);
+            }
+
+            float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
+            if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.01f, 1.0f))
+            {
+                FogComponent->SetFogHeightFalloff(FogHeightFallOff);
+            }
+
+            ImGui::TreePop();
+        }
+        ImGui::PopStyleColor();
     }
     ImGui::End();
 }

@@ -23,7 +23,6 @@ void UEditorEngine::Init()
     FWorldContext& EditorWorldContext = CreateNewWorldContext(EWorldType::Editor);
 
     EditorWorld.reset(UWorld::CreateWorld(EWorldType::Editor, FString("EditorWorld")));
-    EditorWorld->InitializeNewWorld();
 
     EditorWorldContext.SetCurrentWorld(EditorWorld.get());
     ActiveWorld = EditorWorld;

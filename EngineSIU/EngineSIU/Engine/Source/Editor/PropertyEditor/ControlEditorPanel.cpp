@@ -16,6 +16,7 @@
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include "Engine/EditorEngine.h"
+#include <Actors/HeightFogActor.h>
 
 void ControlEditorPanel::Render()
 {
@@ -253,7 +254,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             { .label= "SpotLight", .obj= OBJ_SpotLight },
             { .label= "PointLight", .obj= OBJ_PointLight },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
-            { .label= "Text",      .obj= OBJ_Text }
+            { .label= "Text",      .obj= OBJ_Text },
+            { .label= "Fog",       .obj= OBJ_Fog }
         };
 
         for (const auto& primitive : primitives)
@@ -314,6 +316,12 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
                     TextComponent->SetText(L"안녕하세요 Jungle 1");
+                    break;
+                }
+                case OBJ_Fog:
+                {
+                    SpawnedActor = World->SpawnActor<AHeightFogActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_HeightFog"));
                     break;
                 }
                 case OBJ_TRIANGLE:
