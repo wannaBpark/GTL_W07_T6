@@ -1,7 +1,6 @@
 #pragma once
 #include "Engine.h"
 
-
 /*
     Editor 모드에서 사용될 엔진.
     UEngine을 상속받아 Editor에서 사용 될 기능 구현.
@@ -17,8 +16,11 @@ public:
     virtual void Init() override;
     virtual void Tick(float DeltaTime) override;
 
-    UWorld* PIEWorld;
-    UWorld* EditorWorld;
+    std::shared_ptr<UWorld> PIEWorld;
+    std::shared_ptr<UWorld> EditorWorld;
+
+    void StartPIE();
+    void EndPIE();
 
     // 주석은 UE에서 사용하던 매개변수.
     FWorldContext& GetEditorWorldContext(/*bool bEnsureIsGWorld = false*/);

@@ -8,22 +8,22 @@
 #include "Engine/FLoaderOBJ.h"
 #include "Components/HeightFogComponent.h"
 
-void UWorld::Initialize()
+UWorld* UWorld::CreateWorld(const EWorldType InWorldType, const FString& InWorldName)
 {
-    // TODO: Load Scene
+    UWorld* NewWorld = FObjectFactory::ConstructObject<UWorld>();
+    NewWorld->WorldName = InWorldName;
+    NewWorld->InitializeNewWorld();
+
+    return NewWorld;
+}
+
+void UWorld::InitializeNewWorld()
+{
+    ActiveLevel.reset(FObjectFactory::ConstructObject<ULevel>());
+    ActiveLevel->InitLevel(this);
+
+    // TODO: BaseObject 제거 필요.
     CreateBaseObject();
-    //SpawnObject(OBJ_CUBE);
-    FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
-
-    FManagerOBJ::CreateStaticMesh("Assets/SkySphere.obj");
-    AActor* SpawnedActor = SpawnActor<AActor>();
-    USkySphereComponent* skySphere = SpawnedActor->AddComponent<USkySphereComponent>();
-    skySphere->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"SkySphere.obj"));
-    skySphere->GetStaticMesh()->GetMaterials()[0]->Material->SetDiffuse(FVector((float)32/255, (float)171/255, (float)191/255));
-
-    FogActor = SpawnActor<AActor>();
-    UHeightFogComponent* FogComp = FogActor->AddComponent<UHeightFogComponent>();
-    FogActor->SetActorLabel("Height Fog");
 }
 
 void UWorld::CreateBaseObject()
@@ -54,6 +54,7 @@ void UWorld::ReleaseBaseObject()
     }
 }
 
+
 void UWorld::Tick(float DeltaTime)
 {
     EditorPlayer->Tick(DeltaTime);
@@ -65,40 +66,36 @@ void UWorld::Tick(float DeltaTime)
         Actor->BeginPlay();
     }
     PendingBeginPlayActors.Empty();
-
-    // 매 틱마다 Actor->Tick(...) 호출
-	for (AActor* Actor : ActorsArray)
-	{
-	    Actor->Tick(DeltaTime);
-	}
 }
 
 void UWorld::BeginPlay()
 {
-    /*
-    for (AActor* Actor : ActorsArray)
+    for (AActor* Actor : ActiveLevel->Actors)
     {
         if (Actor->GetWorld() == this)
         {
             Actor->BeginPlay();
         }
     }
-    */
 }
 
 void UWorld::Release()
 {
-	for (AActor* Actor : ActorsArray)
-	{
-		Actor->EndPlay(EEndPlayReason::WorldTransition);
-        TSet<UActorComponent*> Components = Actor->GetComponents();
-	    for (UActorComponent* Component : Components)
+    if (ActiveLevel)
+    {
+	    for (AActor* Actor : ActiveLevel->Actors)
 	    {
-	        GUObjectArray.MarkRemoveObject(Component);
+		    Actor->EndPlay(EEndPlayReason::WorldTransition);
+            TSet<UActorComponent*> Components = Actor->GetComponents();
+	        for (UActorComponent* Component : Components)
+	        {
+	            GUObjectArray.MarkRemoveObject(Component);
+	        }
+	        GUObjectArray.MarkRemoveObject(Actor);
 	    }
-	    GUObjectArray.MarkRemoveObject(Actor);
-	}
-    ActorsArray.Empty();
+        ActiveLevel->Actors.Empty();
+        ActiveLevel.reset();
+    }
 
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
@@ -133,7 +130,7 @@ bool UWorld::DestroyActor(AActor* ThisActor)
     }
 
     // World에서 제거
-    ActorsArray.Remove(ThisActor);
+    ActiveLevel->Actors.Remove(ThisActor);
 
     // 제거 대기열에 추가
     GUObjectArray.MarkRemoveObject(ThisActor);
