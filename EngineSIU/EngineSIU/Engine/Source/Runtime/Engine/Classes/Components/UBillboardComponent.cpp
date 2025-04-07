@@ -34,7 +34,7 @@ UObject* UBillboardComponent::Duplicate()
     {
         NewComponent->finalIndexU = finalIndexU;
         NewComponent->finalIndexV = finalIndexV;
-        NewComponent->Texture = FEngineLoop::resourceMgr.GetTexture(BufferKey.ToWideString());
+        NewComponent->Texture = FEngineLoop::ResourceManager.GetTexture(BufferKey.ToWideString());
         NewComponent->BufferKey = BufferKey;
         NewComponent->m_parent = m_parent;
     }
@@ -69,7 +69,7 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 
 void UBillboardComponent::SetTexture(const FWString& _fileName)
 {
-    Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+    Texture = FEngineLoop::ResourceManager.GetTexture(_fileName);
     std::string str(_fileName.begin(), _fileName.end());
     BufferKey = FString(str);
     CreateQuadTextureVertexBuffer();
@@ -104,8 +104,8 @@ FMatrix UBillboardComponent::CreateBillboardMatrix() const
 
 void UBillboardComponent::CreateQuadTextureVertexBuffer()
 {
-    FEngineLoop::renderer.CreateImmutableVertexBuffer(BufferKey, QuadTextureVertices);
-    FEngineLoop::renderer.CreateImmutableIndexBuffer(BufferKey, QuadTextureIndices);
+    FEngineLoop::Renderer.CreateImmutableVertexBuffer(BufferKey, QuadTextureVertices);
+    FEngineLoop::Renderer.CreateImmutableIndexBuffer(BufferKey, QuadTextureIndices);
 }
 
 bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& quadVertices, float& hitDistance) const
@@ -117,7 +117,7 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& quadVertices,
 
     D3D11_VIEWPORT viewport;
     UINT numViewports = 1;
-    FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
+    FEngineLoop::GraphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 
     // NDC 좌표 계산: X, Y는 [-1,1] 범위로 매핑
     float ndcX = (2.0f * mousePos.x / viewport.Width) - 1.0f;

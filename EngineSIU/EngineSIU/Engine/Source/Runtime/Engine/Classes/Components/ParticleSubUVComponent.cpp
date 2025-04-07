@@ -87,7 +87,7 @@ void UParticleSubUVComponent::SetRowColumnCount(int cellsPerRow, int cellsPerCol
 
 void UParticleSubUVComponent::SetTexture(const FWString& _fileName)
 {
-    Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+    Texture = FEngineLoop::ResourceManager.GetTexture(_fileName);
     std::string str(_fileName.begin(), _fileName.end());
     BufferKey = FString(str);
 
@@ -123,6 +123,6 @@ void UParticleSubUVComponent::CreateOrUpdateVertexBuffer()
     vertices[3].v = normalHeightOffset;
     TArray<uint32> QuadTextureIndices = { 0, 1, 2, 1, 3, 2 };
     // BufferManager를 통해 고유 키(BufferKey)를 사용하여 Immutable 버텍스 버퍼 생성
-    FEngineLoop::renderer.CreateImmutableVertexBuffer(BufferKey, vertices);
-    FEngineLoop::renderer.CreateImmutableIndexBuffer(BufferKey, QuadTextureIndices);
+    FEngineLoop::Renderer.CreateImmutableVertexBuffer(BufferKey, vertices);
+    FEngineLoop::Renderer.CreateImmutableIndexBuffer(BufferKey, QuadTextureIndices);
 }

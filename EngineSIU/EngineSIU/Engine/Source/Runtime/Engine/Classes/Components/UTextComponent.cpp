@@ -227,5 +227,5 @@ void UTextComponent::SetStartUV(char alphabet, float& outStartU, float& outStart
 }
 void UTextComponent::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& Vertex)
 {
-    FEngineLoop::renderer.CreateImmutableVertexBuffer(TextAtlasBufferKey, Vertex);
+    FEngineLoop::Renderer.CreateImmutableVertexBuffer(TextAtlasBufferKey, Vertex);
 }
