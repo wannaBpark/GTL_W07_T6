@@ -129,7 +129,6 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
     ChangeViewMode(ActiveViewport->GetViewMode());
-    bool bIsFog = false;
     UHeightFogComponent* Fog = nullptr;
     for (UHeightFogComponent* iter : TObjectRange<UHeightFogComponent>())
     {
@@ -139,13 +138,12 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
             if (FogWorld == World && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
             {
                 Fog = iter;
-                bIsFog = true;
                 break;
             }
         }
     }
 
-    if (bIsFog) 
+    if (Fog) 
     {
         Graphics->PrepareTexture();
     }
@@ -158,7 +156,7 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     if (IsSceneDepth)
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
 
-    if (!IsSceneDepth && bIsFog) 
+    if (!IsSceneDepth && Fog) 
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
         

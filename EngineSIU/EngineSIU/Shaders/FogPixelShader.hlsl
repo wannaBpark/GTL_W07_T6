@@ -58,7 +58,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
     float distance = length(ToCamera);
     
     //안개 계수
-    float FogFactor = 1.0 - exp(-distance / 2.0 * FogDensity * HeightFactor);
+    float FogFactor = 1.0 - exp(-distance * FogDensity * HeightFactor);
     FogFactor = saturate(FogFactor);
     FogFactor = min(FogFactor, FogMaxOpacity);
     
