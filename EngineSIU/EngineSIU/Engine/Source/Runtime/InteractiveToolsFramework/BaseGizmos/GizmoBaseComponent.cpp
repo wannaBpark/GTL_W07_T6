@@ -1,6 +1,6 @@
 #include "GizmoBaseComponent.h"
 
-#include "World.h"
+#include "World/World.h"
 #include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/EditorViewportClient.h"

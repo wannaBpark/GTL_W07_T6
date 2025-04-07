@@ -402,12 +402,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h">
       <Filter>Engine\Source\Runtime\Engine</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\World.cpp">
-      <Filter>Engine\Source\Runtime\Engine</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\World.h">
-      <Filter>Engine\Source\Runtime\Engine</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Camera</Filter>
     </ClCompile>
@@ -750,6 +744,13 @@
     <ClInclude Include="Font\RawFonts.h">
       <Filter>Font</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Stats\Stats.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\World\World.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Level.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp" />
   </ItemGroup>
@@ -784,6 +785,20 @@
     <FxCompile Include="Shaders\DepthBufferVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Stats\Stats.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\World.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h" />
   </ItemGroup>

@@ -1,7 +1,7 @@
 #include "EngineLoop.h"
 #include "ImGuiManager.h"
 #include "UnrealClient.h"
-#include "World.h"
+#include "World/World.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ViewportTypePanel.h"
@@ -9,6 +9,9 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
 #include "D3D11RHI/GraphicDevice.h"
+
+#include "Engine/EditorEngine.h"
+
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -18,7 +21,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     {
         return true;
     }
-    int zDelta = 0;
+    int zDelta;
     switch (message)
     {
     case WM_DESTROY:
@@ -139,6 +142,10 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     LevelEditor->Initialize();
 
+    GEngine = FObjectFactory::ConstructObject<UEditorEngine>();
+    GEngine->Init();
+
+    GWorld = new UWorld;
     GWorld->Initialize();
 
     return 0;
@@ -276,7 +283,7 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 
     WCHAR Title[] = L"Game Tech Lab";
 
-    WNDCLASSW wndclass = { 0 };
+    WNDCLASSW wndclass{};
     wndclass.lpfnWndProc = WndProc;
     wndclass.hInstance = hInstance;
     wndclass.lpszClassName = WindowClass;

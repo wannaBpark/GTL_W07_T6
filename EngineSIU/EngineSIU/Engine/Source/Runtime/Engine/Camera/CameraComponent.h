@@ -6,8 +6,7 @@ class UCameraComponent : public USceneComponent
     DECLARE_CLASS(UCameraComponent, USceneComponent)
 
 public:
-    UCameraComponent();
-    virtual ~UCameraComponent() override;
+    UCameraComponent() = default;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;

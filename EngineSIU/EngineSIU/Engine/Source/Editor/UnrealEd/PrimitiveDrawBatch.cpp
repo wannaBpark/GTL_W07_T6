@@ -7,12 +7,6 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "UnrealEd/EditorViewportClient.h"
 
-extern FEngineLoop GEngineLoop;
-
-UPrimitiveDrawBatch::UPrimitiveDrawBatch()
-{
-
-}
 
 UPrimitiveDrawBatch::~UPrimitiveDrawBatch()
 {
@@ -85,9 +79,9 @@ void UPrimitiveDrawBatch::PrepareBatch(FLinePrimitiveBatchArgs& OutLinePrimitive
     UpdateConeBuffers();
     UpdateOBBBuffers();
 
-    int BoundingBoxSize = static_cast<int>(BoundingBoxes.Num());
-    int ConeSize = static_cast<int>(Cones.Num());
-    int OBBSize = static_cast<int>(OrientedBoundingBoxes.Num());
+    int BoundingBoxSize = BoundingBoxes.Num();
+    int ConeSize = Cones.Num();
+    int OBBSize = OrientedBoundingBoxes.Num();
 
     UpdateLinePrimitiveCountBuffer(BoundingBoxSize, ConeSize);
 
@@ -139,7 +133,7 @@ void UPrimitiveDrawBatch::UpdateBoundingBoxBuffers()
     }
     if (BoundingBoxBuffer && BoundingBoxSRV)
     {
-        int BoundingBoxCount = static_cast<int>(BoundingBoxes.Num());
+        int BoundingBoxCount = BoundingBoxes.Num();
         UpdateBoundingBoxBuffer(BoundingBoxBuffer, BoundingBoxes, BoundingBoxCount);
     }
 }
@@ -155,7 +149,7 @@ void UPrimitiveDrawBatch::UpdateConeBuffers()
     }
     if (ConesBuffer && ConeSRV)
     {
-        int ConeCount = static_cast<int>(Cones.Num());
+        int ConeCount = Cones.Num();
         UpdateConesBuffer(ConesBuffer, Cones, ConeCount);
     }
 }
@@ -171,7 +165,7 @@ void UPrimitiveDrawBatch::UpdateOBBBuffers()
     }
     if (OBBBuffer && OBBSRV)
     {
-        int OBBCount = static_cast<int>(OrientedBoundingBoxes.Num());
+        int OBBCount = OrientedBoundingBoxes.Num();
         UpdateOBBBuffer(OBBBuffer, OrientedBoundingBoxes, OBBCount);
     }
 }
@@ -319,7 +313,7 @@ void UPrimitiveDrawBatch::CreatePrimitiveBuffers()
 
 ID3D11Buffer* UPrimitiveDrawBatch::CreateStaticVertexBuffer() const
 {
-    FSimpleVertex Vertices[2] = { {0}, {0} };
+    FSimpleVertex Vertices[2] = {{}, {}};
 
     D3D11_BUFFER_DESC VBDesc = {};
     VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -365,7 +359,7 @@ ID3D11Buffer* UPrimitiveDrawBatch::CreateOBBBuffer(UINT NumBoundingBoxes) const
 
 ID3D11Buffer* UPrimitiveDrawBatch::CreateConeBuffer(UINT NumCones) const
 {
-    D3D11_BUFFER_DESC BufferDesc = {};
+    D3D11_BUFFER_DESC BufferDesc;
     BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     BufferDesc.ByteWidth = sizeof(FCone) * NumCones;
     BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -422,7 +416,7 @@ void UPrimitiveDrawBatch::UpdateBoundingBoxBuffer(ID3D11Buffer* Buffer, const TA
         return;
     D3D11_MAPPED_SUBRESOURCE MappedResource;
     Graphics->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-    auto Data = reinterpret_cast<FBoundingBox*>(MappedResource.pData);
+    auto Data = static_cast<FBoundingBox*>(MappedResource.pData);
     for (int i = 0; i < BoundingBoxes.Num(); ++i)
     {
         Data[i] = BoundingBoxes[i];
@@ -436,7 +430,7 @@ void UPrimitiveDrawBatch::UpdateOBBBuffer(ID3D11Buffer* Buffer, const TArray<FOB
         return;
     D3D11_MAPPED_SUBRESOURCE MappedResource;
     Graphics->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-    auto Data = reinterpret_cast<FOBB*>(MappedResource.pData);
+    auto Data = static_cast<FOBB*>(MappedResource.pData);
     for (int i = 0; i < OBBs.Num(); ++i)
     {
         Data[i] = OBBs[i];
@@ -450,7 +444,7 @@ void UPrimitiveDrawBatch::UpdateConesBuffer(ID3D11Buffer* Buffer, const TArray<F
         return;
     D3D11_MAPPED_SUBRESOURCE MappedResource;
     Graphics->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-    auto Data = reinterpret_cast<FCone*>(MappedResource.pData);
+    auto Data = static_cast<FCone*>(MappedResource.pData);
     for (int i = 0; i < Cones.Num(); ++i)
     {
         Data[i] = Cones[i];

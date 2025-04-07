@@ -9,7 +9,6 @@ class UClass : public UObject
 {
 public:
     UClass(const char* InClassName, uint32 InClassSize, uint32 InAlignment, UClass* InSuperClass);
-    virtual ~UClass() override = default;
 
     // 복사 & 이동 생성자 제거
     UClass(const UClass&) = delete;

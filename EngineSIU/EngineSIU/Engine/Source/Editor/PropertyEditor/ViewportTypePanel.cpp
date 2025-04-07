@@ -1,12 +1,5 @@
 #include "ViewportTypePanel.h"
 
-ViewportTypePanel::ViewportTypePanel()
-{
-}
-
-ViewportTypePanel::~ViewportTypePanel()
-{
-}
 
 ViewportTypePanel& ViewportTypePanel::GetInstance()
 {

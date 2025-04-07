@@ -1,5 +1,5 @@
 #include "GraphicDevice.h"
-#include <wchar.h>
+#include <cwchar>
 
 void FGraphicsDevice::Initialize(HWND hWindow)
 {
@@ -70,7 +70,7 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
     descDepth.CPUAccessFlags = 0;                     // CPU 접근 방식 설정
     descDepth.MiscFlags = 0;                          // 기타 플래그 설정
 
-    HRESULT hr = Device->CreateTexture2D(&descDepth, NULL, &DepthStencilBuffer);
+    HRESULT hr = Device->CreateTexture2D(&descDepth, nullptr, &DepthStencilBuffer);
 
     if (FAILED(hr))
     {

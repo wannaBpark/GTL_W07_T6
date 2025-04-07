@@ -11,7 +11,7 @@ class FGraphicsDevice;
 class UPrimitiveDrawBatch
 {
 public:
-    UPrimitiveDrawBatch();
+    UPrimitiveDrawBatch() = default;
     ~UPrimitiveDrawBatch();
 
     // 초기화 및 릴리즈

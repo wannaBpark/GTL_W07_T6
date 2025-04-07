@@ -1,14 +1,7 @@
 #include "SWindow.h"
 
-SWindow::SWindow()
-{
-}
 
 SWindow::SWindow(FRect initRect) : Rect(initRect)
-{
-}
-
-SWindow::~SWindow()
 {
 }
 

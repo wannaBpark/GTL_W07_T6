@@ -177,7 +177,7 @@ struct FBoundingBox
     {
         float tmin = -FLT_MAX;
         float tmax = FLT_MAX;
-        const float epsilon = 1e-6f;
+        constexpr float epsilon = 1e-6f;
 
         // X축 처리
         if (fabs(rayDir.X) < epsilon)

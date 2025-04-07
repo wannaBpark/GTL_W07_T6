@@ -1,12 +1,5 @@
 #include "PrimitiveComponent.h"
 
-UPrimitiveComponent::UPrimitiveComponent()
-{
-}
-
-UPrimitiveComponent::~UPrimitiveComponent()
-{
-}
 
 void UPrimitiveComponent::InitializeComponent()
 {
@@ -66,7 +59,7 @@ int UPrimitiveComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 
 bool UPrimitiveComponent::IntersectRayTriangle(const FVector& rayOrigin, const FVector& rayDirection, const FVector& v0, const FVector& v1, const FVector& v2, float& hitDistance) const
 {
-    const float epsilon = 1e-6f;
+    constexpr float epsilon = 1e-6f;
     FVector edge1 = v1 - v0;
     const FVector edge2 = v2 - v0;
     FVector FrayDirection = rayDirection;

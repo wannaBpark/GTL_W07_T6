@@ -689,13 +689,13 @@ public:
         return true;
     }
 
-    static UMaterial* CreateMaterial(FObjMaterialInfo materialInfo);
+    static UMaterial* CreateMaterial(const FObjMaterialInfo& materialInfo);
     static TMap<FString, UMaterial*>& GetMaterials() { return materialMap; }
-    static UMaterial* GetMaterial(FString name);
+    static UMaterial* GetMaterial(const FString& name);
     static int GetMaterialNum() { return materialMap.Num(); }
-    static UStaticMesh* CreateStaticMesh(FString filePath);
+    static UStaticMesh* CreateStaticMesh(const FString& filePath);
     static const TMap<FWString, UStaticMesh*>& GetStaticMeshes() { return staticMeshMap; }
-    static UStaticMesh* GetStaticMesh(FWString name);
+    static UStaticMesh* GetStaticMesh(const FWString& name);
     static int GetStaticMeshNum() { return staticMeshMap.Num(); }
 
 private:

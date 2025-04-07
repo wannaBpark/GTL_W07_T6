@@ -1,6 +1,9 @@
 #pragma once
 #include "Define.h"
-FVertexSimple quadVertices[] =
+#include "HAL/PlatformType.h"
+
+
+inline FVertexSimple quadVertices[] =
 {
     {-1.0f,1.0f,0.0f,0.0f,1.0f,0.0f,1.0f},
     { 1.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f},
@@ -8,9 +11,8 @@ FVertexSimple quadVertices[] =
     { 1.0f,-1.0f,0.0f,1.0f,1.0f,1.0f,1.0f}
 };
 
-uint32 quadInices[] =
+inline uint32 quadIndices[] =
 {
     0,1,2,
     1,3,2
 };
-

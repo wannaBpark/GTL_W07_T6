@@ -6,8 +6,7 @@ class UPrimitiveComponent : public USceneComponent
     DECLARE_CLASS(UPrimitiveComponent, USceneComponent)
 
 public:
-    UPrimitiveComponent();
-    virtual ~UPrimitiveComponent() override;
+    UPrimitiveComponent() = default;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;

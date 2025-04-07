@@ -2,10 +2,6 @@
 #include "Engine/FLoaderOBJ.h"
 #include "UObject/ObjectFactory.h"
 
-UStaticMesh::UStaticMesh()
-{
-
-}
 
 UStaticMesh::~UStaticMesh()
 {

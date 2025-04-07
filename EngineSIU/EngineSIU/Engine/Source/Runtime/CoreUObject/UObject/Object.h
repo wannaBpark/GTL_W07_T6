@@ -92,5 +92,4 @@ public:
 
         return result;
     }
-private:
 };

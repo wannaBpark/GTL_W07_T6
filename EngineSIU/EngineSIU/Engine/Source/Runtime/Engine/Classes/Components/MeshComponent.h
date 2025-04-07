@@ -15,7 +15,7 @@ public:
     virtual UMaterial* GetMaterialByName(FName MaterialSlotName) const;
     virtual TArray<FName> GetMaterialSlotNames() const;
     virtual void SetMaterial(uint32 ElementIndex, UMaterial* Material);
-    virtual void SetMaterialByName(FName MaterialSlotName, class UMaterial* Material);
+    virtual void SetMaterialByName(FName MaterialSlotName, UMaterial* Material);
     virtual void GetUsedMaterials(TArray<UMaterial*>& Out) const;
 #pragma endregion
 protected:
