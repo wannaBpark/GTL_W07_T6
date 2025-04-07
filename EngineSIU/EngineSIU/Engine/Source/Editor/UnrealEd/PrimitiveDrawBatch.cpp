@@ -288,7 +288,7 @@ void UPrimitiveDrawBatch::AddConeToBatch(const FVector& Center, float Radius, fl
     FVector LocalBaseCenter = FVector(Height, 0, 0);
     Cone.ConeBaseCenter = Center + FMatrix::TransformVector(LocalBaseCenter, ModelMatrix);
     Cone.ConeRadius = Radius;
-    Cone.ConeHeight = Height;
+    Cone.ConeHeight = Height / 1000;
     Cone.Color = Color;
     Cone.ConeSegmentCount = ConeSegmentCount;
     Cones.Add(Cone);

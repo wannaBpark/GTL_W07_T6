@@ -54,12 +54,12 @@ void SLevelEditor::Tick(double deltaTime)
     }
     //Test Code Cursor icon End
     OnResize();
+    ActiveViewportClient->Input();
     for (std::shared_ptr<FEditorViewportClient> Viewport : ViewportClients)
     {
         Viewport->Tick(deltaTime);
     }
 
-    //ActiveViewportClient->Tick(deltaTime);
 }
 
 void SLevelEditor::Input()
