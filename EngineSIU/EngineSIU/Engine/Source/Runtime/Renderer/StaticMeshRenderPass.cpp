@@ -1,7 +1,7 @@
 #include "StaticMeshRenderPass.h"
 
 #include "EngineLoop.h"
-#include "World.h"
+#include "World/World.h"
 
 #include "RendererHelpers.h"
 #include "Math/JungleMath.h"

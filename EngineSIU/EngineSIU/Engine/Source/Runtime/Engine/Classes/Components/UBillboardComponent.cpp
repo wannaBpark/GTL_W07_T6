@@ -59,7 +59,7 @@ void UBillboardComponent::TickComponent(float DeltaTime)
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
     TArray<FVector> quad;
-    for (auto& quadTextureVertice : quadTextureVertices)
+    for (auto& quadTextureVertice : QuadTextureVertices)
     {
         quad.Emplace(quadTextureVertice.x, quadTextureVertice.y, quadTextureVertice.z);
 	}

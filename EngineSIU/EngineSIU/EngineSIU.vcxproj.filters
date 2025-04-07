@@ -2,175 +2,178 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Assets">
-      <UniqueIdentifier>{BE67D43A-D983-4482-9023-2CC10805BEE9}</UniqueIdentifier>
+      <UniqueIdentifier>{694BB89F-0414-4959-AD6A-8947E6BA7D4B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Assets\Cube">
-      <UniqueIdentifier>{FAFE6C32-CAA6-4444-B527-555036CD1A19}</UniqueIdentifier>
+      <UniqueIdentifier>{BDD8E7A6-A019-4DBE-B09B-FD45B7B84703}</UniqueIdentifier>
     </Filter>
     <Filter Include="Assets\Dodge">
-      <UniqueIdentifier>{82E34281-D90D-4F73-A2F5-7C8BE6BEEB56}</UniqueIdentifier>
+      <UniqueIdentifier>{CFC4F1A9-4542-4BE0-9614-4229ECBCCF45}</UniqueIdentifier>
     </Filter>
     <Filter Include="Assets\Texture">
-      <UniqueIdentifier>{F3F4705D-EE84-4135-AA0C-24CCAF861B22}</UniqueIdentifier>
+      <UniqueIdentifier>{09792E6F-BFC7-430E-A74C-C84D9CA8C9AC}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine">
-      <UniqueIdentifier>{8B924F02-740F-4F02-A64D-0D8715D046A0}</UniqueIdentifier>
+      <UniqueIdentifier>{37FCCD5F-6580-468D-A786-B1193F162A29}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source">
-      <UniqueIdentifier>{26BB28E4-0D75-47FF-B2B3-08FC9922D88A}</UniqueIdentifier>
+      <UniqueIdentifier>{A1EB2FB6-4C52-4A74-9853-76B14D49DB32}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor">
-      <UniqueIdentifier>{83120192-AF8A-4B08-B6B1-6E817A3412ED}</UniqueIdentifier>
+      <UniqueIdentifier>{0CECE8F9-BB26-41C5-9052-B306342FC6E2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor\LevelEditor">
-      <UniqueIdentifier>{658D6CEA-AC5E-40F7-8102-2BFE990E4D1F}</UniqueIdentifier>
+      <UniqueIdentifier>{855782B9-1C0F-4002-AD64-908ACC121950}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor\PropertyEditor">
-      <UniqueIdentifier>{7BF03C73-C992-4311-A84C-E93FFC435875}</UniqueIdentifier>
+      <UniqueIdentifier>{03430AF6-A933-418A-A7E8-F9EFE14CCEC0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Editor\UnrealEd">
-      <UniqueIdentifier>{2DED6E83-B831-427C-959A-9471AF7C0FFA}</UniqueIdentifier>
+      <UniqueIdentifier>{22A294CF-AE4D-4EB0-8C9E-8CAA9AF57355}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime">
-      <UniqueIdentifier>{9EFEE939-B278-4B8C-87A4-EEE9EB0618D3}</UniqueIdentifier>
+      <UniqueIdentifier>{66172F68-E854-4C82-8572-27AC3C78ECCB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core">
-      <UniqueIdentifier>{89D5212B-4B02-4973-B112-EFC1E5D29B4A}</UniqueIdentifier>
+      <UniqueIdentifier>{03A69B06-E326-483A-8980-935A68A06371}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Container">
-      <UniqueIdentifier>{CC00E6A7-55AE-4E60-8C32-0F9666C8219E}</UniqueIdentifier>
+      <UniqueIdentifier>{AC7AC51E-6802-4508-9972-E94D433247ED}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Delegates">
-      <UniqueIdentifier>{6F7C745E-31F2-413A-94EA-E8F987495303}</UniqueIdentifier>
+      <UniqueIdentifier>{C87D00C3-6DA8-49AB-90CA-5EA8E6EE82B8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\HAL">
-      <UniqueIdentifier>{B68D1C22-DBDA-46EC-9718-92A55897DFE1}</UniqueIdentifier>
+      <UniqueIdentifier>{7357CC3F-C03D-46BE-8109-35A90DD71598}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Math">
-      <UniqueIdentifier>{6D9963A0-D53B-4510-97B2-719AC1AE3890}</UniqueIdentifier>
+      <UniqueIdentifier>{59F3CE6F-621D-4AA3-B64B-00AE9F1DF561}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Core\Stats">
-      <UniqueIdentifier>{7321DB13-729A-4AEB-B8D6-7FA65B9EF0A8}</UniqueIdentifier>
+      <UniqueIdentifier>{EEA437B8-AAA5-4930-B12F-951542F0E568}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\CoreUObject">
-      <UniqueIdentifier>{ABD8CC37-397A-4369-A637-10365A086DC1}</UniqueIdentifier>
+      <UniqueIdentifier>{7424195D-042F-4A4B-BDA2-00D935656BE8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\CoreUObject\UObject">
-      <UniqueIdentifier>{A09EA9CA-5866-4F83-9A96-84601DECB8F4}</UniqueIdentifier>
+      <UniqueIdentifier>{9BDC6173-EAA0-4F18-AFF0-7FE08E02169F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine">
-      <UniqueIdentifier>{36C7515B-B0D0-4787-8EF6-92AB40E0BD59}</UniqueIdentifier>
+      <UniqueIdentifier>{8E63BBD3-6E87-4D68-85F4-1D4DCFC390A3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Camera">
-      <UniqueIdentifier>{59356E37-CD03-48F0-9596-99D2D9EFCD5E}</UniqueIdentifier>
+      <UniqueIdentifier>{FDFE52C5-F7C3-44A6-BD84-DE19D680E12F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes">
-      <UniqueIdentifier>{83E91DD6-7849-4471-A6F9-65A7AEEF2171}</UniqueIdentifier>
+      <UniqueIdentifier>{F91BC943-CE08-4F4E-9D46-FFF67420B216}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Actors">
-      <UniqueIdentifier>{055B9F64-93DB-446C-B33B-AFED9D122178}</UniqueIdentifier>
+      <UniqueIdentifier>{377D9E3E-EDC2-4CF4-B823-A3FEFE5AAE9C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components">
-      <UniqueIdentifier>{D78751C3-8A8C-44AE-9130-2A2CFA7C200B}</UniqueIdentifier>
+      <UniqueIdentifier>{8B175E7C-7F97-48B0-8587-939FCC8312B3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Material">
-      <UniqueIdentifier>{0F70E714-632B-42A5-8A26-628C9EF4B197}</UniqueIdentifier>
+      <UniqueIdentifier>{8C72C557-9059-41E7-85A0-3B223C472C32}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh">
-      <UniqueIdentifier>{C1C60EEA-3FC0-43C0-93C2-5D3E927D8F93}</UniqueIdentifier>
+      <UniqueIdentifier>{FA92B990-31A8-4878-A054-33A803BE0951}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Engine">
-      <UniqueIdentifier>{074A1AE3-3843-458E-AB3E-E04789AC7FCD}</UniqueIdentifier>
+      <UniqueIdentifier>{AD1DA49E-02D0-4CF8-BA82-13990D12A02F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\Classes\GameFramework">
-      <UniqueIdentifier>{031402C1-74AA-4909-B39E-58D1CE256741}</UniqueIdentifier>
+      <UniqueIdentifier>{3926E081-E3BB-4FE8-BEE1-3CC3FFBE9F55}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\UserInterface">
-      <UniqueIdentifier>{0C040392-A162-483D-BBF8-13FC295B4A29}</UniqueIdentifier>
+      <UniqueIdentifier>{F808DFCA-4DE0-490D-AD46-368DF0536F2A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\Runtime\Engine\World">
+      <UniqueIdentifier>{A868C69C-CD6C-4A84-A8C1-0EA0C9E605A6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\InteractiveToolsFramework">
-      <UniqueIdentifier>{E45BB565-5A5E-4ACF-ACDB-E3C080436EB0}</UniqueIdentifier>
+      <UniqueIdentifier>{3B43D22D-99E8-4CBC-9C82-E90653433F57}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos">
-      <UniqueIdentifier>{5920C175-2D0C-4914-9447-DFB802014489}</UniqueIdentifier>
+      <UniqueIdentifier>{21E3393B-015E-4060-A592-97D54479014C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Launch">
-      <UniqueIdentifier>{12B8191F-2AA5-41AF-9C77-DE6EE756F558}</UniqueIdentifier>
+      <UniqueIdentifier>{12BB4C04-295D-47C2-892C-1DFB947E856E}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Renderer">
-      <UniqueIdentifier>{C2C98EC3-3029-4E53-9456-3A812B6BEE6C}</UniqueIdentifier>
+      <UniqueIdentifier>{05E6AAF0-0D92-4186-A3CB-EB4478256A31}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Serialization">
-      <UniqueIdentifier>{075ACAE8-3EA4-4CE4-B88F-FF750DFE81CB}</UniqueIdentifier>
+      <UniqueIdentifier>{B9B35DA2-9E0A-4327-A332-9ABDA749F226}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Slate">
-      <UniqueIdentifier>{6DA4D88C-E45D-47C0-A8EF-25CFB789681F}</UniqueIdentifier>
+      <UniqueIdentifier>{0EF353CA-610C-48D7-BBDC-BFF176ADB777}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Slate\Widgets">
-      <UniqueIdentifier>{974F7251-34DA-405C-BEEA-15F015021FE4}</UniqueIdentifier>
+      <UniqueIdentifier>{FF980A60-2BB8-4F46-80FD-8000C19571F5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Slate\Widgets\Layout">
-      <UniqueIdentifier>{8E937638-3D3E-4CAD-99EA-94AC5D743CB3}</UniqueIdentifier>
+      <UniqueIdentifier>{8923F80D-56B9-4C6C-BF78-AB411624EAF6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\SlateCore">
-      <UniqueIdentifier>{FA9BE520-8990-466C-B768-FB0D7FF88E52}</UniqueIdentifier>
+      <UniqueIdentifier>{098D5496-5771-4A94-875C-51ADDF18D45B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\SlateCore\Widgets">
-      <UniqueIdentifier>{C3265A09-9B68-42E6-A7B6-880914C5ADF5}</UniqueIdentifier>
+      <UniqueIdentifier>{4BA5C9E1-ED45-48E8-A81E-461B0900B4A5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Windows">
-      <UniqueIdentifier>{016A4A8F-971F-472D-BB7E-D44C5706DAA4}</UniqueIdentifier>
+      <UniqueIdentifier>{1E6A9FD8-0C7D-4E6C-8299-CCE63B08B697}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\Runtime\Windows\D3D11RHI">
-      <UniqueIdentifier>{8CEF655C-B61F-4EEE-8161-98793440CB1A}</UniqueIdentifier>
+      <UniqueIdentifier>{2F9850C9-BADC-4B60-ADC9-D02B14C82296}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty">
-      <UniqueIdentifier>{DD9FA37B-7D17-40B0-B707-61BBD21C0A7C}</UniqueIdentifier>
+      <UniqueIdentifier>{1B49E962-6BCE-4600-9156-E2BADC8BBCF1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK">
-      <UniqueIdentifier>{36537B6E-26FF-498A-8972-B02980F53573}</UniqueIdentifier>
+      <UniqueIdentifier>{E600E831-523A-49EF-931C-74C52135DF4D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Include">
-      <UniqueIdentifier>{2A4809EA-265A-4E8F-B025-0665CBFF0819}</UniqueIdentifier>
+      <UniqueIdentifier>{74609CCB-F47D-4308-8D13-1E6CDCE4E205}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib">
-      <UniqueIdentifier>{777A15E5-63DC-4893-AF0E-2E5EC65B8BC0}</UniqueIdentifier>
+      <UniqueIdentifier>{48F65260-F131-4E16-9FEA-1F14AADDCD82}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x64">
-      <UniqueIdentifier>{81295414-521B-41E4-81D9-B00140A19CA8}</UniqueIdentifier>
+      <UniqueIdentifier>{B2653643-088A-4135-A258-3623E15A9919}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x64\Debug">
-      <UniqueIdentifier>{F191A863-2250-49DB-A802-4688A1969515}</UniqueIdentifier>
+      <UniqueIdentifier>{5A4814C7-F5B1-4383-AA3D-D32182370F75}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x64\Release">
-      <UniqueIdentifier>{EEA4D0C9-070D-42CB-A3DC-D6B0886C7CD6}</UniqueIdentifier>
+      <UniqueIdentifier>{C463769D-4BF8-4125-A378-5482B4FB67CD}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86">
-      <UniqueIdentifier>{EC76FDF8-1BC9-47E9-8A05-747E15BDAB87}</UniqueIdentifier>
+      <UniqueIdentifier>{5647B1D6-D94C-4C4B-ABD9-32853271E4AA}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Debug">
-      <UniqueIdentifier>{4E8B9481-CF23-414D-9BAF-8C1FF5A9EF5F}</UniqueIdentifier>
+      <UniqueIdentifier>{FCCEDD3E-7A59-4330-A58C-E4159EF3CADF}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\DirectXTK\Lib\x86\Release">
-      <UniqueIdentifier>{9F827BAC-5C64-4C6F-A75A-33CD7CC05950}</UniqueIdentifier>
+      <UniqueIdentifier>{7C5517BB-CCCF-4925-9C8F-FC92A086E83C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\include">
-      <UniqueIdentifier>{E4179DD2-F82F-47EF-A235-B127D528D90A}</UniqueIdentifier>
+      <UniqueIdentifier>{4B0E7FAA-D409-4045-80E6-DBBD2DCAB2B1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\include\ImGUI">
-      <UniqueIdentifier>{DF5CAEB8-805F-4127-811E-5BCFF98E757E}</UniqueIdentifier>
+      <UniqueIdentifier>{A4D2ACDF-C48E-4EC2-9E19-C301F041E5AE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\JSON">
-      <UniqueIdentifier>{EFB56CF0-2789-4709-B29C-47B80F06E77D}</UniqueIdentifier>
+      <UniqueIdentifier>{117B78A6-DF3D-4287-B0BC-1BA39C0AC9C1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Source\ThirdParty\tinyfiledialogs">
-      <UniqueIdentifier>{1445C6CE-4D9D-4F46-9447-F6B2F779C451}</UniqueIdentifier>
+      <UniqueIdentifier>{73B7FD64-1F39-49EB-BC4B-697A60EF6B4F}</UniqueIdentifier>
     </Filter>
     <Filter Include="Font">
-      <UniqueIdentifier>{E6C6B9C7-1B21-46AC-BB81-B1F634BC260A}</UniqueIdentifier>
+      <UniqueIdentifier>{68E11244-AE3F-49E6-BE44-49D188FA37CE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Shaders">
-      <UniqueIdentifier>{D4F3B82B-3A6F-47EF-9F22-5BF0722B2756}</UniqueIdentifier>
+      <UniqueIdentifier>{A9773D1D-2B7E-4A45-9967-3C8F6D68F622}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -408,6 +411,12 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Camera</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Level.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
     </ClCompile>
@@ -436,6 +445,12 @@
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PrimitiveComponent.cpp">
@@ -513,6 +528,18 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Mesh</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EngineTypes.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
     </ClInclude>
@@ -548,6 +575,18 @@
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h">
       <Filter>Engine\Source\Runtime\Engine\UserInterface</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\World\World.cpp">
+      <Filter>Engine\Source\Runtime\Engine\World</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\World.h">
+      <Filter>Engine\Source\Runtime\Engine\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h">
+      <Filter>Engine\Source\Runtime\Engine\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h">
+      <Filter>Engine\Source\Runtime\Engine\World</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp">
       <Filter>Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos</Filter>
@@ -606,6 +645,12 @@
     <ClInclude Include="Engine\Source\Runtime\Renderer\BillboardRenderPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp">
+      <Filter>Engine\Source\Runtime\Renderer</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h">
+      <Filter>Engine\Source\Runtime\Renderer</Filter>
+    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\GizmoRenderPass.cpp">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
@@ -613,12 +658,6 @@
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Renderer\IRenderPass.h">
-      <Filter>Engine\Source\Runtime\Renderer</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Renderer\UpdateLightBufferPass.cpp">
-      <Filter>Engine\Source\Runtime\Renderer</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Renderer\UpdateLightBufferPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\LineRenderPass.cpp">
@@ -640,6 +679,12 @@
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Renderer\StaticMeshRenderPass.h">
+      <Filter>Engine\Source\Runtime\Renderer</Filter>
+    </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Renderer\UpdateLightBufferPass.cpp">
+      <Filter>Engine\Source\Runtime\Renderer</Filter>
+    </ClCompile>
+    <ClInclude Include="Engine\Source\Runtime\Renderer\UpdateLightBufferPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Serialization\Serializer.h">
@@ -744,27 +789,24 @@
     <ClInclude Include="Font\RawFonts.h">
       <Filter>Font</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Core\Math\Color.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Core\Stats\Stats.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\World\World.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Level.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DepthBufferVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GizmoPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GizmoVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\PixelBillBoardShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShaderLine.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShaderW0.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">
@@ -776,30 +818,14 @@
     <FxCompile Include="Shaders\VertexBillBoardShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ShaderW0.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShaderLine.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\Light.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\GizmoVertexShader.hlsl" />
-    <FxCompile Include="Shaders\GizmoPixelShader.hlsl" />
-    <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl" />
-    <FxCompile Include="Shaders\DepthBufferVertexShader.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Stats\Stats.h" />
-    <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldType.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\World\World.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Engine\Source\Runtime\Core\Math\Color.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PointLightComponent.h" />
-    <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h" />
   </ItemGroup>
 </Project>

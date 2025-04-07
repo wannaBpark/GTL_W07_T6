@@ -11,7 +11,7 @@
 #include "RendererHelpers.h"
 #include "Math/JungleMath.h"
 
-#include "World.h"
+#include "World/World.h"
 
 #include "Actors/Player.h"
 

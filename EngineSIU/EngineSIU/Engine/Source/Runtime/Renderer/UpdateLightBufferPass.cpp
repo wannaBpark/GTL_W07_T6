@@ -6,7 +6,7 @@
 #include "Components/LightComponent.h"
 #include "Math/JungleMath.h"
 
-#include "World.h"
+#include "World/World.h"
 #include "EngineLoop.h"
 
 #include "UObject/UObjectIterator.h"

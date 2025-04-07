@@ -18,7 +18,7 @@
 
 #include "EngineLoop.h"
 
-#include "World.h"
+#include "World/World.h"
 
 FBillboardRenderPass::FBillboardRenderPass()
     : BufferManager(nullptr)
