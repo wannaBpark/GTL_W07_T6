@@ -8,6 +8,8 @@ class UGizmoBaseComponent;
 class UGizmoArrowComponent;
 class USceneComponent;
 class UPrimitiveComponent;
+class FEditorViewportClient;
+class UStaticMeshComponent;
 
 class AEditorPlayer : public AActor
 {
@@ -18,7 +20,8 @@ class AEditorPlayer : public AActor
     virtual void Tick(float DeltaTime) override;
 
     void Input();
-    bool PickGizmo(FVector& rayOrigin);
+    bool PickGizmo(FVector& rayOrigin, FEditorViewportClient* InActiveViewport);
+    void ProcessGizmoIntersection(UStaticMeshComponent* iter, const FVector& pickPosition, FEditorViewportClient* InActiveViewport, bool& isPickedGizmo);
     void PickActor(const FVector& pickPosition);
     void AddControlMode();
     void AddCoordiMode();

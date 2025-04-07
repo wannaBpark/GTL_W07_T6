@@ -5,12 +5,13 @@
 #include "Components/LightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
+#include "Engine/EditorEngine.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -41,7 +42,11 @@ void PropertyEditorPanel::Render()
     
     
     AEditorPlayer* player = GEngine->ActiveWorld->GetEditorPlayer();
-    AActor* PickedActor = GEngine->ActiveWorld->GetSelectedActor();
+    
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+    AActor* PickedActor = Engine->GetSelectedActor();
     if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();
@@ -85,9 +90,9 @@ void PropertyEditorPanel::Render()
     {
         if (ImGui::Button("Duplicate"))
         {
-            UWorld* World = GEngine->GetWorld();
-            AActor* NewActor = World->DuplicateActor(PickedActor);
-            World->SetSelectedActor(NewActor);
+            UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+            AActor* NewActor = Engine->ActiveWorld->DuplicateActor(Engine->GetSelectedActor());
+            Engine->SelectActor(NewActor);
         }
     }
 

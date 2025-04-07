@@ -31,7 +31,7 @@ private:
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
     UWorld* World;
-    std::shared_ptr<FEditorViewportClient> viewportClients[4];
+    std::shared_ptr<FEditorViewportClient> ViewportClients[4];
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
 
     bool bLButtonDown = false;
@@ -44,7 +44,7 @@ private:
     float EditorHeight;
 
 public:
-    std::shared_ptr<FEditorViewportClient>* GetViewports() { return viewportClients; }
+    std::shared_ptr<FEditorViewportClient>* GetViewports() { return ViewportClients; }
     std::shared_ptr<FEditorViewportClient> GetActiveViewportClient() const
     {
         return ActiveViewportClient;
@@ -55,7 +55,7 @@ public:
     }
     void SetViewportClient(int index)
     {
-        ActiveViewportClient = viewportClients[index];
+        ActiveViewportClient = ViewportClients[index];
     }
 
     //Save And Load

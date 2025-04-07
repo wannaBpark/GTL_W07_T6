@@ -4,6 +4,15 @@
 #include "Level.h"
 #include "GameFramework/Actor.h"
 
+namespace PrivateEditorSelection
+{
+    static AActor* GActorSelected = nullptr;
+    static AActor* GActorHovered = nullptr;
+
+    static USceneComponent* GComponentSelected = nullptr;
+    static USceneComponent* GComponentHovered = nullptr;
+}
+
 void UEditorEngine::Init()
 {
     Super::Init();
@@ -111,4 +120,72 @@ FWorldContext* UEditorEngine::GetPIEWorldContext(/*int32 WorldPIEInstance*/)
         }
     }
     return nullptr;
+}
+
+void UEditorEngine::SelectActor(AActor* InActor)
+{
+    if (InActor && CanSelectActor(InActor))
+    {
+        PrivateEditorSelection::GActorSelected = InActor;
+    }
+}
+
+void UEditorEngine::DeselectActor(AActor* InActor)
+{
+    if (InActor)
+    {
+        PrivateEditorSelection::GActorSelected = nullptr;
+    }
+}
+
+bool UEditorEngine::CanSelectActor(AActor* InActor) const
+{
+    return InActor != nullptr && InActor->GetWorld() == ActiveWorld.get() && !InActor->IsActorBeingDestroyed();
+}
+
+AActor* UEditorEngine::GetSelectedActor() const
+{
+    return PrivateEditorSelection::GActorSelected;
+}
+
+void UEditorEngine::HoverActor(AActor* InActor)
+{
+    if (InActor)
+    {
+        PrivateEditorSelection::GActorHovered = InActor;
+    }
+}
+
+void UEditorEngine::SelectComponent(USceneComponent* InComponent)
+{
+    if (InComponent && CanSelectComponent(InComponent))
+    {
+        PrivateEditorSelection::GComponentSelected = InComponent;
+    }
+}
+
+void UEditorEngine::DeselectComponent(USceneComponent* InComponent)
+{
+    if (InComponent)
+    {
+        PrivateEditorSelection::GComponentSelected = nullptr;
+    }
+}
+
+bool UEditorEngine::CanSelectComponent(USceneComponent* InComponent) const
+{
+    return InComponent != nullptr && InComponent->GetOwner() && InComponent->GetOwner()->GetWorld() == ActiveWorld.get() && !InComponent->GetOwner()->IsActorBeingDestroyed();
+}
+
+USceneComponent* UEditorEngine::GetSelectedComponent() const
+{
+    return PrivateEditorSelection::GComponentSelected;
+}
+
+void UEditorEngine::HoverComponent(USceneComponent* InComponent)
+{
+    if (InComponent)
+    {
+        PrivateEditorSelection::GComponentHovered = InComponent;
+    }
 }

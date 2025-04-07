@@ -16,6 +16,7 @@
 #include "Actors/Player.h"
 
 #include "BaseGizmos/GizmoBaseComponent.h"
+#include "BaseGizmos/TransformGizmo.h"
 
 #include "UnrealEd/EditorViewportClient.h"
 
@@ -26,6 +27,7 @@
 #include "UObject/ObjectTypes.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Engine/EditorEngine.h"
 
 
 // 생성자/소멸자
@@ -86,7 +88,7 @@ void FGizmoRenderPass::ReleaseShader()
 
 void FGizmoRenderPass::ClearRenderArr()
 {
-    GizmoObjs.Empty();
+    //GizmoObjs.Empty();
 }
 
 void FGizmoRenderPass::PrepareRenderState() const
@@ -112,56 +114,65 @@ void FGizmoRenderPass::PrepareRenderState() const
 
 void FGizmoRenderPass::PrepareRender()
 {
-    for (const auto iter : TObjectRange<UGizmoBaseComponent>())
+    /*for (const auto iter : TObjectRange<UGizmoBaseComponent>())
     {
         GizmoObjs.Add(iter);
-    }
+    }*/
 }
 
 void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareRenderState();
-
-    for (UGizmoBaseComponent* GizmoComp : GizmoObjs)
+    Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+    ControlMode Mode = World->GetEditorPlayer()->GetControlMode();
+    if (Mode == CM_TRANSLATION)
     {
-        auto controlMode = World->GetEditorPlayer()->GetControlMode();
-        if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowX ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowY ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowZ) && controlMode != CM_TRANSLATION)
+        for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetArrowArr())
         {
-            continue;
+            UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
+            Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
+
+            RenderGizmoComponent(GizmoComp, Viewport, World);
+
+            Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+            Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
         }
-        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleX ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleY ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleZ) && controlMode != CM_SCALE)
+    }
+    else if (Mode == CM_SCALE)
+    {
+        for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetScaleArr()) 
         {
-            continue;
+            UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
+
+            Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
+
+            RenderGizmoComponent(GizmoComp, Viewport, World);
+
+            Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+            Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
         }
-        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleX ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleY ||
-            GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleZ) && controlMode != CM_ROTATION)
+    }
+    else if (Mode == CM_ROTATION)
+    {
+        for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetDiscArr())
         {
-            continue;
+            UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
+            Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
+
+            RenderGizmoComponent(GizmoComp, Viewport, World);
+
+            Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+            Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
         }
-
-        ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
-        Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-        Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
-
-        RenderGizmoComponent(GizmoComp, Viewport, World);
-
-        Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
-        Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
     }
 }
 
 void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World)
 {
-    bool selected = World->GetSelectedActor();
-    if (!selected)
-    {
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (Engine && !Engine->GetSelectedActor())
         return;
-    }
     // 모델 행렬 계산
     FMatrix Model = JungleMath::CreateModelMatrix(
         GizmoComp->GetWorldLocation(),
@@ -171,23 +182,25 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
     FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
 
-    bool Selected = (GizmoComp == World->GetPickingGizmo());
+    bool Selected = (GizmoComp == Viewport->GetPickedGizmoComponent());
 
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
 
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
 
-    FCameraConstantBuffer CameraData(Viewport->View,Viewport->Projection);
+    FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection);
 
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
     // Gizmo가 렌더링할 StaticMesh가 없으면 렌더링하지 않음
-    if (!GizmoComp->GetStaticMesh()) return;
+    if (!GizmoComp->GetStaticMesh())
+        return;
 
     OBJ::FStaticMeshRenderData* RenderData = GizmoComp->GetStaticMesh()->GetRenderData();
 
-    if (!RenderData) return;
+    if (!RenderData)
+        return;
 
     UINT stride = sizeof(FVertexSimple);
 
@@ -213,7 +226,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
             TArray<FStaticMaterial*>Materials = GizmoComp->GetStaticMesh()->GetMaterials();
             TArray<UMaterial*>OverrideMaterials = GizmoComp->GetOverrideMaterials();
-            
+
             if (OverrideMaterials[materialIndex] != nullptr)
                 MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[materialIndex]->GetMaterialInfo());
             else

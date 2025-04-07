@@ -1,6 +1,6 @@
 #include "GizmoBaseComponent.h"
 
-#include "World/World.h"
+#include "TransformGizmo.h"
 #include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -55,22 +55,22 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
-
-    if (AActor* PickedActor = GetWorld()->GetSelectedActor())
+    if (!GetOwner())
+        return;
+    
+    if (FEditorViewportClient* ViewportClient = Cast<ATransformGizmo>(GetOwner())->GetAttachedViewport())
     {
-        std::shared_ptr<FEditorViewportClient> activeViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-        if (activeViewport->IsPerspective())
+        if (ViewportClient->IsPerspective())
         {
-            float scaler = abs(
-                (activeViewport->ViewTransformPerspective.GetLocation() - PickedActor->GetRootComponent()->GetLocalLocation()).Length()
-            );
-            scaler *= 0.1f;
-            RelativeScale3D = FVector( scaler,scaler,scaler);
+            float Scaler = (ViewportClient->ViewTransformPerspective.GetLocation() - GetOwner()->GetActorLocation()).Length();
+            
+            Scaler *= 0.1f;
+            RelativeScale3D = FVector(Scaler);
         }
         else
         {
-            float scaler = activeViewport->orthoSize * 0.1f;
-            RelativeScale3D = FVector( scaler,scaler,scaler);
+            float Scaler = ViewportClient->orthoSize * 0.1f;
+            RelativeScale3D = FVector(Scaler);
         }
     }
 }
