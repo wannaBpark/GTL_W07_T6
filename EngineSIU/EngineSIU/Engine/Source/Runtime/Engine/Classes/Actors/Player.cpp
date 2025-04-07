@@ -38,7 +38,7 @@ void AEditorPlayer::Input()
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
 
-            uint32 UUID = FEngineLoop::graphicDevice.GetPixelUUID(mousePos);
+            uint32 UUID = FEngineLoop::GraphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
             for ( const USceneComponent* obj : TObjectRange<USceneComponent>())
             {

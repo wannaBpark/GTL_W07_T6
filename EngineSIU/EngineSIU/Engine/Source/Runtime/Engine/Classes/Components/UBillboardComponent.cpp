@@ -71,7 +71,7 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 
 void UBillboardComponent::SetTexture(const FWString& _fileName)
 {
-	Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+	Texture = FEngineLoop::ResourceManager.GetTexture(_fileName);
 }
 
 void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
@@ -113,8 +113,8 @@ FMatrix UBillboardComponent::CreateBillboardMatrix()
 
 void UBillboardComponent::CreateQuadTextureVertexBuffer()
 {
-	vertexTextureBuffer = FEngineLoop::renderer.CreateImmutableVertexBuffer(TEXT("UBillboardComponent"), QuadTextureVertices);
-	indexTextureBuffer = FEngineLoop::renderer.CreateImmutableIndexBuffer(TEXT("UBillboardComponent"), QuadTextureInices);
+	vertexTextureBuffer = FEngineLoop::Renderer.CreateImmutableVertexBuffer(TEXT("UBillboardComponent"), QuadTextureVertices);
+	indexTextureBuffer = FEngineLoop::Renderer.CreateImmutableIndexBuffer(TEXT("UBillboardComponent"), QuadTextureInices);
 
 	if (!vertexTextureBuffer) {
 		Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
@@ -133,7 +133,7 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 
 	D3D11_VIEWPORT viewport;
 	UINT numViewports = 1;
-	FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
+	FEngineLoop::GraphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 	float screenWidth = viewport.Width;
 	float screenHeight = viewport.Height;
 

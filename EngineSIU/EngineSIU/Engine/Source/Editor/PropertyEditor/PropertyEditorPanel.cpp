@@ -448,7 +448,7 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
 
     ImGui::Text("Material Name |");
     ImGui::SameLine();
-    ImGui::Text(*Material->GetMaterialInfo().MTLName);
+    ImGui::Text(*Material->GetMaterialInfo().MaterialName);
     ImGui::Separator();
 
     ImGui::Text("  Diffuse Color");
@@ -519,7 +519,7 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     // 메테리얼 이름 목록을 const char* 배열로 변환
     std::vector<const char*> materialChars;
     for (const auto& material : FManagerOBJ::GetMaterials()) {
-        materialChars.push_back(*material.Value->GetMaterialInfo().MTLName);
+        materialChars.push_back(*material.Value->GetMaterialInfo().MaterialName);
     }
 
     //// 드롭다운 표시 (currentMaterialIndex가 범위를 벗어나지 않도록 확인)
@@ -553,7 +553,7 @@ void PropertyEditorPanel::RenderCreateMaterialView()
     // 기본 텍스트 입력 필드
     ImGui::SetNextItemWidth(128);
     if (ImGui::InputText("##NewName", materialName, IM_ARRAYSIZE(materialName))) {
-        tempMaterialInfo.MTLName = materialName;
+        tempMaterialInfo.MaterialName = materialName;
     }
 
     FVector MatDiffuseColor = tempMaterialInfo.Diffuse;

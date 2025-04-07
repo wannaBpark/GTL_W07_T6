@@ -19,12 +19,13 @@
 #include "UserInterface/Console.h"
 #include <Math/Color.h>
 
-struct FVertexSimple
+struct FStaticMeshVertex
 {
-    float x, y, z;    // Position
-    float r, g, b, a; // Color
-    float nx, ny, nz;
-    float u = 0, v = 0;
+    float X, Y, Z;    // Position
+    float NormalX, NormalY, NormalZ;
+    float TangentX, TangentY, TangentZ;
+    float U = 0, V = 0;
+    float R, G, B, A; // Color
     uint32 MaterialIndex;
 };
 
@@ -67,7 +68,7 @@ struct FObjInfo
     // Index
     TArray<uint32> VertexIndices;
     TArray<uint32> NormalIndices;
-    TArray<uint32> TextureIndices;
+    TArray<uint32> UVIndices;
 
     // Material
     TArray<FMaterialSubset> MaterialSubsets;
@@ -75,7 +76,7 @@ struct FObjInfo
 
 struct FObjMaterialInfo
 {
-    FString MTLName;  // newmtl : Material Name.
+    FString MaterialName;  // newmtl : Material Name.
 
     bool bHasTexture = false;  // Has Texture?
     bool bTransparent = false; // Has alpha channel?
@@ -117,7 +118,7 @@ namespace OBJ
         FWString PathName;
         FString DisplayName;
 
-        TArray<FVertexSimple> Vertices;
+        TArray<FStaticMeshVertex> Vertices;
         TArray<UINT> Indices;
 
         ID3D11Buffer* VertexBuffer;
