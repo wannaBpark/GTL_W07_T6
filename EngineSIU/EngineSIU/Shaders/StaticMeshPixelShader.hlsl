@@ -85,14 +85,21 @@ PS_OUTPUT mainPS(PS_INPUT input)
     // 3) 라이트 계산
     float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
 
-    // 4) 텍스처가 있으면 albedo × matDiffuse, 없으면 matDiffuse만
     bool hasTexture = any(albedo != float3(0, 0, 0));
+    
     float3 baseColor = hasTexture
-        ? albedo 
+        ? albedo
         : matDiffuse;
 
-    // 5) 최종 컬러
-    float3 litColor = baseColor * lightRgb;
-    output.color = float4(litColor, 1);
+    if (IsLit)
+    {
+        float3 litColor = baseColor * lightRgb;
+        output.color = float4(litColor, 1);
+    }
+    else
+    {
+        output.color = float4(baseColor, 1);
+        
+    }
     return output;
 }
