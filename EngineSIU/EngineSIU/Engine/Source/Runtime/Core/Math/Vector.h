@@ -6,29 +6,29 @@
 
 struct FVector2D
 {
-	float x,y;
-	FVector2D(float _x = 0, float _y = 0) : x(_x), y(_y) {}
+	float X, Y;
+	FVector2D(float _x = 0, float _y = 0) : X(_x), Y(_y) {}
 
 	FVector2D operator+(const FVector2D& rhs) const
 	{
-		return FVector2D(x + rhs.x, y + rhs.y);
+		return FVector2D(X + rhs.X, Y + rhs.Y);
 	}
 	FVector2D operator-(const FVector2D& rhs) const
 	{
-		return FVector2D(x - rhs.x, y - rhs.y);
+		return FVector2D(X - rhs.X, Y - rhs.Y);
 	}
 	FVector2D operator*(float rhs) const
 	{
-		return FVector2D(x * rhs, y * rhs);
+		return FVector2D(X * rhs, Y * rhs);
 	}
 	FVector2D operator/(float rhs) const
 	{
-		return FVector2D(x / rhs, y / rhs);
+		return FVector2D(X / rhs, Y / rhs);
 	}
 	FVector2D& operator+=(const FVector2D& rhs)
 	{
-		x += rhs.x;
-		y += rhs.y;
+		X += rhs.X;
+		Y += rhs.Y;
 		return *this;
 	}
 };

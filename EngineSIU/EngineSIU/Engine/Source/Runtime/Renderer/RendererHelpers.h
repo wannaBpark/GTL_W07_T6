@@ -25,7 +25,7 @@ namespace MaterialUtils {
         BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), data);
 
         if (MaterialInfo.bHasTexture) {
-            std::shared_ptr<FTexture> texture = FEngineLoop::resourceMgr.GetTexture(MaterialInfo.DiffuseTexturePath);
+            std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
         }

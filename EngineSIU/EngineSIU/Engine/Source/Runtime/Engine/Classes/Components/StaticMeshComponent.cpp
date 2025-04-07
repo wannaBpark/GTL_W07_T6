@@ -80,7 +80,7 @@ int UStaticMeshComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayD
 
     OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
 
-    FVertexSimple* vertices = renderData->Vertices.GetData();
+    FStaticMeshVertex* vertices = renderData->Vertices.GetData();
     int vCount = renderData->Vertices.Num();
     UINT* indices = renderData->Indices.GetData();
     int iCount = renderData->Indices.Num();
@@ -104,7 +104,7 @@ int UStaticMeshComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayD
         }
 
         // 각 삼각형의 버텍스 위치를 FVector로 불러옵니다.
-        uint32 stride = sizeof(FVertexSimple);
+        uint32 stride = sizeof(FStaticMeshVertex);
         FVector v0 = *reinterpret_cast<FVector*>(pbPositions + idx0 * stride);
         FVector v1 = *reinterpret_cast<FVector*>(pbPositions + idx1 * stride);
         FVector v2 = *reinterpret_cast<FVector*>(pbPositions + idx2 * stride);

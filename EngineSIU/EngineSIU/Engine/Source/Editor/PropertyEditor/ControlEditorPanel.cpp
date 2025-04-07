@@ -16,6 +16,7 @@
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include "Engine/EditorEngine.h"
+#include <Actors/HeightFogActor.h>
 
 void ControlEditorPanel::Render()
 {
@@ -248,12 +249,13 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         };
 
         static const Primitive primitives[] = {
-            {.label = "Cube",      .obj = OBJ_CUBE },
-            {.label = "Sphere",    .obj = OBJ_SPHERE },
-            {.label = "SpotLight", .obj = OBJ_SpotLight },
-            {.label = "PointLight", .obj = OBJ_PointLight },
-            {.label = "Particle",  .obj = OBJ_PARTICLE },
-            {.label = "Text",      .obj = OBJ_Text }
+            { .label= "Cube",      .obj= OBJ_CUBE },
+            { .label= "Sphere",    .obj= OBJ_SPHERE },
+            { .label= "SpotLight", .obj= OBJ_SpotLight },
+            { .label= "PointLight", .obj= OBJ_PointLight },
+            { .label= "Particle",  .obj= OBJ_PARTICLE },
+            { .label= "Text",      .obj= OBJ_Text },
+            { .label= "Fog",       .obj= OBJ_Fog }
         };
 
         for (const auto& primitive : primitives)
@@ -319,6 +321,12 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
                     TextComponent->SetText(L"안녕하세요 Jungle 1");
+                    break;
+                }
+                case OBJ_Fog:
+                {
+                    SpawnedActor = World->SpawnActor<AHeightFogActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_HeightFog"));
                     break;
                 }
                 case OBJ_TRIANGLE:
@@ -390,8 +398,8 @@ void ControlEditorPanel::CreateFlagButton() const
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
                 ActiveViewport->SetViewMode((EViewModeIndex)i);
-                FEngineLoop::graphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                FEngineLoop::renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
+                FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
             }
 
             if (bIsSelected)

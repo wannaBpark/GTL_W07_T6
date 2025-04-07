@@ -18,9 +18,11 @@ public:
     IDXGISwapChain* SwapChain = nullptr;
     ID3D11Texture2D* FrameBuffer = nullptr;
     ID3D11Texture2D* UUIDFrameBuffer = nullptr;
+    ID3D11Texture2D* SceneColorBuffer = nullptr;
     ID3D11RenderTargetView* RTVs[2];
     ID3D11RenderTargetView* FrameBufferRTV = nullptr;
     ID3D11RenderTargetView* UUIDFrameBufferRTV = nullptr;
+    ID3D11RenderTargetView* SceneColorRTV = nullptr;
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;
@@ -51,6 +53,9 @@ public:
     void SwapBuffer() const;
     void Prepare() const;
     void Prepare(D3D11_VIEWPORT* viewport) const;
+    void PrepareUI() const;
+    void PrepareFog() const;
+    void PrepareTexture() const;
     void OnResize(HWND hWindow);
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }
     void CreateAlphaBlendState();

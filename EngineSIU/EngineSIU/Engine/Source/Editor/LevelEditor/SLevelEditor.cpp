@@ -150,8 +150,8 @@ void SLevelEditor::OnResize()
 {
     float PrevWidth = EditorWidth;
     float PrevHeight = EditorHeight;
-    EditorWidth = FEngineLoop::graphicDevice.screenWidth;
-    EditorHeight = FEngineLoop::graphicDevice.screenHeight;
+    EditorWidth = FEngineLoop::GraphicDevice.screenWidth;
+    EditorHeight = FEngineLoop::GraphicDevice.screenHeight;
     if (bInitialize) {
         //HSplitter 에는 바뀐 width 비율이 들어감 
         HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
