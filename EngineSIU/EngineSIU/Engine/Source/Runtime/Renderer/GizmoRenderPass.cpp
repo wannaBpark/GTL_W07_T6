@@ -141,7 +141,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
     }
     else if (Mode == CM_SCALE)
     {
-        for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetScaleArr()) 
+        for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetScaleArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
 
@@ -158,6 +158,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetDiscArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
+            Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
             Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
 
             RenderGizmoComponent(GizmoComp, Viewport, World);

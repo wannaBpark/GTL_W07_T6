@@ -61,7 +61,6 @@ PS_INPUT mainVS(VS_INPUT input)
     }
     else
     {
-        //output.normal = normalize(input.normal);
         output.normal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
         output.normalFlag = 1.0;
     }

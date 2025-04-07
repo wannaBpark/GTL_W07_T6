@@ -3,6 +3,8 @@
 #include "World/World.h"
 #include "Actors/Player.h"
 #include "Components/LightComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
 #include "Engine/EditorEngine.h"
@@ -101,76 +103,37 @@ void PropertyEditorPanel::Render()
     if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickedActor->GetRootComponent()))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-        if (ImGui::TreeNodeEx("SpotLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+      
+        if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
         {
-            FVector4 currColor = lightObj->GetColor();
+            DrawColorProperty("Ambient Color",
+                [&]() { return lightObj->GetAmbientColor(); },
+                [&](FVector4 c) { lightObj->SetAmbientColor(c); });
 
-            float r = currColor.X;
-            float g = currColor.Y;
-            float b = currColor.Z;
-            float a = currColor.W;
-            float h, s, v;
-            float lightColor[4] = { r, g, b, a };
+            DrawColorProperty("Diffuse Color",
+                [&]() { return lightObj->GetDiffuseColor(); },
+                [&](FVector4 c) { lightObj->SetDiffuseColor(c); });
 
-            // SpotLight Color
-            if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
-                ImGuiColorEditFlags_DisplayRGB |
-                ImGuiColorEditFlags_NoSidePreview |
-                ImGuiColorEditFlags_NoInputs |
-                ImGuiColorEditFlags_Float))
+            DrawColorProperty("Specular Color",
+                [&]() { return lightObj->GetSpecularColor(); },
+                [&](FVector4 c) { lightObj->SetSpecularColor(c); });
 
-            {
+            float range = lightObj->GetRange();
+            if (ImGui::SliderFloat("Range", &range, 1.0f, 1000.0f))
+                lightObj->SetRange(range);
 
-                r = lightColor[0];
-                g = lightColor[1];
-                b = lightColor[2];
-                a = lightColor[3];
-                lightObj->SetColor(FVector4(r, g, b, a));
-            }
-            RGBToHSV(r, g, b, h, s, v);
-            // RGB/HSV
-            bool changedRGB = false;
-            bool changedHSV = false;
-
-            // RGB
-            ImGui::PushItemWidth(50.0f);
-            if (ImGui::DragFloat("R##R", &r, 0.001f, 0.f, 1.f)) changedRGB = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("G##G", &g, 0.001f, 0.f, 1.f)) changedRGB = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("B##B", &b, 0.001f, 0.f, 1.f)) changedRGB = true;
-            ImGui::Spacing();
-            
-            // HSV
-            if (ImGui::DragFloat("H##H", &h, 0.1f, 0.f, 360)) changedHSV = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("S##S", &s, 0.001f, 0.f, 1)) changedHSV = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("V##V", &v, 0.001f, 0.f, 1)) changedHSV = true;
-            ImGui::PopItemWidth();
-            ImGui::Spacing();
-            
-            if (changedRGB && !changedHSV)
-            {
-                // RGB -> HSV
-                RGBToHSV(r, g, b, h, s, v);
-                lightObj->SetColor(FVector4(r, g, b, a));
-            }
-            else if (changedHSV && !changedRGB)
-            {
-                // HSV -> RGB
-                HSVToRGB(h, s, v, r, g, b);
-                lightObj->SetColor(FVector4(r, g, b, a));
+            float falloff = lightObj->GetFalloff();
+            if (ImGui::SliderFloat("Falloff", &falloff, 0.01f, 100.0f, "%.2f")) {
+                lightObj->SetFalloff(falloff);
             }
 
-            // Light Radius
-            float radiusVal = lightObj->GetRadius();
-            if (ImGui::SliderFloat("Radius", &radiusVal, 1.0f, 100.0f))
-            {
-                lightObj->SetRadius(radiusVal);
-            }
+            DrawColorProperty("Attenuation",
+                [&]() { return lightObj->GetAttenuation(); },
+                [&](FVector4 c) { lightObj->SetAttenuation(FVector(c.X,c.Y,c.Z)); });
+
             ImGui::TreePop();
         }
+
         ImGui::PopStyleColor();
     }
 

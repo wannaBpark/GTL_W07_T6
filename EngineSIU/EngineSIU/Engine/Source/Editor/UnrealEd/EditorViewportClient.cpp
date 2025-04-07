@@ -46,7 +46,6 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
 
 void FEditorViewportClient::Tick(float DeltaTime)
 {
-    Input();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
     GizmoActor->Tick(DeltaTime);
