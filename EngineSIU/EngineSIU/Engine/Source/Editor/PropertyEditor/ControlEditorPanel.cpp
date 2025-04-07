@@ -358,16 +358,16 @@ void ControlEditorPanel::CreateFlagButton() const
 
     ImGui::SameLine();
     
-    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe" };
-    FString SelectLightControl = ViewModeNames[(int)ActiveViewport->GetViewMode()];
-    ImVec2 LightTextSize = ImGui::CalcTextSize(GetData(SelectLightControl));
+    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "SceneDepth"};
+    FString ViewModeControl = ViewModeNames[(int)ActiveViewport->GetViewMode()];
+    ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
     
-    if (ImGui::Button(GetData(SelectLightControl), ImVec2(30 + LightTextSize.x, 32)))
+    if (ImGui::Button(GetData(ViewModeControl), ImVec2(30 + ViewModeTextSize.x, 32)))
     {
-        ImGui::OpenPopup("LightControl");
+        ImGui::OpenPopup("ViewModeControl");
     }
 
-    if (ImGui::BeginPopup("LightControl"))
+    if (ImGui::BeginPopup("ViewModeControl"))
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
