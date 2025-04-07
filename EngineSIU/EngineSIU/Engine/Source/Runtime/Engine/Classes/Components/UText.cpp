@@ -266,28 +266,33 @@ void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,
 
 }
 
+/*
 
+ToDo; TextRender 살리기
+BufferManager 적용해야함.
+
+*/
 void UText::TextMVPRendering()
 {
-    FEngineLoop::renderer.PrepareTextureShader();
-    //FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-    //FEngineLoop::renderer.PrepareSubUVConstant();
-    FMatrix Model = CreateBillboardMatrix();
+    //FEngineLoop::renderer.PrepareTextureShader();
+    ////FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
+    ////FEngineLoop::renderer.PrepareSubUVConstant();
+    //FMatrix Model = CreateBillboardMatrix();
 
-    FMatrix MVP = Model * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FVector4 UUIDColor = EncodeUUID() / 255.0f;
-    if (this == GetWorld()->GetPickingGizmo()) {
-        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-    }
-    else
-        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+    //FMatrix MVP = Model * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    //FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+    //FVector4 UUIDColor = EncodeUUID() / 255.0f;
+    //if (this == GetWorld()->GetPickingGizmo()) {
+    //    FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+    //}
+    //else
+    //    FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-        FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer.Get(), numTextVertices,
-            Texture->TextureSRV, Texture->SamplerState);
-    }
-    //Super::Render();
+    //if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
+    //    FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer.Get(), numTextVertices,
+    //        Texture->TextureSRV, Texture->SamplerState);
+    //}
+    ////Super::Render();
 
-    FEngineLoop::renderer.PrepareShader();
+    //FEngineLoop::renderer.PrepareStaticMeshRenderState();
 }

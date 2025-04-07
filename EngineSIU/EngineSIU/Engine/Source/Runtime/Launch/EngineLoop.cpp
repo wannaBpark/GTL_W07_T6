@@ -8,6 +8,7 @@
 #include "Slate/Widgets/Layout/SSplitter.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
+#include "D3D11RHI/GraphicDevice.h"
 
 #include "Engine/EditorEngine.h"
 
@@ -99,7 +100,6 @@ uint32 FEngineLoop::TotalAllocationCount = 0;
 FEngineLoop::FEngineLoop()
     : hWnd(nullptr)
     , UIMgr(nullptr)
-    , GWorld(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
 {
@@ -113,26 +113,34 @@ int32 FEngineLoop::PreInit()
 int32 FEngineLoop::Init(HINSTANCE hInstance)
 {
     /* must be initialized before window. */
-    UnrealEditor = new UnrealEd();
-    UnrealEditor->Initialize();
-
     WindowInit(hInstance);
-    graphicDevice.Initialize(hWnd);
-    renderer.Initialize(&graphicDevice);
-    PrimitiveDrawBatch.Initialize(&graphicDevice);
+
+    UnrealEditor = new UnrealEd();
+
+    bufferManager = new FDXDBufferManager();
 
     UIMgr = new UImGuiManager;
+
+    LevelEditor = new SLevelEditor();
+
+    UnrealEditor->Initialize();
+
+    graphicDevice.Initialize(hWnd);
+
+    bufferManager->Initialize(graphicDevice.Device, graphicDevice.DeviceContext);
+
+    renderer.Initialize(&graphicDevice, bufferManager);
+
+    PrimitiveDrawBatch.Initialize(&graphicDevice);
+
     UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
 
     resourceMgr.Initialize(&renderer, &graphicDevice);
-    LevelEditor = new SLevelEditor();
+
     LevelEditor->Initialize();
 
     GEngine = FObjectFactory::ConstructObject<UEditorEngine>();
     GEngine->Init();
-
-    GWorld = new UWorld;
-    GWorld->Initialize();
 
     return 0;
 }
@@ -154,7 +162,7 @@ void FEngineLoop::Render() const
             // renderer.UpdateLightBuffer();
             // RenderWorld();
             renderer.PrepareRender();
-            renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+            renderer.Render(GEngine->ActiveWorld.get(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -167,7 +175,8 @@ void FEngineLoop::Render() const
         // renderer.UpdateLightBuffer();
         // RenderWorld();
         renderer.PrepareRender();
-        renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+        
+        renderer.Render(GEngine->ActiveWorld.get(), LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -179,7 +188,7 @@ void FEngineLoop::Tick()
     QueryPerformanceFrequency(&frequency);
 
     LARGE_INTEGER startTime, endTime;
-    double elapsedTime = 1.0;
+    double elapsedTime = 0.0;
 
     while (bIsExit == false)
     {
@@ -199,7 +208,7 @@ void FEngineLoop::Tick()
         }
 
         Input();
-        GWorld->Tick(elapsedTime);
+        GEngine->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
         UIMgr->BeginFrame();
@@ -218,8 +227,7 @@ void FEngineLoop::Tick()
             Sleep(0);
             QueryPerformanceCounter(&endTime);
             elapsedTime = (endTime.QuadPart - startTime.QuadPart) * 1000.0 / frequency.QuadPart;
-        }
-        while (elapsedTime < targetFrameTime);
+        } while (elapsedTime < targetFrameTime);
     }
 }
 
@@ -254,8 +262,6 @@ void FEngineLoop::Input()
 void FEngineLoop::Exit()
 {
     LevelEditor->Release();
-    GWorld->Release();
-    delete GWorld;
     UIMgr->Shutdown();
     delete UIMgr;
     resourceMgr.Release(&renderer);

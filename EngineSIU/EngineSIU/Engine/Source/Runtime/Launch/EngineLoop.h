@@ -1,6 +1,5 @@
 #pragma once
 #include "Core/HAL/PlatformType.h"
-#include "D3D11RHI/GraphicDevice.h"
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveDrawBatch.h"
 #include "Engine/ResourceMgr.h"
@@ -11,7 +10,10 @@ class UWorld;
 class FEditorViewportClient;
 class SSplitterV;
 class SSplitterH;
+class FGraphicDevice;
 class SLevelEditor;
+
+class FDXDBufferManager;
 
 class FEngineLoop
 {
@@ -42,15 +44,17 @@ public:
 
 private:
     UImGuiManager* UIMgr;
-    UWorld* GWorld;
+    //TODO: GWorld 제거, Editor들 EditorEngine으로 넣기
+    
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
+    FDXDBufferManager* bufferManager; //ToDo UEngine으로 옮겨야함.
+
     bool bIsExit = false;
     const int32 targetFPS = 60;
     bool bTestInput = false;
 
 public:
-    UWorld* GetWorld() const { return GWorld; }
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
 };

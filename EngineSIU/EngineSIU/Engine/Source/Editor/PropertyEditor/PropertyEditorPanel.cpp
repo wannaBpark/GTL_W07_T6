@@ -10,6 +10,7 @@
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
+#include "Engine/Engine.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -38,8 +39,9 @@ void PropertyEditorPanel::Render()
     /* Render Start */
     ImGui::Begin("Detail", nullptr, PanelFlags);
     
-    AEditorPlayer* player = GEngineLoop.GetWorld()->GetEditorPlayer();
-    AActor* PickedActor = GEngineLoop.GetWorld()->GetSelectedActor();
+    
+    AEditorPlayer* player = GEngine->ActiveWorld->GetEditorPlayer();
+    AActor* PickedActor = GEngine->ActiveWorld->GetSelectedActor();
     if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();

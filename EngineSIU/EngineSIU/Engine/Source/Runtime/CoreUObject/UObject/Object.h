@@ -39,10 +39,7 @@ public:
 
     virtual UObject* Duplicate();
 
-    UWorld* GetWorld() const
-    {
-        return GEngineLoop.GetWorld();
-    }
+    UWorld* GetWorld() const;
 
     FName GetFName() const { return NamePrivate; }
     FString GetName() const { return NamePrivate.ToString(); }

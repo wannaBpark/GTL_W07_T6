@@ -2,6 +2,7 @@
 
 #include "ObjectFactory.h"
 #include "UClass.h"
+#include "Engine/Engine.h"
 
 
 UClass* UObject::StaticClass()
@@ -32,6 +33,11 @@ UObject::UObject()
 UObject* UObject::Duplicate()
 {
     return FObjectFactory::ConstructObject(GetClass());
+}
+
+UWorld* UObject::GetWorld() const
+{
+    return GEngine->ActiveWorld.get();
 }
 
 bool UObject::IsA(const UClass* SomeBase) const

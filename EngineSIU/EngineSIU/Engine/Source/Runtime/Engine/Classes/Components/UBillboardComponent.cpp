@@ -8,6 +8,20 @@
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
 
+TArray<uint32> QuadTextureInices =
+{
+    0,1,2,
+    1,3,2
+};
+
+TArray<FVertexTexture> QuadTextureVertices =
+{
+    {-1.0f,1.0f,0.0f,0.0f,0.0f},
+    { 1.0f,1.0f,0.0f,1.0f,0.0f},
+    {-1.0f,-1.0f,0.0f,0.0f,1.0f},
+    { 1.0f,-1.0f,0.0f,1.0f,1.0f}
+};
+
 
 UBillboardComponent::UBillboardComponent()
 {
@@ -47,7 +61,7 @@ void UBillboardComponent::TickComponent(float DeltaTime)
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
     TArray<FVector> quad;
-    for (auto& quadTextureVertice : quadTextureVertices)
+    for (auto& quadTextureVertice : QuadTextureVertices)
     {
         quad.Emplace(quadTextureVertice.x, quadTextureVertice.y, quadTextureVertice.z);
 	}
@@ -99,16 +113,14 @@ FMatrix UBillboardComponent::CreateBillboardMatrix()
 
 void UBillboardComponent::CreateQuadTextureVertexBuffer()
 {
-	numVertices = sizeof(quadTextureVertices) / sizeof(FVertexTexture);
-	numIndices = sizeof(quadTextureInices) / sizeof(uint32);
-	vertexTextureBuffer = FEngineLoop::renderer.CreateVertexBuffer(quadTextureVertices, sizeof(quadTextureVertices));
-	indexTextureBuffer = FEngineLoop::renderer.CreateIndexBuffer(quadTextureInices, sizeof(quadTextureInices));
+	vertexTextureBuffer = FEngineLoop::renderer.CreateImmutableVertexBuffer(TEXT("UBillboardComponent"), QuadTextureVertices);
+	indexTextureBuffer = FEngineLoop::renderer.CreateImmutableIndexBuffer(TEXT("UBillboardComponent"), QuadTextureInices);
 
 	if (!vertexTextureBuffer) {
 		Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
 	}
 	if (!indexTextureBuffer) {
-		Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
+        Console::GetInstance().AddLog(LogLevel::Warning, "Buffer Error");
 	}
 }
 

@@ -3,6 +3,8 @@
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
+#include "WorldType.h"
+#include "Level.h"
 
 class FObjectFactory;
 class AActor;
@@ -21,12 +23,15 @@ class UWorld : public UObject
 public:
     UWorld() = default;
 
+    static UWorld* CreateWorld(const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
+
+    void InitializeNewWorld();
+
     virtual UObject* Duplicate() override;
 
     void Tick(float DeltaTime);
     void BeginPlay();
 
-    void Initialize();
     void CreateBaseObject();
     void ReleaseBaseObject();
     void Release();
@@ -43,21 +48,16 @@ public:
     /** World에 존재하는 Actor를 제거합니다. */
     bool DestroyActor(AActor* ThisActor);
 
+    std::weak_ptr<ULevel> GetActiveLevel() const { return ActiveLevel; }
+
     template <typename T>
         requires std::derived_from<T, AActor>
-    T* DuplicateActor(T* InActor)
-    {
-        T* NewActor = static_cast<T*>(InActor->Duplicate());
-        ActorsArray.Add(NewActor);
-        PendingBeginPlayActors.Add(NewActor);
-        return NewActor;
-    }
+    T* DuplicateActor(T* InActor);
 
 private:
-    const FString defaultMapName = "Default";
+    FString WorldName = "DefaultWorld";
 
-    /** World에서 관리되는 모든 Actor의 목록 */
-    TSet<AActor*> ActorsArray;
+    std::shared_ptr<ULevel> ActiveLevel;
 
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
@@ -68,8 +68,6 @@ private:
     AEditorPlayer* EditorPlayer = nullptr;
 
 public:
-    const TSet<AActor*>& GetActors() const { return ActorsArray; }
-
     ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
@@ -91,7 +89,22 @@ T* UWorld::SpawnActor()
     // TODO: 일단 AddComponent에서 Component마다 초기화
     // 추후에 RegisterComponent() 만들어지면 주석 해제
     // Actor->InitializeComponents();
-    ActorsArray.Add(Actor);
+    ActiveLevel->Actors.Add(Actor);
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
+
+template <typename T>
+    requires std::derived_from<T, AActor>
+T* UWorld::DuplicateActor(T* InActor)
+{
+    if (std::shared_ptr<ULevel> ActiveLevel = GetActiveLevel().lock())
+    {
+        T* NewActor = static_cast<T*>(InActor->Duplicate());
+        ActiveLevel->Actors.Add(NewActor);
+        PendingBeginPlayActors.Add(NewActor);
+        return NewActor;
+    }
+    return nullptr;
+}
+

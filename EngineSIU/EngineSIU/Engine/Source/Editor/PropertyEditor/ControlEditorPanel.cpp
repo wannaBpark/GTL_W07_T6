@@ -13,6 +13,8 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
+#include "Engine/Engine.h"
+
 void ControlEditorPanel::Render()
 {
     /* Pre Setup */
@@ -256,7 +258,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             if (ImGui::Selectable(primitive.label))
             {
                 // GEngineLoop.GetWorld()->SpawnObject(static_cast<OBJECTS>(primitive.obj));
-                UWorld* World = GEngineLoop.GetWorld();
+                UWorld* World = GEngine->ActiveWorld.get();
                 AActor* SpawnedActor = nullptr;
                 switch (static_cast<OBJECTS>(primitive.obj))
                 {
@@ -355,16 +357,16 @@ void ControlEditorPanel::CreateFlagButton() const
 
     ImGui::SameLine();
     
-    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe" };
-    FString SelectLightControl = ViewModeNames[(int)ActiveViewport->GetViewMode()];
-    ImVec2 LightTextSize = ImGui::CalcTextSize(GetData(SelectLightControl));
+    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "SceneDepth"};
+    FString ViewModeControl = ViewModeNames[(int)ActiveViewport->GetViewMode()];
+    ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
     
-    if (ImGui::Button(GetData(SelectLightControl), ImVec2(30 + LightTextSize.x, 32)))
+    if (ImGui::Button(GetData(ViewModeControl), ImVec2(30 + ViewModeTextSize.x, 32)))
     {
-        ImGui::OpenPopup("LightControl");
+        ImGui::OpenPopup("ViewModeControl");
     }
 
-    if (ImGui::BeginPopup("LightControl"))
+    if (ImGui::BeginPopup("ViewModeControl"))
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
@@ -416,7 +418,8 @@ void ControlEditorPanel::CreateFlagButton() const
 // code is so dirty / Please refactor
 void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 {
-    AEditorPlayer* Player = GEngineLoop.GetWorld()->GetEditorPlayer();
+    
+    AEditorPlayer* Player = GEngine->ActiveWorld->GetEditorPlayer();
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
     
