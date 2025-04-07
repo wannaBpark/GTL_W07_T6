@@ -375,7 +375,12 @@ void FGraphicsDevice::PrepareFog() const
 
 void FGraphicsDevice::PrepareTexture() const
 {
-    DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView);
+    ID3D11RenderTargetView* tempRTVs[2] =
+    {
+        SceneColorRTV,
+        UUIDFrameBufferRTV
+    };
+    DeviceContext->OMSetRenderTargets(2, tempRTVs, DepthStencilView);
 }
 
 void FGraphicsDevice::OnResize(HWND hWindow)

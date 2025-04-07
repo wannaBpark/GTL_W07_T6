@@ -19,7 +19,7 @@ public:
     ID3D11Texture2D* FrameBuffer = nullptr;
     ID3D11Texture2D* UUIDFrameBuffer = nullptr;
     ID3D11Texture2D* SceneColorBuffer = nullptr;
-    ID3D11RenderTargetView* RTVs[3];
+    ID3D11RenderTargetView* RTVs[2];
     ID3D11RenderTargetView* FrameBufferRTV = nullptr;
     ID3D11RenderTargetView* UUIDFrameBufferRTV = nullptr;
     ID3D11RenderTargetView* SceneColorRTV = nullptr;

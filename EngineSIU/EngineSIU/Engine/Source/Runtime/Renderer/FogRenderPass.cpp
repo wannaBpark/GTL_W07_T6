@@ -32,6 +32,7 @@ FFogRenderPass::~FFogRenderPass()
     if (SpriteVertexShader) { SpriteVertexShader->Release(); SpriteVertexShader = nullptr; }
     if (SpritePixelShader) { SpritePixelShader->Release(); SpritePixelShader = nullptr; }
     if (InputLayout) { InputLayout->Release(); InputLayout = nullptr; }
+    if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
 }
 
 void FFogRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
@@ -125,6 +126,20 @@ void FFogRenderPass::CreateSceneSrv()
     sampDesc.MinLOD = 0;
     sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
     Graphics->Device->CreateSamplerState(&sampDesc, &Sampler);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    // 기존 SRV가 있다면 해제
+    if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
+
+    HRESULT hr = Graphics->Device->CreateShaderResourceView(Graphics->SceneColorBuffer, &srvDesc, &SceneSRV);
+    if (FAILED(hr)) {
+        return;
+    }
 }
 
 void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)

@@ -49,12 +49,12 @@ private:
     ID3D11Buffer* SpriteVertexBuffer;
     ID3D11Buffer* SpriteIndexBuffer;
 
-    // Depth Buffer 렌더링용 셰이더 및 입력 레이아웃
+    // Fog 렌더링용 셰이더 및 입력 레이아웃
     ID3D11VertexShader* SpriteVertexShader;
     ID3D11PixelShader* SpritePixelShader;
     ID3D11InputLayout* InputLayout;
 
-    // Depth Buffer SRV (외부에서 등록)
+    // Scene SRV (외부에서 등록)
     ID3D11ShaderResourceView* SceneSRV;
 
     bool bRender = false;
