@@ -11,7 +11,7 @@
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -90,9 +90,9 @@ void PropertyEditorPanel::Render()
     {
         if (ImGui::Button("Duplicate"))
         {
-            UWorld* World = GEngine->GetWorld();
-            AActor* NewActor = World->DuplicateActor(PickedActor);
-            World->SetSelectedActor(NewActor);
+            UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+            AActor* NewActor = Engine->ActiveWorld->DuplicateActor(Engine->GetSelectedActor());
+            Engine->SelectActor(NewActor);
         }
     }
 
