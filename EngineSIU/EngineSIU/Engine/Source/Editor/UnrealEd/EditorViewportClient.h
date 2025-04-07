@@ -11,6 +11,8 @@
 #define MIN_ORTHOZOOM				1.0							/* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
 #define MAX_ORTHOZOOM				1e25
 
+class ATransformGizmo;
+class USceneComponent;
 
 struct FViewportCameraTransform
 {
@@ -188,4 +190,22 @@ private:
         }
         return defaultValue;
     }
+
+public:
+    // Gizmo
+    void SetGizmoActor(ATransformGizmo* gizmo) { GizmoActor = gizmo; }
+    ATransformGizmo* GetGizmoActor() const { return GizmoActor; }
+
+    void SetPickedGizmoComponent(USceneComponent* component) { PickedGizmoComponent = component; }
+    USceneComponent* GetPickedGizmoComponent() const { return PickedGizmoComponent; }
+
+    void SetShowGizmo(bool show) { bShowGizmo = show; }
+    bool IsShowGizmo() const { return bShowGizmo; }
+
+private:
+    ATransformGizmo* GizmoActor = nullptr;
+    USceneComponent* PickedGizmoComponent = nullptr;
+    bool bShowGizmo = true;
+
+
 };

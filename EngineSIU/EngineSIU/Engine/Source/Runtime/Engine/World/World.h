@@ -56,22 +56,11 @@ private:
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
-    AActor* SelectedActor = nullptr;
-
-    USceneComponent* pickingGizmo = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
 
 public:
-    ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
-
-    // EditorManager 같은데로 보내기
-    AActor* GetSelectedActor() const { return SelectedActor; }
-    void SetSelectedActor(AActor* InActor) { SelectedActor = InActor; }
-
-    USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
-    void SetPickingGizmo(UObject* Object);
 };
 
 

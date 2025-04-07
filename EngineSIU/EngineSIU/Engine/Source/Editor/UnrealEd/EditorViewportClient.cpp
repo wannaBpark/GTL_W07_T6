@@ -6,10 +6,14 @@
 #include "UnrealClient.h"
 #include "World/World.h"
 #include "GameFramework/Actor.h"
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
+
+#include "UObject/ObjectFactory.h"
+#include "BaseGizmos/TransformGizmo.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::orthoSize = 10.0f;
+
 FEditorViewportClient::FEditorViewportClient()
     : Viewport(nullptr)
     , ViewportType(LVT_Perspective)
@@ -35,6 +39,8 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
     ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
     ViewportIndex = viewportIndex;
+
+    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>();
 }
 
 void FEditorViewportClient::Tick(float DeltaTime)
@@ -42,7 +48,7 @@ void FEditorViewportClient::Tick(float DeltaTime)
     Input();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
-
+    GizmoActor->Tick(DeltaTime);
 }
 
 void FEditorViewportClient::Release() const
@@ -120,7 +126,8 @@ void FEditorViewportClient::Input()
     // Focus Selected Actor
     if (GetAsyncKeyState('F') & 0x8000)
     {
-        if (AActor* PickedActor = GEngine->ActiveWorld->GetSelectedActor())
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        if (AActor* PickedActor = Engine->GetSelectedActor())
         {
             FViewportCameraTransform& ViewTransform = ViewTransformPerspective;
             ViewTransform.SetLocation(
