@@ -50,5 +50,5 @@ private:
 
     uint32 Stride;
     // 수집된 Gizmo 객체 배열
-    TArray<UGizmoBaseComponent*> GizmoObjs;
+    //TArray<UGizmoBaseComponent*> GizmoObjs;
 };
