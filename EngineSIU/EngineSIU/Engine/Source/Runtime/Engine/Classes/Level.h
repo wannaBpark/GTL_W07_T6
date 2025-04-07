@@ -13,6 +13,8 @@ class ULevel : public UObject
 public:
     ULevel() = default;
 
+    virtual UObject* Duplicate() override;
+
     UWorld* OwningWorld;
     TArray<AActor*> Actors;
 };
