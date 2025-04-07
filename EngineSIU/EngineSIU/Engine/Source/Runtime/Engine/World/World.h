@@ -15,17 +15,19 @@ class AEditorPlayer;
 class USceneComponent;
 class ATransformGizmo;
 
+
 class UWorld : public UObject
 {
     DECLARE_CLASS(UWorld, UObject)
 
 public:
+    UWorld() = default;
+
     static UWorld* CreateWorld(const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
 
     void InitializeNewWorld();
 
-    UWorld() = default;
-
+    virtual UObject* Duplicate() override;
 
     void Tick(float DeltaTime);
     void BeginPlay();
@@ -47,6 +49,10 @@ public:
     bool DestroyActor(AActor* ThisActor);
 
     std::weak_ptr<ULevel> GetActiveLevel() const { return ActiveLevel; }
+
+    template <typename T>
+        requires std::derived_from<T, AActor>
+    T* DuplicateActor(T* InActor);
 
 private:
     FString WorldName = "DefaultWorld";
@@ -87,3 +93,18 @@ T* UWorld::SpawnActor()
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
+
+template <typename T>
+    requires std::derived_from<T, AActor>
+T* UWorld::DuplicateActor(T* InActor)
+{
+    if (std::shared_ptr<ULevel> ActiveLevel = GetActiveLevel().lock())
+    {
+        T* NewActor = static_cast<T*>(InActor->Duplicate());
+        ActiveLevel->Actors.Add(NewActor);
+        PendingBeginPlayActors.Add(NewActor);
+        return NewActor;
+    }
+    return nullptr;
+}
+

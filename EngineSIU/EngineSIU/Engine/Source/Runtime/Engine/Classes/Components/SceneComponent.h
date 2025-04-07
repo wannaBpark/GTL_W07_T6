@@ -10,6 +10,8 @@ class USceneComponent : public UActorComponent
 public:
     USceneComponent();
 
+    virtual UObject* Duplicate() override;
+
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
@@ -19,6 +21,11 @@ public:
     void AddLocation(FVector _added);
     void AddRotation(FVector _added);
     void AddScale(FVector _added);
+
+    USceneComponent* GetAttachParent() const { return AttachParent; }
+    const TArray<USceneComponent*>& GetAttachChildren() const { return AttachChildren; }
+
+    void AttachToComponent(USceneComponent* InParent);
 
 protected:
     FVector RelativeLocation;
