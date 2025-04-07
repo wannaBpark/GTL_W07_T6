@@ -286,6 +286,12 @@ void PropertyEditorPanel::Render()
                 FogComponent->SetFogDensity(FogDensity);
             }
 
+            float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
+            if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
+            {
+                FogComponent->SetFogMaxOpacity(FogMaxOpacity);
+            }
+
             float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
             if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.01f, 1.0f))
             {

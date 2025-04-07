@@ -65,9 +65,6 @@ float4 mainPS(PS_INPUT input) : SV_Target
     if (distance < StartDistance)
         FogFactor = 0;
     
-    if (FogFactor > 0.7)
-        FogFactor = 0.7;
-    
     float4 SceneColorValue = SceneColor.Sample(Sampler, UV);
     float4 FinalColor = lerp(SceneColorValue, FogColor, FogFactor);
     return FinalColor;
