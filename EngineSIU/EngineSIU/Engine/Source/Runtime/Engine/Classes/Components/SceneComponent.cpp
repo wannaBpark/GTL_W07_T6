@@ -34,7 +34,7 @@ void USceneComponent::TickComponent(float DeltaTime)
 }
 
 
-int USceneComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
+int USceneComponent::CheckRayIntersection(FVector& InRayOrigin, FVector& InRayDirection, float& pfNearHitDistance)
 {
     int nIntersections = 0;
     return nIntersections;
@@ -62,21 +62,21 @@ FVector USceneComponent::GetUpVector()
 }
 
 
-void USceneComponent::AddLocation(FVector _added)
+void USceneComponent::AddLocation(FVector InAddValue)
 {
-	RelativeLocation = RelativeLocation + _added;
+	RelativeLocation = RelativeLocation + InAddValue;
 
 }
 
-void USceneComponent::AddRotation(FVector _added)
+void USceneComponent::AddRotation(FVector InAddValue)
 {
-	RelativeRotation = RelativeRotation + _added;
+	RelativeRotation = RelativeRotation + InAddValue;
 
 }
 
-void USceneComponent::AddScale(FVector _added)
+void USceneComponent::AddScale(FVector InAddValue)
 {
-	RelativeScale3D = RelativeScale3D + _added;
+	RelativeScale3D = RelativeScale3D + InAddValue;
 
 }
 
@@ -119,7 +119,7 @@ FVector USceneComponent::GetWorldScale() const
 {
 	if (AttachParent)
 	{
-		return FVector(AttachParent->GetWorldScale() + GetLocalScale());
+		return FVector(AttachParent->GetWorldScale() * GetLocalScale());
 	}
     return GetLocalScale();
 }

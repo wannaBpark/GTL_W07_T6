@@ -14,13 +14,13 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
+    virtual int CheckRayIntersection(FVector& InRayOrigin, FVector& InRayDirection, float& pfNearHitDistance);
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
     virtual FVector GetUpVector();
-    void AddLocation(FVector _added);
-    void AddRotation(FVector _added);
-    void AddScale(FVector _added);
+    void AddLocation(FVector InAddValue);
+    void AddRotation(FVector InAddValue);
+    void AddScale(FVector InAddValue);
 
     USceneComponent* GetAttachParent() const { return AttachParent; }
     const TArray<USceneComponent*>& GetAttachChildren() const { return AttachChildren; }
