@@ -87,9 +87,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
 
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
-    float3 baseColor = hasTexture
-        ? albedo
-        : matDiffuse;
+    float3 baseColor = hasTexture ? albedo : matDiffuse;
 
     if (IsLit)
     {
