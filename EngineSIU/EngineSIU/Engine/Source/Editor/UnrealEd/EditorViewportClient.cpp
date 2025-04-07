@@ -41,6 +41,7 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     ViewportIndex = viewportIndex;
 
     GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>();
+    GizmoActor->Initialize(this);
 }
 
 void FEditorViewportClient::Tick(float DeltaTime)

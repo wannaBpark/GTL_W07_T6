@@ -1,5 +1,6 @@
 #include "GizmoBaseComponent.h"
 
+#include "TransformGizmo.h"
 #include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -54,22 +55,21 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
-
-    // TODO: Selec 된 Actor의 크기 기준이 아닌 현재 카메라와 Gizmo의 위치 차이로 Scale 조정하기.
+    if (!GetOwner())
+        return;
     
-    if (GetOwner())
+    if (FEditorViewportClient* ViewportClient = Cast<ATransformGizmo>(GetOwner())->GetAttachedViewport())
     {
-        std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-        if (ActiveViewport->IsPerspective())
+        if (ViewportClient->IsPerspective())
         {
-            float Scaler = (ActiveViewport->ViewTransformPerspective.GetLocation() - GetOwner()->GetActorLocation()).Length();
+            float Scaler = (ViewportClient->ViewTransformPerspective.GetLocation() - GetOwner()->GetActorLocation()).Length();
             
             Scaler *= 0.1f;
             RelativeScale3D = FVector(Scaler);
         }
         else
         {
-            float Scaler = ActiveViewport->orthoSize * 0.1f;
+            float Scaler = ViewportClient->orthoSize * 0.1f;
             RelativeScale3D = FVector(Scaler);
         }
     }
