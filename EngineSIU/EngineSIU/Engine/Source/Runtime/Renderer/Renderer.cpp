@@ -49,9 +49,13 @@ void FRenderer::Release()
 }
 
 
-void FRenderer::ChangeViewMode(EViewModeIndex evi) const
+void FRenderer::ChangeViewMode(EViewModeIndex evi)
 {
     StaticMeshRenderPass->ChangeViewMode(evi);
+    if (evi == EViewModeIndex::VMI_SceneDepth)
+        IsSceneDepth = true;
+    else
+        IsSceneDepth = false;
 }
 
 //------------------------------------------------------------------------------
@@ -122,8 +126,8 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     UpdateLightBufferPass->Render(World, ActiveViewport);
     BillboardRenderPass->Render(World, ActiveViewport);
 
-    // 주석제거시 DepthBuffer렌더링/ TDOO: depthbuffer렌더링 showflag 기능 구현 필요
-    //DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+    if (IsSceneDepth)
+        DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
 
     GizmoRenderPass->Render(World, ActiveViewport);
     ClearRenderArr();
