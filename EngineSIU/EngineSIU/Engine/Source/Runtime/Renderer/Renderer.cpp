@@ -55,7 +55,7 @@ void FRenderer::ChangeViewMode(EViewModeIndex evi) const
 }
 
 //------------------------------------------------------------------------------
-// 상수 버퍼 및 기타 버퍼 생성/해제 함수
+// 사용하는 모든 상수 버퍼 생성
 //------------------------------------------------------------------------------
 void FRenderer::CreateConstantBuffers()
 {
@@ -122,7 +122,8 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     UpdateLightBufferPass->Render(World, ActiveViewport);
     BillboardRenderPass->Render(World, ActiveViewport);
 
-    DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+    // 주석제거시 DepthBuffer렌더링/ TDOO: depthbuffer렌더링 showflag 기능 구현 필요
+    //DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
 
     GizmoRenderPass->Render(World, ActiveViewport);
     ClearRenderArr();
