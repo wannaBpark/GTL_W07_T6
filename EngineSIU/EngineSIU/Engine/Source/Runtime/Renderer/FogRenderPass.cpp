@@ -213,6 +213,9 @@ void FFogRenderPass::UpdateFogConstant(const std::shared_ptr<FEditorViewportClie
         Constants.StartDistance = Fog->GetStartDistance();
         Constants.FogCutoffDistance = Fog->GetFogCutoffDistance();
         Constants.FogMaxOpacity = Fog->GetFogMaxOpacity();
+        if (ActiveViewport->IsOrtho()) {
+            Constants.FogMaxOpacity = 0;
+        }
         Constants.FogPosition = Fog->GetWorldLocation();
     }
     //상수버퍼 업데이트

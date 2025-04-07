@@ -62,7 +62,8 @@ UObject* UWorld::Duplicate()
 
 void UWorld::Tick(float DeltaTime)
 {
-    if (FogActor == nullptr) {
+    if (FogActor == nullptr) 
+    {
         FogActor = SpawnActor<AActor>();
         UHeightFogComponent* FogComp = FogActor->AddComponent<UHeightFogComponent>();
         FogActor->SetActorLabel(TEXT("Height Fog"));
