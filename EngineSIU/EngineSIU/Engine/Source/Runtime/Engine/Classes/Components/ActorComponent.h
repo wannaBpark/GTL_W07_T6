@@ -15,6 +15,8 @@ private:
 public:
     UActorComponent() = default;
 
+    virtual UObject* Duplicate() override;
+
     /** AActor가 World에 Spawn되어 BeginPlay이전에 호출됩니다. */
     virtual void InitializeComponent();
 
@@ -59,18 +61,18 @@ private:
     AActor* OwnerPrivate;
 
     /** InitializeComponent가 호출 되었는지 여부 */
-    uint8 bHasBeenInitialized : 1;
+    uint8 bHasBeenInitialized : 1 = false;
 
     /** BeginPlay가 호출 되었는지 여부 */
-    uint8 bHasBegunPlay : 1;
+    uint8 bHasBegunPlay : 1 = false;
 
     /** 현재 컴포넌트가 삭제 처리중인지 여부 */
-    uint8 bIsBeingDestroyed : 1;
+    uint8 bIsBeingDestroyed : 1 = false;
 
     /** Component가 현재 활성화 중인지 여부 */
-    uint8 bIsActive:1;
+    uint8 bIsActive : 1 = true;
 
 public:
     /** Component가 초기화 되었을 때, 자동으로 활성화할지 여부 */
-    uint8 bAutoActive : 1;
+    uint8 bAutoActive : 1 = true;
 };

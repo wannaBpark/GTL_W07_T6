@@ -15,7 +15,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
 
 void ControlEditorPanel::Render()
 {
@@ -325,7 +325,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         
                 if (SpawnedActor)
                 {
-                    World->SetSelectedActor(SpawnedActor);
+                    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+                    Engine->SelectActor(Engine->GetSelectedActor());
                 }
             }
         }

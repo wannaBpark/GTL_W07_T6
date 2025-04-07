@@ -133,7 +133,7 @@ void FBillboardRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
-void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) return;
     PrepareTextureShader();
@@ -146,27 +146,32 @@ void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorVi
 
         FMatrix Model = BillboardComp->CreateBillboardMatrix();
         FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
-        bool Selected = (BillboardComp == World->GetPickingGizmo());
+        bool Selected = (BillboardComp == Viewport->GetPickedGizmoComponent());
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
 
         if (UParticleSubUVComp* SubUVParticle = Cast<UParticleSubUVComp>(BillboardComp))
         {
-            RenderTexturePrimitive(SubUVParticle->vertexSubUVBuffer, SubUVParticle->numTextVertices,
-                SubUVParticle->indexTextureBuffer, SubUVParticle->numIndices,
+            RenderTexturePrimitive(SubUVParticle->vertexSubUVBuffer.Get(), SubUVParticle->numTextVertices,
+                SubUVParticle->indexTextureBuffer.Get(), SubUVParticle->numIndices,
                 SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
         }
         else if (UText* Text = Cast<UText>(BillboardComp))
         {
-            RenderTextPrimitive(Text->vertexTextBuffer, Text->numTextVertices,
+            RenderTextPrimitive(Text->vertexTextBuffer.Get(), Text->numTextVertices,
                 Text->Texture->TextureSRV, Text->Texture->SamplerState);
         }
         else
         {
-            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer, BillboardComp->numVertices,
-                BillboardComp->indexTextureBuffer, BillboardComp->numIndices,
+            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer.Get(), BillboardComp->numVertices,
+                BillboardComp->indexTextureBuffer.Get(), BillboardComp->numIndices,
                 BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState);
         }
     }
+}
+
+void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    // TODO: 제거 필요 Interface에서 직접 제거.
 }
 
 void FBillboardRenderPass::ClearRenderArr()

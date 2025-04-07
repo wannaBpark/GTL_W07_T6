@@ -7,12 +7,13 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
+#include "Engine/EditorEngine.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -43,7 +44,11 @@ void PropertyEditorPanel::Render()
     
     
     AEditorPlayer* player = GEngine->ActiveWorld->GetEditorPlayer();
-    AActor* PickedActor = GEngine->ActiveWorld->GetSelectedActor();
+    
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+    AActor* PickedActor = Engine->GetSelectedActor();
     if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();
@@ -81,6 +86,16 @@ void PropertyEditorPanel::Render()
             ImGui::TreePop(); // 트리 닫기
         }
         ImGui::PopStyleColor();
+    }
+
+    if (PickedActor)
+    {
+        if (ImGui::Button("Duplicate"))
+        {
+            UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+            AActor* NewActor = Engine->ActiveWorld->DuplicateActor(Engine->GetSelectedActor());
+            Engine->SelectActor(NewActor);
+        }
     }
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기

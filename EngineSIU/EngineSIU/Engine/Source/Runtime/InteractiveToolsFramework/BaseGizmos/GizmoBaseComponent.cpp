@@ -1,6 +1,5 @@
 #include "GizmoBaseComponent.h"
 
-#include "World/World.h"
 #include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -56,21 +55,22 @@ void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
 
-    if (AActor* PickedActor = GetWorld()->GetSelectedActor())
+    // TODO: Selec 된 Actor의 크기 기준이 아닌 현재 카메라와 Gizmo의 위치 차이로 Scale 조정하기.
+    
+    if (GetOwner())
     {
-        std::shared_ptr<FEditorViewportClient> activeViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-        if (activeViewport->IsPerspective())
+        std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+        if (ActiveViewport->IsPerspective())
         {
-            float scaler = abs(
-                (activeViewport->ViewTransformPerspective.GetLocation() - PickedActor->GetRootComponent()->GetLocalLocation()).Length()
-            );
-            scaler *= 0.1f;
-            RelativeScale3D = FVector( scaler,scaler,scaler);
+            float Scaler = (ActiveViewport->ViewTransformPerspective.GetLocation() - GetOwner()->GetActorLocation()).Length();
+            
+            Scaler *= 0.1f;
+            RelativeScale3D = FVector(Scaler);
         }
         else
         {
-            float scaler = activeViewport->orthoSize * 0.1f;
-            RelativeScale3D = FVector( scaler,scaler,scaler);
+            float Scaler = ActiveViewport->orthoSize * 0.1f;
+            RelativeScale3D = FVector(Scaler);
         }
     }
 }

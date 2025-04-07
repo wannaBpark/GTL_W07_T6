@@ -14,9 +14,9 @@
 #include "D3D11RHI/DXDShaderManager.h"
 
 #include "Components/StaticMeshComponent.h"
-#include "Components/SkySphereComponent.h"
 
 #include "BaseGizmos/GizmoBaseComponent.h"
+#include "Engine/EditorEngine.h"
 
 #include "PropertyEditor/ShowFlags.h"
 
@@ -214,7 +214,8 @@ void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorV
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 
-        bool Selected = (World->GetSelectedActor() == Comp->GetOwner());
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
 

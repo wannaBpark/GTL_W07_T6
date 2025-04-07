@@ -17,6 +17,8 @@ class AActor : public UObject
 public:
     AActor() = default;
 
+    virtual UObject* Duplicate() override;
+
     /** Actor가 게임에 배치되거나 스폰될 때 호출됩니다. */
     virtual void BeginPlay();
 
@@ -98,7 +100,7 @@ private:
 
 
     /** 현재 Actor가 삭제 처리중인지 여부 */
-    uint8 bActorIsBeingDestroyed : 1;
+    uint8 bActorIsBeingDestroyed : 1 = false;
 
 #if 1 // TODO: WITH_EDITOR 추가
 public:
@@ -132,10 +134,11 @@ T* AActor::AddComponent()
         {
             RootComponent = NewSceneComp;
         }
-        else
-        {
-            NewSceneComp->SetupAttachment(RootComponent);
-        }
+        // TODO: 나중에 RegisterComponent() 생기면 주석 해제
+        // else
+        // {
+        //     NewSceneComp->SetupAttachment(RootComponent);
+        // }
     }
 
     // TODO: RegisterComponent() 생기면 제거

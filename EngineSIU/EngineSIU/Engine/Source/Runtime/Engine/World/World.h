@@ -15,17 +15,19 @@ class AEditorPlayer;
 class USceneComponent;
 class ATransformGizmo;
 
+
 class UWorld : public UObject
 {
     DECLARE_CLASS(UWorld, UObject)
 
 public:
+    UWorld() = default;
+
     static UWorld* CreateWorld(const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
 
     void InitializeNewWorld();
 
-    UWorld() = default;
-
+    virtual UObject* Duplicate() override;
 
     void Tick(float DeltaTime);
     void BeginPlay();
@@ -48,6 +50,10 @@ public:
 
     std::weak_ptr<ULevel> GetActiveLevel() const { return ActiveLevel; }
 
+    template <typename T>
+        requires std::derived_from<T, AActor>
+    T* DuplicateActor(T* InActor);
+
 private:
     FString WorldName = "DefaultWorld";
 
@@ -56,22 +62,11 @@ private:
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
-    AActor* SelectedActor = nullptr;
-
-    USceneComponent* pickingGizmo = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
 
 public:
-    ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
-
-    // EditorManager 같은데로 보내기
-    AActor* GetSelectedActor() const { return SelectedActor; }
-    void SetSelectedActor(AActor* InActor) { SelectedActor = InActor; }
-
-    USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
-    void SetPickingGizmo(UObject* Object);
 };
 
 
@@ -87,3 +82,18 @@ T* UWorld::SpawnActor()
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
+
+template <typename T>
+    requires std::derived_from<T, AActor>
+T* UWorld::DuplicateActor(T* InActor)
+{
+    if (std::shared_ptr<ULevel> ActiveLevel = GetActiveLevel().lock())
+    {
+        T* NewActor = static_cast<T*>(InActor->Duplicate());
+        ActiveLevel->Actors.Add(NewActor);
+        PendingBeginPlayActors.Add(NewActor);
+        return NewActor;
+    }
+    return nullptr;
+}
+

@@ -1,8 +1,19 @@
 #include "Components/StaticMeshComponent.h"
 
 #include "Launch/EngineLoop.h"
+#include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 
+
+UObject* UStaticMeshComponent::Duplicate()
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+
+    NewComponent->staticMesh = staticMesh;
+    NewComponent->selectedSubMeshIndex = selectedSubMeshIndex;
+
+    return NewComponent;
+}
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
 {
