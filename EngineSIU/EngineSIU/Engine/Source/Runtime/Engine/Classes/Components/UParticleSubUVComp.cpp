@@ -20,8 +20,6 @@ UParticleSubUVComp::~UParticleSubUVComp()
 void UParticleSubUVComp::InitializeComponent()
 {
 	Super::InitializeComponent();
-	FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-	FEngineLoop::renderer.PrepareSubUVConstant();
 }
 
 void UParticleSubUVComp::TickComponent(float DeltaTime)
@@ -108,6 +106,6 @@ void UParticleSubUVComp::CreateSubUVVertexBuffer()
 	vertices[3].u = normalWidthOffset;
 	vertices[3].v = normalHeightOffset;
 
-	vertexSubUVBuffer = FEngineLoop::renderer.CreateVertexBuffer(vertices.GetData(), static_cast<UINT>(vertices.Num() * sizeof(FVertexTexture)));
+	vertexSubUVBuffer = FEngineLoop::renderer.CreateImmutableVertexBuffer(TEXT("UParticleSubUVComp"), vertices);
 	numTextVertices = static_cast<UINT>(vertices.Num());
 }

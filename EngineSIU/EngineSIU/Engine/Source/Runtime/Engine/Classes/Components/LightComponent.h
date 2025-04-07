@@ -14,19 +14,25 @@ public:
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
     void InitializeLight();
-    void SetColor(FVector4 newColor);
-    FVector4 GetColor() const;
-    float GetRadius() const;
+    void SetColor(FVector4 NewColor);
+  
     void SetRadius(float r);
 
+    FLight GetLightInfo() const { return Light; };
 private:
-    FVector4 color;
-    float radius;
+
     FBoundingBox AABB;
+    
     UBillboardComponent* texture2D;
+
+    FLight Light;
+
 public:
     FBoundingBox GetBoundingBox() const {return AABB;}
-    float GetRadius() {return radius;}
-    FVector4 GetColor() {return color;}
+    
+    float GetRadius() const {return Light.Range;}
+    
+    FVector4 GetColor() const { return FVector4(Light.AmbientColor.X, Light.AmbientColor.Y, Light.AmbientColor.Z, 1); }
+
     UBillboardComponent* GetTexture2D() const {return texture2D;}
 };

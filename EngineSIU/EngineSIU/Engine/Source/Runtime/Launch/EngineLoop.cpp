@@ -8,6 +8,7 @@
 #include "Slate/Widgets/Layout/SSplitter.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
+#include "D3D11RHI/GraphicDevice.h"
 
 #include "Engine/EditorEngine.h"
 
@@ -112,19 +113,30 @@ int32 FEngineLoop::PreInit()
 int32 FEngineLoop::Init(HINSTANCE hInstance)
 {
     /* must be initialized before window. */
-    UnrealEditor = new UnrealEd();
-    UnrealEditor->Initialize();
-
     WindowInit(hInstance);
-    graphicDevice.Initialize(hWnd);
-    renderer.Initialize(&graphicDevice);
-    PrimitiveDrawBatch.Initialize(&graphicDevice);
+
+    UnrealEditor = new UnrealEd();
+
+    bufferManager = new FDXDBufferManager();
 
     UIMgr = new UImGuiManager;
+
+    LevelEditor = new SLevelEditor();
+
+    UnrealEditor->Initialize();
+
+    graphicDevice.Initialize(hWnd);
+
+    bufferManager->Initialize(graphicDevice.Device, graphicDevice.DeviceContext);
+
+    renderer.Initialize(&graphicDevice, bufferManager);
+
+    PrimitiveDrawBatch.Initialize(&graphicDevice);
+
     UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
 
     resourceMgr.Initialize(&renderer, &graphicDevice);
-    LevelEditor = new SLevelEditor();
+
     LevelEditor->Initialize();
 
     GEngine = FObjectFactory::ConstructObject<UEditorEngine>();
@@ -178,7 +190,7 @@ void FEngineLoop::Tick()
     QueryPerformanceFrequency(&frequency);
 
     LARGE_INTEGER startTime, endTime;
-    double elapsedTime = 1.0;
+    double elapsedTime = 0.0;
 
     while (bIsExit == false)
     {
@@ -218,8 +230,7 @@ void FEngineLoop::Tick()
             Sleep(0);
             QueryPerformanceCounter(&endTime);
             elapsedTime = (endTime.QuadPart - startTime.QuadPart) * 1000.0 / frequency.QuadPart;
-        }
-        while (elapsedTime < targetFrameTime);
+        } while (elapsedTime < targetFrameTime);
     }
 }
 

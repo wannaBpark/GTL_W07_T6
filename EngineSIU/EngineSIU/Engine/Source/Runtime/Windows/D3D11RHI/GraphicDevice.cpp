@@ -62,7 +62,7 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
     descDepth.Height = height;                        // 텍스처 높이 설정
     descDepth.MipLevels = 1;                          // 미맵 레벨 수 (1로 설정하여 미맵 없음)
     descDepth.ArraySize = 1;                          // 텍스처 배열의 크기 (1로 단일 텍스처)
-    descDepth.Format = DXGI_FORMAT_R24G8_TYPELESS;    // 렌더링을 위해
+    descDepth.Format = DXGI_FORMAT_R32_TYPELESS; // 24비트 깊이와 8비트 스텐실을 위한 포맷
     descDepth.SampleDesc.Count = 1;                   // 멀티샘플링 설정 (1로 단일 샘플)
     descDepth.SampleDesc.Quality = 0;                 // 샘플 퀄리티 설정
     descDepth.Usage = D3D11_USAGE_DEFAULT;            // 텍스처 사용 방식
@@ -81,7 +81,7 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
 
     D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
     ZeroMemory(&descDSV, sizeof(descDSV));
-    descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;        // 깊이 스텐실 포맷
+    descDSV.Format = DXGI_FORMAT_D32_FLOAT;        // 깊이 스텐실 포맷
     descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D; // 뷰 타입 설정 (2D 텍스처)
     descDSV.Texture2D.MipSlice = 0;                        // 사용할 미맵 슬라이스 설정
 
@@ -96,20 +96,6 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
         wchar_t errorMsg[256];
         swprintf_s(errorMsg, L"Failed to create depth stencil view! HRESULT: 0x%08X", hr);
         MessageBox(hWindow, errorMsg, L"Error", MB_ICONERROR | MB_OK);
-        return;
-    }
-
-    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-    SRVDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS; // SRV 전용 포맷
-    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    SRVDesc.Texture2D.MipLevels = 1;
-    SRVDesc.Texture2D.MostDetailedMip = 0;
-
-    hr = Device->CreateShaderResourceView(DepthStencilBuffer, &SRVDesc, &SceneDepthSRV);
-
-    if (FAILED(hr))
-    {
-        MessageBox(hWindow, L"Failed to create depth stencil SRV!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
 }
@@ -259,7 +245,6 @@ void FGraphicsDevice::CreateFrameBuffer()
 
     RTVs[0] = SceneColorRTV;
     RTVs[1] = UUIDFrameBufferRTV;
-    RTVs[2] = FrameBufferRTV;
 }
 
 void FGraphicsDevice::ReleaseFrameBuffer()
