@@ -79,6 +79,16 @@ void PropertyEditorPanel::Render()
         ImGui::PopStyleColor();
     }
 
+    if (PickedActor)
+    {
+        if (ImGui::Button("Duplicate"))
+        {
+            UWorld* World = GEngineLoop.GetWorld();
+            AActor* NewActor = World->DuplicateActor(PickedActor);
+            World->SetSelectedActor(NewActor);
+        }
+    }
+
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
     if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickedActor->GetRootComponent()))
