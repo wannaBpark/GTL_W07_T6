@@ -6,7 +6,7 @@
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
-#include "Components/HeightFogComponent.h"
+#include "Actors/HeightFogActor.h"
 
 UWorld* UWorld::CreateWorld(const EWorldType InWorldType, const FString& InWorldName)
 {
@@ -24,6 +24,12 @@ void UWorld::InitializeNewWorld()
 
     // TODO: BaseObject 제거 필요.
     CreateBaseObject();
+
+    if (FogActor == nullptr)
+    {
+        FogActor = SpawnActor<AHeightFogActor>();
+
+    }
 }
 
 void UWorld::CreateBaseObject()
@@ -51,12 +57,6 @@ UObject* UWorld::Duplicate()
 
 void UWorld::Tick(float DeltaTime)
 {
-    if (FogActor == nullptr) 
-    {
-        FogActor = SpawnActor<AActor>();
-        UHeightFogComponent* FogComp = FogActor->AddComponent<UHeightFogComponent>();
-        FogActor->SetActorLabel(TEXT("Height Fog"));
-    }
 
     EditorPlayer->Tick(DeltaTime);
 
