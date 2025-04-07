@@ -27,6 +27,7 @@ class FGizmoRenderPass;
 class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
 class FLineRenderPass;
+class FFogRenderPass;
 
 class FRenderer
 {
@@ -70,6 +71,8 @@ public:
     FUpdateLightBufferPass* UpdateLightBufferPass = nullptr;
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
+    FFogRenderPass* FogRenderPass = nullptr;
+
     bool IsSceneDepth = false;
 };
 

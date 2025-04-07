@@ -178,6 +178,8 @@ void FEngineLoop::Render() const
         
         Renderer.Render(GEngine->ActiveWorld.get(), LevelEditor->GetActiveViewportClient());
     }
+    //지금까지 렌더된걸 기반으로 쿼드 생성 (안개 적용)
+
 }
 
 void FEngineLoop::Tick()
@@ -211,6 +213,7 @@ void FEngineLoop::Tick()
         GEngine->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
+        graphicDevice.PrepareUI();
         UIMgr->BeginFrame();
         UnrealEditor->Render();
 

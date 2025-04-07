@@ -34,13 +34,17 @@ void FDXDShaderManager::ReleaseAllShader()
 
 HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint)
 {
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
     HRESULT hr = S_OK;
 
     if (DXDDevice == nullptr)
         return S_FALSE;
 
     ID3DBlob* PsBlob = nullptr;
-    hr = D3DCompileFromFile(FileName.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "ps_5_0", 0, 0, &PsBlob, nullptr);
+    hr = D3DCompileFromFile(FileName.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
     if (FAILED(hr))
         return hr;
 
@@ -105,6 +109,10 @@ HRESULT FDXDShaderManager::AddInputLayout(const std::wstring& Key, const D3D11_I
 
 HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize)
 {
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
     if (DXDDevice == nullptr)
         return S_FALSE;
 
@@ -113,7 +121,7 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
     ID3DBlob* VertexShaderCSO = nullptr;
     ID3DBlob* ErrorBlob = nullptr;
 
-    hr = D3DCompileFromFile(FileName.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "vs_5_0", 0, 0, &VertexShaderCSO, &ErrorBlob);
+    hr = D3DCompileFromFile(FileName.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorBlob);
     if (FAILED(hr))
     {
         if (ErrorBlob) {
