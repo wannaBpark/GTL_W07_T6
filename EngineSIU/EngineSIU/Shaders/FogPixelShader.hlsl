@@ -15,6 +15,8 @@ cbuffer ConstantBuffer : register(b1)
     float StartDistance;
     float FogCutoffDistance;
     float FogMaxOpacity;
+    float3 FogPosition;
+    float padding;
 };
 
 cbuffer ScreenConstants : register(b0)
@@ -48,7 +50,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
     float3 worldPos = worldPos4.xyz;
     
     //높이 감쇠
-    float HeightDiff = worldPos.z - CameraPos.z;
+    float HeightDiff = worldPos.z - FogPosition.z;
     float HeightFactor = exp(-HeightDiff * FogHeightFalloff);
     
      //카메라 까지의 거리 계산

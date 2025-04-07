@@ -22,12 +22,6 @@ void UWorld::InitializeNewWorld()
     ActiveLevel.reset(FObjectFactory::ConstructObject<ULevel>());
     ActiveLevel->InitLevel(this);
 
-    if (FogActor == nullptr) {
-        FogActor = SpawnActor<AActor>();
-        UHeightFogComponent* FogComp = FogActor->AddComponent<UHeightFogComponent>();
-        FogActor->SetActorLabel("Height Fog");
-    }
-
     // TODO: BaseObject 제거 필요.
     CreateBaseObject();
 }
@@ -63,6 +57,12 @@ void UWorld::ReleaseBaseObject()
 
 void UWorld::Tick(float DeltaTime)
 {
+    if (FogActor == nullptr) {
+        FogActor = SpawnActor<AActor>();
+        UHeightFogComponent* FogComp = FogActor->AddComponent<UHeightFogComponent>();
+        FogActor->SetActorLabel(TEXT("Height Fog"));
+    }
+
     EditorPlayer->Tick(DeltaTime);
 	LocalGizmo->Tick(DeltaTime);
 
