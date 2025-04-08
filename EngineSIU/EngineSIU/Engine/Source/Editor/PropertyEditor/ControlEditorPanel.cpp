@@ -255,6 +255,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             { .label= "PointLight", .obj= OBJ_PointLight },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
             { .label= "Text",      .obj= OBJ_Text },
+            { .label= "Fireball",  .obj = OBJ_Fireball},
             { .label= "Fog",       .obj= OBJ_Fog }
         };
 
@@ -271,7 +272,9 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 {
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_SPHERE"));
-                    SpawnedActor->AddComponent<USphereComp>();
+                    USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
+                    FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
+                    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
                     break;
                 }
                 case OBJ_CUBE:
@@ -321,6 +324,15 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
                     TextComponent->SetText(L"안녕하세요 Jungle 1");
+                    break;
+                }
+                case OBJ_Fireball:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
+                    USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
+                    FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
+                    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
                     break;
                 }
                 case OBJ_Fog:

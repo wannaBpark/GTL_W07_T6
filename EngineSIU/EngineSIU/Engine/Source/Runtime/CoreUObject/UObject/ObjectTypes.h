@@ -9,6 +9,7 @@ enum OBJECTS : uint8
     OBJ_PointLight,
     OBJ_PARTICLE,
     OBJ_Text,
+    OBJ_Fireball,
     OBJ_TRIANGLE,
     OBJ_CAMERA,
     OBJ_PLAYER,
