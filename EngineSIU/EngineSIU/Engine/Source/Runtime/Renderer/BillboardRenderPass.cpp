@@ -179,11 +179,6 @@ void FBillboardRenderPass::SetupVertexBuffer(ID3D11Buffer* pVertexBuffer, UINT n
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
-{
-  
-}
-
 void FBillboardRenderPass::ClearRenderArr()
 {
     BillboardObjs.Empty();

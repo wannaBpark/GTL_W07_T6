@@ -1,20 +1,53 @@
 #pragma once
 #include "Vector.h"
+
+
 // 4D Vector
-struct FVector4 {
+struct FVector4
+{
     float X, Y, Z, W;
-    FVector4(float _x = 0, float _y = 0, float _z = 0, float _a = 0) : X(_x), Y(_y), Z(_z), W(_a) {}
 
-    FVector4(FVector _vector, float _a = 0) : X(_vector.X), Y(_vector.Y), Z(_vector.Z), W(_a) {}
+    FVector4() : X(0), Y(0), Z(0), W(0) {}
+    FVector4(float InX, float InY, float InZ, float InW)
+        : X(InX), Y(InY), Z(InZ), W(InW)
+    {}
+    FVector4(FVector InVector, float InW = 0)
+        : X(InVector.X), Y(InVector.Y), Z(InVector.Z)
+        , W(InW)
+    {}
 
-    FVector4 operator-(const FVector4& other) const {
-        return FVector4(X - other.X, Y - other.Y, Z - other.Z, W - other.W);
-    }
-    FVector4 operator+(const FVector4& other) const {
-        return FVector4(X + other.X, Y + other.Y, Z + other.Z, W + other.W);
-    }
-    FVector4 operator/(float scalar) const
-    {
-        return FVector4{ X / scalar, Y / scalar, Z / scalar, W / scalar };
-    }
+    FVector4 operator+(const FVector4& Other) const;
+    FVector4 operator-(const FVector4& Other) const;
+
+    FVector4 operator/(float Scalar) const;
 };
+
+inline FVector4 FVector4::operator-(const FVector4& Other) const
+{
+    return {
+        X - Other.X,
+        Y - Other.Y,
+        Z - Other.Z,
+        W - Other.W
+    };
+}
+
+inline FVector4 FVector4::operator+(const FVector4& Other) const
+{
+    return {
+        X + Other.X,
+        Y + Other.Y,
+        Z + Other.Z,
+        W + Other.W
+    };
+}
+
+inline FVector4 FVector4::operator/(float Scalar) const
+{
+    return {
+        X / Scalar,
+        Y / Scalar,
+        Z / Scalar,
+        W / Scalar
+    };
+}

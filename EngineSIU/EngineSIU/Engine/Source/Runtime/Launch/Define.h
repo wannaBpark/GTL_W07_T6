@@ -280,10 +280,10 @@ enum ELightType {
 };
 struct FLight
 {
-    FVector AmbientColor;
+    FVector AmbientColor = FVector(1.f, 1.f, 1.f);
     float pad0;
     
-    FVector DiffuseColor;
+    FVector DiffuseColor = FVector(1.f, 1.f, 1.f);
     float pad1;
 
     FVector SpecularColor = FVector(0.5, 0.5, 0.5);
@@ -295,14 +295,12 @@ struct FLight
     FVector Direction;
     float pad3;
 
-    FVector Attenuation = FVector(0.5,0.5,0.5);
-    float pad4;
-
+    float Attenuation = 0.5f;
+ 
     int Enabled = 0;
     int Type = ELightType::POINT_LIGHT;
 
-    float Range = 4.f;
-    float pad5;
+    float Range = 30.f;
 };
 
 struct FLightBuffer
@@ -333,7 +331,7 @@ struct FPerObjectConstantBuffer {
     FMatrix Model;      // 모델
     FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
     FVector4 UUIDColor;
-    bool IsSelected;
+    int IsSelected;
     FVector pad;
 };
 
