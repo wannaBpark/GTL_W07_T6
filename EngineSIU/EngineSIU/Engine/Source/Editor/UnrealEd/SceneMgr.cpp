@@ -1,5 +1,7 @@
 #include "UnrealEd/SceneMgr.h"
 #include <fstream>
+
+#include "CoreMiscDefines.h"
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CubeComp.h"

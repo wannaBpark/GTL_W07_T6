@@ -17,8 +17,6 @@
 3. std::string에서 FString 생성
 */
 
-enum : int8 { INDEX_NONE = -1 };
-
 /** Determines case sensitivity options for string comparisons. */
 namespace ESearchCase
 {

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cctype>
 
+#include "CoreMiscDefines.h"
 #include "Math/MathUtility.h"
 
 
