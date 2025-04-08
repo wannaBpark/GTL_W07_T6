@@ -172,7 +172,7 @@
   <ItemGroup>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Serialization\Archive.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\MemoryWriter.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Matrix.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.cpp" />
@@ -263,7 +263,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\MemoryWriter.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Matrix.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\HeightFogActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.h" />

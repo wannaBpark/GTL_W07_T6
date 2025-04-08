@@ -15,7 +15,7 @@ public:
         bIsLoading = false;
     }
 
-    virtual void SaveData(const void* InData, int64 Length) override
+    virtual void SaveData(const void* InData, uint64 Length) override
     {
         const int32 Index = Data.Num();
         Data.AddUninitialized(static_cast<int32>(Length));
@@ -39,7 +39,7 @@ public:
         bIsLoading = true;
     }
 
-    virtual void LoadData(void* OutData, int64 Length) override
+    virtual void LoadData(void* OutData, uint64 Length) override
     {
         FPlatformMemory::Memcpy(OutData, Data.GetData() + Position, Length);
         Position += Length;
