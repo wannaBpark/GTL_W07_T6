@@ -6,31 +6,35 @@
 #define INLINE_STRINGIFY(name) #name
 
 
-// RTTI를 위한 클래스 매크로
-#define DECLARE_CLASS(TClass, TSuperClass) \
+// 공통 클래스 정의 부분
+#define __DECLARE_COMMON_CLASS_BODY__(TClass, TSuperClass) \
 private: \
     TClass(const TClass&) = delete; \
     TClass& operator=(const TClass&) = delete; \
     TClass(TClass&&) = delete; \
     TClass& operator=(TClass&&) = delete; \
-    inline static struct TClass##_ClassRegistrar \
+    inline static struct TClass##_StaticClassRegistrar_ \
     { \
-        TClass##_ClassRegistrar() \
+        TClass##_StaticClassRegistrar_() \
         { \
             UClass::GetClassMap().Add(#TClass, ThisClass::StaticClass()); \
         } \
-    } TClass##_ClassRegistrar_{}; \
+    } TClass##_StaticClassRegistrar_{}; \
 public: \
     using Super = TSuperClass; \
-    using ThisClass = TClass; \
+    using ThisClass = TClass;
+
+
+// RTTI를 위한 클래스 매크로
+#define DECLARE_CLASS(TClass, TSuperClass) \
+    __DECLARE_COMMON_CLASS_BODY__(TClass, TSuperClass) \
     static UClass* StaticClass() { \
         static UClass ClassInfo{ \
             TEXT(#TClass), \
             static_cast<uint32>(sizeof(TClass)), \
             static_cast<uint32>(alignof(TClass)), \
             TSuperClass::StaticClass(), \
-            []() -> UObject* \
-            { \
+            []() -> UObject* { \
                 void* RawMemory = FPlatformMemory::Malloc<EAT_Object>(sizeof(TClass)); \
                 ::new (RawMemory) TClass; \
                 return static_cast<UObject*>(RawMemory); \
@@ -39,23 +43,9 @@ public: \
         return &ClassInfo; \
     }
 
-// RTTI를 위한 클래스 매크로
+// RTTI를 위한 추상 클래스 매크로
 #define DECLARE_ABSTRACT_CLASS(TClass, TSuperClass) \
-private: \
-    TClass(const TClass&) = delete; \
-    TClass& operator=(const TClass&) = delete; \
-    TClass(TClass&&) = delete; \
-    TClass& operator=(TClass&&) = delete; \
-    inline static struct TClass##_ClassRegistrar \
-    { \
-        TClass##_ClassRegistrar() \
-        { \
-            UClass::GetClassMap().Add(#TClass, ThisClass::StaticClass()); \
-        } \
-    } TClass##_ClassRegistrar_{}; \
-public: \
-    using Super = TSuperClass; \
-    using ThisClass = TClass; \
+    __DECLARE_COMMON_CLASS_BODY__(TClass, TSuperClass) \
     static UClass* StaticClass() { \
         static UClass ClassInfo{ \
             TEXT(#TClass), \
@@ -66,6 +56,7 @@ public: \
         }; \
         return &ClassInfo; \
     }
+
 
 #define FIRST_ARG(Arg1, ...) Arg1
 
