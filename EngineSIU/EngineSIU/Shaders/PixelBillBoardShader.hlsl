@@ -35,7 +35,7 @@ float4 main(PSInput input) : SV_TARGET
     // 검정색에 가까운 경우 알파 값을 0으로 설정하여 투명하게 처리
     if (col.r < threshold && col.g < threshold && col.b < threshold)
     {
-        output.color = float4(col.rgb, 0.0);
+        discard;
     }
     else
     {

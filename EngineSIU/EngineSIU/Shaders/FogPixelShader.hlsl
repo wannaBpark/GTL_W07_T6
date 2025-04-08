@@ -52,10 +52,11 @@ float4 mainPS(PS_INPUT input) : SV_Target
     //높이 감쇠
     float HeightDiff = worldPos.z - FogPosition.z;
     float HeightFactor = exp(-HeightDiff * FogHeightFalloff);
+    HeightFactor = clamp(HeightFactor, 0.01, 1.0);
     
      //카메라 까지의 거리 계산
-    float3 ToCamera = CameraPos - worldPos;
-    float distance = length(ToCamera);
+    float3 ToWorld = worldPos - CameraPos;
+    float distance = length(ToWorld);
     
     //안개 계수
     float FogFactor = 1.0 - exp(-distance * FogDensity * HeightFactor);
@@ -67,5 +68,5 @@ float4 mainPS(PS_INPUT input) : SV_Target
     
     float4 SceneColorValue = SceneColor.Sample(Sampler, UV);
     float4 FinalColor = lerp(SceneColorValue, FogColor, FogFactor);
-    return FinalColor;
+    return float4(FinalColor.rgb, FogFactor);
 }
