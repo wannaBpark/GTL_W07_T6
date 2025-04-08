@@ -87,7 +87,7 @@ public: \
     { \
         VarName##_PropRegistrar() \
         { \
-            constexpr size_t Offset = offsetof(ThisClass, VarName); \
+            constexpr int64 Offset = offsetof(ThisClass, VarName); \
             ThisClass::StaticClass()->RegisterProperty( \
                 { #VarName, sizeof(Type), Offset } \
             ); \

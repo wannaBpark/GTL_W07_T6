@@ -13,10 +13,8 @@ struct FProperty
     virtual ~FProperty() = default;
 
     const char* Name;
-    size_t Size;
-    size_t Offset;
-
-    // virtual void Serialize(void* Data) const = 0;
+    int64 Size;
+    int64 Offset;
 };
 
 

@@ -63,7 +63,7 @@ void UClass::SerializeBin(FArchive& Ar, void* Data)
     for (const FProperty& Prop : Properties)
     {
         void* PropData = static_cast<uint8*>(Data) + Prop.Offset;
-        Ar.SerializeBytes(PropData, Prop.Size);
+        Ar.Serialize(PropData, Prop.Size);
     }
 }
 
