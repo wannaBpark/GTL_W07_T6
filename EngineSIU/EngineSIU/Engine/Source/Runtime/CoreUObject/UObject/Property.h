@@ -5,16 +5,16 @@
 struct FProperty
 {
     FProperty(const char* InName, int32 InSize, int32 InOffset)
-        : PropertyName(InName)
-        , PropertySize(InSize)
-        , PropertyOffset(InOffset)
+        : Name(InName)
+        , Size(InSize)
+        , Offset(InOffset)
     {}
 
     virtual ~FProperty() = default;
 
-    const char* PropertyName;
-    size_t PropertySize;
-    size_t PropertyOffset;
+    const char* Name;
+    size_t Size;
+    size_t Offset;
 
     // virtual void Serialize(void* Data) const = 0;
 };

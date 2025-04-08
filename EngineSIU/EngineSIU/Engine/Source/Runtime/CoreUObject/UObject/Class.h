@@ -4,6 +4,7 @@
 #include "Property.h"
 
 
+class FArchive;
 /**
  * UObject의 RTTI를 가지고 있는 클래스
  */
@@ -40,30 +41,20 @@ public:
 
     template <typename T>
         requires std::derived_from<T, UObject>
-    bool IsChildOf() const
-    {
-        return IsChildOf(T::StaticClass());
-    }
+    bool IsChildOf() const;
 
     /**
      * 부모의 UClass를 가져옵니다.
      *
      * @note AActor::StaticClass()->GetSuperClass() == UObject::StaticClass()
      */
-    UClass* GetSuperClass() const
-    {
-        return SuperClass;
-    }
+    UClass* GetSuperClass() const { return SuperClass; }
 
     UObject* GetDefaultObject() const;
 
     template <typename T>
-    T* GetDefaultObject() const
-    {
-        UObject* Ret = GetDefaultObject();
-        assert(Ret->IsA<T>());
-        return static_cast<T*>(Ret);
-    }
+        requires std::derived_from<T, UObject>
+    T* GetDefaultObject() const;
 
     const TArray<FProperty>& GetProperties() const { return Properties; }
 
@@ -89,3 +80,19 @@ private:
 
     TArray<FProperty> Properties;
 };
+
+template <typename T>
+    requires std::derived_from<T, UObject>
+bool UClass::IsChildOf() const
+{
+    return IsChildOf(T::StaticClass());
+}
+
+template <typename T>
+    requires std::derived_from<T, UObject>
+T* UClass::GetDefaultObject() const
+{
+    UObject* Ret = GetDefaultObject();
+    assert(Ret->IsA<T>());
+    return static_cast<T*>(Ret);
+}
