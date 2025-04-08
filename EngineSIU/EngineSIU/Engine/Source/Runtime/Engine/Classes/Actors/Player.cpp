@@ -16,8 +16,6 @@
 #include "Engine/EditorEngine.h"
 
 
-using namespace DirectX;
-
 void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);

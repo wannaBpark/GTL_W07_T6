@@ -129,7 +129,7 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
     ChangeViewMode(ActiveViewport->GetViewMode());
-    UHeightFogComponent* Fog = nullptr;
+    TArray< UHeightFogComponent*> Fogs;
     for (UHeightFogComponent* iter : TObjectRange<UHeightFogComponent>())
     {
         if(iter)
@@ -137,13 +137,12 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
             UWorld* FogWorld = iter->GetOwner()->GetWorld();
             if (FogWorld == World && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
             {
-                Fog = iter;
-                break;
+                Fogs.Add(iter);
             }
         }
     }
 
-    if (Fog) 
+    if (Fogs.Num() > 0)
     {
         Graphics->PrepareTexture();
     }
@@ -158,11 +157,14 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
     }
 
-    if (!IsSceneDepth && Fog) 
+    if (!IsSceneDepth && Fogs.Num()>0) 
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
         
-        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fog);
+        for (const auto& Fog : Fogs)
+        {
+            FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fog);
+        }
     }
 
     GizmoRenderPass->Render(World, ActiveViewport);

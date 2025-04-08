@@ -373,7 +373,8 @@ void FGraphicsDevice::PrepareFog() const
     DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
     DeviceContext->OMSetRenderTargets(2, nullRTVs, nullptr);
     DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView);
-    DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+    float blendFactor[4] = { 0, 0, 0, 0 };
+    DeviceContext->OMSetBlendState(AlphaBlendState, blendFactor, 0xffffffff);
 }
 
 void FGraphicsDevice::PrepareTexture() const

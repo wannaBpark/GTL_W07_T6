@@ -13,10 +13,6 @@ ULightComponentBase::~ULightComponentBase()
 {
   
 }
-void ULightComponentBase::SetAmbientColor(FVector4 NewColor)
-{
-    Light.AmbientColor = FVector(NewColor.X, NewColor.Y, NewColor.Z);
-}
 
 void ULightComponentBase::SetDiffuseColor(FVector4 NewColor)
 {
@@ -25,10 +21,10 @@ void ULightComponentBase::SetDiffuseColor(FVector4 NewColor)
 
 void ULightComponentBase::SetSpecularColor(FVector4 NewColor)
 {
-   // Light.SpecularColor = FVector(NewColor.X, NewColor.Y, NewColor.Z);
+   Light.SpecularColor = FVector(NewColor.X, NewColor.Y, NewColor.Z);
 }
 
-void ULightComponentBase::SetAttenuation(FVector Attenuation)
+void ULightComponentBase::SetAttenuation(float Attenuation)
 {
     Light.Attenuation = Attenuation;
 }
@@ -43,11 +39,6 @@ void ULightComponentBase::SetFalloff(float fallOff)
     Light.Falloff = fallOff;
 }
 
-FVector4 ULightComponentBase::GetAmbientColor()
-{
-    return FVector4(Light.AmbientColor, 1);
-}
-
 FVector4 ULightComponentBase::GetDiffuseColor()
 {
     return FVector4(Light.DiffuseColor, 1);
@@ -58,7 +49,7 @@ FVector4 ULightComponentBase::GetSpecularColor()
     return FVector4(Light.SpecularColor, 1);
 }
 
-FVector ULightComponentBase::GetAttenuation()
+float ULightComponentBase::GetAttenuation()
 {
     return Light.Attenuation;
 }
