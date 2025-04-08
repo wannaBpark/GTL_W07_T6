@@ -5,6 +5,7 @@
 #include "Vector.h"
 #include "Vector4.h"
 #include "HAL/PlatformType.h"
+#include <cmath>
 
 
 // 단위 행렬 정의
@@ -109,7 +110,7 @@ FMatrix FMatrix::Inverse(const FMatrix& Mat)
 
 	const float Determinant = Mat[0][0] * Det[0] - Mat[1][0] * Det[1] + Mat[2][0] * Det[2] - Mat[3][0] * Det[3];
 	
-	if ( Determinant == 0.0f || !_finite(Determinant) )
+    if ( Determinant == 0.0f || !std::isfinite(Determinant) )
 	{
 		return Identity;
 	}
