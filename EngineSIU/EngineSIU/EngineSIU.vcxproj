@@ -171,6 +171,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\Archive.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.cpp" />
@@ -253,6 +254,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h" />
