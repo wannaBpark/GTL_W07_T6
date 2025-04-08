@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <assert.h>
+
 #include "Archive.h"
 #include "Container/Array.h"
 #include "UObject/NameTypes.h"
@@ -32,6 +34,13 @@ protected:
             FString StringName = N.ToString();
             *this << StringName;
         }
+        return *this;
+    }
+
+    virtual FArchive& operator<<(UObject*& Object) override
+    {
+        // FMemoryArchive로는 UObject 직렬화를 할 수 없음.
+        assert(0);
         return *this;
     }
 };
