@@ -27,9 +27,6 @@ public:
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;
     ID3D11BlendState* AlphaBlendState = nullptr;
-
-    ID3D11Texture2D* FogBuffer = nullptr;
-    ID3D11RenderTargetView* FogRTV = nullptr;
     
     UINT screenWidth = 0;
     UINT screenHeight = 0;
@@ -63,6 +60,8 @@ public:
     void CreateAlphaBlendState();
     void ChangeRasterizer(EViewModeIndex evi);
     void ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil) const;
+
+    void CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTargetView*& OutRTV);
 
     uint32 GetPixelUUID(POINT pt) const;
     uint32 DecodeUUIDColor(FVector4 UUIDColor) const;
