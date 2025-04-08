@@ -2,9 +2,8 @@
 
 #define _TCHAR_DEFINED
 #include <wrl.h>
-
 #include "PrimitiveComponent.h"
-#include "UTexture.h"
+
 
 class UBillboardComponent : public UPrimitiveComponent
 {
@@ -12,32 +11,31 @@ class UBillboardComponent : public UPrimitiveComponent
 
 public:
     UBillboardComponent();
-
+    virtual ~UBillboardComponent();
     virtual UObject* Duplicate() override;
-
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(
         FVector& rayOrigin,
-        FVector& rayDirection, float& pfNearHitDistance
+        FVector& rayDirection,
+        float& pfNearHitDistance
     ) override;
 
-    void SetTexture(const FWString& _fileName);
+    virtual void SetTexture(const FWString& _fileName);
     void SetUUIDParent(USceneComponent* _parent);
-    FMatrix CreateBillboardMatrix();
+    FMatrix CreateBillboardMatrix() const;
+    FString GetBufferKey();
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexTextureBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> indexTextureBuffer;
-    UINT numVertices;
-    UINT numIndices;
     float finalIndexU = 0.0f;
     float finalIndexV = 0.0f;
     std::shared_ptr<FTexture> Texture;
+    FString BufferKey = TEXT("default");
 
 protected:
     USceneComponent* m_parent = nullptr;
 
-    bool CheckPickingOnNDC(const TArray<FVector>& checkQuad, float& hitDistance);
+    // NDC 픽킹을 위한 내부 함수 : quadVertices는 월드 공간 정점 배열
+    bool CheckPickingOnNDC(const TArray<FVector>& quadVertices, float& hitDistance) const;
 
 private:
     void CreateQuadTextureVertexBuffer();
