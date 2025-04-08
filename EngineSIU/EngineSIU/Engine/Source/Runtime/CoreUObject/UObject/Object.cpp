@@ -35,6 +35,12 @@ UObject* UObject::Duplicate()
     return FObjectFactory::ConstructObject(GetClass());
 }
 
+void UObject::Serialize(FArchive& Ar)
+{
+    // TODO: Serialize 구현
+    // GetClass()->SerializeBin(Ar, this);
+}
+
 UWorld* UObject::GetWorld() const
 {
     return GEngine->ActiveWorld.get();
