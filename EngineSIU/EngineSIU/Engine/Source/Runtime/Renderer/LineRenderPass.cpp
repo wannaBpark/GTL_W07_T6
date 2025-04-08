@@ -38,7 +38,7 @@ void FLineRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDe
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
-
+    CreateShader();
 }
 
 void FLineRenderPass::PrepareRender()
