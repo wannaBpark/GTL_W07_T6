@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ContainerAllocator.h"
+#include "Serialization/Archive.h"
 
 
 template <typename T, typename Allocator = FDefaultAllocator<T>>
@@ -363,4 +364,28 @@ template <typename Compare>
 void TArray<T, Allocator>::Sort(const Compare& CompFn)
 {
     std::sort(ContainerPrivate.begin(), ContainerPrivate.end(), CompFn);
+}
+
+template <typename ElementType, typename Allocator>
+FArchive& operator<<(FArchive& Ar, TArray<ElementType, Allocator>& Array)
+{
+    using SizeType = typename TArray<ElementType, Allocator>::SizeType;
+
+    // 배열 크기 직렬화
+    SizeType ArraySize = Array.Num();
+    Ar << ArraySize;
+
+    if (Ar.IsLoading())
+    {
+        // 로드 시 배열 크기 설정
+        Array.SetNum(ArraySize);
+    }
+
+    // 배열 요소 직렬화
+    for (SizeType Index = 0; Index < ArraySize; ++Index)
+    {
+        Ar << Array[Index];
+    }
+
+    return Ar;
 }
