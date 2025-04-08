@@ -1,16 +1,21 @@
 #include "ControlEditorPanel.h"
 
 #include "World/World.h"
+
 #include "Actors/Player.h"
+#include "Actors/LightActor.h"
+#include "Actors/FireballActor.h"
+
 #include "Components/LightComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/ParticleSubUVComponent.h"
 #include "Components/UTextComponent.h"
+#include "Components/ProjectileMovementComponent.h"
+
 #include "Engine/FLoaderOBJ.h"
 #include "Engine/StaticMeshActor.h"
-#include "Actors/LightActor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -334,11 +339,18 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_Fireball:
                 {
-                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor = World->SpawnActor<AFireballActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
+
                     USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
+                    
                     FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
                     SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
+                    SphereComp->SetScale(FVector(0.5f, 0.5f, 0.5f));
+                    UPointLightComponent* PointLightComp = SpawnedActor->AddComponent<UPointLightComponent>();
+                    UProjectileMovementComponent* ProjectileMovementComponent = SpawnedActor->AddComponent<UProjectileMovementComponent>();
+                    PointLightComp->AttachToComponent(SpawnedActor->GetRootComponent());
+                    ProjectileMovementComponent->AttachToComponent(PointLightComp);
                     break;
                 }
                 case OBJ_Fog:
