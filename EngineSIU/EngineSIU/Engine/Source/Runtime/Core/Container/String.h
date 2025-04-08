@@ -177,6 +177,8 @@ public:
         ESearchDir::Type SearchDir = ESearchDir::FromStart, int32 StartPosition = -1
     ) const;
 
+    void Reserve(int32 CharacterCount);
+
 public:
     /** ElementType* 로 반환하는 연산자 */
     FORCEINLINE const ElementType* operator*() const;
@@ -228,11 +230,6 @@ FORCEINLINE const FString::ElementType* FString::operator*() const
     return PrivateString.c_str();
 }
 
-// FORCEINLINE FString FString::operator+(const FString& SubStr) const
-// {
-//     return this->PrivateString + SubStr.PrivateString;
-// }
-
 FString operator+(const FString& Lhs, const FString& Rhs)
 {
     FString CopyLhs{Lhs};
@@ -274,4 +271,3 @@ inline const FString::ElementType* GetData(const FString& String)
 {
     return String.PrivateString.data();
 }
-

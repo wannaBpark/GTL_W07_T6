@@ -120,3 +120,8 @@ int32 FString::Find(
         return FindSubString(StartPosition, -1, -1);
     }
 }
+
+void FString::Reserve(int32 CharacterCount)
+{
+    PrivateString.reserve(CharacterCount);
+}
