@@ -30,7 +30,7 @@ private:
     static void DecrementStats(size_t Size);
 
 public:
-    static void* Memcpy(void* Dest, const void* Src, int64 Length)
+    static void* Memcpy(void* Dest, const void* Src, uint64 Length)
     {
         return std::memcpy(Dest, Src, Length);
     }
