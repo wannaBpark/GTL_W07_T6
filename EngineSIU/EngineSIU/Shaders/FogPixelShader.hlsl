@@ -1,7 +1,6 @@
 #define CAMERA_NEAR 0.1f
 #define CAMERA_FAR  100.0f
 
-Texture2D SceneColor : register(t126);
 Texture2D SceneDepth : register(t127);
 SamplerState Sampler : register(s0);
 
@@ -50,10 +49,9 @@ float4 mainPS(PS_INPUT input) : SV_Target
     float3 worldPos = worldPos4.xyz;
     
     //높이 감쇠
-    float HeightDiff = worldPos.z - FogPosition.z;
+    float HeightDiff = worldPos.z - (FogPosition.z + CameraPos.z);
     float HeightFactor = exp(-HeightDiff * FogHeightFalloff);
-    HeightFactor = clamp(HeightFactor, 0.01, 1.0);
-    
+   
      //카메라 까지의 거리 계산
     float3 ToWorld = worldPos - CameraPos;
     float distance = length(ToWorld);
@@ -66,7 +64,6 @@ float4 mainPS(PS_INPUT input) : SV_Target
     if (distance < StartDistance)
         FogFactor = 0;
     
-    float4 SceneColorValue = SceneColor.Sample(Sampler, UV);
-    float4 FinalColor = lerp(SceneColorValue, FogColor, FogFactor);
-    return float4(FinalColor.rgb, FogFactor);
+    float4 FinalColor = float4(FogColor.rgb * FogFactor, FogFactor);
+    return FinalColor;
 }
