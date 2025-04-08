@@ -53,6 +53,7 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+    CreateShader();
 }
 
 void FGizmoRenderPass::CreateShader()

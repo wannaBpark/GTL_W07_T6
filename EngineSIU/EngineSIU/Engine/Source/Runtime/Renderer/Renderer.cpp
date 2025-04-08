@@ -41,13 +41,6 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
-    StaticMeshRenderPass->CreateShader();
-    BillboardRenderPass->CreateShader();
-    LineRenderPass->CreateShader();
-    GizmoRenderPass->CreateShader();
-    DepthBufferDebugPass->CreateShader();
-    FogRenderPass->CreateShader();
-
     CreateConstantBuffers();
 }
 
@@ -161,10 +154,7 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
         
-        for (const auto& Fog : Fogs)
-        {
-            FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fog);
-        }
+        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fogs);
     }
 
     GizmoRenderPass->Render(World, ActiveViewport);

@@ -41,6 +41,7 @@ void FBillboardRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraph
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+    CreateShader();
 }
 
 void FBillboardRenderPass::PrepareRender()

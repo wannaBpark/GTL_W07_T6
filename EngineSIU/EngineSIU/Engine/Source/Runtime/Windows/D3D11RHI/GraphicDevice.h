@@ -28,6 +28,8 @@ public:
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;
     ID3D11BlendState* AlphaBlendState = nullptr;
 
+    ID3D11Texture2D* FogBuffer = nullptr;
+    ID3D11RenderTargetView* FogRTV = nullptr;
     
     UINT screenWidth = 0;
     UINT screenHeight = 0;
