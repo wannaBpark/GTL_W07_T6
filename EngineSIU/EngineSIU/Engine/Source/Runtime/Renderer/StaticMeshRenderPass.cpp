@@ -143,8 +143,7 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
-    FCameraConstantBuffer CameraData(View, Projection, {}, 0);
-    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
+   
 }
 
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
@@ -219,6 +218,8 @@ void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorV
         bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
+        FCameraConstantBuffer CameraData(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), Viewport->ViewTransformPerspective.GetLocation(), 0);
+        BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
 

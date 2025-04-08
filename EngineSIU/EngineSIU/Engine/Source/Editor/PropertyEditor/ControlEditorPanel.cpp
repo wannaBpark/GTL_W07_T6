@@ -10,6 +10,7 @@
 #include "Components/UTextComponent.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Engine/StaticMeshActor.h"
+#include "Actors/LightActor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -249,13 +250,13 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         };
 
         static const Primitive primitives[] = {
-            { .label= "Cube",      .obj= OBJ_CUBE },
-            { .label= "Sphere",    .obj= OBJ_SPHERE },
-            { .label= "SpotLight", .obj= OBJ_SpotLight },
-            { .label= "PointLight", .obj= OBJ_PointLight },
-            { .label= "Particle",  .obj= OBJ_PARTICLE },
-            { .label= "Text",      .obj= OBJ_Text },
-            { .label= "Fog",       .obj= OBJ_Fog }
+            {.label = "Cube",      .obj = OBJ_CUBE },
+            {.label = "Sphere",    .obj = OBJ_SPHERE },
+            {.label = "SpotLight", .obj = OBJ_SpotLight },
+            {.label = "PointLight", .obj = OBJ_PointLight },
+            {.label = "Particle",  .obj = OBJ_PARTICLE },
+            {.label = "Text",      .obj = OBJ_Text },
+            {.label = "Fog",       .obj = OBJ_Fog }
         };
 
         for (const auto& primitive : primitives)
@@ -285,21 +286,26 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_SpotLight:
                 {
-                    SpawnedActor = World->SpawnActor<AActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_SpotLight"));
-                    SpawnedActor->AddComponent<USpotLightComponent>();
-                    UBillboardComponent* BillboardComponent = SpawnedActor->AddComponent<UBillboardComponent>();
+                    ALight* LightActor = World->SpawnActor<ALight>();
+                    LightActor->SetActorLabel(TEXT("OBJ_SpotLight"));
+
+                    UBillboardComponent* BillboardComponent = LightActor->AddComponent<UBillboardComponent>();
                     BillboardComponent->SetTexture(L"Assets/Editor/Icon/SpotLight_64x.png");
+
+                    USpotLightComponent* SpotLightComp = LightActor->AddComponent<USpotLightComponent>();
+                    SpotLightComp->AttachToComponent(LightActor->GetRootComponent());
                     break;
                 }
                 case OBJ_PointLight:
                 {
-                    SpawnedActor = World->SpawnActor<AActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_PointLight"));
-                    UBillboardComponent* BillboardComponent = SpawnedActor->AddComponent<UBillboardComponent>();
-                    SpawnedActor->AddComponent<UPointLightComponent>();
+                    ALight* LightActor = World->SpawnActor<ALight>();
+                    LightActor->SetActorLabel(TEXT("OBJ_PointLight"));
+
+                    UBillboardComponent* BillboardComponent = LightActor->AddComponent<UBillboardComponent>();
                     BillboardComponent->SetTexture(L"Assets/Editor/Icon/PointLight_64x.png");
-                    SpawnedActor->SetRootComponent(BillboardComponent);
+
+                    UPointLightComponent* PointLightComp = LightActor->AddComponent<UPointLightComponent>();
+                    PointLightComp->AttachToComponent(LightActor->GetRootComponent());
                     break;
                 }
                 case OBJ_PARTICLE:
