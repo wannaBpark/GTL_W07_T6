@@ -12,10 +12,10 @@ UClass::UClass(
     UClass* InSuperClass,
     ClassConstructorType InCTOR
 )
-    : ClassSize(InClassSize)
+    : ClassCTOR(InCTOR)
+    , ClassSize(InClassSize)
     , ClassAlignment(InAlignment)
     , SuperClass(InSuperClass)
-    , ClassCTOR(InCTOR)
 {
     NamePrivate = InClassName;
 }

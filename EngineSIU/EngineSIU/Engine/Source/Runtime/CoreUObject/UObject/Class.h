@@ -26,6 +26,12 @@ public:
     UClass(UClass&&) = delete;
     UClass& operator=(UClass&&) = delete;
 
+    static TMap<FName, UClass*>& GetClassMap()
+    {
+        static TMap<FName, UClass*> ClassMap;
+        return ClassMap;
+    }
+
     uint32 GetClassSize() const { return ClassSize; }
     uint32 GetClassAlignment() const { return ClassAlignment; }
 

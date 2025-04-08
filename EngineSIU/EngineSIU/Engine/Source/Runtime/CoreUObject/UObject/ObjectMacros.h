@@ -13,6 +13,13 @@ private: \
     TClass& operator=(const TClass&) = delete; \
     TClass(TClass&&) = delete; \
     TClass& operator=(TClass&&) = delete; \
+    inline static struct TClass##_ClassRegistrar \
+    { \
+        TClass##_ClassRegistrar() \
+        { \
+            UClass::GetClassMap().Add(#TClass, ThisClass::StaticClass()); \
+        } \
+    } TClass##_ClassRegistrar_{}; \
 public: \
     using Super = TSuperClass; \
     using ThisClass = TClass; \
@@ -39,6 +46,13 @@ private: \
     TClass& operator=(const TClass&) = delete; \
     TClass(TClass&&) = delete; \
     TClass& operator=(TClass&&) = delete; \
+    inline static struct TClass##_ClassRegistrar \
+    { \
+        TClass##_ClassRegistrar() \
+        { \
+            UClass::GetClassMap().Add(#TClass, ThisClass::StaticClass()); \
+        } \
+    } TClass##_ClassRegistrar_{}; \
 public: \
     using Super = TSuperClass; \
     using ThisClass = TClass; \
