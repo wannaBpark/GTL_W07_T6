@@ -1,15 +1,46 @@
 ﻿#pragma once
 #include "Archive.h"
 #include "Container/Array.h"
+#include "UObject/NameTypes.h"
 
 
-class FMemoryWriter : public FArchive
+class FMemoryArchive : public FArchive
 {
-private:
-    TArray<uint8> Data;
+protected:
+    int64 Offset;
 
+    FMemoryArchive()
+        : FArchive(), Offset(0)
+    {}
+
+    virtual int64 Tell() override final
+    {
+        return Offset;
+    }
+
+    virtual FArchive& operator<<(FName& N) override
+    {
+        // Serialize the FName as a string
+        if (IsLoading())
+        {
+            FString StringName;
+            *this << StringName;
+            N = FName(*StringName);
+        }
+        else
+        {
+            FString StringName = N.ToString();
+            *this << StringName;
+        }
+        return *this;
+    }
+};
+
+class FMemoryWriter : public FMemoryArchive
+{
 public:
-    FMemoryWriter()
+    FMemoryWriter(TArray<uint8>& InData)
+        : Data(InData)
     {
         bIsSaving = true;
         bIsLoading = false;
@@ -17,20 +48,33 @@ public:
 
     virtual void SaveData(const void* InData, uint64 Length) override
     {
-        const int32 Index = Data.Num();
-        Data.AddUninitialized(static_cast<int32>(Length));
-        FPlatformMemory::Memcpy(Data.GetData() + Index, InData, Length);
+        const int64 StartIndex = Data.Num();
+
+        // 메모리 공간 확보
+        Data.AddUninitialized(Length);
+
+        // 데이터 복사
+        FPlatformMemory::Memcpy(Data.GetData() + StartIndex, InData, Length);
+
+        // 현재 위치 업데이트
+        Offset += Length;
     }
 
-    TArray<uint8>& GetData() { return Data; }
+    virtual void Seek(int64 InPos) override
+    {
+        Offset = InPos;
+        if (Offset > Data.Num())
+        {
+            Data.AddUninitialized(Offset - Data.Num()); // 추가 공간 확보
+        }
+    }
+
+private:
+    TArray<uint8>& Data;
 };
 
-class FMemoryReader : public FArchive
+class FMemoryReader : public FMemoryArchive
 {
-private:
-    TArray<uint8> Data;
-    int64 Position = 0;
-
 public:
     FMemoryReader(const TArray<uint8>& InData)
         : Data(InData)
@@ -41,7 +85,27 @@ public:
 
     virtual void LoadData(void* OutData, uint64 Length) override
     {
-        FPlatformMemory::Memcpy(OutData, Data.GetData() + Position, Length);
-        Position += Length;
+        if (Offset + Length > Data.Num())
+        {
+            throw std::runtime_error("Attempted to read beyond the end of the buffer.");
+        }
+
+        // 데이터 복사
+        FPlatformMemory::Memcpy(OutData, Data.GetData() + Offset, Length);
+
+        // 현재 위치 업데이트
+        Offset += Length;
     }
+
+    virtual void Seek(int64 InPos) override
+    {
+        if (InPos > Data.Num())
+        {
+            throw std::runtime_error("Attempted to seek beyond the end of the buffer.");
+        }
+        Offset = InPos;
+    }
+
+private:
+    const TArray<uint8>& Data;
 };
