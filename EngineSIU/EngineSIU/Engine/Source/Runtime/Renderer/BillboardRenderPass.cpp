@@ -41,6 +41,7 @@ void FBillboardRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraph
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+    CreateShader();
 }
 
 void FBillboardRenderPass::PrepareRender()
@@ -176,11 +177,6 @@ void FBillboardRenderPass::SetupVertexBuffer(ID3D11Buffer* pVertexBuffer, UINT n
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &Stride, &offset);
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
-{
-  
 }
 
 void FBillboardRenderPass::ClearRenderArr()

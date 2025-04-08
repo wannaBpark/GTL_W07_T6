@@ -38,7 +38,7 @@ void FLineRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDe
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
-
+    CreateShader();
 }
 
 void FLineRenderPass::PrepareRender()
@@ -106,7 +106,9 @@ void FLineRenderPass::ProcessLineRendering(const FMatrix& View, const FMatrix& P
     FEngineLoop::PrimitiveDrawBatch.RemoveArr();
 }
 
-void FLineRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FLineRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
+
     ProcessLineRendering(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());
 }

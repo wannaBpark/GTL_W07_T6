@@ -50,7 +50,7 @@ void FUpdateLightBufferPass::PrepareRender()
     }
 }
 
-void FUpdateLightBufferPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     FLightBuffer LightBufferData = {};
     int LightCount = 0;
