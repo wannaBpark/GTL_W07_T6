@@ -169,6 +169,21 @@ bool AActor::SetRootComponent(USceneComponent* NewRootComponent)
     return false;
 }
 
+FVector AActor::GetActorLocation() const
+{
+    return RootComponent ? RootComponent->GetRelativeLocation() : FVector::ZeroVector; 
+}
+
+FRotator AActor::GetActorRotation() const
+{
+    return RootComponent ? RootComponent->GetWorldRotation() : FVector::ZeroVector;
+}
+
+FVector AActor::GetActorScale() const
+{
+    return RootComponent ? RootComponent->GetWorldScale() : FVector::ZeroVector; 
+}
+
 bool AActor::SetActorLocation(const FVector& NewLocation)
 {
     if (RootComponent)
