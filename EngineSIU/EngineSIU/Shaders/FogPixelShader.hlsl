@@ -49,9 +49,8 @@ float4 mainPS(PS_INPUT input) : SV_Target
     float3 worldPos = worldPos4.xyz;
     
     //높이 감쇠
-    float HeightDiff = worldPos.z - FogPosition.z;
+    float HeightDiff = worldPos.z - (FogPosition.z + CameraPos.z);
     float HeightFactor = exp(-HeightDiff * FogHeightFalloff);
-    HeightFactor = max(HeightFactor, 0.001);
    
      //카메라 까지의 거리 계산
     float3 ToWorld = worldPos - CameraPos;
