@@ -31,9 +31,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         if (wParam != SIZE_MINIMIZED)
         {
             //UGraphicsDevice 객체의 OnResize 함수 호출
-            if (FEngineLoop::graphicDevice.SwapChain)
+            if (FEngineLoop::GraphicDevice.SwapChain)
             {
-                FEngineLoop::graphicDevice.OnResize(hWnd);
+                FEngineLoop::GraphicDevice.OnResize(hWnd);
             }
             for (int i = 0; i < 4; i++)
             {
@@ -41,7 +41,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 {
                     if (GEngineLoop.GetLevelEditor()->GetViewports()[i])
                     {
-                        GEngineLoop.GetLevelEditor()->GetViewports()[i]->ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+                        GEngineLoop.GetLevelEditor()->GetViewports()[i]->ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
                     }
                 }
             }
@@ -90,10 +90,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     return 0;
 }
 
-FGraphicsDevice FEngineLoop::graphicDevice;
-FRenderer FEngineLoop::renderer;
+FGraphicsDevice FEngineLoop::GraphicDevice;
+FRenderer FEngineLoop::Renderer;
 UPrimitiveDrawBatch FEngineLoop::PrimitiveDrawBatch;
-FResourceMgr FEngineLoop::resourceMgr;
+FResourceMgr FEngineLoop::ResourceManager;
 uint32 FEngineLoop::TotalAllocationBytes = 0;
 uint32 FEngineLoop::TotalAllocationCount = 0;
 
@@ -125,17 +125,17 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     UnrealEditor->Initialize();
 
-    graphicDevice.Initialize(hWnd);
+    GraphicDevice.Initialize(hWnd);
 
-    bufferManager->Initialize(graphicDevice.Device, graphicDevice.DeviceContext);
+    bufferManager->Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext);
 
-    renderer.Initialize(&graphicDevice, bufferManager);
+    Renderer.Initialize(&GraphicDevice, bufferManager);
 
-    PrimitiveDrawBatch.Initialize(&graphicDevice);
+    PrimitiveDrawBatch.Initialize(&GraphicDevice);
 
-    UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
+    UIMgr->Initialize(hWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
 
-    resourceMgr.Initialize(&renderer, &graphicDevice);
+    ResourceManager.Initialize(&Renderer, &GraphicDevice);
 
     LevelEditor->Initialize();
 
@@ -148,7 +148,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
 void FEngineLoop::Render() const
 {
-    graphicDevice.Prepare();
+    GraphicDevice.Prepare();
     if (LevelEditor->IsMultiViewport())
     {
         std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
@@ -161,8 +161,8 @@ void FEngineLoop::Render() const
             // renderer.PrepareShader();
             // renderer.UpdateLightBuffer();
             // RenderWorld();
-            renderer.PrepareRender();
-            renderer.Render(GEngine->ActiveWorld.get(),LevelEditor->GetActiveViewportClient());
+            Renderer.PrepareRender();
+            Renderer.Render(GEngine->ActiveWorld.get(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -174,10 +174,12 @@ void FEngineLoop::Render() const
         // renderer.PrepareShader();
         // renderer.UpdateLightBuffer();
         // RenderWorld();
-        renderer.PrepareRender();
+        Renderer.PrepareRender();
         
-        renderer.Render(GEngine->ActiveWorld.get(), LevelEditor->GetActiveViewportClient());
+        Renderer.Render(GEngine->ActiveWorld.get(), LevelEditor->GetActiveViewportClient());
     }
+    //지금까지 렌더된걸 기반으로 쿼드 생성 (안개 적용)
+
 }
 
 void FEngineLoop::Tick()
@@ -211,6 +213,7 @@ void FEngineLoop::Tick()
         GEngine->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
+        GraphicDevice.PrepareUI();
         UIMgr->BeginFrame();
         UnrealEditor->Render();
 
@@ -221,7 +224,7 @@ void FEngineLoop::Tick()
         // Pending 처리된 오브젝트 제거
         GUObjectArray.ProcessPendingDestroyObjects();
 
-        graphicDevice.SwapBuffer();
+        GraphicDevice.SwapBuffer();
         do
         {
             Sleep(0);
@@ -264,9 +267,9 @@ void FEngineLoop::Exit()
     LevelEditor->Release();
     UIMgr->Shutdown();
     delete UIMgr;
-    resourceMgr.Release(&renderer);
-    renderer.Release();
-    graphicDevice.Release();
+    ResourceManager.Release(&Renderer);
+    Renderer.Release();
+    GraphicDevice.Release();
 }
 
 

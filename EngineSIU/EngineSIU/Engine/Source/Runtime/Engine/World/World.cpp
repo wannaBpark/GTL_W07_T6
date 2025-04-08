@@ -6,6 +6,7 @@
 #include "Classes/Components/StaticMeshComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
+#include "Actors/HeightFogActor.h"
 
 UWorld* UWorld::CreateWorld(const EWorldType InWorldType, const FString& InWorldName)
 {
@@ -50,6 +51,7 @@ UObject* UWorld::Duplicate()
 
 void UWorld::Tick(float DeltaTime)
 {
+
     EditorPlayer->Tick(DeltaTime);
 
     // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출

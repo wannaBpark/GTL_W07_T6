@@ -58,7 +58,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance; // 정규화
         
-        float fDiffuseFactor = dot(vToLight, vNormal);
+        float fDiffuseFactor = saturate(dot(vToLight, vNormal));
         if (fDiffuseFactor > 0.0f)
         {
             float3 vHalf = float3(0.0f, 1.0f, 0.0f);
@@ -69,7 +69,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         
         float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
         
-        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
+        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor);
 
         return float4(lit * fAttenuationFactor * fSpotFactor, 1.0f);
     }
@@ -84,18 +84,19 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     {
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance;
-        float fDiffuseFactor = dot(vToLight, vNormal);
+        float fDiffuseFactor = saturate(dot(vToLight, normalize(vNormal)));
         if (fDiffuseFactor > 0.0f)
         {
-           
             float3 vHalf = float3(0.0f, 1.0f, 0.0f);
-            fSpecularFactor = pow(max(dot(vHalf, vNormal), 0.0f), 1);
+            fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
             
         }
         float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
 
-        float3 lit = (((gLights[nIndex].m_cAmbient * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor)) * fAttenuationFactor);
-        return float4(lit, 1);
+        
+        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor);
+
+        return float4(lit * fAttenuationFactor, 1.0f);
     }
     return (float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
@@ -122,7 +123,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     }
     
     // 전역 환경광 추가
-    cColor += (gcGlobalAmbientLight * Material.AmbientColor);
+    cColor += (gcGlobalAmbientLight * float4(Material.AmbientColor, 1));
     cColor.a = 1;
     
     return cColor;

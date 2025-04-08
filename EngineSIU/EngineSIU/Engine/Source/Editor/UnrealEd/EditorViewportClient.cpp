@@ -37,7 +37,7 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
-    ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+    ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
     ViewportIndex = viewportIndex;
 
     GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>();
@@ -46,7 +46,6 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
 
 void FEditorViewportClient::Tick(float DeltaTime)
 {
-    Input();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
     GizmoActor->Tick(DeltaTime);
@@ -146,7 +145,7 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -158,7 +157,7 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }

@@ -498,16 +498,16 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.cpp">
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ParticleSubUVComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.h">
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ParticleSubUVComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UText.cpp">
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextComponent.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UText.h">
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UTextComponent.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.cpp">
@@ -789,6 +789,12 @@
     <ClInclude Include="Font\RawFonts.h">
       <Filter>Font</Filter>
     </ClInclude>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -827,5 +833,13 @@
     <FxCompile Include="Shaders\Light.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

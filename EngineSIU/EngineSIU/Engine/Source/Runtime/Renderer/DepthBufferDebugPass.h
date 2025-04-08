@@ -32,6 +32,8 @@ public:
 
     void UpdateScreenConstant(const D3D11_VIEWPORT& viewport);
 
+    ID3D11ShaderResourceView* GetDepthSRV() { return DepthBufferSRV; }
+
 private:
     ID3D11SamplerState* DepthSampler = nullptr;
 

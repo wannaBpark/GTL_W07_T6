@@ -11,6 +11,10 @@
 #include "UpdateLightBufferPass.h"
 #include "LineRenderPass.h"
 #include "DepthBufferDebugPass.h"
+#include "FogRenderPass.h"
+#include <UObject/UObjectIterator.h>
+#include <UObject/Casts.h>
+#include "GameFrameWork/Actor.h"
 
 //------------------------------------------------------------------------------
 // 초기화 및 해제 관련 함수
@@ -27,6 +31,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     UpdateLightBufferPass = new FUpdateLightBufferPass();
     LineRenderPass = new FLineRenderPass();
     DepthBufferDebugPass = new FDepthBufferDebugPass();
+    FogRenderPass = new FFogRenderPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -34,12 +39,14 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
+    FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     StaticMeshRenderPass->CreateShader();
     BillboardRenderPass->CreateShader();
     LineRenderPass->CreateShader();
     GizmoRenderPass->CreateShader();
     DepthBufferDebugPass->CreateShader();
+    FogRenderPass->CreateShader();
 
     CreateConstantBuffers();
 }
@@ -89,6 +96,9 @@ void FRenderer::CreateConstantBuffers()
 
     UINT ScreenConstantsBufferSize = sizeof(FScreenConstants);
     BufferManager->CreateBufferGeneric<FScreenConstants>("FScreenConstants", nullptr, ScreenConstantsBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT FogConstantBufferSize = sizeof(FFogConstants);
+    BufferManager->CreateBufferGeneric<FFogConstants>("FFogConstants", nullptr, FogConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 
 void FRenderer::ReleaseConstantBuffer()
@@ -119,15 +129,43 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
     ChangeViewMode(ActiveViewport->GetViewMode());
+    TArray< UHeightFogComponent*> Fogs;
+    for (UHeightFogComponent* iter : TObjectRange<UHeightFogComponent>())
+    {
+        if(iter)
+        {
+            UWorld* FogWorld = iter->GetOwner()->GetWorld();
+            if (FogWorld == World && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
+            {
+                Fogs.Add(iter);
+            }
+        }
+    }
 
+    if (Fogs.Num() > 0)
+    {
+        Graphics->PrepareTexture();
+    }
 
     StaticMeshRenderPass->Render(World, ActiveViewport);
     LineRenderPass->Render(World, ActiveViewport);
+    BillboardRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(World, ActiveViewport);
-    BillboardRenderPass->Render(World, ActiveViewport);
 
-    if (IsSceneDepth)
+    if (IsSceneDepth) 
+    {
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+    }
+
+    if (!IsSceneDepth && Fogs.Num()>0) 
+    {
+        DepthBufferDebugPass->UpdateDepthBufferSRV();
+        
+        for (const auto& Fog : Fogs)
+        {
+            FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fog);
+        }
+    }
 
     GizmoRenderPass->Render(World, ActiveViewport);
 

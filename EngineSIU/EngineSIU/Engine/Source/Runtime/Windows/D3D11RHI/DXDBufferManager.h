@@ -9,7 +9,7 @@
 #include "Engine/Texture.h"
 #include "GraphicDevice.h"
 
-// ShaderStage 열거형 (혹은 별도의 구분 방식)
+// ShaderStage 열거형
 enum class EShaderStage
 {
     Vertex,
@@ -18,24 +18,24 @@ enum class EShaderStage
 
 class FDXDBufferManager
 {
-
 public:
     FDXDBufferManager() = default;
     void Initialize(ID3D11Device* DXDevice, ID3D11DeviceContext* DXDeviceContext);
 
+    // 템플릿을 활용한 버텍스 버퍼 생성 (정적/동적)
     template<typename T>
     HRESULT CreateVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo);
 
+    template<typename T>
+    HRESULT CreateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo);
+
+    // 템플릿 헬퍼 함수: 내부에서 버퍼 생성 로직 통합
+    template<typename T>
+    HRESULT CreateVertexBufferInternal(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo,
+        D3D11_USAGE usage, UINT cpuAccessFlags);
+
     HRESULT CreateIndexBuffer(const FString& KeyName, const TArray<uint32>& indices, FIndexInfo& OutIndexInfo);
-
-    HRESULT CreateTextureVertexBuffer(const FWString& KeyName, const TArray<FVertexTexture>& vertices, FVertexInfo& OutVertexInfo);
-
-    HRESULT CreateTextureIndexBuffer(const FWString& KeyName, const TArray<uint32>& indices, FIndexInfo& OutIndexInfo);
-
-    void GetStartUV(wchar_t ch, float& outStartU, float& outStartV, int ColumnCount);
-
-    HRESULT CreateASCIITextBuffer(const FWString& Text, FTexture& Texture, uint16_t RowCount, uint16_t ColumnCount, int quadWidth, FBufferInfo& OutBufferInfo, float WidthOffset, float HeightOffset);
-
+    
     void ReleaseBuffers();
     void ReleaseConstantBuffer();
 
@@ -43,135 +43,77 @@ public:
     HRESULT CreateBufferGeneric(const FString& KeyName, T* data, UINT byteWidth, UINT bindFlags, D3D11_USAGE usage, UINT cpuAccessFlags);
 
     template<typename T>
-    HRESULT CreateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo);
-
-    template<typename T>
     void UpdateConstantBuffer(const FString& key, const T& data) const;
 
     template<typename T>
     void UpdateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices) const;
 
+    void BindConstantBuffers(const TArray<FString>& Keys, UINT StartSlot, EShaderStage Stage) const;
+    void BindConstantBuffer(const FString& Key, UINT StartSlot, EShaderStage Stage) const;
+
     template<typename T>
     static void SafeRelease(T*& comObject);
 
-    FVertexInfo GetVertexBuffer(const FString& InName)const;
-
+    FVertexInfo GetVertexBuffer(const FString& InName) const;
     FIndexInfo GetIndexBuffer(const FString& InName) const;
-
-    FVertexInfo GetTextVertexBuffer(const FWString& InName) const;
-
-    FVertexInfo GetTextureIndexBuffer(const FWString& InName) const;
-
     ID3D11Buffer* GetConstantBuffer(const FString& InName) const;
 
-    void BindConstantBuffers(const TArray<FString>& Keys, UINT StartSlot, EShaderStage Stage) const
-    {
-        const int Count = Keys.Num();
-
-        // 키 목록에 해당하는 버퍼 배열 생성
-        TArray<ID3D11Buffer*> Buffers;
-        Buffers.Reserve(Count);
-        for (const FString& Key : Keys)
-        {
-            ID3D11Buffer* Buffer = GetConstantBuffer(Key);
-            Buffers.Add(Buffer);
-        }
-
-        if (Stage == EShaderStage::Vertex)
-            DXDeviceContext->VSSetConstantBuffers(StartSlot, Count, Buffers.GetData());
-        else if (Stage == EShaderStage::Pixel)
-            DXDeviceContext->PSSetConstantBuffers(StartSlot, Count, Buffers.GetData());
-    }
-
-    void BindConstantBuffer(const FString& Key, UINT StartSlot, EShaderStage Stage) const
-    {
-        ID3D11Buffer* Buffer = GetConstantBuffer(Key);
-        if (Stage == EShaderStage::Vertex)
-            DXDeviceContext->VSSetConstantBuffers(StartSlot, 1, &Buffer);
-        else if (Stage == EShaderStage::Pixel)
-            DXDeviceContext->PSSetConstantBuffers(StartSlot, 1, &Buffer);
-    }
-        
 private:
-    inline UINT Align16(UINT size)
-    {
-        return (size + 15) & ~15;
-    }
+    // 16바이트 정렬
+    inline UINT Align16(UINT size) { return (size + 15) & ~15; }
+
 private:
-
-    ID3D11Device* DXDevice;
-
-    ID3D11DeviceContext* DXDeviceContext;
+    ID3D11Device* DXDevice = nullptr;
+    ID3D11DeviceContext* DXDeviceContext = nullptr;
 
     TMap<FString, FVertexInfo> VertexBufferPool;
     TMap<FString, FIndexInfo> IndexBufferPool;
-
-    TMap<FWString, FBufferInfo> TextAtlasBufferPool;
-
     TMap<FString, ID3D11Buffer*> ConstantBufferPool;
 };
 
+// 템플릿 함수 구현부
+
 template<typename T>
-inline HRESULT FDXDBufferManager::CreateVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo)
+HRESULT FDXDBufferManager::CreateVertexBufferInternal(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo,
+    D3D11_USAGE usage, UINT cpuAccessFlags)
 {
-    if (KeyName != TEXT("") && VertexBufferPool.Contains(KeyName))
+    if (!KeyName.IsEmpty() && VertexBufferPool.Contains(KeyName))
     {
         OutVertexInfo = VertexBufferPool[KeyName];
         return S_OK;
     }
 
-    ID3D11Buffer* NewVertexBuffer;
-    // 버텍스 버퍼 생성
     D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.Usage = usage;
     bufferDesc.ByteWidth = sizeof(T) * static_cast<uint32>(vertices.Num());
     bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.CPUAccessFlags = cpuAccessFlags;
 
     D3D11_SUBRESOURCE_DATA initData = {};
     initData.pSysMem = vertices.GetData();
 
-    HRESULT hr = DXDevice->CreateBuffer(&bufferDesc, &initData, &NewVertexBuffer);
+    ID3D11Buffer* NewBuffer = nullptr;
+    HRESULT hr = DXDevice->CreateBuffer(&bufferDesc, &initData, &NewBuffer);
     if (FAILED(hr))
         return hr;
 
     OutVertexInfo.NumVertices = static_cast<uint32>(vertices.Num());
-    OutVertexInfo.VertexBuffer = NewVertexBuffer;
+    OutVertexInfo.VertexBuffer = NewBuffer;
+    VertexBufferPool.Add(KeyName, OutVertexInfo);
 
-    VertexBufferPool[KeyName] = OutVertexInfo;
     return S_OK;
 }
 
 template<typename T>
-inline HRESULT FDXDBufferManager::CreateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo)
+HRESULT FDXDBufferManager::CreateVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo)
 {
+    return CreateVertexBufferInternal(KeyName, vertices, OutVertexInfo, D3D11_USAGE_DEFAULT, 0);
+}
 
-    if (VertexBufferPool.Contains(KeyName))
-    {
-        OutVertexInfo = VertexBufferPool[KeyName];
-        return S_OK;
-    }
-
-    ID3D11Buffer* NewVertexBuffer;
-    // 버텍스 버퍼 생성
-    D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    bufferDesc.ByteWidth = sizeof(T) * static_cast<uint32>(vertices.Num());
-    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-    D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem = vertices.GetData();
-
-    HRESULT hr = DXDevice->CreateBuffer(&bufferDesc, &initData, &NewVertexBuffer);
-    if (FAILED(hr))
-        return hr;
-
-    OutVertexInfo.NumVertices = static_cast<uint32>(vertices.Num());
-    OutVertexInfo.VertexBuffer = NewVertexBuffer;
-
-    VertexBufferPool[KeyName] = OutVertexInfo;
-    return S_OK;
+template<typename T>
+HRESULT FDXDBufferManager::CreateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo)
+{
+    return CreateVertexBufferInternal(KeyName, vertices, OutVertexInfo, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 
 template<typename T>
@@ -189,19 +131,15 @@ HRESULT FDXDBufferManager::CreateBufferGeneric(const FString& KeyName, T* data, 
     initData.pSysMem = data;
 
     ID3D11Buffer* buffer = nullptr;
-
     HRESULT hr = DXDevice->CreateBuffer(&desc, data ? &initData : nullptr, &buffer);
-
     if (FAILED(hr))
     {
-        UE_LOG(LogLevel::Error, "Error Create Constant Buffer!");
+        UE_LOG(LogLevel::Error, TEXT("Error Create Constant Buffer!"));
         return hr;
     }
 
-    ConstantBufferPool[KeyName] = buffer;
-
+    ConstantBufferPool.Add(KeyName, buffer);
     return S_OK;
-
 }
 
 template<typename T>
@@ -210,7 +148,7 @@ void FDXDBufferManager::UpdateConstantBuffer(const FString& key, const T& data) 
     ID3D11Buffer* buffer = GetConstantBuffer(key);
     if (!buffer)
     {
-        UE_LOG(LogLevel::Error, "UpdateConstantBuffer 호출: 키 %s에 해당하는 buffer가 없습니다.", *key);
+        UE_LOG(LogLevel::Error, TEXT("UpdateConstantBuffer 호출: 키 %s에 해당하는 buffer가 없습니다."), *key);
         return;
     }
 
@@ -218,43 +156,38 @@ void FDXDBufferManager::UpdateConstantBuffer(const FString& key, const T& data) 
     HRESULT hr = DXDeviceContext->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     if (FAILED(hr))
     {
-        UE_LOG(LogLevel::Error, "Buffer Map 실패, HRESULT: 0x%X", hr);
+        UE_LOG(LogLevel::Error, TEXT("Buffer Map 실패, HRESULT: 0x%X"), hr);
         return;
     }
 
     memcpy(mappedResource.pData, &data, sizeof(T));
     DXDeviceContext->Unmap(buffer, 0);
 }
+
 template<typename T>
 void FDXDBufferManager::UpdateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices) const
 {
-    // 1) 풀에서 버퍼 정보 조회
-    FVertexInfo vbInfo;
     if (!VertexBufferPool.Contains(KeyName))
     {
-        UE_LOG(LogLevel::Error, "UpdateDynamicVertexBuffer 호출: 키 %s에 해당하는 버텍스 버퍼가 없습니다.", *KeyName);
+        UE_LOG(LogLevel::Error, TEXT("UpdateDynamicVertexBuffer 호출: 키 %s에 해당하는 버텍스 버퍼가 없습니다."), *KeyName);
         return;
     }
-    vbInfo = VertexBufferPool[KeyName];
+    FVertexInfo vbInfo = VertexBufferPool[KeyName];
 
-    // 2) 맵핑
     D3D11_MAPPED_SUBRESOURCE mapped;
     HRESULT hr = DXDeviceContext->Map(vbInfo.VertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
     if (FAILED(hr))
     {
-        UE_LOG(LogLevel::Error, "VertexBuffer Map 실패, HRESULT: 0x%X", hr);
+        UE_LOG(LogLevel::Error, TEXT("VertexBuffer Map 실패, HRESULT: 0x%X"), hr);
         return;
     }
 
-    // 3) 데이터 복사
     memcpy(mapped.pData, vertices.GetData(), sizeof(T) * vertices.Num());
-
-    // 4) 언맵
     DXDeviceContext->Unmap(vbInfo.VertexBuffer, 0);
 }
 
 template<typename T>
-inline void FDXDBufferManager::SafeRelease(T*& comObject)
+void FDXDBufferManager::SafeRelease(T*& comObject)
 {
     if (comObject)
     {
@@ -262,3 +195,4 @@ inline void FDXDBufferManager::SafeRelease(T*& comObject)
         comObject = nullptr;
     }
 }
+
