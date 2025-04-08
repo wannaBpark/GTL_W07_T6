@@ -176,6 +176,7 @@ public:
     ) const;
 
     void Reserve(int32 CharacterCount);
+    void Resize(int32 CharacterCount);
 
 public:
     /** ElementType* 로 반환하는 연산자 */

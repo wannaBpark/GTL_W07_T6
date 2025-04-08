@@ -65,12 +65,12 @@ public:
 
     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, FString& Value)
     {
-        int64 Length = Value.Len();
+        int32 Length = Value.Len();
         Ar << Length; // 문자열 길이 직렬화
 
         if (Ar.IsLoading())
         {
-            Value.Reserve(Length);
+            Value.Resize(Length);
         }
         Ar.Serialize(GetData(Value), Length * sizeof(TCHAR));
 

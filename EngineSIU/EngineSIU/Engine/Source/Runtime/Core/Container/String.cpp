@@ -126,3 +126,8 @@ void FString::Reserve(int32 CharacterCount)
 {
     PrivateString.reserve(CharacterCount);
 }
+
+void FString::Resize(int32 CharacterCount)
+{
+    PrivateString.resize(CharacterCount);
+}
