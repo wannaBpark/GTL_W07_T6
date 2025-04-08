@@ -3,9 +3,9 @@
 #include "UObject/Casts.h"
 
 
-UObject* UMeshComponent::Duplicate()
+UObject* UMeshComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->OverrideMaterials = OverrideMaterials;
 

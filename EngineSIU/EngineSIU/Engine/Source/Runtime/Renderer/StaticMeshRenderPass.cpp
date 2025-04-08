@@ -108,8 +108,10 @@ void FStaticMeshRenderPass::PrepareRender()
 {
     for (const auto iter : TObjectRange<UStaticMeshComponent>())
     {
-        if (!Cast<UGizmoBaseComponent>(iter))
+        if (!Cast<UGizmoBaseComponent>(iter) && iter->GetWorld() == GEngine->ActiveWorld)
+        {
             StaticMeshObjs.Add(iter);
+        }
     }
 }
 

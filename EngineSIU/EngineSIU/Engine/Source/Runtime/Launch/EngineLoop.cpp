@@ -139,7 +139,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     LevelEditor->Initialize();
 
-    GEngine = FObjectFactory::ConstructObject<UEditorEngine>();
+    GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
     GEngine->Init();
 
     return 0;

@@ -18,11 +18,11 @@ class UWorld : public UObject
 public:
     UWorld() = default;
 
-    static UWorld* CreateWorld(const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
+    static UWorld* CreateWorld(UObject* InOuter, const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
 
     void InitializeNewWorld();
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     void Tick(float DeltaTime);
     void BeginPlay();
@@ -41,7 +41,8 @@ public:
     /** World에 존재하는 Actor를 제거합니다. */
     bool DestroyActor(AActor* ThisActor);
 
-    std::weak_ptr<ULevel> GetActiveLevel() const { return ActiveLevel; }
+    virtual UWorld* GetWorld() const override;
+    ULevel* GetActiveLevel() const { return ActiveLevel; }
 
     template <typename T>
         requires std::derived_from<T, AActor>
@@ -52,7 +53,7 @@ public:
 private:
     FString WorldName = "DefaultWorld";
 
-    std::shared_ptr<ULevel> ActiveLevel;
+    ULevel* ActiveLevel;
 
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
@@ -64,7 +65,7 @@ template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::SpawnActor()
 {
-    T* Actor = FObjectFactory::ConstructObject<T>();
+    T* Actor = FObjectFactory::ConstructObject<T>(this);
     // TODO: 일단 AddComponent에서 Component마다 초기화
     // 추후에 RegisterComponent() 만들어지면 주석 해제
     // Actor->InitializeComponents();
@@ -77,9 +78,9 @@ template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::DuplicateActor(T* InActor)
 {
-    if (std::shared_ptr<ULevel> ActiveLevel = GetActiveLevel().lock())
+    if (ULevel* ActiveLevel = GetActiveLevel())
     {
-        T* NewActor = static_cast<T*>(InActor->Duplicate());
+        T* NewActor = static_cast<T*>(InActor->Duplicate(this));
         ActiveLevel->Actors.Add(NewActor);
         PendingBeginPlayActors.Add(NewActor);
         return NewActor;

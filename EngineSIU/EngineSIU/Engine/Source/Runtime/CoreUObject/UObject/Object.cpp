@@ -30,14 +30,21 @@ UObject::UObject()
 {
 }
 
-UObject* UObject::Duplicate()
+UObject* UObject::Duplicate(UObject* InOuter)
 {
-    return FObjectFactory::ConstructObject(GetClass());
+    return FObjectFactory::ConstructObject(GetClass(), InOuter);
 }
 
 UWorld* UObject::GetWorld() const
 {
-    return GEngine->ActiveWorld;
+    if (UObject* Outer = GetOuter())
+    {
+        if (UObject* Outer = GetOuter())
+        {
+            return Outer->GetWorld();
+        }
+    }
+    return nullptr;
 }
 
 bool UObject::IsA(const UClass* SomeBase) const

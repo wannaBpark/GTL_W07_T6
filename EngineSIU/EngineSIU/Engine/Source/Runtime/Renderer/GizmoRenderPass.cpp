@@ -124,6 +124,9 @@ void FGizmoRenderPass::PrepareRender()
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
+        return;
+    
     PrepareRenderState();
     Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);

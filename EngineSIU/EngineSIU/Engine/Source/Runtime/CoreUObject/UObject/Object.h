@@ -32,14 +32,16 @@ private:
 
     FName NamePrivate;
     UClass* ClassPrivate = nullptr;
+    UObject* OuterPrivate = nullptr;
 
 public:
     UObject();
     virtual ~UObject() = default;
 
-    virtual UObject* Duplicate();
+    virtual UObject* Duplicate(UObject* InOuter);
 
-    UWorld* GetWorld() const;
+    UObject* GetOuter() const { return OuterPrivate; }
+    virtual UWorld* GetWorld() const;
 
     FName GetFName() const { return NamePrivate; }
     FString GetName() const { return NamePrivate.ToString(); }

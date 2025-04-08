@@ -22,12 +22,12 @@ void UEditorEngine::Init()
 
     FWorldContext& EditorWorldContext = CreateNewWorldContext(EWorldType::Editor);
 
-    EditorWorld = UWorld::CreateWorld(EWorldType::Editor, FString("EditorWorld"));
+    EditorWorld = UWorld::CreateWorld(this, EWorldType::Editor, FString("EditorWorld"));
 
     EditorWorldContext.SetCurrentWorld(EditorWorld);
     ActiveWorld = EditorWorld;
 
-    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();
+    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
 }
 
 void UEditorEngine::Tick(float DeltaTime)
@@ -41,12 +41,12 @@ void UEditorEngine::Tick(float DeltaTime)
                 // TODO: World에서 EditorPlayer 제거 후 Tick 호출 제거 필요.
                 World->Tick(DeltaTime);
                 EditorPlayer->Tick(DeltaTime);
-                std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
+                ULevel* Level = World->GetActiveLevel();
                 if (Level)
                 {
                     for (AActor* Actor : Level->Actors)
                     {
-                        if (Actor)
+                        if (Actor && Actor->IsActorTickInEditor())
                         {
                             Actor->Tick(DeltaTime);
                         }
@@ -59,7 +59,7 @@ void UEditorEngine::Tick(float DeltaTime)
             if (UWorld* World = WorldContext->World())
             {
                 World->Tick(DeltaTime);
-                std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
+                ULevel* Level = World->GetActiveLevel();
                 if (Level)
                 {
                     for (AActor* Actor : Level->Actors)
@@ -85,7 +85,7 @@ void UEditorEngine::StartPIE()
 
     FWorldContext& PIEWorldContext = CreateNewWorldContext(EWorldType::PIE);
 
-    PIEWorld = Cast<UWorld>(EditorWorld->Duplicate());
+    PIEWorld = Cast<UWorld>(EditorWorld->Duplicate(this));
     PIEWorld->WorldType = EWorldType::PIE;
 
     PIEWorldContext.SetCurrentWorld(PIEWorld);

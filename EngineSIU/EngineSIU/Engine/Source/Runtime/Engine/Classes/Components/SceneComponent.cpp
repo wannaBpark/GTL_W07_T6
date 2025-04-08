@@ -10,9 +10,9 @@ USceneComponent::USceneComponent()
 {
 }
 
-UObject* USceneComponent::Duplicate()
+UObject* USceneComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->RelativeLocation = RelativeLocation;
     NewComponent->RelativeRotation = RelativeRotation;

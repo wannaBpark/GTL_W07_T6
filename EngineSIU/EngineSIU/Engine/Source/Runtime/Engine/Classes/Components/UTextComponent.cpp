@@ -11,9 +11,9 @@ UTextComponent::UTextComponent()
     SetType(StaticClass()->GetName());
 }
 
-UObject* UTextComponent::Duplicate()
+UObject* UTextComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->TextAtlasBufferKey = TextAtlasBufferKey;
     NewComponent->Text = Text;

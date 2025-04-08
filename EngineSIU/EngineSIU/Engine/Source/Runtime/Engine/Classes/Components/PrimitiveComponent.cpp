@@ -3,9 +3,9 @@
 #include "UObject/Casts.h"
 
 
-UObject* UPrimitiveComponent::Duplicate()
+UObject* UPrimitiveComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->AABB = AABB;
 

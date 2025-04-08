@@ -21,6 +21,8 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
+#include "Actors/Cube.h"
+
 #include "Engine/EditorEngine.h"
 #include <Actors/HeightFogActor.h>
 
@@ -291,11 +293,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_CUBE:
                 {
-                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();
-                    TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
-                    UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
-                    FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
-                    MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+                    ACube* CubeActor = World->SpawnActor<ACube>();
+                    CubeActor->SetActorLabel(TEXT("OBJ_CUBE"));
                     break;
                 }
                 case OBJ_SpotLight:

@@ -10,6 +10,6 @@ public:
     AStaticMeshActor();
 
     UStaticMeshComponent* GetStaticMeshComponent() const;
-private:
+protected:
     UStaticMeshComponent* StaticMeshComponent = nullptr;
 };

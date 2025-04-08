@@ -799,6 +799,11 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\FogRenderPass.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Matrix.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -839,6 +844,7 @@
     </FxCompile>
     <FxCompile Include="Shaders\FogPixelShader.hlsl" />
     <FxCompile Include="Shaders\FogVertexShader.hlsl" />
+    <FxCompile Include="Shaders\FogQuadPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h">
@@ -851,5 +857,9 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\FogRenderPass.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
