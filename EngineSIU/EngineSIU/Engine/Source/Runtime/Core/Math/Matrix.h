@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Vector.h"
+#include "Vector4.h"
+
 // 4x4 행렬 연산
 struct alignas(16) FMatrix
 {

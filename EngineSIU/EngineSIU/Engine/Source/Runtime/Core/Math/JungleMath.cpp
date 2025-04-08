@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 #include "MathUtility.h"
 
+#include "Rotator.h"
+
 using namespace DirectX;
 
 
@@ -82,9 +84,9 @@ FMatrix JungleMath::CreateOrthoProjectionMatrix(float width, float height, float
     return Projection;
 }
 
-FVector JungleMath::FVectorRotate(FVector& origin, const FVector& rotation)
+FVector JungleMath::FVectorRotate(FVector& origin, const FVector& InRotation)
 {
-    FQuat quaternion = JungleMath::EulerToQuaternion(rotation);
+    FQuat quaternion = JungleMath::EulerToQuaternion(InRotation);
     // 쿼터니언을 이용해 벡터 회전 적용
     return quaternion.RotateVector(origin);
 }
@@ -144,9 +146,9 @@ FVector JungleMath::QuaternionToEuler(const FQuat& quat)
     euler.X = FMath::RadiansToDegrees(atan2(sinRoll, cosRoll));
     return euler;
 }
-FVector JungleMath::FVectorRotate(FVector& origin, const FQuat& rotation)
+FVector JungleMath::FVectorRotate(FVector& origin, const FRotator& InRotation)
 {
-    return rotation.RotateVector(origin);
+    return InRotation.ToQuaternion().RotateVector(origin);
 }
 
 FMatrix JungleMath::CreateRotationMatrix(FVector rotation)

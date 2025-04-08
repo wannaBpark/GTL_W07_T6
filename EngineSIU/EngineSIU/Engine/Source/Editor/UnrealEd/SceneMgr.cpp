@@ -153,7 +153,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     {
         USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
         std::vector<float> Location = { primitive->GetWorldLocation().X,primitive->GetWorldLocation().Y,primitive->GetWorldLocation().Z };
-        std::vector<float> Rotation = { primitive->GetWorldRotation().X,primitive->GetWorldRotation().Y,primitive->GetWorldRotation().Z };
+        std::vector<float> Rotation = { primitive->GetWorldRotation().Roll,primitive->GetWorldRotation().Pitch,primitive->GetWorldRotation().Yaw };
         std::vector<float> Scale = { primitive->GetWorldScale().X,primitive->GetWorldScale().Y,primitive->GetWorldScale().Z };
 
         std::string primitiveName = *primitive->GetName();
@@ -173,7 +173,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     {
         UCameraComponent* cameraComponent = static_cast<UCameraComponent*>(camera);
         TArray<float> Location = { cameraComponent->GetWorldLocation().X, cameraComponent->GetWorldLocation().Y, cameraComponent->GetWorldLocation().Z };
-        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().Y, cameraComponent->GetWorldRotation().Z };
+        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().Pitch, cameraComponent->GetWorldRotation().Yaw };
         float FOV = cameraComponent->GetFOV();
         float nearClip = cameraComponent->GetNearClip();
         float farClip = cameraComponent->GetFarClip();

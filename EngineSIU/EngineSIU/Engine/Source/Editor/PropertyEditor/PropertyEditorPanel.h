@@ -1,6 +1,8 @@
 #pragma once
+
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
+#include "Math/Rotator.h"
 
 class UStaticMeshComponent;
 
@@ -45,7 +47,7 @@ private:
 private:
     float Width = 0, Height = 0;
     FVector Location = FVector(0, 0, 0);
-    FVector Rotation = FVector(0, 0, 0);
+    FRotator Rotation = FRotator(0, 0, 0);
     FVector Scale = FVector(0, 0, 0);
 
     /* Material Property */

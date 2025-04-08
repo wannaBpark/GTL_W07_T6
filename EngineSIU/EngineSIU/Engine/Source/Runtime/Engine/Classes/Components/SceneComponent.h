@@ -1,6 +1,6 @@
 #pragma once
 #include "ActorComponent.h"
-#include "Math/Quat.h"
+#include "Math/Rotator.h"
 #include "UObject/ObjectMacros.h"
 
 class USceneComponent : public UActorComponent
@@ -29,26 +29,23 @@ public:
 
 protected:
     FVector RelativeLocation;
-    FVector RelativeRotation;
-    FQuat QuatRotation;
+    FRotator RelativeRotation;
     FVector RelativeScale3D;
 
     USceneComponent* AttachParent = nullptr;
     TArray<USceneComponent*> AttachChildren;
 
 public:
-    virtual FVector GetWorldRotation();
     FVector GetWorldScale() const;
+    FRotator GetWorldRotation();
     FVector GetWorldLocation() const;
-    FVector GetLocalRotation() const;
-    FQuat GetQuat() const { return QuatRotation; }
-
+    
     FVector GetLocalScale() const { return RelativeScale3D; }
+    FRotator GetLocalRotation() const { return RelativeRotation; }
     FVector GetLocalLocation() const { return RelativeLocation; }
 
     void SetLocation(FVector _newLoc) { RelativeLocation = _newLoc; }
-    virtual void SetRotation(FVector _newRot);
-    void SetRotation(FQuat _newRot) { QuatRotation = _newRot; }
+    void SetRotation(FRotator InRotator) { RelativeRotation = InRotator; }
     void SetScale(FVector _newScale) { RelativeScale3D = _newScale; }
     void SetupAttachment(USceneComponent* InParent);
 };

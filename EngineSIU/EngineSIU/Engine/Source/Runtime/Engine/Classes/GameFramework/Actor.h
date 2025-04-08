@@ -85,7 +85,7 @@ public:
     FVector GetActorUpVector() const { return RootComponent ? RootComponent->GetUpVector() : FVector::UpVector; }
 
     bool SetActorLocation(const FVector& NewLocation);
-    bool SetActorRotation(const FVector& NewRotation);
+    bool SetActorRotation(const FRotator& NewRotation);
     bool SetActorScale(const FVector& NewScale);
 
 protected:

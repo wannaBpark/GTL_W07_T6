@@ -179,7 +179,7 @@ bool AActor::SetActorLocation(const FVector& NewLocation)
     return false;
 }
 
-bool AActor::SetActorRotation(const FVector& NewRotation)
+bool AActor::SetActorRotation(const FRotator& NewRotation)
 {
     if (RootComponent)
     {

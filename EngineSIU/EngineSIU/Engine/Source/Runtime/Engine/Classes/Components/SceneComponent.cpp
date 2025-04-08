@@ -1,4 +1,5 @@
 #include "Components/SceneComponent.h"
+#include "Math/Rotator.h"
 #include "Math/JungleMath.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
@@ -16,7 +17,6 @@ UObject* USceneComponent::Duplicate()
 
     NewComponent->RelativeLocation = RelativeLocation;
     NewComponent->RelativeRotation = RelativeRotation;
-    NewComponent->QuatRotation = QuatRotation;
     NewComponent->RelativeScale3D = RelativeScale3D;
 
     return NewComponent;
@@ -43,21 +43,21 @@ int USceneComponent::CheckRayIntersection(FVector& InRayOrigin, FVector& InRayDi
 FVector USceneComponent::GetForwardVector()
 {
 	FVector Forward = FVector(1.f, 0.f, 0.0f);
-	Forward = JungleMath::FVectorRotate(Forward, QuatRotation);
+	Forward = JungleMath::FVectorRotate(Forward, RelativeRotation);
 	return Forward;
 }
 
 FVector USceneComponent::GetRightVector()
 {
 	FVector Right = FVector(0.f, 1.f, 0.0f);
-	Right = JungleMath::FVectorRotate(Right, QuatRotation);
+	Right = JungleMath::FVectorRotate(Right, RelativeRotation);
 	return Right;
 }
 
 FVector USceneComponent::GetUpVector()
 {
 	FVector Up = FVector(0.f, 0.f, 1.0f);
-	Up = JungleMath::FVectorRotate(Up, QuatRotation);
+	Up = JungleMath::FVectorRotate(Up, RelativeRotation);
 	return Up;
 }
 
@@ -106,11 +106,11 @@ void USceneComponent::AttachToComponent(USceneComponent* InParent)
     }
 }
 
-FVector USceneComponent::GetWorldRotation()
+FRotator USceneComponent::GetWorldRotation()
 {
 	if (AttachParent)
 	{
-		return FVector(AttachParent->GetLocalRotation() + GetLocalRotation());
+		return FRotator(GetLocalRotation().ToQuaternion() * AttachParent->GetWorldRotation().ToQuaternion());
 	}
     return GetLocalRotation();
 }
@@ -131,17 +131,6 @@ FVector USceneComponent::GetWorldLocation() const
 		return FVector(AttachParent->GetWorldLocation() + GetLocalLocation());
 	}
     return GetLocalLocation();
-}
-
-FVector USceneComponent::GetLocalRotation() const
-{
-	return JungleMath::QuaternionToEuler(QuatRotation);
-}
-
-void USceneComponent::SetRotation(FVector _newRot)
-{
-	RelativeRotation = _newRot;
-	QuatRotation = JungleMath::EulerToQuaternion(_newRot);
 }
 
 void USceneComponent::SetupAttachment(USceneComponent* InParent)

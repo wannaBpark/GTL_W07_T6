@@ -267,9 +267,9 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 		obj->GetWorldScale().Z
 	);
 	FMatrix rotationMatrix = FMatrix::CreateRotation(
-		obj->GetWorldRotation().X,
-		obj->GetWorldRotation().Y,
-		obj->GetWorldRotation().Z
+		FMath::DegreesToRadians(obj->GetWorldRotation().Roll),
+		FMath::DegreesToRadians(obj->GetWorldRotation().Pitch),
+		FMath::DegreesToRadians(obj->GetWorldRotation().Yaw)
 	);
 
 	FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
@@ -358,7 +358,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     FVector CameraRight = ViewTransform->GetRightVector();
     FVector CameraUp = ViewTransform->GetUpVector();
 
-    FQuat currentRotation = pObj->GetQuat();
+    FQuat currentRotation = pObj->GetWorldRotation().ToQuaternion();
 
     FQuat rotationDelta;
 

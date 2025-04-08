@@ -178,7 +178,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     // 모델 행렬 계산
     FMatrix Model = JungleMath::CreateModelMatrix(
         GizmoComp->GetWorldLocation(),
-        GizmoComp->GetWorldRotation(),
+        GizmoComp->GetWorldRotation().ToVector(),
         GizmoComp->GetWorldScale()
     );
 

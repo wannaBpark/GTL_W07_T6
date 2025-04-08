@@ -211,7 +211,7 @@ void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorV
     for (UStaticMeshComponent* Comp : StaticMeshObjs) {
         if (!Comp || !Comp->GetStaticMesh()) continue;
 
-        FMatrix Model = JungleMath::CreateModelMatrix(Comp->GetWorldLocation(), Comp->GetWorldRotation(), Comp->GetWorldScale());
+        FMatrix Model = JungleMath::CreateModelMatrix(Comp->GetWorldLocation(), Comp->GetWorldRotation().ToVector(), Comp->GetWorldScale());
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 

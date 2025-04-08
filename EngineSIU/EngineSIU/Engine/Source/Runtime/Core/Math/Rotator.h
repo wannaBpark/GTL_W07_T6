@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Quat.h"
+
 // 회전 정보를 Degree 단위로 저장하는 구조체
 struct FRotator
 {
@@ -204,3 +206,7 @@ inline FVector FRotator::ToVector() const
     return FVector(FMath::DegreesToRadians(Roll), FMath::DegreesToRadians(Pitch), FMath::DegreesToRadians(Yaw));
 }
 
+inline FMatrix FRotator::ToMatrix() const
+{
+    
+}
