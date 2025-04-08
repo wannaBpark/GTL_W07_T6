@@ -150,11 +150,13 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
     StaticMeshRenderPass->Render(World, ActiveViewport);
     LineRenderPass->Render(World, ActiveViewport);
+    BillboardRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(World, ActiveViewport);
-    BillboardRenderPass->Render(World, ActiveViewport);
 
-    if (IsSceneDepth)
+    if (IsSceneDepth) 
+    {
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+    }
 
     if (!IsSceneDepth && Fog) 
     {

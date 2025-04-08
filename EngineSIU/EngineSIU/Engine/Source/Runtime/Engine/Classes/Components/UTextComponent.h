@@ -1,0 +1,55 @@
+#pragma once
+
+#define _TCHAR_DEFINED
+#include <wrl.h>
+
+#include "UBillboardComponent.h"
+
+class UTextComponent : public UBillboardComponent
+{
+    DECLARE_CLASS(UTextComponent, UBillboardComponent)
+
+public:
+    UTextComponent();
+
+    virtual UObject* Duplicate() override;
+
+    virtual void InitializeComponent() override;
+    
+    virtual void TickComponent(float DeltaTime) override;
+    
+    void ClearText();
+    
+    void SetText(const FWString& text);
+    
+    FString GetBufferKey() { return TextAtlasBufferKey; }
+    
+    FWString GetText() { return Text; }
+    
+    void SetRowColumnCount(int cellsPerRow, int cellsPerColumn);
+
+    virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
+
+private:
+    void SetStartUV(char alphabet, float& outStartU, float& outStartV);
+    void SetStartUV(wchar_t hangul, float& outStartU, float& outStartV);
+    void CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex);
+
+protected:
+
+    FWString Text;
+
+    TArray<FVector> Quad;
+
+    TArray<FVertexTexture> vertexTextureArr;
+
+    int QuadSize = 2;
+
+    int RowCount;
+    int ColumnCount;
+
+    float QuadWidth = 2.0f;
+    float QuadHeight = 2.0f;
+private:
+    FString TextAtlasBufferKey;
+};

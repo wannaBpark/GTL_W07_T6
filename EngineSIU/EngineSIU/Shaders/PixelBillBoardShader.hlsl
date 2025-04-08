@@ -12,7 +12,8 @@ cbuffer UUIDConstant : register(b2)
     float4 UUID;
 }
 
-struct PSInput {
+struct PSInput
+{
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
 };
@@ -23,18 +24,25 @@ struct PSOutput
     float4 uuid : SV_Target1;
 };
 
-float4 main(PSInput input) : SV_TARGET {
+float4 main(PSInput input) : SV_TARGET
+{
     PSOutput output;
     
     float2 uv = input.texCoord + float2(indexU, indexV);
-    //float4 col = gTexture.Sample(gSampler, input.texCoord);
     float4 col = gTexture.Sample(gSampler, uv);
-    float threshold = 0.05; // 필요한 경우 임계값을 조정
-    if (col.r < threshold && col.g < threshold && col.b < threshold)
-        clip(-1); // 픽셀 버리기
+    float threshold = 0.1f;
     
-    output.color = col;
+    // 검정색에 가까운 경우 알파 값을 0으로 설정하여 투명하게 처리
+    if (col.r < threshold && col.g < threshold && col.b < threshold)
+    {
+        output.color = float4(col.rgb, 0.0);
+    }
+    else
+    {
+        output.color = col;
+    }
+    
     output.uuid = UUID;
     
-    return col;
+    return output.color;
 }

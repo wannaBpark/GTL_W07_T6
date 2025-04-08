@@ -26,6 +26,7 @@ public:
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;
+    ID3D11BlendState* AlphaBlendState = nullptr;
 
     
     UINT screenWidth = 0;
@@ -57,6 +58,7 @@ public:
     void PrepareTexture() const;
     void OnResize(HWND hWindow);
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }
+    void CreateAlphaBlendState();
     void ChangeRasterizer(EViewModeIndex evi);
     void ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil) const;
 
