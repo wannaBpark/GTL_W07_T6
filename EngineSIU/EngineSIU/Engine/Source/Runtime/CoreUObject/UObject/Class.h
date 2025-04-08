@@ -64,6 +64,9 @@ public:
      */
     void RegisterProperty(const FProperty& Prop);
 
+    /** 바이너리 직렬화 함수 */
+    void SerializeBin(FArchive& Ar, void* Data);
+
 protected:
     virtual UObject* CreateDefaultObject();
 

@@ -116,11 +116,8 @@ class FArchive
 public:
     virtual ~FArchive() = default;
 
-    bool bIsLoading = false;
-    bool bIsSaving = false;
-    
     // 직렬화/역직렬화를 위한 연산자 오버로딩
-    template<typename T>
+    template <typename T>
     FArchive& operator<<(T& Data)
     {
         if (bIsSaving)
@@ -135,8 +132,29 @@ public:
         }
         return *this;
     }
-    
+
+    template <typename T>
+    FArchive& SerializeBytes(T& Value)
+    {
+        if (IsLoading())
+        {
+            
+        }
+        else // Saving
+        {
+            
+        }
+        return *this;
+    }
+
     // 기본 데이터 타입들을 위한 특수 처리
-    virtual void SaveData(const void* Data, int64 Length) = 0;
-    virtual void LoadData(void* Data, int64 Length) = 0;
+    virtual void SaveData(const void* Data, int64 Length) {}
+    virtual void LoadData(void* Data, int64 Length) {}
+
+    bool IsLoading() const { return bIsLoading; }
+    bool IsSaving() const { return bIsSaving; }
+
+protected:
+    bool bIsLoading = false;
+    bool bIsSaving = false;
 };
