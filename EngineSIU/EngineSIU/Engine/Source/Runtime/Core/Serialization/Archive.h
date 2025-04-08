@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "CoreMiscDefines.h"
 #include "Container/String.h"
 #include "HAL/PlatformType.h"
 
@@ -39,6 +40,7 @@ public:
     }
 
     template <typename T>
+        requires std::is_arithmetic_v<T>
     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, T& Value)
     {
         Ar.Serialize(Value);
@@ -93,6 +95,7 @@ public:
     }
 
 	virtual void Seek(int64 InPos) {}
+    virtual int64 Tell() { return INDEX_NONE; }
 
 
     virtual void SaveData(const void* Data, uint64 Length) {}
