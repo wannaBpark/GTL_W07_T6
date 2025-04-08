@@ -22,7 +22,7 @@ void UProjectileMovementComponent::TickComponent(float DeltaTime)
     if (GetOwner())
     {
         FVector NewLocation = GetOwner()->GetRootComponent()->GetWorldLocation() + Velocity * DeltaTime;
-        GetOwner()->GetRootComponent()->SetLocation(NewLocation);
+        GetOwner()->GetRootComponent()->SetRelativeLocation(NewLocation);
     }
 }
 
