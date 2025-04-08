@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cctype>
 
+#include "CoreMiscDefines.h"
 #include "Math/MathUtility.h"
 
 
@@ -119,4 +120,14 @@ int32 FString::Find(
         StartPosition = (StartPosition == INDEX_NONE) ? StrLen - SubStrLen : FMath::Min(StartPosition, StrLen - SubStrLen);
         return FindSubString(StartPosition, -1, -1);
     }
+}
+
+void FString::Reserve(int32 CharacterCount)
+{
+    PrivateString.reserve(CharacterCount);
+}
+
+void FString::Resize(int32 CharacterCount)
+{
+    PrivateString.resize(CharacterCount);
 }

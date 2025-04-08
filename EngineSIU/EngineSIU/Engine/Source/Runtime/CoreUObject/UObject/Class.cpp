@@ -1,8 +1,9 @@
-#include "UClass.h"
+#include "Class.h"
 #include <cassert>
 
 #include "EngineStatics.h"
 #include "UObjectArray.h"
+#include "Serialization/Archive.h"
 
 
 UClass::UClass(
@@ -12,10 +13,10 @@ UClass::UClass(
     UClass* InSuperClass,
     ClassConstructorType InCTOR
 )
-    : ClassSize(InClassSize)
+    : ClassCTOR(InCTOR)
+    , ClassSize(InClassSize)
     , ClassAlignment(InAlignment)
     , SuperClass(InSuperClass)
-    , ClassCTOR(InCTOR)
 {
     NamePrivate = InClassName;
 }
@@ -43,6 +44,27 @@ UObject* UClass::GetDefaultObject() const
         const_cast<UClass*>(this)->CreateDefaultObject();
     }
     return ClassDefaultObject;
+}
+
+void UClass::RegisterProperty(const FProperty& Prop)
+{
+    Properties.Add(Prop);
+}
+
+void UClass::SerializeBin(FArchive& Ar, void* Data)
+{
+    // 상속받은 클래스의 프로퍼티들도 직렬화
+    if (SuperClass)
+    {
+        SuperClass->SerializeBin(Ar, Data);
+    }
+
+    // 이 클래스의 프로퍼티들 직렬화
+    for (const FProperty& Prop : Properties)
+    {
+        void* PropData = static_cast<uint8*>(Data) + Prop.Offset;
+        Ar.Serialize(PropData, Prop.Size);
+    }
 }
 
 UObject* UClass::CreateDefaultObject()

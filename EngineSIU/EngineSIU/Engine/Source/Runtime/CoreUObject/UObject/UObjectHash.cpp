@@ -1,7 +1,7 @@
 ﻿#include "UObjectHash.h"
 #include <cassert>
 #include "Object.h"
-#include "UClass.h"
+#include "Class.h"
 #include "Container/Map.h"
 #include "Container/Set.h"
 

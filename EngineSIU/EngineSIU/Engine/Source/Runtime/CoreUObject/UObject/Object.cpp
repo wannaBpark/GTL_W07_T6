@@ -1,7 +1,7 @@
 #include "Object.h"
 
 #include "ObjectFactory.h"
-#include "UClass.h"
+#include "Class.h"
 #include "Engine/Engine.h"
 
 
@@ -33,6 +33,12 @@ UObject::UObject()
 UObject* UObject::Duplicate()
 {
     return FObjectFactory::ConstructObject(GetClass());
+}
+
+void UObject::Serialize(FArchive& Ar)
+{
+    // TODO: Serialize 구현
+    // GetClass()->SerializeBin(Ar, this);
 }
 
 UWorld* UObject::GetWorld() const
