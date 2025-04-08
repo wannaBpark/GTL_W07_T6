@@ -57,6 +57,10 @@ PS_OUTPUT mainPS(PS_INPUT input)
     float3 matDiffuse = Material.DiffuseColor.rgb;
     
     output.color = float4(matDiffuse, 1);
-    
+    if (isSelected)
+    {
+        output.color += float4(0.5f, 0.5f, 0.5f, 1); // 선택된 경우 빨간색으로 설정
+    }
+      
     return output;
 }

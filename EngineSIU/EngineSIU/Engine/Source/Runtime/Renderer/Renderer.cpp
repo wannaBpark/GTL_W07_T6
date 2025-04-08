@@ -147,10 +147,10 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
         Graphics->PrepareTexture();
     }
 
-    StaticMeshRenderPass->Render(World, ActiveViewport);
-    LineRenderPass->Render(World, ActiveViewport);
+    StaticMeshRenderPass->Render(ActiveViewport);
+    LineRenderPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
-    UpdateLightBufferPass->Render(World, ActiveViewport);
+    UpdateLightBufferPass->Render(ActiveViewport);
 
     if (IsSceneDepth) 
     {
@@ -167,7 +167,7 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
         }
     }
 
-    GizmoRenderPass->Render(World, ActiveViewport);
+    GizmoRenderPass->Render(ActiveViewport);
 
     ClearRenderArr();
 }
