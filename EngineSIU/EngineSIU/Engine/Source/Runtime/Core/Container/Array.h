@@ -6,7 +6,7 @@
 #include "ContainerAllocator.h"
 
 
-template <typename T, typename Allocator>
+template <typename T, typename Allocator = FDefaultAllocator<T>>
 class TArray
 {
 public:
@@ -104,6 +104,9 @@ public:
 
 	/** Array의 Capacity를 Number로 설정합니다. */
     void Reserve(SizeType Number);
+
+    /** Count만큼 초기화되지 않은 공간을 확장합니다. */
+    SizeType AddUninitialized(SizeType Count);
 
     void Sort();
     template <typename Compare>
@@ -331,6 +334,24 @@ void TArray<T, Allocator>::Reserve(SizeType Number)
 }
 
 template <typename T, typename Allocator>
+typename TArray<T, Allocator>::SizeType TArray<T, Allocator>::AddUninitialized(SizeType Count)
+{
+    if (Count <= 0)
+    {
+        return ContainerPrivate.size();
+    }
+
+    // 기존 크기 저장
+    SizeType OldSize = ContainerPrivate.size();
+
+    // 메모리를 확장 (초기화하지 않음)
+    ContainerPrivate.resize(OldSize + Count);
+
+    // 새 크기를 반환
+    return OldSize;
+}
+
+template <typename T, typename Allocator>
 void TArray<T, Allocator>::Sort()
 {
     std::sort(ContainerPrivate.begin(), ContainerPrivate.end());
@@ -343,5 +364,3 @@ void TArray<T, Allocator>::Sort(const Compare& CompFn)
 {
     std::sort(ContainerPrivate.begin(), ContainerPrivate.end(), CompFn);
 }
-
-template <typename T, typename Allocator = FDefaultAllocator<T>> class TArray;
