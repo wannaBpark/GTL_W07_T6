@@ -37,6 +37,18 @@ struct FColor
         DWColor() = InColor;
     }
 
+    // Serializer
+    friend FArchive& operator<<(FArchive& Ar, FColor& Color)
+    {
+        return Ar << Color.DWColor();
+    }
+
+    bool Serialize(FArchive& Ar)
+    {
+        Ar << *this;
+        return true;
+    }
+
     // Operators
     FORCEINLINE bool operator==(const FColor& Other) const
     {
@@ -90,6 +102,18 @@ struct FLinearColor
 
     constexpr FLinearColor(const FColor& InColor)
         : R(InColor.R / 255.0f), G(InColor.G / 255.0f), B(InColor.B / 255.0f), A(InColor.A / 255.0f) {
+    }
+
+    // Serializer
+    friend FArchive& operator<<(FArchive& Ar, FLinearColor& Color)
+    {
+        return Ar << Color.R << Color.G << Color.B << Color.A;
+    }
+
+    bool Serialize(FArchive& Ar)
+    {
+        Ar << *this;
+        return true;
     }
 
     // Default Colors

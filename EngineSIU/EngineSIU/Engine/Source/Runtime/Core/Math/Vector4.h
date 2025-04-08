@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector.h"
+#include "Serialization/Archive.h"
 
 
 // 4D Vector
@@ -50,4 +51,9 @@ inline FVector4 FVector4::operator/(float Scalar) const
         Z / Scalar,
         W / Scalar
     };
+}
+
+inline FArchive& operator<<(FArchive& Ar, FVector4& V)
+{
+    return Ar << V.X << V.Y << V.Z << V.W;
 }
