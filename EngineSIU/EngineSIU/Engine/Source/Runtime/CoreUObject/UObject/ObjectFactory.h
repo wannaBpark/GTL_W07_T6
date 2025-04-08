@@ -1,7 +1,7 @@
 #pragma once
 #include "EngineStatics.h"
 #include "Object.h"
-#include "UClass.h"
+#include "Class.h"
 #include "UObjectArray.h"
 
 class FObjectFactory

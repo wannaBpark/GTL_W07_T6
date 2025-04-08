@@ -42,6 +42,7 @@ public:
 
     UObject* GetOuter() const { return OuterPrivate; }
     virtual UWorld* GetWorld() const;
+    virtual void Serialize(FArchive& Ar);
 
     FName GetFName() const { return NamePrivate; }
     FString GetName() const { return NamePrivate.ToString(); }

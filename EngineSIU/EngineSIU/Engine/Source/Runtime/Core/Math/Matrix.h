@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Serialization/Archive.h"
 
 struct FVector;
 struct FVector4;
@@ -34,3 +35,12 @@ public:
     FVector4 TransformFVector4(const FVector4& vector) const;
     FVector TransformPosition(const FVector& vector) const;
 };
+
+inline FArchive& operator<<(FArchive& Ar, FMatrix& M)
+{
+    Ar << M.M[0][0] << M.M[0][1] << M.M[0][2] << M.M[0][3];
+    Ar << M.M[1][0] << M.M[1][1] << M.M[1][2] << M.M[1][3];
+    Ar << M.M[2][0] << M.M[2][1] << M.M[2][2] << M.M[2][3];
+    Ar << M.M[3][0] << M.M[3][1] << M.M[3][2] << M.M[3][3];
+    return Ar;
+}

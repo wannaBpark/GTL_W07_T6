@@ -89,11 +89,13 @@ public:
     bool SetActorScale(const FVector& NewScale);
 
 protected:
-    USceneComponent* RootComponent = nullptr;
+    UPROPERTY
+    (USceneComponent*, RootComponent, = nullptr)
 
 private:
     /** 이 Actor를 소유하고 있는 다른 Actor의 정보 */
-    AActor* Owner = nullptr;
+    UPROPERTY
+    (AActor*, Owner, = nullptr)
 
     /** 본인이 소유하고 있는 컴포넌트들의 정보 */
     TSet<UActorComponent*> OwnedComponents;
@@ -115,7 +117,8 @@ public:
 
 private:
     /** 에디터상에 보이는 Actor의 이름 */
-    FString ActorLabel;
+    UPROPERTY
+    (FString, ActorLabel)
 #endif
 
 public:

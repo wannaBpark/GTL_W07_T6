@@ -29,6 +29,15 @@ public:
 
     void Release();
 
+    /**
+     * World에 Actor를 Spawn합니다.
+     * @param InClass Spawn할 Actor 정보
+     * @param InOuter
+     * @param InOuter
+     * @return Spawn된 Actor
+     */
+    AActor* SpawnActor(UClass* InClass, UObject* InOuter);
+
     /** 
      * World에 Actor를 Spawn합니다.
      * @tparam T AActor를 상속받은 클래스
@@ -65,13 +74,7 @@ template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::SpawnActor()
 {
-    T* Actor = FObjectFactory::ConstructObject<T>(this);
-    // TODO: 일단 AddComponent에서 Component마다 초기화
-    // 추후에 RegisterComponent() 만들어지면 주석 해제
-    // Actor->InitializeComponents();
-    ActiveLevel->Actors.Add(Actor);
-    PendingBeginPlayActors.Add(Actor);
-    return Actor;
+    return Cast<T>(SpawnActor(T::StaticClass(), this));
 }
 
 template <typename T>

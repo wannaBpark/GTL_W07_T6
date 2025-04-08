@@ -27,28 +27,46 @@ public:
 
     void AttachToComponent(USceneComponent* InParent);
 
-protected:
-    FVector RelativeLocation;
-    FVector RelativeRotation;
-    FQuat QuatRotation;
-    FVector RelativeScale3D;
-
-    USceneComponent* AttachParent = nullptr;
-    TArray<USceneComponent*> AttachChildren;
-
 public:
-    virtual FVector GetWorldRotation();
-    FVector GetWorldScale() const;
     FVector GetWorldLocation() const;
-    FVector GetLocalRotation() const;
+    FVector GetWorldRotation();
+    FVector GetWorldScale() const;
+
+    FVector GetRelativeLocation() const { return RelativeLocation; }
+    void SetRelativeLocation(FVector NewLocation) { RelativeLocation = NewLocation; }
+
+    FVector GetRelativeRotation() const;
     FQuat GetQuat() const { return QuatRotation; }
+    void SetRelativeRotation(FVector NewRotation);
+    void SetRelativeRotation(FQuat NewQuat) { QuatRotation = NewQuat; }
 
-    FVector GetLocalScale() const { return RelativeScale3D; }
-    FVector GetLocalLocation() const { return RelativeLocation; }
+    FVector GetRelativeScale3D() const { return RelativeScale3D; }
+    void SetRelativeScale3D(FVector NewScale) { RelativeScale3D = NewScale; }
 
-    void SetLocation(FVector _newLoc) { RelativeLocation = _newLoc; }
-    virtual void SetRotation(FVector _newRot);
-    void SetRotation(FQuat _newRot) { QuatRotation = _newRot; }
-    void SetScale(FVector _newScale) { RelativeScale3D = _newScale; }
+
     void SetupAttachment(USceneComponent* InParent);
+
+protected:
+    /** 부모 컴포넌트로부터 상대적인 위치 */
+    UPROPERTY
+    (FVector, RelativeLocation);
+
+    /** 부모 컴포넌트로부터 상대적인 회전 */
+    UPROPERTY
+    (FVector, RelativeRotation);
+
+    /** 부모 컴포넌트로부터 상대적인 회전(쿼터니언) */
+    UPROPERTY
+    (FQuat, QuatRotation);
+
+    /** 부모 컴포넌트로부터 상대적인 크기 */
+    UPROPERTY
+    (FVector, RelativeScale3D);
+
+
+    UPROPERTY
+    (USceneComponent*, AttachParent, = nullptr);
+
+    UPROPERTY
+    (TArray<USceneComponent*>, AttachChildren);
 };

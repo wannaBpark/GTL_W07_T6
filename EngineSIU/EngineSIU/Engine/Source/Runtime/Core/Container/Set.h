@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <unordered_set>
+
 #include "Array.h"
 #include "ContainerAllocator.h"
 
@@ -12,8 +13,6 @@ private:
     using ElementType = T;
 
     SetType ContainerPrivate;
-
-	friend struct FNamePool;
 
 public:
     using SizeType = typename Allocator::SizeType;
@@ -73,7 +72,45 @@ public:
 
     // Empty
     void Empty() { ContainerPrivate.clear(); }
+    void Empty(SizeType Number)
+    {
+        ContainerPrivate.clear();
+        ContainerPrivate.reserve(Number);
+    }
 
     // IsEmpty
     bool IsEmpty() const { return ContainerPrivate.empty(); }
 };
+
+template <typename ElementType, typename Hasher, class Allocator>
+FArchive& operator<<(FArchive& Ar, TSet<ElementType, Hasher, Allocator>& Set)
+{
+    using SizeType = typename TSet<ElementType, Hasher, Allocator>::SizeType;
+
+    // 집합 크기 직렬화
+    SizeType SetSize = Set.Num();
+    Ar << SetSize;
+
+    // 집합 요소 직렬화
+    if (Ar.IsLoading())
+    {
+        // 로드 시 집합 초기화
+        Set.Empty(SetSize);
+
+        for (SizeType i = 0; i < SetSize; ++i)
+        {
+            ElementType Temp;
+            Ar << Temp;
+            Set.Emplace(std::move(Temp));
+        }
+    }
+    else
+    {
+        for (const ElementType& Element : Set)
+        {
+            Ar << const_cast<ElementType&>(Element);
+        }
+    }
+
+    return Ar;
+}
