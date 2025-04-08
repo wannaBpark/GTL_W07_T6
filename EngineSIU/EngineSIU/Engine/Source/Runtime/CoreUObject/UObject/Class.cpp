@@ -58,7 +58,7 @@ void UClass::SerializeBin(FArchive& Ar, void* Data)
     {
         SuperClass->SerializeBin(Ar, Data);
     }
-        
+
     // 이 클래스의 프로퍼티들 직렬화
     for (const FProperty& Prop : Properties)
     {

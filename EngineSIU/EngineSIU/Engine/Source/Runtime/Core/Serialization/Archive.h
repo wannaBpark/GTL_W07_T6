@@ -10,6 +10,9 @@ class FName;
 // TODO: 나중에 Version 관련 메서드 추가
 class FArchive
 {
+protected:
+    FArchive() = default;
+
 public:
     virtual ~FArchive() = default;
 
@@ -78,13 +81,13 @@ public:
     {
         if (IsLoading())
         {
-            // 데이터 저장 로직
-            SaveData(V, Length);
+            // 데이터 로드 로직
+            LoadData(V, Length);
         }
         else
         {
-            // 데이터 로드 로직
-            LoadData(V, Length);
+            // 데이터 저장 로직
+            SaveData(V, Length);
         }
     }
 
