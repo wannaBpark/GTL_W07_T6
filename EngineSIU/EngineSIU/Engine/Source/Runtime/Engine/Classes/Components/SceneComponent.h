@@ -40,9 +40,16 @@ public:
     FRotator GetWorldRotation();
     FVector GetWorldLocation() const;
     
-    FVector GetLocalScale() const { return RelativeScale3D; }
-    FRotator GetLocalRotation() const { return RelativeRotation; }
-    FVector GetLocalLocation() const { return RelativeLocation; }
+    FVector GetRelativeScale() const { return RelativeScale3D; }
+    FRotator GetRelativeRotation() const { return RelativeRotation; }
+    FVector GetRelativeLocation() const { return RelativeLocation; }
+
+    FMatrix GetScaleMatrix() const;
+    FMatrix GetRotationMatrix() const;
+    FMatrix GetTranslationMatrix() const;
+
+    FMatrix GetRTMatrix() const;
+    FMatrix GetWorldMatrix() const;
 
     void SetLocation(FVector _newLoc) { RelativeLocation = _newLoc; }
     void SetRotation(FRotator InRotator) { RelativeRotation = InRotator; }
