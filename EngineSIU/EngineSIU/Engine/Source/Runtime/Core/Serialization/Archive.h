@@ -1,155 +1,102 @@
 ﻿#pragma once
-#include <assert.h>
+#include "Container/String.h"
 #include "HAL/PlatformType.h"
 
 class UObject;
 class FName;
 
 
-#pragma region Legacy FArchive
-// class FArchive
-// {
-// public:
-//     FArchive() = default;
-//     virtual ~FArchive() = default;
-//
-//     FArchive(const FArchive&) = default;
-//     FArchive& operator=(const FArchive& ArchiveToCopy) = default;
-//     FArchive(FArchive&&) = default;
-//     FArchive& operator=(FArchive&&) = default;
-//
-// public:
-//     virtual void Serialize(void* V, int64 Length)
-//     {
-//     }
-//
-// public:
-//     virtual FArchive& operator<<(FName& Value)
-//     {
-//         return *this;
-//     }
-//
-//     virtual FArchive& operator<<(UObject*& Value)
-//     {
-//         return *this;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, ANSICHAR& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, uint8& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, int8& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, uint16& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, int16& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, uint32& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, int32& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, uint64& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, int64& Value)
-//     {
-//         Ar.Serialize(&Value, 1);
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, bool& D)
-//     {
-//         uint32 OldUBoolValue = D ? 1 : 0;
-//         Ar.Serialize(&OldUBoolValue, sizeof(OldUBoolValue));
-//
-//         assert(OldUBoolValue == 1);
-//         D = !!OldUBoolValue;
-//         return Ar;
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, float& Value)
-//     {
-//         
-//     }
-//
-//     FORCEINLINE friend FArchive& operator<<(FArchive& Ar, double& Value)
-//     {
-//         
-//     }
-// };
-#pragma endregion
-
+// TODO: 나중에 Version 관련 메서드 추가
 class FArchive
 {
 public:
     virtual ~FArchive() = default;
 
-    // 직렬화/역직렬화를 위한 연산자 오버로딩
-    template <typename T>
-    FArchive& operator<<(T& Data)
+    /**
+     * FName을 직렬화 합니다.
+     *
+     * 이 함수는 Subclass에서 구현됩니다.
+     *
+     * @param Value Serialize할 FName
+     * @return 현재 FArchive의 인스턴스
+     */
+    virtual FArchive& operator<<(FName& Value)
     {
-        if (bIsSaving)
-        {
-            // 데이터 저장 로직
-            SaveData(&Data, sizeof(T));
-        }
-        else if (bIsLoading)
-        {
-            // 데이터 로드 로직
-            LoadData(&Data, sizeof(T));
-        }
+        return *this;
+    }
+
+    /**
+     * UObject를 직렬화 합니다.
+     *
+     * 이 함수는 Subclass에서 구현됩니다.
+     *
+     * @param Value Serialize할 Object
+     * @return 현재 FArchive의 인스턴스
+     */
+    virtual FArchive& operator<<(UObject*& Value)
+    {
         return *this;
     }
 
     template <typename T>
-    FArchive& SerializeBytes(T& Value)
+    FORCEINLINE friend FArchive& operator<<(FArchive& Ar, T& Value)
+    {
+        Ar.Serialize(Value);
+        return Ar;
+    }
+
+    FORCEINLINE friend FArchive& operator<<(FArchive& Ar, bool& Value)
+    {
+        uint8 BoolValue = Value ? 1 : 0;
+        Ar.Serialize(&BoolValue, sizeof(uint8));
+
+        if (Ar.IsLoading())
+        {
+            Value = BoolValue != 0;
+        }
+
+        return Ar;
+    }
+
+    FORCEINLINE friend FArchive& operator<<(FArchive& Ar, FString& Value)
+    {
+        int64 Length = Value.Len();
+        Ar << Length; // 문자열 길이 직렬화
+
+        if (Ar.IsLoading())
+        {
+            Value.Reserve(Length);
+        }
+        Ar.Serialize(GetData(Value), Length * sizeof(TCHAR));
+
+        return Ar;
+    }
+
+    virtual void Serialize(void* V, int64 Length)
     {
         if (IsLoading())
         {
-            
+            // 데이터 저장 로직
+            SaveData(V, Length);
         }
-        else // Saving
+        else
         {
-            
+            // 데이터 로드 로직
+            LoadData(V, Length);
         }
-        return *this;
     }
 
-    // 기본 데이터 타입들을 위한 특수 처리
-    virtual void SaveData(const void* Data, int64 Length) {}
-    virtual void LoadData(void* Data, int64 Length) {}
+    template <typename T>
+    void Serialize(T& Value)
+    {
+        Serialize(&Value, sizeof(T));
+    }
+
+	virtual void Seek(int64 InPos) {}
+
+
+    virtual void SaveData(const void* Data, uint64 Length) {}
+    virtual void LoadData(void* Data, uint64 Length) {}
 
     bool IsLoading() const { return bIsLoading; }
     bool IsSaving() const { return bIsSaving; }
