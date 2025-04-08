@@ -52,22 +52,8 @@ PS_INPUT mainVS(VS_INPUT input)
     
     output.color = input.color;
   
-    // 입력 normal 값의 길이 확인
-    float normalThreshold = 0.001;
-    float normalLen = length(input.normal);
+    output.normal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
     
-    if (normalLen < normalThreshold)
-    {
-        output.normalFlag = 0.0;
-    }
-    else
-    {
-        output.normal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
-        output.normalFlag = 1.0;
-    }
-    
-    float3 tangentNormalized = normalize(input.tangent);
-    output.worldPos += 0.0 * tangentNormalized;
     output.texcoord = input.texcoord;
     
     return output;

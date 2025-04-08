@@ -101,16 +101,16 @@ void PropertyEditorPanel::Render()
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
-    if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickedActor->GetRootComponent()))
+    if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
       
         if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
         {
-            DrawColorProperty("Ambient Color",
+          /*  DrawColorProperty("Ambient Color",
                 [&]() { return lightObj->GetAmbientColor(); },
                 [&](FVector4 c) { lightObj->SetAmbientColor(c); });
-
+            */
             DrawColorProperty("Diffuse Color",
                 [&]() { return lightObj->GetDiffuseColor(); },
                 [&](FVector4 c) { lightObj->SetDiffuseColor(c); });
@@ -120,17 +120,18 @@ void PropertyEditorPanel::Render()
                 [&](FVector4 c) { lightObj->SetSpecularColor(c); });
 
             float range = lightObj->GetRange();
-            if (ImGui::SliderFloat("Range", &range, 1.0f, 1000.0f))
+            if (ImGui::SliderFloat("Range", &range, 20.0f, 10000.0f, "%1.f"))
                 lightObj->SetRange(range);
 
             float falloff = lightObj->GetFalloff();
-            if (ImGui::SliderFloat("Falloff", &falloff, 0.01f, 100.0f, "%.2f")) {
+            if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
                 lightObj->SetFalloff(falloff);
             }
 
-            DrawColorProperty("Attenuation",
-                [&]() { return lightObj->GetAttenuation(); },
-                [&](FVector4 c) { lightObj->SetAttenuation(FVector(c.X,c.Y,c.Z)); });
+            float attenuation = lightObj->GetAttenuation();
+            if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 1.f, "%.1f")) {
+                lightObj->SetAttenuation(attenuation);
+            }
 
             ImGui::TreePop();
         }

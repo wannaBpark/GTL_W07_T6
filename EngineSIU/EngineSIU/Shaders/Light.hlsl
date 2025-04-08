@@ -7,36 +7,25 @@
 
 struct LIGHT
 {
-    // Ambient (float3) + padding
     float3 m_cAmbient;
     float pad1;
 
-    // Diffuse (float3) + padding
     float3 m_cDiffuse;
     float pad2;
 
-    // Specular (float3) + padding
     float3 m_cSpecular;
     float pad3;
 
-    // Position (float3) + Falloff
     float3 m_vPosition;
     float m_fFalloff;
 
-    // Direction (float3) + padding
     float3 m_vDirection;
     float pad4;
 
-    // Attenuation (float3) + padding
-    float3 m_vAttenuation;
-    float pad5;
-
-    // Enable + Range + padding (총 16바이트)
+    float m_fAttenuation;
     int m_bEnable;
     int m_nType;
-    
     float m_fRange;
-    float pad7;
 };
 
 cbuffer cbLights : register(b2)
@@ -58,18 +47,24 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance; // 정규화
         
-        float fDiffuseFactor = saturate(dot(vToLight, vNormal));
+        float fDiffuseFactor = saturate(dot(vNormal, normalize(vToLight)));
+
         if (fDiffuseFactor > 0.0f)
         {
-            float3 vHalf = float3(0.0f, 1.0f, 0.0f);
-            fSpecularFactor = pow(max(dot(vHalf, vNormal), 0.0f), 1);
+            float3 vView = normalize(CameraPosition - vPosition);
+            float3 vHalf = normalize(vToLight + vView);
+            fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
         }
         
         float fSpotFactor = pow(max(dot(-vToLight, gLights[nIndex].m_vDirection), 0.0f), gLights[nIndex].m_fFalloff);
         
-        float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
+        float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
+     
+       
         
-        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor);
+        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) +
+                     (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
+                     (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor);
 
         return float4(lit * fAttenuationFactor * fSpotFactor, 1.0f);
     }
@@ -84,17 +79,21 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     {
         float fSpecularFactor = 0.0f;
         vToLight /= fDistance;
-        float fDiffuseFactor = saturate(dot(vToLight, normalize(vNormal)));
+        float fDiffuseFactor = saturate(dot(vNormal, normalize(vToLight)));
+
         if (fDiffuseFactor > 0.0f)
         {
-            float3 vHalf = float3(0.0f, 1.0f, 0.0f);
+            float3 vView = normalize(CameraPosition - vPosition);
+            float3 vHalf = normalize(vToLight + vView);
             fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
             
         }
-        float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
 
-        
-        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) + (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) + (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor);
+        float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
+   
+        float3 lit = (gLights[nIndex].m_cAmbient.rgb * Material.AmbientColor.rgb) +
+                     (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
+                     (gLights[nIndex].m_cSpecular * fSpecularFactor * Material.SpecularColor);
 
         return float4(lit * fAttenuationFactor, 1.0f);
     }
@@ -123,8 +122,9 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     }
     
     // 전역 환경광 추가
-    cColor += (gcGlobalAmbientLight * float4(Material.AmbientColor, 1));
+    cColor += (gcGlobalAmbientLight);
     cColor.a = 1;
     
     return cColor;
+
 }
