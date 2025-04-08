@@ -94,7 +94,7 @@ public:
     template <typename T>
     void Serialize(T& Value)
     {
-        Serialize(&Value, sizeof(T));
+        Serialize((void*)&Value, sizeof(T));
     }
 
 	virtual void Seek(int64 InPos) {}
