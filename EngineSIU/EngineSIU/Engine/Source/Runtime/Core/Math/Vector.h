@@ -42,6 +42,9 @@ struct FVector
     FVector(float X, float Y, float Z) : X(X), Y(Y), Z(Z) {}
     FVector(float Scalar) : X(Scalar), Y(Scalar), Z(Scalar) {}
 
+    // Include 문제로 일단 보류.
+    // FVector(const FRotator& InRotator) : X(FMath::DegreesToRadians(InRotator.X)), Y(FMath::DegreesToRadians(InRotator.Y)), Z(FMath::DegreesToRadians(InRotator.Z)) {}
+
     // Vector(0, 0, 0)
     static const FVector ZeroVector;
 
@@ -134,7 +137,6 @@ public:
     bool IsNearlyZero(float Tolerance = SMALL_NUMBER) const;
     bool IsZero() const;
 };
-
 
 inline float FVector::Distance(const FVector& V1, const FVector& V2)
 {
