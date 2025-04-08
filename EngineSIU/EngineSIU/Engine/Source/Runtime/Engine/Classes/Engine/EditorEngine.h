@@ -21,8 +21,8 @@ public:
     virtual void Init() override;
     virtual void Tick(float DeltaTime) override;
 
-    UWorld* PIEWorld;
-    UWorld* EditorWorld;
+    UWorld* PIEWorld = nullptr;
+    UWorld* EditorWorld = nullptr;
 
     void StartPIE();
     void EndPIE();

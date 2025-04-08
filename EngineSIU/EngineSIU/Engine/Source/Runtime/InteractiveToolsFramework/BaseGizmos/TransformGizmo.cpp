@@ -85,6 +85,10 @@ void ATransformGizmo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    // Editor 모드에서만 Gizmo를 표시.
+    if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
+        return;
+
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
         return;

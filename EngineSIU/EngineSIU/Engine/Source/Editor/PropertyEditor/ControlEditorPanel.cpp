@@ -66,6 +66,7 @@ void ControlEditorPanel::Render()
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
 
     ImGui::SameLine();
+    ImGui::PushFont(IconFont);
 
     CreatePIEButton(IconSize, IconFont);
 
@@ -74,7 +75,6 @@ void ControlEditorPanel::Render()
     /* Move Cursor X Position */
     ImGui::SetCursorPosX(ContentWidth - (IconSize.x * 3.0f + 16.0f));
 
-    ImGui::PushFont(IconFont);
     CreateSRTButton(IconSize);
     ImGui::PopFont();
 
@@ -457,10 +457,23 @@ void ControlEditorPanel::CreatePIEButton(ImVec2 ButtonSize, ImFont* IconFont) co
     if (!Engine)
         return;
 
-    if (ImGui::Button(GetData("PIE"), ImVec2(120, 32)))
+    ImVec2 WindowSize = ImGui::GetIO().DisplaySize;
+
+    float CenterX = (WindowSize.x - ButtonSize.x) / 2.5f;
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX - 40.0f, 10.0f));
+    
+    if (ImGui::Button("\ue9a8", ButtonSize)) // Play
     {
         UE_LOG(LogLevel::Display, TEXT("PIE Button Clicked"));
         Engine->StartPIE();
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX - 10.0f, 10.0f));
+    if (ImGui::Button("\ue9e4", ButtonSize)) // Stop
+    {
+        UE_LOG(LogLevel::Display, TEXT("Stop Button Clicked"));
+        Engine->EndPIE();
     }
     
 }

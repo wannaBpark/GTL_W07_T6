@@ -81,11 +81,13 @@ void UEditorEngine::StartPIE()
 
     PIEWorld = Cast<UWorld>(EditorWorld->Duplicate());
     PIEWorld->WorldType = EWorldType::PIE;
+
+    PIEWorldContext.SetCurrentWorld(PIEWorld);
+    ActiveWorld = PIEWorld;
     
     PIEWorld->BeginPlay();
     // 여기서 Actor들의 BeginPlay를 해줄지 안에서 해줄 지 고민.
     WorldList.Add(GetWorldContextFromWorld(PIEWorld));
-    ActiveWorld = PIEWorld;
 }
 
 void UEditorEngine::EndPIE()
@@ -93,7 +95,7 @@ void UEditorEngine::EndPIE()
     if (PIEWorld)
     {
         //WorldList.Remove(*GetWorldContextFromWorld(PIEWorld.get()));
-        
+        WorldList.Remove(GetWorldContextFromWorld(PIEWorld));
         PIEWorld->Release();
         GUObjectArray.MarkRemoveObject(PIEWorld);
         PIEWorld = nullptr;
