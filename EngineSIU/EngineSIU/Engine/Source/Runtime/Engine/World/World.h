@@ -9,12 +9,7 @@
 class FObjectFactory;
 class AActor;
 class UObject;
-class UGizmoArrowComponent;
-class UCameraComponent;
-class AEditorPlayer;
 class USceneComponent;
-class ATransformGizmo;
-
 
 class UWorld : public UObject
 {
@@ -32,8 +27,6 @@ public:
     void Tick(float DeltaTime);
     void BeginPlay();
 
-    void CreateBaseObject();
-    void ReleaseBaseObject();
     void Release();
 
     /** 
@@ -54,6 +47,8 @@ public:
         requires std::derived_from<T, AActor>
     T* DuplicateActor(T* InActor);
 
+    EWorldType WorldType = EWorldType::None;
+    
 private:
     FString WorldName = "DefaultWorld";
 
@@ -61,10 +56,7 @@ private:
 
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
-    AEditorPlayer* EditorPlayer = nullptr;
 
-public:
-    AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 };
 
 

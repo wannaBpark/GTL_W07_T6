@@ -12,6 +12,7 @@ UWorld* UWorld::CreateWorld(const EWorldType InWorldType, const FString& InWorld
 {
     UWorld* NewWorld = FObjectFactory::ConstructObject<UWorld>();
     NewWorld->WorldName = InWorldName;
+    NewWorld->WorldType = InWorldType;
     NewWorld->InitializeNewWorld();
 
     return NewWorld;
@@ -22,38 +23,21 @@ void UWorld::InitializeNewWorld()
     ActiveLevel.reset(FObjectFactory::ConstructObject<ULevel>());
     ActiveLevel->InitLevel(this);
 
-    // TODO: BaseObject 제거 필요.
-    CreateBaseObject();
-}
-
-void UWorld::CreateBaseObject()
-{
-    if (EditorPlayer == nullptr)
-    {
-        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();
-    }
-}
-
-void UWorld::ReleaseBaseObject()
-{
-    if (EditorPlayer)
-    {
-        GUObjectArray.MarkRemoveObject(EditorPlayer);
-        EditorPlayer = nullptr;
-    }
 }
 
 UObject* UWorld::Duplicate()
 {
     // TODO: UWorld의 Duplicate는 역할 분리후 만드는것이 좋을듯
-    return nullptr;
+    UWorld* NewWorld = Cast<UWorld>(Super::Duplicate());
+    NewWorld->ActiveLevel = std::shared_ptr<ULevel>(Cast<ULevel>(ActiveLevel->Duplicate()));
+    NewWorld->ActiveLevel->InitLevel(NewWorld);
+    
+    
+    return NewWorld;
 }
 
 void UWorld::Tick(float DeltaTime)
 {
-
-    EditorPlayer->Tick(DeltaTime);
-
     // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
     for (AActor* Actor : PendingBeginPlayActors)
     {
@@ -90,8 +74,6 @@ void UWorld::Release()
         ActiveLevel->Actors.Empty();
         ActiveLevel.reset();
     }
-
-	ReleaseBaseObject();
 
     GUObjectArray.ProcessPendingDestroyObjects();
 }

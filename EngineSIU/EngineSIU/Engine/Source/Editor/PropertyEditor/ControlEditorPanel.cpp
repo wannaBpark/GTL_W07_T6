@@ -65,6 +65,12 @@ void ControlEditorPanel::Render()
     /* Get Window Content Region */
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
 
+    ImGui::SameLine();
+
+    CreatePIEButton(IconSize, IconFont);
+
+    ImGui::SameLine();
+
     /* Move Cursor X Position */
     ImGui::SetCursorPosX(ContentWidth - (IconSize.x * 3.0f + 16.0f));
 
@@ -264,7 +270,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             if (ImGui::Selectable(primitive.label))
             {
                 // GEngineLoop.GetWorld()->SpawnObject(static_cast<OBJECTS>(primitive.obj));
-                UWorld* World = GEngine->ActiveWorld.get();
+                UWorld* World = GEngine->ActiveWorld;
                 AActor* SpawnedActor = nullptr;
                 switch (static_cast<OBJECTS>(primitive.obj))
                 {
@@ -445,11 +451,25 @@ void ControlEditorPanel::CreateFlagButton() const
     }
 }
 
+void ControlEditorPanel::CreatePIEButton(ImVec2 ButtonSize, ImFont* IconFont) const
+{
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+
+    if (ImGui::Button(GetData("PIE"), ImVec2(120, 32)))
+    {
+        UE_LOG(LogLevel::Display, TEXT("PIE Button Clicked"));
+        Engine->StartPIE();
+    }
+    
+}
+
 // code is so dirty / Please refactor
 void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 {
-
-    AEditorPlayer* Player = GEngine->ActiveWorld->GetEditorPlayer();
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    AEditorPlayer* Player = Engine->GetEditorPlayer();
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
 

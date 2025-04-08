@@ -126,7 +126,8 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
     PrepareRenderState();
     Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
-    ControlMode Mode = World->GetEditorPlayer()->GetControlMode();
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    ControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
     if (Mode == CM_TRANSLATION)
     {
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetArrowArr())

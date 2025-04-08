@@ -37,7 +37,7 @@ UObject* UObject::Duplicate()
 
 UWorld* UObject::GetWorld() const
 {
-    return GEngine->ActiveWorld.get();
+    return GEngine->ActiveWorld;
 }
 
 bool UObject::IsA(const UClass* SomeBase) const

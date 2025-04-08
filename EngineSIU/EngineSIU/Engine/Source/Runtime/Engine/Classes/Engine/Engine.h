@@ -16,7 +16,7 @@ public:
     UEngine() = default;
 
 public:
-    std::shared_ptr<UWorld> ActiveWorld;
+    UWorld* ActiveWorld;
 
 protected:
     TArray<FWorldContext*> WorldList;
