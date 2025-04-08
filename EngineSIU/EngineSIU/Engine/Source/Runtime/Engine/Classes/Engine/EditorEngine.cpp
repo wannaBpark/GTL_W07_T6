@@ -77,6 +77,12 @@ void UEditorEngine::Tick(float DeltaTime)
 
 void UEditorEngine::StartPIE()
 {
+    if (PIEWorld)
+    {
+        UE_LOG(LogLevel::Warning, TEXT("PIEWorld already exists!"));
+        return;
+    }
+
     FWorldContext& PIEWorldContext = CreateNewWorldContext(EWorldType::PIE);
 
     PIEWorld = Cast<UWorld>(EditorWorld->Duplicate());
