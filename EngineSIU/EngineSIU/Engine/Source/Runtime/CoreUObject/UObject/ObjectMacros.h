@@ -67,12 +67,13 @@ public: \
         return &ClassInfo; \
     }
 
+#define FIRST_ARG(Arg1, ...) Arg1
 
 /**
  * UClass에 Property를 등록합니다.
  * @param Type 선언할 타입
  * @param VarName 변수 이름
- * @param DefaultExpr 기본값
+ * @param ... 기본값
  *
  * Example Code
  * ```
@@ -80,8 +81,8 @@ public: \
  * (int, Value, = 10)
  * ```
  */
-#define UPROPERTY(Type, VarName, DefaultExpr) \
-    Type VarName DefaultExpr; \
+#define UPROPERTY(Type, VarName, ...) \
+    Type VarName FIRST_ARG(__VA_ARGS__); \
     inline static struct VarName##_PropRegistrar \
     { \
         VarName##_PropRegistrar() \
