@@ -201,7 +201,7 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
 
