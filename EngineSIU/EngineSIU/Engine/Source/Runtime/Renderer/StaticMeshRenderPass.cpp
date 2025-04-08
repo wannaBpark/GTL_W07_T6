@@ -14,9 +14,9 @@
 #include "D3D11RHI/DXDShaderManager.h"
 
 #include "Components/StaticMeshComponent.h"
-#include "Components/SkySphereComponent.h"
 
 #include "BaseGizmos/GizmoBaseComponent.h"
+#include "Engine/EditorEngine.h"
 
 #include "PropertyEditor/ShowFlags.h"
 
@@ -47,11 +47,12 @@ FStaticMeshRenderPass::~FStaticMeshRenderPass()
 void FStaticMeshRenderPass::CreateShader()
 {
     D3D11_INPUT_ELEMENT_DESC StaticMeshLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
     D3D11_INPUT_ELEMENT_DESC TextureLayoutDesc[] = {
@@ -59,7 +60,7 @@ void FStaticMeshRenderPass::CreateShader()
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
-    Stride = sizeof(FVertexSimple);
+    Stride = sizeof(FStaticMeshVertex);
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
 
@@ -142,8 +143,7 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
-    FCameraConstantBuffer CameraData(View, Projection, {}, 0);
-    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
+   
 }
 
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
@@ -214,9 +214,12 @@ void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorV
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 
-        bool Selected = (World->GetSelectedActor() == Comp->GetOwner());
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
+        FCameraConstantBuffer CameraData(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), Viewport->ViewTransformPerspective.GetLocation(), 0);
+        BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
 

@@ -1,9 +1,12 @@
 #include "Define.h"
+#include "UObject/Casts.h"
 #include "UpdateLightBufferPass.h"
 #include "D3D11RHI/DXDBufferManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "Components/LightComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Math/JungleMath.h"
 
 #include "World/World.h"
@@ -36,7 +39,14 @@ void FUpdateLightBufferPass::PrepareRender()
 {
     for (const auto iter : TObjectRange<ULightComponentBase>())
     {
-        LightObjs.Add(iter);
+        if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter)) {
+
+            PointLights.Add(PointLight);
+        }
+        else if (USpotLightComponent* PointLight = Cast<USpotLightComponent>(iter)) {
+
+            SpotLights.Add(PointLight);
+        }
     }
 }
 
@@ -45,43 +55,46 @@ void FUpdateLightBufferPass::Render(UWorld* World, const std::shared_ptr<FEditor
     FLightBuffer LightBufferData = {};
     int LightCount = 0;
 
-    LightBufferData.GlobalAmbientLight = FVector4(0.1, 0.1, 0.1,1);
-    for (auto Light : LightObjs)
+    LightBufferData.GlobalAmbientLight = FVector4(0.01, 0.01, 0.01, 1);
+    for (auto Light : PointLights)
     {
-        // 월드 변환 행렬 계산 (스케일 1로 가정)
-        //FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
-
-        //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
-
-        //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
-
-        if (LightCount < MAX_LIGHTS) //TODO LightObj가 정보를 갖도록 분리
+        if (LightCount < MAX_LIGHTS)
         {
-            LightBufferData.gLights[LightCount] = FLight{};
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Range = 100.f;
-            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.5,0.5,0.5);
-            LightBufferData.gLights[LightCount].DiffuseColor = FVector(0.1,0.1,0.1);
-            LightBufferData.gLights[LightCount].Attenuation = FVector(0.5f,0.5f,0.5f);
-            LightBufferData.gLights[LightCount].Direction = FVector(0.f,0.f,0.f);
-            LightBufferData.gLights[LightCount].Type = 1;
-            LightBufferData.gLights[LightCount].Falloff = 0.4f;
-
-            LightBufferData.gLights[LightCount].Enabled = 1;
+            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.01, 0.01, 0.01);
 
             LightCount++;
-        } 
+        }
+    }
 
+    for (auto Light : SpotLights)
+    {
+        if (LightCount < MAX_LIGHTS)
+        {
+            //// 월드 변환 행렬 계산 (스케일 1로 가정)
+            //FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
+
+            //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), 100, Light->GetRange(), 140, {1,1,1,1}, Model);
+
+            //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
+            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
+            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
+            LightBufferData.gLights[LightCount].Direction = Light->GetForwardVector();
+            LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
+
+            LightCount++;
+        }
     }
     LightBufferData.nLights = LightCount;
 
     BufferManager->UpdateConstantBuffer(TEXT("FLightBuffer"), LightBufferData);
-}    
+}
 
 void FUpdateLightBufferPass::ClearRenderArr()
 {
-    LightObjs.Empty();
+    PointLights.Empty();
+    SpotLights.Empty();
 }
 
 void FUpdateLightBufferPass::UpdateLightBuffer(FLight Light) const

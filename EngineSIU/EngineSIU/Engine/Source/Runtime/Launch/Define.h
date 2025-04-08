@@ -17,13 +17,15 @@
 #include <d3d11.h>
 
 #include "UserInterface/Console.h"
+#include <Math/Color.h>
 
-struct FVertexSimple
+struct FStaticMeshVertex
 {
-    float x, y, z;    // Position
-    float r, g, b, a; // Color
-    float nx, ny, nz;
-    float u = 0, v = 0;
+    float X, Y, Z;    // Position
+    float NormalX, NormalY, NormalZ;
+    float TangentX, TangentY, TangentZ;
+    float U = 0, V = 0;
+    float R, G, B, A; // Color
     uint32 MaterialIndex;
 };
 
@@ -66,7 +68,7 @@ struct FObjInfo
     // Index
     TArray<uint32> VertexIndices;
     TArray<uint32> NormalIndices;
-    TArray<uint32> TextureIndices;
+    TArray<uint32> UVIndices;
 
     // Material
     TArray<FMaterialSubset> MaterialSubsets;
@@ -74,7 +76,7 @@ struct FObjInfo
 
 struct FObjMaterialInfo
 {
-    FString MTLName;  // newmtl : Material Name.
+    FString MaterialName;  // newmtl : Material Name.
 
     bool bHasTexture = false;  // Has Texture?
     bool bTransparent = false; // Has alpha channel?
@@ -116,7 +118,7 @@ namespace OBJ
         FWString PathName;
         FString DisplayName;
 
-        TArray<FVertexSimple> Vertices;
+        TArray<FStaticMeshVertex> Vertices;
         TArray<UINT> Indices;
 
         ID3D11Buffer* VertexBuffer;
@@ -272,31 +274,33 @@ struct FPrimitiveCounts
 };
 
 #define MAX_LIGHTS 16
-
+enum ELightType {
+    POINT_LIGHT	= 1,
+    SPOT_LIGHT	= 2
+};
 struct FLight
 {
-    // 색상 데이터 (float3와 패딩)
-    FVector AmbientColor;
+    FVector AmbientColor = FVector(1.f, 1.f, 1.f);
     float pad0;
-    FVector DiffuseColor;
+    
+    FVector DiffuseColor = FVector(1.f, 1.f, 1.f);
     float pad1;
-    FVector SpecularColor;
+
+    FVector SpecularColor = FVector(0.5, 0.5, 0.5);
     float pad2;
 
     FVector Position;
-    float Falloff;
+    float Falloff = 0.01f;
 
     FVector Direction;
     float pad3;
 
-    FVector Attenuation;
-    float pad4;
-
+    float Attenuation = 0.5f;
+ 
     int Enabled = 0;
-    int Type = 1;
+    int Type = ELightType::POINT_LIGHT;
 
-    float Range;
-    float pad5;
+    float Range = 30.f;
 };
 
 struct FLightBuffer
@@ -311,13 +315,16 @@ struct FLightBuffer
 struct FMaterialConstants {
     FVector DiffuseColor;
     float TransparencyScalar;
+
     FVector AmbientColor;
     float DensityScalar;
+
     FVector SpecularColor;
     float SpecularScalar;
+    
     FVector EmmisiveColor;
     float MaterialPad0;
-    float MaterialPad1;
+    
 };
 
 struct FPerObjectConstantBuffer {
@@ -392,4 +399,19 @@ struct FScreenConstants
     FVector2D UVOffset;     // 뷰포트 시작 UV (x/sw, y/sh)
     FVector2D UVScale;      // 뷰포트 크기 비율 (w/sw, h/sh)
     FVector2D Padding;      // 정렬용 (사용 안 해도 무방)
+};
+
+
+struct FFogConstants
+{
+    FMatrix InvViewProj;
+    FLinearColor FogColor;
+    FVector CameraPos;
+    float FogDensity;
+    float FogHeightFalloff;
+    float StartDistance;
+    float FogCutoffDistance;
+    float FogMaxOpacity;
+    FVector FogPosition;
+    float padding;
 };

@@ -1,7 +1,7 @@
 #include "OutlinerEditorPanel.h"
 #include "World/World.h"
 #include "GameFramework/Actor.h"
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
 
 
 void OutlinerEditorPanel::Render()
@@ -35,12 +35,13 @@ void OutlinerEditorPanel::Render()
 
     if (ImGui::TreeNode("Primitives")) // 트리 노드 생성
     {
-        UWorld* World = GEngine->ActiveWorld.get();
-        for (AActor* Actor : World->GetActiveLevel().lock()->Actors)
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        for (AActor* Actor : Engine->ActiveWorld->GetActiveLevel().lock()->Actors)
         {
-            if (ImGui::Selectable(*Actor->GetActorLabel(), World->GetSelectedActor() == Actor))
+            
+            if (ImGui::Selectable(*Actor->GetActorLabel(), Engine->GetSelectedActor() == Actor))
             {
-                World->SetSelectedActor(Actor);
+                Engine->SelectActor(Actor);
                 break;
             }
         }

@@ -1,0 +1,63 @@
+#pragma once
+#define _TCHAR_DEFINED
+#include <d3d11.h>
+#include <memory>
+#include "Math/Color.h"
+#include "Math/Matrix.h"
+#include "Math/Vector.h"
+#include "Engine/Classes/Components/HeightFogComponent.h"
+class FGraphicsDevice;
+class FDXDShaderManager;
+class FDXDBufferManager;
+class FEditorViewportClient;
+
+class FFogRenderPass
+{
+public:
+    FFogRenderPass();
+    ~FFogRenderPass();
+
+    // 초기화: 그래픽 디바이스와 셰이더 매니저를 등록
+    void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager);
+
+    // 스프라이트 렌더링에 필요한 버퍼 및 상태 생성
+    void CreateSpriteResources();
+
+    // Fog 렌더링용 셰이더 생성 및 입력 레이아웃 설정
+    void CreateShader();
+
+    void CreateSceneSrv();
+
+    void PrepareRenderState(ID3D11ShaderResourceView* DepthSRV);
+    // Fog를 화면에 렌더링
+    void RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, UHeightFogComponent* Fog);
+
+    void UpdateSceneSRV();
+
+    void UpdateScreenConstant(const D3D11_VIEWPORT& viewport);
+
+    void UpdateFogConstant(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, UHeightFogComponent* Fog);
+
+private:
+    ID3D11SamplerState* Sampler = nullptr;
+
+    FGraphicsDevice* Graphics;
+    FDXDBufferManager* BufferManager;
+    FDXDShaderManager* ShaderManager;
+
+    // 전체 화면 Quad 렌더링용 버퍼
+    ID3D11Buffer* SpriteVertexBuffer;
+    ID3D11Buffer* SpriteIndexBuffer;
+
+    // Fog 렌더링용 셰이더 및 입력 레이아웃
+    ID3D11VertexShader* SpriteVertexShader;
+    ID3D11PixelShader* SpritePixelShader;
+    ID3D11InputLayout* InputLayout;
+
+    // Scene SRV (외부에서 등록)
+    ID3D11ShaderResourceView* SceneSRV;
+
+    bool bRender = false;
+    float screenWidth = 0;
+    float screenHeight = 0;
+};

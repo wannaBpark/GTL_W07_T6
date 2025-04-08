@@ -6,10 +6,14 @@
 #include "UnrealClient.h"
 #include "World/World.h"
 #include "GameFramework/Actor.h"
-#include "Engine/Engine.h"
+#include "Engine/EditorEngine.h"
+
+#include "UObject/ObjectFactory.h"
+#include "BaseGizmos/TransformGizmo.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::orthoSize = 10.0f;
+
 FEditorViewportClient::FEditorViewportClient()
     : Viewport(nullptr)
     , ViewportType(LVT_Perspective)
@@ -33,16 +37,18 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
-    ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+    ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
     ViewportIndex = viewportIndex;
+
+    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>();
+    GizmoActor->Initialize(this);
 }
 
 void FEditorViewportClient::Tick(float DeltaTime)
 {
-    Input();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
-
+    GizmoActor->Tick(DeltaTime);
 }
 
 void FEditorViewportClient::Release() const
@@ -70,18 +76,18 @@ void FEditorViewportClient::Input()
             GetCursorPos(&currentMousePos);
 
             // 마우스 이동 차이 계산
-            int32 deltaX = currentMousePos.x - lastMousePos.x;
-            int32 deltaY = currentMousePos.y - lastMousePos.y;
+            int32 DeltaX = currentMousePos.x - lastMousePos.x;
+            int32 DeltaY = currentMousePos.y - lastMousePos.y;
 
             // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
             if (IsPerspective()) {
-                CameraRotateYaw(deltaX * 0.1f);  // X 이동에 따라 좌우 회전
-                CameraRotatePitch(deltaY * 0.1f);  // Y 이동에 따라 상하 회전
+                CameraRotateYaw(DeltaX * 0.1f);  // X 이동에 따라 좌우 회전
+                CameraRotatePitch(DeltaY * 0.1f);  // Y 이동에 따라 상하 회전
             }
             else
             {
-                PivotMoveRight(deltaX);
-                PivotMoveUp(deltaY);
+                PivotMoveRight(DeltaX);
+                PivotMoveUp(DeltaY);
             }
 
             SetCursorPos(lastMousePos.x, lastMousePos.y);
@@ -120,7 +126,8 @@ void FEditorViewportClient::Input()
     // Focus Selected Actor
     if (GetAsyncKeyState('F') & 0x8000)
     {
-        if (AActor* PickedActor = GEngine->ActiveWorld->GetSelectedActor())
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        if (AActor* PickedActor = Engine->GetSelectedActor())
         {
             FViewportCameraTransform& ViewTransform = ViewTransformPerspective;
             ViewTransform.SetLocation(
@@ -138,7 +145,7 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -150,19 +157,19 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
-bool FEditorViewportClient::IsSelected(POINT point) const
+bool FEditorViewportClient::IsSelected(POINT InPoint) const
 {
     float TopLeftX = Viewport->GetViewport().TopLeftX;
     float TopLeftY = Viewport->GetViewport().TopLeftY;
     float Width = Viewport->GetViewport().Width;
     float Height = Viewport->GetViewport().Height;
 
-    if (point.x >= TopLeftX && point.x <= TopLeftX + Width &&
-        point.y >= TopLeftY && point.y <= TopLeftY + Height)
+    if (InPoint.x >= TopLeftX && InPoint.x <= TopLeftX + Width &&
+        InPoint.y >= TopLeftY && InPoint.y <= TopLeftY + Height)
     {
         return true;
     }
@@ -172,66 +179,66 @@ D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
 {
     return Viewport->GetViewport();
 }
-void FEditorViewportClient::CameraMoveForward(float _Value)
+void FEditorViewportClient::CameraMoveForward(float InValue)
 {
     if (IsPerspective()) {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * _Value;
+        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * InValue;
         ViewTransformPerspective.SetLocation(curCameraLoc);
     }
     else
     {
-        Pivot.X += _Value * 0.1f;
+        Pivot.X += InValue * 0.1f;
     }
 }
 
-void FEditorViewportClient::CameraMoveRight(float _Value)
+void FEditorViewportClient::CameraMoveRight(float InValue)
 {
     if (IsPerspective()) {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetRightVector() * GetCameraSpeedScalar() * _Value;
+        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetRightVector() * GetCameraSpeedScalar() * InValue;
         ViewTransformPerspective.SetLocation(curCameraLoc);
     }
     else
     {
-        Pivot.Y += _Value * 0.1f;
+        Pivot.Y += InValue * 0.1f;
     }
 }
 
-void FEditorViewportClient::CameraMoveUp(float _Value)
+void FEditorViewportClient::CameraMoveUp(float InValue)
 {
     if (IsPerspective()) {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-        curCameraLoc.Z = curCameraLoc.Z + GetCameraSpeedScalar() * _Value;
+        curCameraLoc.Z = curCameraLoc.Z + GetCameraSpeedScalar() * InValue;
         ViewTransformPerspective.SetLocation(curCameraLoc);
     }
     else {
-        Pivot.Z += _Value * 0.1f;
+        Pivot.Z += InValue * 0.1f;
     }
 }
 
-void FEditorViewportClient::CameraRotateYaw(float _Value)
+void FEditorViewportClient::CameraRotateYaw(float InValue)
 {
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
-    curCameraRot.Z += _Value ;
+    curCameraRot.Z += InValue ;
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
-void FEditorViewportClient::CameraRotatePitch(float _Value)
+void FEditorViewportClient::CameraRotatePitch(float InValue)
 {
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
-    curCameraRot.Y = FMath::Clamp(curCameraRot.Y + _Value, -89.f, 89.f);
+    curCameraRot.Y = FMath::Clamp(curCameraRot.Y + InValue, -89.f, 89.f);
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
-void FEditorViewportClient::PivotMoveRight(float _Value)
+void FEditorViewportClient::PivotMoveRight(float InValue)
 {
-    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * -0.05f;
+    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * InValue * -0.05f;
 }
 
-void FEditorViewportClient::PivotMoveUp(float _Value)
+void FEditorViewportClient::PivotMoveUp(float InValue)
 {
-    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * 0.05f;
+    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * InValue * 0.05f;
 }
 
 void FEditorViewportClient::UpdateViewMatrix()
@@ -359,9 +366,9 @@ void FEditorViewportClient::UpdateOrthoCameraLoc()
     }
 }
 
-void FEditorViewportClient::SetOthoSize(float _Value)
+void FEditorViewportClient::SetOthoSize(float InValue)
 {
-    orthoSize += _Value;
+    orthoSize += InValue;
     if (orthoSize <= 0.1f)
         orthoSize = 0.1f;
     

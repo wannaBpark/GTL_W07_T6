@@ -8,6 +8,7 @@ void FGraphicsDevice::Initialize(HWND hWindow)
     CreateDepthStencilBuffer(hWindow);
     CreateDepthStencilState();
     CreateRasterizerState();
+    CreateAlphaBlendState();
     CurrentRasterizer = RasterizerStateSOLID;
 }
 
@@ -211,6 +212,26 @@ void FGraphicsDevice::CreateFrameBuffer()
 
     Device->CreateRenderTargetView(UUIDFrameBuffer, &UUIDFrameBufferRTVDesc, &UUIDFrameBufferRTV);
 
+    D3D11_TEXTURE2D_DESC TextureDesc = {};
+    TextureDesc.Width = screenWidth;
+    TextureDesc.Height = screenHeight;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.CPUAccessFlags = 0;
+    TextureDesc.MiscFlags = 0;
+    Device->CreateTexture2D(&TextureDesc, nullptr, &SceneColorBuffer);
+
+    D3D11_RENDER_TARGET_VIEW_DESC SceneColorRTVDesc = {};
+    SceneColorRTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;      // 색상 포맷
+    SceneColorRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D; // 2D 텍스처
+
+    Device->CreateRenderTargetView(SceneColorBuffer, &SceneColorRTVDesc, &SceneColorRTV);
+
     RTVs[0] = FrameBufferRTV;
     RTVs[1] = UUIDFrameBufferRTV;
 }
@@ -301,8 +322,10 @@ void FGraphicsDevice::SwapBuffer() const
 
 void FGraphicsDevice::Prepare() const
 {
-    DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);                                         // 렌더 타겟 뷰에 저장된 이전 프레임 데이터를 삭제
+    DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
+    DeviceContext->ClearRenderTargetView(SceneColorRTV, ClearColor);                                         // 렌더 타겟 뷰에 저장된 이전 프레임 데이터를 삭제
     DeviceContext->ClearRenderTargetView(UUIDFrameBufferRTV, ClearColor);                                     // 렌더 타겟 뷰에 저장된 이전 프레임 데이터를 삭제
+    
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // 깊이 버퍼 초기화 추가
 
     DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 정정 연결 방식 설정
@@ -313,7 +336,9 @@ void FGraphicsDevice::Prepare() const
     DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
 
     DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
-    DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // 블렌뎅 상태 설정, 기본블렌딩 상태임
+    float blendFactor[4] = { 0, 0, 0, 0 };
+    DeviceContext->OMSetBlendState(AlphaBlendState, blendFactor, 0xffffffff);
+
 }
 
 void FGraphicsDevice::Prepare(D3D11_VIEWPORT* viewport) const
@@ -330,6 +355,36 @@ void FGraphicsDevice::Prepare(D3D11_VIEWPORT* viewport) const
 
     DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);            // 블렌뎅 상태 설정, 기본블렌딩 상태임
+}
+
+void FGraphicsDevice::PrepareUI() const
+{
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView);
+}
+
+void FGraphicsDevice::PrepareFog() const
+{
+    ID3D11RenderTargetView* nullRTVs[2] = { nullptr,nullptr };
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 정정 연결 방식 설정
+
+    //DeviceContext->RSSetViewports(1, &ViewportInfo); // GPU가 화면을 렌더링할 영역 설정
+    DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
+
+    DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
+    DeviceContext->OMSetRenderTargets(2, nullRTVs, nullptr);
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView);
+    float blendFactor[4] = { 0, 0, 0, 0 };
+    DeviceContext->OMSetBlendState(AlphaBlendState, blendFactor, 0xffffffff);
+}
+
+void FGraphicsDevice::PrepareTexture() const
+{
+    ID3D11RenderTargetView* tempRTVs[2] =
+    {
+        SceneColorRTV,
+        UUIDFrameBufferRTV
+    };
+    DeviceContext->OMSetRenderTargets(2, tempRTVs, DepthStencilView);
 }
 
 void FGraphicsDevice::OnResize(HWND hWindow)
@@ -372,6 +427,26 @@ void FGraphicsDevice::OnResize(HWND hWindow)
 
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
+}
+void FGraphicsDevice::CreateAlphaBlendState()
+{
+    D3D11_BLEND_DESC blendDesc = {};
+    blendDesc.AlphaToCoverageEnable = FALSE;
+    blendDesc.IndependentBlendEnable = FALSE;
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    HRESULT hr = Device->CreateBlendState(&blendDesc, &AlphaBlendState);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, L"AlphaBlendState 생성에 실패했습니다!", L"Error", MB_ICONERROR | MB_OK);
+    }
 }
 
 

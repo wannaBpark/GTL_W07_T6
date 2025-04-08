@@ -13,8 +13,8 @@
 #include "PropertyEditor/ShowFlags.h"
 
 #include "Components/UBillboardComponent.h"
-#include "Components/UParticleSubUVComp.h"
-#include "Components/UText.h"
+#include "Components/ParticleSubUVComponent.h"
+#include "Components/UTextComponent.h"
 
 #include "EngineLoop.h"
 
@@ -45,6 +45,7 @@ void FBillboardRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraph
 
 void FBillboardRenderPass::PrepareRender()
 {
+    BillboardObjs.Empty();
     for (const auto iter : TObjectRange<UBillboardComponent>())
     {
         BillboardObjs.Add(iter);
@@ -62,8 +63,8 @@ void FBillboardRenderPass::PrepareTextureShader() const
 
 void FBillboardRenderPass::PrepareSubUVConstant() const
 {
-    BufferManager->BindConstantBuffer(TEXT("FSubUVConstantBuffer"), 0, EShaderStage::Vertex);
-    BufferManager->BindConstantBuffer(TEXT("FSubUVConstantBuffer"), 0, EShaderStage::Pixel);
+    BufferManager->BindConstantBuffer(TEXT("FSubUVConstant"), 1, EShaderStage::Vertex);
+    BufferManager->BindConstantBuffer(TEXT("FSubUVConstant"), 1, EShaderStage::Pixel);
 }
 
 void FBillboardRenderPass::UpdateSubUVConstant(float _indexU, float _indexV) const
@@ -71,7 +72,8 @@ void FBillboardRenderPass::UpdateSubUVConstant(float _indexU, float _indexV) con
     FSubUVConstant data;
     data.indexU = _indexU;
     data.indexV = _indexV;
-    BufferManager->UpdateConstantBuffer(TEXT("FSubUVConstantBuffer"), data);
+
+     BufferManager->UpdateConstantBuffer(TEXT("FSubUVConstant"), data);
 }
 
 void FBillboardRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const
@@ -82,29 +84,23 @@ void FBillboardRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const F
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), data);
 }
 
-void FBillboardRenderPass::RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices,
-    ID3D11Buffer* pIndexBuffer, UINT numIndices,
-    ID3D11ShaderResourceView* _TextureSRV,
-    ID3D11SamplerState* _SamplerState) const
+
+void FBillboardRenderPass::RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* TextureSRV, ID3D11SamplerState* SamplerState) const
 {
-    UINT offset = 0;
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &Stride, &offset);
+    SetupVertexBuffer(pVertexBuffer, numVertices);
+ 
     Graphics->DeviceContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Graphics->DeviceContext->PSSetShaderResources(0, 1, &_TextureSRV);
-    Graphics->DeviceContext->PSSetSamplers(0, 1, &_SamplerState);
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, &TextureSRV);
+    Graphics->DeviceContext->PSSetSamplers(0, 1, &SamplerState);
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FBillboardRenderPass::RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices,
-    ID3D11ShaderResourceView* _TextureSRV,
-    ID3D11SamplerState* _SamplerState) const
+void FBillboardRenderPass::RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11ShaderResourceView* TextureSRV, ID3D11SamplerState* SamplerState) const
 {
-    UINT offset = 0;
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &Stride, &offset);
-    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Graphics->DeviceContext->PSSetShaderResources(0, 1, &_TextureSRV);
-    Graphics->DeviceContext->PSSetSamplers(0, 1, &_SamplerState);
+    SetupVertexBuffer(pVertexBuffer, numVertices);
+
+    Graphics->DeviceContext->PSSetShaderResources(0, 1, &TextureSRV);
+    Graphics->DeviceContext->PSSetSamplers(0, 1, &SamplerState);
     Graphics->DeviceContext->Draw(numVertices, 0);
 }
 
@@ -119,6 +115,7 @@ void FBillboardRenderPass::CreateShader()
     Stride = sizeof(FVertexTexture);
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"VertexBillboardShader", L"Shaders/VertexBillboardShader.hlsl", "main", TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc));
+  
     hr = ShaderManager->AddPixelShader(L"PixelBillboardShader", L"Shaders/PixelBillboardShader.hlsl", "main");
 
     VertexShader = ShaderManager->GetVertexShaderByKey(L"VertexBillboardShader");
@@ -133,10 +130,12 @@ void FBillboardRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
-void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) return;
+    
     PrepareTextureShader();
+    
     PrepareSubUVConstant();
 
     // 각 Billboard에 대해 렌더링 처리
@@ -146,27 +145,42 @@ void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorVi
 
         FMatrix Model = BillboardComp->CreateBillboardMatrix();
         FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
-        bool Selected = (BillboardComp == World->GetPickingGizmo());
+        
+        bool Selected = (BillboardComp == Viewport->GetPickedGizmoComponent());
+        
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
 
-        if (UParticleSubUVComp* SubUVParticle = Cast<UParticleSubUVComp>(BillboardComp))
+        if (UParticleSubUVComponent* SubUVParticle = Cast<UParticleSubUVComponent>(BillboardComp))
         {
-            RenderTexturePrimitive(SubUVParticle->vertexSubUVBuffer.Get(), SubUVParticle->numTextVertices,
-                SubUVParticle->indexTextureBuffer.Get(), SubUVParticle->numIndices,
-                SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
+            FVertexInfo VertexInfo =  BufferManager->GetVertexBuffer(SubUVParticle->GetBufferKey());
+            FIndexInfo IndexInfo =  BufferManager->GetIndexBuffer(SubUVParticle->GetBufferKey());
+            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer, IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
         }
-        else if (UText* Text = Cast<UText>(BillboardComp))
+        else if (UTextComponent* TextComp = Cast<UTextComponent>(BillboardComp))
         {
-            RenderTextPrimitive(Text->vertexTextBuffer.Get(), Text->numTextVertices,
-                Text->Texture->TextureSRV, Text->Texture->SamplerState);
+            FVertexInfo VertexInfo = BufferManager->GetVertexBuffer(TextComp->GetBufferKey());
+            RenderTextPrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
         }
         else
         {
-            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer.Get(), BillboardComp->numVertices,
-                BillboardComp->indexTextureBuffer.Get(), BillboardComp->numIndices,
-                BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState);
+            FVertexInfo VertexInfo = BufferManager->GetVertexBuffer(BillboardComp->GetBufferKey());
+            FIndexInfo IndexInfo = BufferManager->GetIndexBuffer(BillboardComp->GetBufferKey());
+            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer, IndexInfo.NumIndices, BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState);
+
+           
         }
     }
+}
+void FBillboardRenderPass::SetupVertexBuffer(ID3D11Buffer* pVertexBuffer, UINT numVertices) const
+{
+    UINT offset = 0;
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &Stride, &offset);
+    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void FBillboardRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+  
 }
 
 void FBillboardRenderPass::ClearRenderArr()

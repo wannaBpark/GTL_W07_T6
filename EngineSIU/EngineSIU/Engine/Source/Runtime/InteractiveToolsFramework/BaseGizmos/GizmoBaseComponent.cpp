@@ -1,6 +1,6 @@
 #include "GizmoBaseComponent.h"
 
-#include "World/World.h"
+#include "TransformGizmo.h"
 #include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -11,7 +11,7 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
     int nIntersections = 0;
     if (staticMesh == nullptr) return 0;
     OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
-    FVertexSimple* vertices = renderData->Vertices.GetData();
+    FStaticMeshVertex* vertices = renderData->Vertices.GetData();
     int vCount = renderData->Vertices.Num();
     UINT* indices = renderData->Indices.GetData();
     int iCount = renderData->Indices.Num();
@@ -35,7 +35,7 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
         }
 
         // 각 삼각형의 버텍스 위치를 FVector로 불러옵니다.
-        uint32 stride = sizeof(FVertexSimple);
+        uint32 stride = sizeof(FStaticMeshVertex);
         FVector v0 = *reinterpret_cast<FVector*>(pbPositions + idx0 * stride);
         FVector v1 = *reinterpret_cast<FVector*>(pbPositions + idx1 * stride);
         FVector v2 = *reinterpret_cast<FVector*>(pbPositions + idx2 * stride);
@@ -55,22 +55,22 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
-
-    if (AActor* PickedActor = GetWorld()->GetSelectedActor())
+    if (!GetOwner())
+        return;
+    
+    if (FEditorViewportClient* ViewportClient = Cast<ATransformGizmo>(GetOwner())->GetAttachedViewport())
     {
-        std::shared_ptr<FEditorViewportClient> activeViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-        if (activeViewport->IsPerspective())
+        if (ViewportClient->IsPerspective())
         {
-            float scaler = abs(
-                (activeViewport->ViewTransformPerspective.GetLocation() - PickedActor->GetRootComponent()->GetRelativeLocation()).Length()
-            );
-            scaler *= 0.1f;
-            RelativeScale3D = FVector( scaler,scaler,scaler);
+            float Scaler = (ViewportClient->ViewTransformPerspective.GetLocation() - GetOwner()->GetActorLocation()).Length();
+            
+            Scaler *= 0.1f;
+            RelativeScale3D = FVector(Scaler);
         }
         else
         {
-            float scaler = activeViewport->orthoSize * 0.1f;
-            RelativeScale3D = FVector( scaler,scaler,scaler);
+            float Scaler = FEditorViewportClient::orthoSize * 0.1f;
+            RelativeScale3D = FVector(Scaler);
         }
     }
 }
