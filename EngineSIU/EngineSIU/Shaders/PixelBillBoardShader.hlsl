@@ -32,8 +32,8 @@ float4 main(PSInput input) : SV_TARGET
     float4 col = gTexture.Sample(gSampler, uv);
     float threshold = 0.1f;
     
-    // 검정색에 가까운 경우 알파 값을 0으로 설정하여 투명하게 처리
-    if (col.r < threshold && col.g < threshold && col.b < threshold)
+
+    if (col.r < threshold && col.g < threshold && col.b < threshold || col.a < threshold)
     {
         discard;
     }

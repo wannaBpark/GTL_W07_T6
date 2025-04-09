@@ -16,6 +16,6 @@ void ACube::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
     
 
-    SetActorLocation(GetActorLocation() + FVector(1.0f, 0.0f, 0.0f));
+    //SetActorLocation(GetActorLocation() + FVector(1.0f, 0.0f, 0.0f));
 
 }

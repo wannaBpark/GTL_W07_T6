@@ -14,14 +14,14 @@ ULightComponentBase::~ULightComponentBase()
   
 }
 
-void ULightComponentBase::SetDiffuseColor(FVector4 NewColor)
+void ULightComponentBase::SetDiffuseColor(FLinearColor NewColor)
 {
-    Light.DiffuseColor = FVector(NewColor.X, NewColor.Y, NewColor.Z);
+    Light.DiffuseColor = FVector(NewColor.R, NewColor.G, NewColor.B);
 }
 
-void ULightComponentBase::SetSpecularColor(FVector4 NewColor)
+void ULightComponentBase::SetSpecularColor(FLinearColor NewColor)
 {
-   Light.SpecularColor = FVector(NewColor.X, NewColor.Y, NewColor.Z);
+   Light.SpecularColor = FVector(NewColor.R, NewColor.G, NewColor.B);
 }
 
 void ULightComponentBase::SetAttenuation(float Attenuation)
@@ -29,9 +29,14 @@ void ULightComponentBase::SetAttenuation(float Attenuation)
     Light.Attenuation = Attenuation;
 }
 
-void ULightComponentBase::SetRange(float r)
+void ULightComponentBase::SetAttenuationRadius(float AttenuationRadius)
 {
-    Light.Range = r;
+    Light.AttRadius = AttenuationRadius;
+}
+
+void ULightComponentBase::SetIntensity(float Intensity)
+{
+    Light.Intensity = Intensity;
 }
 
 void ULightComponentBase::SetFalloff(float fallOff)
@@ -39,19 +44,24 @@ void ULightComponentBase::SetFalloff(float fallOff)
     Light.Falloff = fallOff;
 }
 
-FVector4 ULightComponentBase::GetDiffuseColor()
+FLinearColor ULightComponentBase::GetDiffuseColor()
 {
-    return FVector4(Light.DiffuseColor, 1);
+    return FLinearColor(Light.DiffuseColor.X, Light.DiffuseColor.Y, Light.DiffuseColor.Z, 1);
 }
 
-FVector4 ULightComponentBase::GetSpecularColor()
+FLinearColor ULightComponentBase::GetSpecularColor()
 {
-    return FVector4(Light.SpecularColor, 1);
+    return FLinearColor(Light.SpecularColor.X, Light.SpecularColor.Y, Light.SpecularColor.Z, 1);
 }
 
 float ULightComponentBase::GetAttenuation()
 {
     return Light.Attenuation;
+}
+
+float ULightComponentBase::GetAttenuationRadius()
+{
+    return Light.AttRadius;
 }
 
 float ULightComponentBase::GetFalloff()
@@ -75,7 +85,7 @@ void ULightComponentBase::TickComponent(float DeltaTime)
 
 int ULightComponentBase::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-    bool res =AABB.Intersect(rayOrigin, rayDirection, pfNearHitDistance);
+    bool res = AABB.Intersect(rayOrigin, rayDirection, pfNearHitDistance);
     return res;
 }
 

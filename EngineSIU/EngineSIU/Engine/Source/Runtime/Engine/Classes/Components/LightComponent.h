@@ -15,15 +15,17 @@ public:
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
     void InitializeLight();
     
-    void SetDiffuseColor(FVector4 NewColor);
-    void SetSpecularColor(FVector4 NewColor);
+    void SetDiffuseColor(FLinearColor NewColor);
+    void SetSpecularColor(FLinearColor NewColor);
     void SetAttenuation(float Attenuation);
-    void SetRange(float r);
+    void SetAttenuationRadius(float AttenuationRadius);
+    void SetIntensity(float Intensity);
     void SetFalloff(float fallOff);
 
-    FVector4 GetDiffuseColor();
-    FVector4 GetSpecularColor();
+    FLinearColor GetDiffuseColor();
+    FLinearColor GetSpecularColor();
     float GetAttenuation();
+    float GetAttenuationRadius();
     float GetFalloff();
     FLight GetLightInfo() const { return Light; };
 protected:
@@ -35,8 +37,6 @@ protected:
 public:
     FBoundingBox GetBoundingBox() const {return AABB;}
     
-    float GetRange() const {return Light.Range;}
+    float GetIntensity() const {return Light.Intensity;}
     
-    FVector4 GetColor() const { return FVector4(Light.AmbientColor.X, Light.AmbientColor.Y, Light.AmbientColor.Z, 1); }
-
 };

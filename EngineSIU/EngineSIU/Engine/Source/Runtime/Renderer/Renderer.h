@@ -43,7 +43,7 @@ public:
     //==========================================================================
     void PrepareRender();
     void ClearRenderArr();
-    void Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    void Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
     // 뷰 모드 변경
     void ChangeViewMode(EViewModeIndex evi);

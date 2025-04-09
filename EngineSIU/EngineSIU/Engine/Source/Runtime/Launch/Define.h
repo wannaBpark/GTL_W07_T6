@@ -275,37 +275,35 @@ struct FPrimitiveCounts
 
 #define MAX_LIGHTS 16
 enum ELightType {
-    POINT_LIGHT	= 1,
-    SPOT_LIGHT	= 2
+    POINT_LIGHT = 1,
+    SPOT_LIGHT = 2
 };
+
 struct FLight
 {
-    FVector AmbientColor = FVector(1.f, 1.f, 1.f);
-    float pad0;
-    
-    FVector DiffuseColor = FVector(1.f, 1.f, 1.f);
+    FVector DiffuseColor;
     float pad1;
 
-    FVector SpecularColor = FVector(0.5, 0.5, 0.5);
+    FVector SpecularColor;
     float pad2;
 
     FVector Position;
-    float Falloff = 0.01f;
+    float Falloff;
 
     FVector Direction;
     float pad3;
 
-    float Attenuation = 0.5f;
- 
-    int Enabled = 0;
-    int Type = ELightType::POINT_LIGHT;
-
-    float Range = 30.f;
+    float Attenuation = 20.f;
+    int   Enabled;
+    int   Type;
+    float Intensity = 1000.f;    // m_fIntensity: 광원 강도
+    float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
+    FVector LightPad;
 };
 
 struct FLightBuffer
 {
-    FLight gLights[MAX_LIGHTS];
+    FLight gLights[MAX_LIGHTS]{};
     FVector4 GlobalAmbientLight;
     int nLights;
     float    pad0, pad1, pad2;
@@ -321,10 +319,10 @@ struct FMaterialConstants {
 
     FVector SpecularColor;
     float SpecularScalar;
-    
+
     FVector EmmisiveColor;
     float MaterialPad0;
-    
+
 };
 
 struct FPerObjectConstantBuffer {

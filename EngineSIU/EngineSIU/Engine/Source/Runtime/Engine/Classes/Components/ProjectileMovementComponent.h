@@ -14,11 +14,13 @@ public:
 
     virtual void TickComponent(float DeltaTime) override;
 
-    virtual void OnComponentDestroyed() override;
-
 private:
+    float ProjectileLifetime = 10.0f; // 생명주기
+    float AccumulatedTime = 0;
+
     float InitialSpeed;
     float MaxSpeed;
+    
     float ProjectileGravityScale;
     FVector Velocity;
 };
