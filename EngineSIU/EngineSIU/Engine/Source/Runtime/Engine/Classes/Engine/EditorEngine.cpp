@@ -39,9 +39,10 @@ void UEditorEngine::Tick(float DeltaTime)
                 // TODO: World에서 EditorPlayer 제거 후 Tick 호출 제거 필요.
                 World->Tick(DeltaTime);
                 std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
+                TArray ActorCpy = Level->Actors;
                 if (Level)
                 {
-                    for (AActor* Actor : Level->Actors)
+                    for (AActor* Actor : ActorCpy)
                     {
                         if (Actor)
                         {
@@ -76,7 +77,7 @@ void UEditorEngine::StartPIE()
 {
     FWorldContext& PIEWorldContext = CreateNewWorldContext(EWorldType::PIE);
     // PIEWorld = Cast<UWorld>(EditorWorld->Duplicate());
-    
+
     // PIEWorld->BeginPlay();
     // 여기서 Actor들의 BeginPlay를 해줄지 안에서 해줄 지 고민.
     // WorldList.Add(*GetWorldContextFromWorld(PIEWorld.get()));
