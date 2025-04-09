@@ -13,7 +13,8 @@
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 #include "Engine/Engine.h"
-#include <Components/HeightFogComponent.h>
+#include "Components/HeightFogComponent.h"
+#include "Components/ProjectileMovementComponent.h"
 
 #include "Engine/AssetManager.h"
 
@@ -28,10 +29,10 @@ void PropertyEditorPanel::Render()
 
     ImVec2 MinSize(140, 370);
     ImVec2 MaxSize(FLT_MAX, 900);
-    
+
     /* Min, Max Size */
     ImGui::SetNextWindowSizeConstraints(MinSize, MaxSize);
-    
+
     /* Panel Position */
     ImGui::SetNextWindowPos(ImVec2(PanelPosX, PanelPosY), ImGuiCond_Always);
 
@@ -43,9 +44,9 @@ void PropertyEditorPanel::Render()
 
     /* Render Start */
     ImGui::Begin("Detail", nullptr, PanelFlags);
-    
-    
-    
+
+
+
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
         return;
@@ -61,7 +62,7 @@ void PropertyEditorPanel::Render()
             Location = PickedActor->GetActorLocation();
             Rotation = PickedActor->GetActorRotation();
             Scale = PickedActor->GetActorScale();
-            
+
             FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
             ImGui::Spacing();
 
@@ -74,13 +75,13 @@ void PropertyEditorPanel::Render()
             PickedActor->SetActorLocation(Location);
             PickedActor->SetActorRotation(Rotation);
             PickedActor->SetActorScale(Scale);
-            
+
             std::string coordiButtonLabel;
             if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
                 coordiButtonLabel = "World";
             else if (player->GetCoordiMode() == CoordiMode::CDM_LOCAL)
                 coordiButtonLabel = "Local";
-            
+
             if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
             {
                 player->AddCoordiMode();
@@ -102,187 +103,227 @@ void PropertyEditorPanel::Render()
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
-    if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
-    {
-        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-      
-        if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+        if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
         {
-          /*  DrawColorProperty("Ambient Color",
-                [&]() { return lightObj->GetAmbientColor(); },
-                [&](FVector4 c) { lightObj->SetAmbientColor(c); });
-            */
-            DrawColorProperty("Base Color",
-                [&]() { return lightObj->GetDiffuseColor(); },
-                [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
-            DrawColorProperty("Specular Color",
-                [&]() { return lightObj->GetSpecularColor(); },
-                [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
+            if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                /*  DrawColorProperty("Ambient Color",
+                      [&]() { return lightObj->GetAmbientColor(); },
+                      [&](FVector4 c) { lightObj->SetAmbientColor(c); });
+                  */
+                DrawColorProperty("Base Color",
+                    [&]() { return lightObj->GetDiffuseColor(); },
+                    [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
 
-            float Intensity = lightObj->GetIntensity();
-            if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
-                lightObj->SetIntensity(Intensity);
+                DrawColorProperty("Specular Color",
+                    [&]() { return lightObj->GetSpecularColor(); },
+                    [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
 
-            float falloff = lightObj->GetFalloff();
-            if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
-                lightObj->SetFalloff(falloff);
-            }
+                float Intensity = lightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                    lightObj->SetIntensity(Intensity);
 
-            float attenuation = lightObj->GetAttenuation();
-            if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
-                lightObj->SetAttenuation(attenuation);
-            }
-            
-            float AttenuationRadius = lightObj->GetAttenuationRadius();
-            if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
-                lightObj->SetAttenuationRadius(AttenuationRadius);
-            }
-
-            ImGui::TreePop();
-        }
-
-        ImGui::PopStyleColor();
-    }
-
-    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
-    if (PickedActor)
-    if (UTextComponent* textOBj = Cast<UTextComponent>(PickedActor->GetRootComponent()))
-    {
-        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-        if (ImGui::TreeNodeEx("Text Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
-        {
-            if (textOBj) {
-                textOBj->SetTexture(L"Assets/Texture/font.png");
-                textOBj->SetRowColumnCount(106, 106);
-                FWString wText = textOBj->GetText();
-                int len = WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                std::string u8Text(len, '\0');
-                WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, u8Text.data(), len, nullptr, nullptr);
-
-                static char buf[256];
-                strcpy_s(buf, u8Text.c_str());
-
-                ImGui::Text("Text: ", buf);
-                ImGui::SameLine();
-                ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
-                if (ImGui::InputText("##Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
-                {
-                    textOBj->ClearText();
-                    int wlen = MultiByteToWideChar(CP_UTF8, 0, buf, -1, nullptr, 0);
-                    FWString newWText(wlen, L'\0');
-                    MultiByteToWideChar(CP_UTF8, 0, buf, -1, newWText.data(), wlen);
-                    textOBj->SetText(newWText.c_str());
+                 /*  
+                float falloff = lightObj->GetFalloff();
+                if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
+                    lightObj->SetFalloff(falloff);
                 }
-                ImGui::PopItemFlag();
+
+                TODO : For SpotLight
+                */
+
+                float attenuation = lightObj->GetAttenuation();
+                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                    lightObj->SetAttenuation(attenuation);
+                }
+
+                float AttenuationRadius = lightObj->GetAttenuationRadius();
+                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                    lightObj->SetAttenuationRadius(AttenuationRadius);
+                }
+
+                ImGui::TreePop();
             }
-            ImGui::TreePop();
+
+            ImGui::PopStyleColor();
         }
-        ImGui::PopStyleColor();
-    }
+
+    if (PickedActor)
+        if (UProjectileMovementComponent* ProjectileComp = (PickedActor->GetComponentByClass<UProjectileMovementComponent>()))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("Projectile Movement Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                float InitialSpeed = ProjectileComp->GetInitialSpeed();
+                if (ImGui::InputFloat("InitialSpeed", &InitialSpeed, 0.f, 10000.0f, "%.1f"))
+                    ProjectileComp->SetInitialSpeed(InitialSpeed);
+
+                float MaxSpeed = ProjectileComp->GetMaxSpeed();
+                if (ImGui::InputFloat("MaxSpeed", &MaxSpeed, 0.f, 10000.0f, "%.1f"))
+                    ProjectileComp->SetMaxSpeed(MaxSpeed);
+
+                float Gravity = ProjectileComp->GetGravity();
+                if (ImGui::InputFloat("Gravity", &Gravity, 0.f, 10000.f, "%.1f"))
+                    ProjectileComp->SetGravity(Gravity); 
+                
+                float ProjectileLifetime = ProjectileComp->GetLifetime();
+                if (ImGui::InputFloat("Lifetime", &ProjectileLifetime, 0.f, 10000.f, "%.1f"))
+                    ProjectileComp->SetLifetime(ProjectileLifetime);
+
+                FVector currentVelocity = ProjectileComp->GetVelocity();
+
+                float velocity[3] = { currentVelocity.X, currentVelocity.Y, currentVelocity.Z };
+
+                if (ImGui::InputFloat3("Velocity", velocity, "%.1f")) {
+                    ProjectileComp->SetVelocity(FVector(velocity[0], velocity[1], velocity[2]));
+                }
+                
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
+        if (UTextComponent* textOBj = Cast<UTextComponent>(PickedActor->GetRootComponent()))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+            if (ImGui::TreeNodeEx("Text Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+            {
+                if (textOBj) {
+                    textOBj->SetTexture(L"Assets/Texture/font.png");
+                    textOBj->SetRowColumnCount(106, 106);
+                    FWString wText = textOBj->GetText();
+                    int len = WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, nullptr, 0, nullptr, nullptr);
+                    std::string u8Text(len, '\0');
+                    WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, u8Text.data(), len, nullptr, nullptr);
+
+                    static char buf[256];
+                    strcpy_s(buf, u8Text.c_str());
+
+                    ImGui::Text("Text: ", buf);
+                    ImGui::SameLine();
+                    ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+                    if (ImGui::InputText("##Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
+                    {
+                        textOBj->ClearText();
+                        int wlen = MultiByteToWideChar(CP_UTF8, 0, buf, -1, nullptr, 0);
+                        FWString newWText(wlen, L'\0');
+                        MultiByteToWideChar(CP_UTF8, 0, buf, -1, newWText.data(), wlen);
+                        textOBj->SetText(newWText.c_str());
+                    }
+                    ImGui::PopItemFlag();
+                }
+                ImGui::TreePop();
+            }
+            ImGui::PopStyleColor();
+        }
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
-    if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor->GetRootComponent()))
-    {
-        RenderForStaticMesh(StaticMeshComponent);
-        RenderForMaterial(StaticMeshComponent);
-    }
-
-    if(PickedActor)
-    if (UHeightFogComponent* FogComponent = Cast<UHeightFogComponent>(PickedActor->GetRootComponent()))
-    {
-        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-        if (ImGui::TreeNodeEx("Exponential Height Fog", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+        if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor->GetRootComponent()))
         {
-            FLinearColor currColor = FogComponent->GetFogColor();
-
-            float r = currColor.R;
-            float g = currColor.G;
-            float b = currColor.B;
-            float a = currColor.A;
-            float h, s, v;
-            float lightColor[4] = { r, g, b, a };
-
-            // SpotLight Color
-            if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
-                ImGuiColorEditFlags_DisplayRGB |
-                ImGuiColorEditFlags_NoSidePreview |
-                ImGuiColorEditFlags_NoInputs |
-                ImGuiColorEditFlags_Float))
-
-            {
-
-                r = lightColor[0];
-                g = lightColor[1];
-                b = lightColor[2];
-                a = lightColor[3];
-                FogComponent->SetFogColor(FLinearColor(r, g, b, a));
-            }
-            RGBToHSV(r, g, b, h, s, v);
-            // RGB/HSV
-            bool changedRGB = false;
-            bool changedHSV = false;
-
-            // RGB
-            ImGui::PushItemWidth(50.0f);
-            if (ImGui::DragFloat("R##R", &r, 0.001f, 0.f, 1.f)) changedRGB = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("G##G", &g, 0.001f, 0.f, 1.f)) changedRGB = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("B##B", &b, 0.001f, 0.f, 1.f)) changedRGB = true;
-            ImGui::Spacing();
-
-            // HSV
-            if (ImGui::DragFloat("H##H", &h, 0.1f, 0.f, 360)) changedHSV = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("S##S", &s, 0.001f, 0.f, 1)) changedHSV = true;
-            ImGui::SameLine();
-            if (ImGui::DragFloat("V##V", &v, 0.001f, 0.f, 1)) changedHSV = true;
-            ImGui::PopItemWidth();
-            ImGui::Spacing();
-
-            if (changedRGB && !changedHSV)
-            {
-                // RGB -> HSV
-                RGBToHSV(r, g, b, h, s, v);
-                FogComponent->SetFogColor(FLinearColor(r, g, b, a));
-            }
-            else if (changedHSV && !changedRGB)
-            {
-                // HSV -> RGB
-                HSVToRGB(h, s, v, r, g, b);
-                FogComponent->SetFogColor(FLinearColor(r, g, b, a));
-            }
-
-            float FogDensity = FogComponent->GetFogDensity();
-            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
-            {
-                FogComponent->SetFogDensity(FogDensity);
-            }
-
-            float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
-            if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
-            {
-                FogComponent->SetFogMaxOpacity(FogMaxOpacity);
-            }
-
-            float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
-            if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.001f, 0.15f))
-            {
-                FogComponent->SetFogHeightFalloff(FogHeightFallOff);
-            }
-
-            float FogStartDistance = FogComponent->GetStartDistance();
-            if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
-            {
-                FogComponent->SetStartDistance(FogStartDistance);
-            }
-
-            ImGui::TreePop();
+            RenderForStaticMesh(StaticMeshComponent);
+            RenderForMaterial(StaticMeshComponent);
         }
-        ImGui::PopStyleColor();
-    }
+
+    if (PickedActor)
+        if (UHeightFogComponent* FogComponent = Cast<UHeightFogComponent>(PickedActor->GetRootComponent()))
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+            if (ImGui::TreeNodeEx("Exponential Height Fog", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+            {
+                FLinearColor currColor = FogComponent->GetFogColor();
+
+                float r = currColor.R;
+                float g = currColor.G;
+                float b = currColor.B;
+                float a = currColor.A;
+                float h, s, v;
+                float lightColor[4] = { r, g, b, a };
+
+                // SpotLight Color
+                if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
+                    ImGuiColorEditFlags_DisplayRGB |
+                    ImGuiColorEditFlags_NoSidePreview |
+                    ImGuiColorEditFlags_NoInputs |
+                    ImGuiColorEditFlags_Float))
+
+                {
+
+                    r = lightColor[0];
+                    g = lightColor[1];
+                    b = lightColor[2];
+                    a = lightColor[3];
+                    FogComponent->SetFogColor(FLinearColor(r, g, b, a));
+                }
+                RGBToHSV(r, g, b, h, s, v);
+                // RGB/HSV
+                bool changedRGB = false;
+                bool changedHSV = false;
+
+                // RGB
+                ImGui::PushItemWidth(50.0f);
+                if (ImGui::DragFloat("R##R", &r, 0.001f, 0.f, 1.f)) changedRGB = true;
+                ImGui::SameLine();
+                if (ImGui::DragFloat("G##G", &g, 0.001f, 0.f, 1.f)) changedRGB = true;
+                ImGui::SameLine();
+                if (ImGui::DragFloat("B##B", &b, 0.001f, 0.f, 1.f)) changedRGB = true;
+                ImGui::Spacing();
+
+                // HSV
+                if (ImGui::DragFloat("H##H", &h, 0.1f, 0.f, 360)) changedHSV = true;
+                ImGui::SameLine();
+                if (ImGui::DragFloat("S##S", &s, 0.001f, 0.f, 1)) changedHSV = true;
+                ImGui::SameLine();
+                if (ImGui::DragFloat("V##V", &v, 0.001f, 0.f, 1)) changedHSV = true;
+                ImGui::PopItemWidth();
+                ImGui::Spacing();
+
+                if (changedRGB && !changedHSV)
+                {
+                    // RGB -> HSV
+                    RGBToHSV(r, g, b, h, s, v);
+                    FogComponent->SetFogColor(FLinearColor(r, g, b, a));
+                }
+                else if (changedHSV && !changedRGB)
+                {
+                    // HSV -> RGB
+                    HSVToRGB(h, s, v, r, g, b);
+                    FogComponent->SetFogColor(FLinearColor(r, g, b, a));
+                }
+
+                float FogDensity = FogComponent->GetFogDensity();
+                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
+                {
+                    FogComponent->SetFogDensity(FogDensity);
+                }
+
+                float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
+                if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
+                {
+                    FogComponent->SetFogMaxOpacity(FogMaxOpacity);
+                }
+
+                float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
+                if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.001f, 0.15f))
+                {
+                    FogComponent->SetFogHeightFalloff(FogHeightFallOff);
+                }
+
+                float FogStartDistance = FogComponent->GetStartDistance();
+                if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
+                {
+                    FogComponent->SetStartDistance(FogStartDistance);
+                }
+
+                ImGui::TreePop();
+            }
+            ImGui::PopStyleColor();
+        }
     ImGui::End();
 }
 
@@ -347,7 +388,7 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
     {
         return;
     }
-    
+
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
     if (ImGui::TreeNodeEx("Static Mesh", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {
@@ -386,7 +427,7 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
     {
         return;
     }
-    
+
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
     if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {
@@ -406,7 +447,7 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
         if (ImGui::Button("    +    ")) {
             IsCreateMaterial = true;
         }
-        
+
         ImGui::TreePop();
     }
 
@@ -452,7 +493,7 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     ImGui::Begin("Material Viewer", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav);
 
     static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
-    
+
     FVector MatDiffuseColor = Material->GetMaterialInfo().Diffuse;
     FVector MatSpecularColor = Material->GetMaterialInfo().Specular;
     FVector MatAmbientColor = Material->GetMaterialInfo().Ambient;
@@ -523,10 +564,10 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
 
     ImGui::Spacing();
     ImGui::Separator();
-    
+
     ImGui::Text("Choose Material");
     ImGui::Spacing();
-    
+
     ImGui::Text("Material Slot Name |");
     ImGui::SameLine();
     ImGui::Text(GetData(SelectedStaticMeshComp->GetMaterialSlotNames()[SelectedMaterialIndex].ToString()));
@@ -548,13 +589,13 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
         UMaterial* material = FManagerOBJ::GetMaterial(materialChars[CurMaterialIndex]);
         SelectedStaticMeshComp->SetMaterial(SelectedMaterialIndex, material);
     }
-    
+
     if (ImGui::Button("Close"))
     {
         SelectedMaterialIndex = -1;
         SelectedStaticMeshComp = nullptr;
     }
-     
+
     ImGui::End();
 }
 

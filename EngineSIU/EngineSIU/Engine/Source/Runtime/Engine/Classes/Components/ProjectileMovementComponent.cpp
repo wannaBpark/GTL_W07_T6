@@ -3,14 +3,32 @@
 
 UProjectileMovementComponent::UProjectileMovementComponent()
 {
-    InitialSpeed = 10.0f;
-    MaxSpeed = 2000.0f;
-    ProjectileGravityScale = 1.0f;
-    Velocity = FVector(10.f, 0, 0);
+    InitialSpeed = 0;
+    MaxSpeed = 0;
+    Gravity = 0.f;
+    Velocity = FVector(0.f, 0.f, 0.f);
+    ProjectileLifetime = 10.0f; // 기본 생명주기 설정
+    AccumulatedTime = 0;
 }
 
 UProjectileMovementComponent::~UProjectileMovementComponent()
 {
+}
+
+UObject* UProjectileMovementComponent::Duplicate(UObject* InOuter)
+{
+
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
+
+    NewComponent->ProjectileLifetime = ProjectileLifetime;
+    NewComponent->AccumulatedTime = AccumulatedTime;
+    NewComponent->InitialSpeed = InitialSpeed;
+    NewComponent->MaxSpeed = MaxSpeed;
+    NewComponent->Gravity = Gravity;
+    NewComponent->Velocity = Velocity;
+
+    return NewComponent;
+    
 }
 
 void UProjectileMovementComponent::BeginPlay()
@@ -23,8 +41,7 @@ void UProjectileMovementComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
 
-    const float Gravity = -0.f;
-    Velocity.Z += Gravity * ProjectileGravityScale * DeltaTime;
+    Velocity.Z += Gravity * DeltaTime;
 
     if (Velocity.Length() > MaxSpeed)
     {
