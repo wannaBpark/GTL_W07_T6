@@ -1,4 +1,5 @@
 // ReSharper disable CppClangTidyBugproneMacroParentheses
+// ReSharper disable CppClangTidyClangDiagnosticPedantic
 #pragma once
 #include "Class.h"
 
