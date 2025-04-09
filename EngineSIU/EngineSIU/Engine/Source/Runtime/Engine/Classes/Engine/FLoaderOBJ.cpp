@@ -733,7 +733,7 @@ UMaterial* FManagerOBJ::CreateMaterial(FObjMaterialInfo materialInfo)
     if (materialMap[materialInfo.MaterialName] != nullptr)
         return materialMap[materialInfo.MaterialName];
 
-    UMaterial* newMaterial = FObjectFactory::ConstructObject<UMaterial>();
+    UMaterial* newMaterial = FObjectFactory::ConstructObject<UMaterial>(nullptr); // Material은 Outer가 없이 따로 관리되는 객체이므로 Outer가 없음으로 설정. 추후 Garbage Collection이 추가되면 AssetManager를 생성해서 관리.
     newMaterial->SetMaterialInfo(materialInfo);
     materialMap.Add(materialInfo.MaterialName, newMaterial);
     return newMaterial;
@@ -756,7 +756,7 @@ UStaticMesh* FManagerOBJ::CreateStaticMesh(const FString& filePath)
         return StaticMesh;
     }
 
-    StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
+    StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr); // TODO: 추후 AssetManager를 생성해서 관리.
     StaticMesh->SetData(StaticMeshRenderData);
 
     StaticMeshMap.Add(StaticMeshRenderData->ObjectName, StaticMesh); // TODO: 장기적으로 보면 파일 이름 대신 경로를 Key로 사용하는게 좋음.

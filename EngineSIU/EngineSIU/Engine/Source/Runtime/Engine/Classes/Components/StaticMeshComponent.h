@@ -9,7 +9,7 @@ class UStaticMeshComponent : public UMeshComponent
 public:
     UStaticMeshComponent() = default;
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     void SetselectedSubMeshIndex(const int& value) { selectedSubMeshIndex = value; }
     int GetselectedSubMeshIndex() const { return selectedSubMeshIndex; };

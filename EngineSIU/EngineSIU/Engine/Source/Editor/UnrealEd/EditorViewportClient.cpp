@@ -40,7 +40,7 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
     ViewportIndex = viewportIndex;
 
-    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>();
+    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
     GizmoActor->Initialize(this);
 }
 

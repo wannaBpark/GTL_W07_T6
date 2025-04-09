@@ -124,13 +124,25 @@ void FGizmoRenderPass::PrepareRender()
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
+        return;
+    
     PrepareRenderState();
     Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
-    
-    UWorld* ActiveWorld = GEngine->ActiveWorld.get();
-
-    ControlMode Mode = ActiveWorld->GetEditorPlayer()->GetControlMode();
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+    {
+        UE_LOG(LogLevel::Error, TEXT("Gizmo RenderPass : Render : Engine is not valid."));
+        return;
+    }
+    ControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
+    UWorld* ActiveWorld = GEngine->ActiveWorld;
+    if (!ActiveWorld)
+    {
+        UE_LOG(LogLevel::Error, TEXT("Gizmo RenderPass : Render : ActiveWorld is not valid."));
+        return;
+    }
 
     if (Mode == CM_TRANSLATION)
     {

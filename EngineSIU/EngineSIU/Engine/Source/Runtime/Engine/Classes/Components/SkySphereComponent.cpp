@@ -7,9 +7,9 @@ USkySphereComponent::USkySphereComponent()
     SetType(StaticClass()->GetName());
 }
 
-UObject* USkySphereComponent::Duplicate()
+UObject* USkySphereComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->UOffset = UOffset;
     NewComponent->VOffset = VOffset;

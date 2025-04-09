@@ -21,6 +21,8 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 
+#include "Actors/Cube.h"
+
 #include "Engine/EditorEngine.h"
 #include <Actors/HeightFogActor.h>
 
@@ -70,10 +72,16 @@ void ControlEditorPanel::Render()
     /* Get Window Content Region */
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
 
+    ImGui::SameLine();
+    ImGui::PushFont(IconFont);
+
+    CreatePIEButton(IconSize, IconFont);
+
+    ImGui::SameLine();
+
     /* Move Cursor X Position */
     ImGui::SetCursorPosX(ContentWidth - (IconSize.x * 3.0f + 16.0f));
 
-    ImGui::PushFont(IconFont);
     CreateSRTButton(IconSize);
     ImGui::PopFont();
 
@@ -270,7 +278,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             if (ImGui::Selectable(primitive.label))
             {
                 // GEngineLoop.GetWorld()->SpawnObject(static_cast<OBJECTS>(primitive.obj));
-                UWorld* World = GEngine->ActiveWorld.get();
+                UWorld* World = GEngine->ActiveWorld;
                 AActor* SpawnedActor = nullptr;
                 switch (static_cast<OBJECTS>(primitive.obj))
                 {
@@ -285,11 +293,9 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_CUBE:
                 {
-                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();
-                    TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
-                    UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
-                    FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
-                    MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+                        // TODO: 다른 부분들 전부 Actor만 소환하도록 하고, Component 생성은 Actor가 자체적으로 하도록 변경.
+                    ACube* CubeActor = World->SpawnActor<ACube>();
+                    CubeActor->SetActorLabel(TEXT("OBJ_CUBE"));
                     break;
                 }
                 case OBJ_SpotLight:
@@ -469,11 +475,38 @@ void ControlEditorPanel::CreateFlagButton() const
     }
 }
 
+void ControlEditorPanel::CreatePIEButton(ImVec2 ButtonSize, ImFont* IconFont) const
+{
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+
+    ImVec2 WindowSize = ImGui::GetIO().DisplaySize;
+
+    float CenterX = (WindowSize.x - ButtonSize.x) / 2.5f;
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX - 40.0f, 10.0f));
+    
+    if (ImGui::Button("\ue9a8", ButtonSize)) // Play
+    {
+        UE_LOG(LogLevel::Display, TEXT("PIE Button Clicked"));
+        Engine->StartPIE();
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX - 10.0f, 10.0f));
+    if (ImGui::Button("\ue9e4", ButtonSize)) // Stop
+    {
+        UE_LOG(LogLevel::Display, TEXT("Stop Button Clicked"));
+        Engine->EndPIE();
+    }
+    
+}
+
 // code is so dirty / Please refactor
 void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 {
-
-    AEditorPlayer* Player = GEngine->ActiveWorld->GetEditorPlayer();
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    AEditorPlayer* Player = Engine->GetEditorPlayer();
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
 

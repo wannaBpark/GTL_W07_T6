@@ -9,10 +9,12 @@
 #include "Components/SkySphereComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/UBillboardComponent.h"
+#include "Engine/Engine.h"
 #include "JSON/json.hpp"
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
 #include "UObject/ObjectFactory.h"
+#include "World/World.h"
 
 using json = nlohmann::json;
 
@@ -38,27 +40,27 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 const FString TypeName = value["Type"].get<std::string>();
                 if (TypeName == USphereComp::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<USphereComp>();
+                    obj = FObjectFactory::ConstructObject<USphereComp>(GEngine->ActiveWorld);
                 }
                 else if (TypeName == UCubeComp::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<UCubeComp>();
+                    obj = FObjectFactory::ConstructObject<UCubeComp>(GEngine->ActiveWorld);
                 }
                 else if (TypeName == UGizmoArrowComponent::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
+                    obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>(GEngine->ActiveWorld);
                 }
                 else if (TypeName == UBillboardComponent::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<UBillboardComponent>();
+                    obj = FObjectFactory::ConstructObject<UBillboardComponent>(GEngine->ActiveWorld);
                 }
                 else if (TypeName == ULightComponentBase::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<ULightComponentBase>();
+                    obj = FObjectFactory::ConstructObject<ULightComponentBase>(GEngine->ActiveWorld);
                 }
                 else if (TypeName == USkySphereComponent::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<USkySphereComponent>();
+                    obj = FObjectFactory::ConstructObject<USkySphereComponent>(GEngine->ActiveWorld);
                 }
             }
 
@@ -91,7 +93,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
         for (auto it = perspectiveCamera.begin(); it != perspectiveCamera.end(); ++it) {
             int id = std::stoi(it.key());  // Key는 문자열, 숫자로 변환
             const json& value = it.value();
-            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>();
+            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>(nullptr);
             UCameraComponent* camera = Cast<UCameraComponent>(obj);
             if (value.contains("Location")) camera->SetRelativeLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                     value["Location"].get<std::vector<float>>()[1],

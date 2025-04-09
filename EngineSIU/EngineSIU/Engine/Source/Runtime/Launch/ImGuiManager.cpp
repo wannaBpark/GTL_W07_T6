@@ -30,6 +30,9 @@ void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
         ICON_MENU,      ICON_MENU + 1,
         ICON_SLIDER,    ICON_SLIDER + 1,
         ICON_PLUS,      ICON_PLUS + 1,
+        ICON_PLAY,      ICON_PLAY + 1,
+        ICON_STOP,      ICON_STOP + 1,
+        ICON_SQUARE,    ICON_SQUARE + 1,
         0 };
 
     io.Fonts->AddFontFromMemoryTTF(FeatherRawData, FontSizeOfFeather, 22.0f, &FeatherFontConfig, IconRanges);

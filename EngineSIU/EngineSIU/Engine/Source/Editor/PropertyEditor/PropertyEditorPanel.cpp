@@ -43,11 +43,11 @@ void PropertyEditorPanel::Render()
     ImGui::Begin("Detail", nullptr, PanelFlags);
     
     
-    AEditorPlayer* player = GEngine->ActiveWorld->GetEditorPlayer();
     
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
         return;
+    AEditorPlayer* player = Engine->GetEditorPlayer();
     AActor* PickedActor = Engine->GetSelectedActor();
     if (PickedActor)
     {
