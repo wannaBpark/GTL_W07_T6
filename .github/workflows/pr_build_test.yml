@@ -28,17 +28,29 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    # 1. 레포지토리 체크아웃
     - uses: actions/checkout@v4
 
+    # 2. MSBuild Setup
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet packages
-      working-directory: ${{github.workspace}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+    # NuGet 사용 안하기 때문에 주석 처리
+    # - name: Restore NuGet packages
+    #   working-directory: ${{ github.workspace }}
+    #   run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
+
+    # 3. MSBuild 중간 파일 캐싱
+    - name: Cache MSBuild intermediate files
+      uses: actions/cache@v4
+      with:
+        path: build/
+        key: ${{ runner.os }}-msbuild-${{ hashFiles('**/*.sln', '**/*.vcxproj') }}
+        restore-keys: |
+          ${{ runner.os }}-msbuild-
 
     - name: Build
-      working-directory: ${{github.workspace}}
+      working-directory: ${{ github.workspace }}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild /m /p:Configuration=${{ env.BUILD_CONFIGURATION }} ${{ env.SOLUTION_FILE_PATH }}
