@@ -110,38 +110,38 @@ FVector USceneComponent::GetWorldRotation()
 {
 	if (AttachParent)
 	{
-		return FVector(AttachParent->GetLocalRotation() + GetLocalRotation());
+		return FVector(AttachParent->GetRelativeRotation() + GetRelativeRotation());
 	}
-    return GetLocalRotation();
+    return GetRelativeRotation();
 }
 
 FVector USceneComponent::GetWorldScale() const
 {
 	if (AttachParent)
 	{
-		return FVector(AttachParent->GetWorldScale() + GetLocalScale());
+		return FVector(AttachParent->GetWorldScale() + GetRelativeScale3D());
 	}
-    return GetLocalScale();
+    return GetRelativeScale3D();
 }
 
 FVector USceneComponent::GetWorldLocation() const
 {
 	if (AttachParent)
 	{
-		return FVector(AttachParent->GetWorldLocation() + GetLocalLocation());
+		return FVector(AttachParent->GetWorldLocation() + GetRelativeLocation());
 	}
-    return GetLocalLocation();
+    return GetRelativeLocation();
 }
 
-FVector USceneComponent::GetLocalRotation() const
+FVector USceneComponent::GetRelativeRotation() const
 {
 	return JungleMath::QuaternionToEuler(QuatRotation);
 }
 
-void USceneComponent::SetRotation(FVector _newRot)
+void USceneComponent::SetRelativeRotation(FVector NewRotation)
 {
-	RelativeRotation = _newRot;
-	QuatRotation = JungleMath::EulerToQuaternion(_newRot);
+	RelativeRotation = NewRotation;
+	QuatRotation = JungleMath::EulerToQuaternion(NewRotation);
 }
 
 void USceneComponent::SetupAttachment(USceneComponent* InParent)

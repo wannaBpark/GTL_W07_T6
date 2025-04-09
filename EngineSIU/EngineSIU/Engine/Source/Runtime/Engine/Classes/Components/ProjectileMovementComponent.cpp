@@ -33,9 +33,10 @@ void UProjectileMovementComponent::TickComponent(float dt)
     }
     if (GetOwner())
     {
-        FVector NewLocation = GetOwner()->GetActorLocation() + Velocity * DeltaTime;
-        GetOwner()->SetActorLocation(NewLocation);
+        FVector NewLocation = GetOwner()->GetRootComponent()->GetWorldLocation() + Velocity * DeltaTime;
+        GetOwner()->GetRootComponent()->SetRelativeLocation(NewLocation);
     }
+}
 
     AccumulatedTime += DeltaTime;
     

@@ -60,7 +60,6 @@ public:
     //~ std::allocator_traits 관련 타입
 
 public:
-
     constexpr TContainerAllocator() noexcept = default;
 
     constexpr TContainerAllocator(const TContainerAllocator&) noexcept = default;

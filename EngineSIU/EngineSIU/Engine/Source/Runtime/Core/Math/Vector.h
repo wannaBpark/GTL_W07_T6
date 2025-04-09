@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <cassert>
 #include "MathUtility.h"
+#include "Serialization/Archive.h"
 
 
 struct FVector2D
@@ -363,4 +364,14 @@ inline bool FVector::IsNearlyZero(float Tolerance) const
 inline bool FVector::IsZero() const
 {
     return X==0.f && Y==0.f && Z==0.f;
+}
+
+inline FArchive& operator<<(FArchive& Ar, FVector2D& V)
+{
+    return Ar << V.X << V.Y;
+}
+
+inline FArchive& operator<<(FArchive& Ar, FVector& V)
+{
+    return Ar << V.X << V.Y << V.Z;
 }

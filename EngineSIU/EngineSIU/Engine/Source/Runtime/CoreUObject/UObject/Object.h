@@ -39,6 +39,8 @@ public:
 
     virtual UObject* Duplicate();
 
+    virtual void Serialize(FArchive& Ar);
+
     UWorld* GetWorld() const;
 
     FName GetFName() const { return NamePrivate; }

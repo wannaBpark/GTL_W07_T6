@@ -323,7 +323,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     UParticleSubUVComponent* ParticleComponent = SpawnedActor->AddComponent<UParticleSubUVComponent>();
                     ParticleComponent->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
                     ParticleComponent->SetRowColumnCount(6, 6);
-                    ParticleComponent->SetScale(FVector(10.0f, 10.0f, 1.0f));
+                    ParticleComponent->SetRelativeScale3D(FVector(10.0f, 10.0f, 1.0f));
                     ParticleComponent->Activate();
                     break;
                 }
@@ -346,7 +346,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     
                     FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
                     SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
-                    SphereComp->SetScale(FVector(0.5f, 0.5f, 0.5f));
+                    SphereComp->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
                     UPointLightComponent* PointLightComp = SpawnedActor->AddComponent<UPointLightComponent>();
                     UProjectileMovementComponent* ProjectileMovementComponent = SpawnedActor->AddComponent<UProjectileMovementComponent>();
                     PointLightComp->AttachToComponent(SpawnedActor->GetRootComponent());

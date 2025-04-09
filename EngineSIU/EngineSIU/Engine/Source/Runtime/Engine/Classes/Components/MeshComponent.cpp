@@ -1,5 +1,6 @@
 #include "MeshComponent.h"
 
+#include "CoreMiscDefines.h"
 #include "UObject/Casts.h"
 
 
