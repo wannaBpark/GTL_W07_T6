@@ -141,7 +141,6 @@ void FStaticMeshRenderPass::PrepareRenderState() const
 
 void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const
 {
-    FMatrix MVP = RendererHelpers::CalculateMVP(Model, View, Projection);
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
@@ -211,8 +210,8 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
     for (UStaticMeshComponent* Comp : StaticMeshObjs) {
         if (!Comp || !Comp->GetStaticMesh()) continue;
-
-        FMatrix Model = JungleMath::CreateModelMatrix(Comp->GetWorldLocation(), Comp->GetWorldRotation(), Comp->GetWorldScale());
+        
+        FMatrix Model = Comp->GetWorldMatrix();
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 

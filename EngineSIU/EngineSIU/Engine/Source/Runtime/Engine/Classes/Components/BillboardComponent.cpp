@@ -88,7 +88,7 @@ FMatrix UBillboardComponent::CreateBillboardMatrix() const
     if (m_parent)
         worldLocation += m_parent->GetWorldLocation();
     FVector worldScale = RelativeScale3D;
-    FMatrix S = FMatrix::CreateScale(worldScale.X, worldScale.Y, worldScale.Z);
+    FMatrix S = FMatrix::CreateScaleMatrix(worldScale.X, worldScale.Y, worldScale.Z);
     FMatrix T = FMatrix::CreateTranslationMatrix(worldLocation);
     // 최종 빌보드 행렬 = Scale * Rotation(LookAt) * Translation
     return S * LookAtCamera * T;

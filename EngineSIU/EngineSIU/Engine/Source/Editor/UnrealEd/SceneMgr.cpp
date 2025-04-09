@@ -71,8 +71,8 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 value["Location"].get<std::vector<float>>()[1],
                 value["Location"].get<std::vector<float>>()[2]));
             if (value.contains("Rotation")) sceneComp->SetRelativeRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
-                value["Rotation"].get<std::vector<float>>()[1],
-                value["Rotation"].get<std::vector<float>>()[2]));
+                                                                                   value["Rotation"].get<std::vector<float>>()[1],
+                                                                                   value["Rotation"].get<std::vector<float>>()[2]));
             if (value.contains("Scale")) sceneComp->SetRelativeScale3D(FVector(value["Scale"].get<std::vector<float>>()[0],
                 value["Scale"].get<std::vector<float>>()[1],
                 value["Scale"].get<std::vector<float>>()[2]));
@@ -99,11 +99,11 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                     value["Location"].get<std::vector<float>>()[1],
                     value["Location"].get<std::vector<float>>()[2]));
             if (value.contains("Rotation")) camera->SetRelativeRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
-                value["Rotation"].get<std::vector<float>>()[1],
-                value["Rotation"].get<std::vector<float>>()[2]));
+                                                                                value["Rotation"].get<std::vector<float>>()[1],
+                                                                                value["Rotation"].get<std::vector<float>>()[2]));
             if (value.contains("Rotation")) camera->SetRelativeRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
-                value["Rotation"].get<std::vector<float>>()[1],
-                value["Rotation"].get<std::vector<float>>()[2]));
+                                                                                value["Rotation"].get<std::vector<float>>()[1],
+                                                                                value["Rotation"].get<std::vector<float>>()[2]));
             if (value.contains("FOV")) camera->SetFOV(value["FOV"].get<float>());
             if (value.contains("NearClip")) camera->SetNearClip(value["NearClip"].get<float>());
             if (value.contains("FarClip")) camera->SetNearClip(value["FarClip"].get<float>());
@@ -157,8 +157,8 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     {
         USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
         std::vector<float> Location = { primitive->GetWorldLocation().X,primitive->GetWorldLocation().Y,primitive->GetWorldLocation().Z };
-        std::vector<float> Rotation = { primitive->GetWorldRotation().X,primitive->GetWorldRotation().Y,primitive->GetWorldRotation().Z };
-        std::vector<float> Scale = { primitive->GetWorldScale().X,primitive->GetWorldScale().Y,primitive->GetWorldScale().Z };
+        std::vector<float> Rotation = { primitive->GetWorldRotation().Roll,primitive->GetWorldRotation().Pitch,primitive->GetWorldRotation().Yaw };
+        std::vector<float> Scale = { primitive->GetWorldScale3D().X,primitive->GetWorldScale3D().Y,primitive->GetWorldScale3D().Z };
 
         std::string primitiveName = *primitive->GetName();
         size_t pos = primitiveName.rfind('_');
@@ -177,7 +177,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     {
         UCameraComponent* cameraComponent = static_cast<UCameraComponent*>(camera);
         TArray<float> Location = { cameraComponent->GetWorldLocation().X, cameraComponent->GetWorldLocation().Y, cameraComponent->GetWorldLocation().Z };
-        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().Y, cameraComponent->GetWorldRotation().Z };
+        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().Pitch, cameraComponent->GetWorldRotation().Yaw };
         float FOV = cameraComponent->GetFOV();
         float nearClip = cameraComponent->GetNearClip();
         float farClip = cameraComponent->GetFarClip();

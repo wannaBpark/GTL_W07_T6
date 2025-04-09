@@ -9,7 +9,6 @@
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
 #include "Engine/FLoaderOBJ.h"
-#include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
@@ -64,7 +63,7 @@ void PropertyEditorPanel::Render()
             FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
             ImGui::Spacing();
 
-            FImGuiWidget::DrawVec3Control("Rotation", Rotation, 0, 85);
+            FImGuiWidget::DrawRot3Control("Rotation", Rotation, 0, 85);
             ImGui::Spacing();
 
             FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);

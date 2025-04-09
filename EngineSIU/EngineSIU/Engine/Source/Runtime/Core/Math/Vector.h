@@ -3,6 +3,7 @@
 #include "MathUtility.h"
 #include "Serialization/Archive.h"
 
+#include "Rotator.h"
 
 struct FVector2D
 {
@@ -61,6 +62,9 @@ struct FVector
     FVector() : X(0), Y(0), Z(0) {}
     FVector(float X, float Y, float Z) : X(X), Y(Y), Z(Z) {}
     FVector(float Scalar) : X(Scalar), Y(Scalar), Z(Scalar) {}
+
+    
+    FVector(const FRotator& InRotator);
 
     // Vector(0, 0, 0)
     static const FVector ZeroVector;
@@ -155,6 +159,10 @@ public:
     bool IsZero() const;
 };
 
+inline FVector::FVector(const FRotator& InRotator)
+    : X(FMath::DegreesToRadians(InRotator.Roll)), Y(FMath::DegreesToRadians(InRotator.Pitch)), Z(FMath::DegreesToRadians(InRotator.Yaw))
+{
+}
 
 inline float FVector::Distance(const FVector& V1, const FVector& V2)
 {

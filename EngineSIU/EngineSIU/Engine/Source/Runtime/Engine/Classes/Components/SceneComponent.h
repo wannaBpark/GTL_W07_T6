@@ -1,6 +1,6 @@
 #pragma once
 #include "ActorComponent.h"
-#include "Math/Quat.h"
+#include "Math/Rotator.h"
 #include "UObject/ObjectMacros.h"
 
 class USceneComponent : public UActorComponent
@@ -14,13 +14,15 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
+    virtual int CheckRayIntersection(FVector& InRayOrigin, FVector& InRayDirection, float& pfNearHitDistance);
+    
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
     virtual FVector GetUpVector();
-    void AddLocation(FVector _added);
-    void AddRotation(FVector _added);
-    void AddScale(FVector _added);
+    
+    void AddLocation(FVector InAddValue);
+    void AddRotation(FVector InAddValue);
+    void AddScale(FVector InAddValue);
 
     USceneComponent* GetAttachParent() const { return AttachParent; }
     const TArray<USceneComponent*>& GetAttachChildren() const { return AttachChildren; }
@@ -28,22 +30,24 @@ public:
     void AttachToComponent(USceneComponent* InParent);
 
 public:
-    FVector GetWorldLocation() const;
-    FVector GetWorldRotation();
-    FVector GetWorldScale() const;
-
-    FVector GetRelativeLocation() const { return RelativeLocation; }
-    void SetRelativeLocation(FVector NewLocation) { RelativeLocation = NewLocation; }
-
-    FVector GetRelativeRotation() const;
-    FQuat GetQuat() const { return QuatRotation; }
-    void SetRelativeRotation(FVector NewRotation);
-    void SetRelativeRotation(FQuat NewQuat) { QuatRotation = NewQuat; }
-
-    FVector GetRelativeScale3D() const { return RelativeScale3D; }
+    void SetRelativeLocation(FVector InNewLocation) { RelativeLocation = InNewLocation; }
+    void SetRelativeRotation(FRotator InNewRotation) { RelativeRotation = InNewRotation; }
     void SetRelativeScale3D(FVector NewScale) { RelativeScale3D = NewScale; }
+    
+    FVector GetRelativeLocation() const { return RelativeLocation; }
+    FRotator GetRelativeRotation() const { return RelativeRotation; }
+    FVector GetRelativeScale3D() const { return RelativeScale3D; }
 
+    FVector GetWorldLocation() const;
+    FRotator GetWorldRotation() const;
+    FVector GetWorldScale3D() const;
 
+    FMatrix GetScaleMatrix() const;
+    FMatrix GetRotationMatrix() const;
+    FMatrix GetTranslationMatrix() const;
+
+    FMatrix GetWorldMatrix() const;
+    
     void SetupAttachment(USceneComponent* InParent);
 
 protected:
@@ -53,11 +57,7 @@ protected:
 
     /** 부모 컴포넌트로부터 상대적인 회전 */
     UPROPERTY
-    (FVector, RelativeRotation);
-
-    /** 부모 컴포넌트로부터 상대적인 회전(쿼터니언) */
-    UPROPERTY
-    (FQuat, QuatRotation);
+    (FRotator, RelativeRotation);
 
     /** 부모 컴포넌트로부터 상대적인 크기 */
     UPROPERTY
