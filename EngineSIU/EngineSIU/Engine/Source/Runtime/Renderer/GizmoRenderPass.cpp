@@ -192,12 +192,8 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (Engine && !Engine->GetSelectedActor())
         return;
-    // 모델 행렬 계산
-    FMatrix Model = JungleMath::CreateModelMatrix(
-        GizmoComp->GetWorldLocation(),
-        GizmoComp->GetWorldRotation().ToVector(),
-        GizmoComp->GetWorldScale()
-    );
+    // 모델 행렬.
+    FMatrix Model = GizmoComp->GetWorldMatrix();
 
     FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
 

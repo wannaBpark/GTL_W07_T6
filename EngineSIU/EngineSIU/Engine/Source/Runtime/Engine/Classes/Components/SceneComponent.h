@@ -34,15 +34,18 @@ public:
     void SetRelativeRotation(FRotator InNewRotation) { RelativeRotation = InNewRotation; }
     void SetRelativeScale3D(FVector NewScale) { RelativeScale3D = NewScale; }
     
-    FRotator GetRelativeRotation() const { return RelativeRotation; }
     FVector GetRelativeLocation() const { return RelativeLocation; }
+    FRotator GetRelativeRotation() const { return RelativeRotation; }
     FVector GetRelativeScale3D() const { return RelativeScale3D; }
+
+    FVector GetWorldLocation() const;
+    FRotator GetWorldRotation() const;
+    FVector GetWorldScale3D() const;
 
     FMatrix GetScaleMatrix() const;
     FMatrix GetRotationMatrix() const;
     FMatrix GetTranslationMatrix() const;
 
-    FMatrix GetRTMatrix() const;
     FMatrix GetWorldMatrix() const;
     
     void SetupAttachment(USceneComponent* InParent);

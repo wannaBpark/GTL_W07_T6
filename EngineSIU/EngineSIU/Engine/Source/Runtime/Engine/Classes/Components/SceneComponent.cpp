@@ -106,6 +106,33 @@ void USceneComponent::AttachToComponent(USceneComponent* InParent)
     }
 }
 
+FVector USceneComponent::GetWorldLocation() const
+{
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldLocation() + RelativeLocation;
+    }
+    return RelativeLocation;
+}
+
+FRotator USceneComponent::GetWorldRotation() const
+{
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldRotation().ToQuaternion() * RelativeRotation.ToQuaternion();
+    }
+    return RelativeRotation;
+}
+
+FVector USceneComponent::GetWorldScale3D() const
+{
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldScale3D() * RelativeScale3D;
+    }
+    return RelativeScale3D;
+}
+
 FMatrix USceneComponent::GetScaleMatrix() const
 {
     FMatrix ScaleMat = FMatrix::GetScaleMatrix(RelativeScale3D);
@@ -139,27 +166,21 @@ FMatrix USceneComponent::GetTranslationMatrix() const
     return TranslationMat;
 }
 
-FMatrix USceneComponent::GetRTMatrix() const
-{
-    FMatrix RTMat = GetRotationMatrix() * GetTranslationMatrix();
-    if (AttachParent)
-    {
-        FMatrix ParentRTMat = AttachParent->GetRTMatrix();
-        RTMat = RTMat * ParentRTMat;
-    }
-    return RTMat;
-}
-
 FMatrix USceneComponent::GetWorldMatrix() const
 {
     FMatrix ScaleMat = GetScaleMatrix();
-    FMatrix RTMat = GetRTMatrix();
-    
+    FMatrix RotationMat = GetRotationMatrix();
+    FMatrix TranslationMat = GetTranslationMatrix();
+
+    FMatrix RTMat = RotationMat * TranslationMat;
     if (AttachParent)
     {
         FMatrix ParentScaleMat = AttachParent->GetScaleMatrix();
-        FMatrix ParentRTMat = AttachParent->GetRTMatrix();
+        FMatrix ParentRotationMat = AttachParent->GetRotationMatrix();
+        FMatrix ParentTranslationMat = AttachParent->GetTranslationMatrix();
+        
         ScaleMat = ScaleMat * ParentScaleMat;
+        FMatrix ParentRTMat = ParentRotationMat * ParentTranslationMat;
         RTMat = RTMat * ParentRTMat;
     }
     return ScaleMat * RTMat;

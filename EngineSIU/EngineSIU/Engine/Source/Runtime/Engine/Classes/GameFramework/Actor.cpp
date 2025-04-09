@@ -172,17 +172,17 @@ bool AActor::SetRootComponent(USceneComponent* NewRootComponent)
 
 FVector AActor::GetActorLocation() const
 {
-    return RootComponent ? RootComponent->GetRelativeLocation() : FVector::ZeroVector; 
+    return RootComponent ? RootComponent->GetRelativeLocation() : FVector(FVector::ZeroVector); 
 }
 
 FRotator AActor::GetActorRotation() const
 {
-    return RootComponent ? RootComponent->GetWorldRotation() : FVector::ZeroVector;
+    return RootComponent ? RootComponent->GetRelativeRotation() : FRotator(FVector::ZeroVector);
 }
 
 FVector AActor::GetActorScale() const
 {
-    return RootComponent ? RootComponent->GetWorldScale() : FVector::ZeroVector; 
+    return RootComponent ? RootComponent->GetRelativeScale3D() : FVector(FVector::OneVector); 
 }
 
 bool AActor::SetActorLocation(const FVector& NewLocation)

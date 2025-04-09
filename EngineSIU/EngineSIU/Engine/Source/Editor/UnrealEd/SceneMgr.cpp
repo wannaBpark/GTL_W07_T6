@@ -158,7 +158,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
         USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
         std::vector<float> Location = { primitive->GetWorldLocation().X,primitive->GetWorldLocation().Y,primitive->GetWorldLocation().Z };
         std::vector<float> Rotation = { primitive->GetWorldRotation().Roll,primitive->GetWorldRotation().Pitch,primitive->GetWorldRotation().Yaw };
-        std::vector<float> Scale = { primitive->GetWorldScale().X,primitive->GetWorldScale().Y,primitive->GetWorldScale().Z };
+        std::vector<float> Scale = { primitive->GetWorldScale3D().X,primitive->GetWorldScale3D().Y,primitive->GetWorldScale3D().Z };
 
         std::string primitiveName = *primitive->GetName();
         size_t pos = primitiveName.rfind('_');

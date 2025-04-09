@@ -171,7 +171,7 @@ FMatrix FMatrix::Inverse(const FMatrix& Mat)
     return Result;
 }
 
-FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
+FMatrix FMatrix::CreateRotationMatrix(float roll, float pitch, float yaw)
 {
     float radRoll = roll * (PI / 180.0f);
     float radPitch = pitch * (PI / 180.0f);
@@ -211,7 +211,7 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
 
 
 // 스케일 행렬 생성
-FMatrix FMatrix::CreateScale(float scaleX, float scaleY, float scaleZ)
+FMatrix FMatrix::CreateScaleMatrix(float scaleX, float scaleY, float scaleZ)
 {
     return { {
         { scaleX, 0, 0, 0 },
@@ -273,88 +273,19 @@ FVector FMatrix::TransformPosition(const FVector& vector) const
     return w != 0.0f ? FVector{x / w, y / w, z / w} : FVector{x, y, z};
 }
 
-FMatrix FMatrix::GetScaleMatrix(float InScaleX, float InScaleY, float InScaleZ)
-{
-    FMatrix Result;
-    Result.M[0][0] = InScaleX;
-    Result.M[1][1] = InScaleY;
-    Result.M[2][2] = InScaleZ;
-    return Result;
-}
-
 FMatrix FMatrix::GetScaleMatrix(const FVector& InScale)
 {
-    return GetScaleMatrix(InScale);
-}
-
-FMatrix FMatrix::GetTranslationMatrix(float InX, float InY, float InZ)
-{
-    FMatrix Result;
-    Result.M[3][0] = InX;
-    Result.M[3][1] = InY;
-    Result.M[3][2] = InZ;
-    return Result;
+    return CreateScaleMatrix(InScale.X, InScale.Y, InScale.Z);
 }
 
 FMatrix FMatrix::GetTranslationMatrix(const FVector& position)
 {
-    return GetTranslationMatrix(position.X, position.Y, position.Z);
-}
-
-static FMatrix RotateRoll(float InAngle)
-{
-    float Angle = FMath::DegreesToRadians(InAngle);
-
-    FMatrix Result;
-
-    float CosAngle = FMath::Cos(Angle);
-    float SinAngle = FMath::Sin(Angle);
-
-    Result.M[1][1] = CosAngle;
-    Result.M[1][2] = -SinAngle;
-    Result.M[2][1] = SinAngle;
-    Result.M[2][2] = CosAngle;
-
-    return Result;
-}
-
-static FMatrix RotatePitch(float InAngle)
-{
-    float Angle = FMath::DegreesToRadians(InAngle);
-
-    FMatrix Result;
-
-    float CosAngle = FMath::Cos(Angle);
-    float SinAngle = FMath::Sin(Angle);
-
-    Result.M[0][0] = CosAngle;
-    Result.M[0][2] = SinAngle;
-    Result.M[2][0] = -SinAngle;
-    Result.M[2][2] = CosAngle;
-
-    return Result;
-}
-
-static FMatrix RotateYaw(float InAngle)
-{
-    float Angle = FMath::DegreesToRadians(InAngle);
-
-    FMatrix Result;
-
-    float CosAngle = FMath::Cos(Angle);
-    float SinAngle = FMath::Sin(Angle);
-
-    Result.M[0][0] = CosAngle;
-    Result.M[0][1] = SinAngle;
-    Result.M[1][0] = -SinAngle;
-    Result.M[1][1] = CosAngle;
-
-    return Result;
+    return CreateTranslationMatrix(position);
 }
 
 FMatrix FMatrix::GetRotationMatrix(const FRotator& InRotation)
 {
-    return RotateRoll(InRotation.Roll) * RotatePitch(InRotation.Pitch) * RotateYaw(InRotation.Yaw);
+    return CreateRotationMatrix(InRotation.Roll, InRotation.Pitch, InRotation.Yaw);
 }
 
 FMatrix FMatrix::GetRotationMatrix(const FQuat& InRotation)
@@ -398,4 +329,9 @@ FMatrix FMatrix::GetRotationMatrix(const FQuat& InRotation)
     Result.M[3][3] = 1.0f; // 4x4 행렬이므로 마지막 값은 1
 
     return Result;
+}
+
+FQuat FMatrix::ToQuat(const FMatrix& M) const
+{
+    return FQuat(M);
 }

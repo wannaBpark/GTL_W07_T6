@@ -11,6 +11,7 @@
 
 #include "World/World.h"
 #include "EngineLoop.h"
+#include "GameFramework/Actor.h"
 
 #include "UObject/UObjectIterator.h"
 
