@@ -8,7 +8,6 @@ void FGraphicsDevice::Initialize(HWND hWindow)
     CreateDepthStencilBuffer(hWindow);
     CreateDepthStencilState();
     CreateRasterizerState();
-    CreateAlphaBlendState();
     CurrentRasterizer = RasterizerStateSOLID;
 }
 
@@ -348,8 +347,8 @@ void FGraphicsDevice::Prepare() const
     DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
 
     DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
-    float blendFactor[4] = { 0, 0, 0, 0 };
-    DeviceContext->OMSetBlendState(AlphaBlendState, blendFactor, 0xffffffff);
+    //float blendFactor[4] = { 0, 0, 0, 0 };
+   // DeviceContext->OMSetBlendState(AlphaBlendState, blendFactor, 0xffffffff);
 
 }
 
