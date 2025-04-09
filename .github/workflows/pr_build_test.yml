@@ -1,9 +1,6 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Build MSVC Project
+# main 브랜치에 합치기 전 PR에 대해 빌드 테스트를 수행하는 GitHub Actions 워크플로우입니다.
+# 이 워크플로우는 PR이 생성되거나 업데이트될 때마다 자동으로 실행됩니다.
+name: Pull Request Build Test
 
 on:
   pull_request:
@@ -41,13 +38,13 @@ jobs:
     #   run: nuget restore ${{ env.SOLUTION_FILE_PATH }}
 
     # 3. MSBuild 중간 파일 캐싱
-    - name: Cache MSBuild intermediate files
-      uses: actions/cache@v4
-      with:
-        path: build/
-        key: ${{ runner.os }}-msbuild-${{ hashFiles('**/*.sln', '**/*.vcxproj') }}
-        restore-keys: |
-          ${{ runner.os }}-msbuild-
+    # - name: Cache MSBuild intermediate files
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: build/
+    #     key: ${{ runner.os }}-msbuild-${{ hashFiles('**/*.sln', '**/*.vcxproj') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-msbuild-
 
     - name: Build
       working-directory: ${{ github.workspace }}
