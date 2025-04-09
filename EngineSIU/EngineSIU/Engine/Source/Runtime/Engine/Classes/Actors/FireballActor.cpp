@@ -10,7 +10,8 @@ AFireballActor::~AFireballActor()
 
 void AFireballActor::BeginPlay()
 {
-    GetComponentByClass<UPointLightComponent>()->SetAttenuation(0.5f);
-    GetComponentByClass<UPointLightComponent>()->SetSpecularColor(FLinearColor::Red);
-    GetComponentByClass<UPointLightComponent>()->SetDiffuseColor(FLinearColor::Red);
+    UPointLightComponent* PointLight = GetComponentByClass<UPointLightComponent>();
+    PointLight->SetAttenuation(0.5f);
+    PointLight->SetSpecularColor(FLinearColor::Red);
+    PointLight->SetDiffuseColor(FLinearColor::Red);
 }
