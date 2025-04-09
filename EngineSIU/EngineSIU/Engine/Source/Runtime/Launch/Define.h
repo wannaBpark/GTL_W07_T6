@@ -48,8 +48,8 @@ struct FStaticMaterial
 // OBJ File Raw Data
 struct FObjInfo
 {
-    FWString ObjectName; // OBJ File Name
-    FWString PathName; // OBJ File Paths
+    FWString ObjectName; // OBJ File Name. Path + FileName.obj 
+    FWString FilePath; // OBJ File Paths
     FString DisplayName; // Display Name
     FString MatName; // OBJ MTL File Name
 
@@ -115,7 +115,6 @@ namespace OBJ
     struct FStaticMeshRenderData
     {
         FWString ObjectName;
-        FWString PathName;
         FString DisplayName;
 
         TArray<FStaticMeshVertex> Vertices;

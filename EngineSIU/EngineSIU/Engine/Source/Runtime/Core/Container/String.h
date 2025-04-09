@@ -128,7 +128,7 @@ public:
 	}
 #endif
 	template <typename Number>
-		requires std::is_arithmetic_v<Number>
+		requires std::is_integral_v<Number>
     static FString FromInt(Number Num);
 
     static FString SanitizeFloat(float InFloat);
@@ -178,6 +178,14 @@ public:
     void Reserve(int32 CharacterCount);
     void Resize(int32 CharacterCount);
 
+    [[nodiscard]] FString ToUpper() const &;
+    [[nodiscard]] FString ToUpper() &&;
+    void ToUpperInline();
+
+    [[nodiscard]] FString ToLower() const &;
+    [[nodiscard]] FString ToLower() &&;
+    void ToLowerInline();
+
 public:
     /** ElementType* 로 반환하는 연산자 */
     FORCEINLINE const ElementType* operator*() const;
@@ -212,7 +220,7 @@ public:
 };
 
 template <typename Number>
-	requires std::is_arithmetic_v<Number>
+	requires std::is_integral_v<Number>
 FString FString::FromInt(Number Num)
 {
 #if USE_WIDECHAR

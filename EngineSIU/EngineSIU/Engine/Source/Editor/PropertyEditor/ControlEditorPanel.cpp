@@ -286,8 +286,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_SPHERE"));
                     USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
-                    FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
-                    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
+                    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/Sphere.obj"));
                     break;
                 }
                 case OBJ_CUBE:
@@ -331,6 +330,9 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor = World->SpawnActor<AFireballActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
 
+                    UProjectileMovementComponent* ProjectileMovementComponent = SpawnedActor->AddComponent<UProjectileMovementComponent>();
+                    
+                    PointLightComp->AttachToComponent(SpawnedActor->GetRootComponent());
                     break;
                 }
                 case OBJ_Fog:
