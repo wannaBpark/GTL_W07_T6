@@ -45,10 +45,7 @@ UWorld* UObject::GetWorld() const
 {
     if (UObject* Outer = GetOuter())
     {
-        if (UObject* Outer = GetOuter())
-        {
-            return Outer->GetWorld();
-        }
+        return Outer->GetWorld();
     }
     return nullptr;
 }
