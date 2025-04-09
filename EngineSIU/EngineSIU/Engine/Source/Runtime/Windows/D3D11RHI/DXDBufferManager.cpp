@@ -4,35 +4,7 @@ void FDXDBufferManager::Initialize(ID3D11Device* InDXDevice, ID3D11DeviceContext
 {
     DXDevice = InDXDevice;
     DXDeviceContext = InDXDeviceContext;
-}
-
-HRESULT FDXDBufferManager::CreateIndexBuffer(const FString& KeyName, const TArray<uint32>& indices, FIndexInfo& OutIndexInfo)
-{
-    if (!KeyName.IsEmpty() && IndexBufferPool.Contains(KeyName))
-    {
-        OutIndexInfo = IndexBufferPool[KeyName];
-        return S_OK;
-    }
-
-    D3D11_BUFFER_DESC indexBufferDesc = {};
-    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    indexBufferDesc.ByteWidth = sizeof(uint32) * static_cast<uint32>(indices.Num());
-    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    indexBufferDesc.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA indexInitData = {};
-    indexInitData.pSysMem = indices.GetData();
-
-    ID3D11Buffer* NewBuffer = nullptr;
-    HRESULT hr = DXDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &NewBuffer);
-    if (FAILED(hr))
-        return hr;
-
-    OutIndexInfo.NumIndices = static_cast<uint32>(indices.Num());
-    OutIndexInfo.IndexBuffer = NewBuffer;
-    IndexBufferPool.Add(KeyName, FIndexInfo(static_cast<uint32>(indices.Num()), NewBuffer));
-
-    return S_OK;
+    CreateQuadBuffer();
 }
 
 void FDXDBufferManager::ReleaseBuffers()
@@ -115,4 +87,33 @@ ID3D11Buffer* FDXDBufferManager::GetConstantBuffer(const FString& InName) const
     if (ConstantBufferPool.Contains(InName))
         return ConstantBufferPool[InName];
     return nullptr;
+}
+
+void FDXDBufferManager::CreateQuadBuffer()
+{
+    TArray<QuadVertex> Vertices =
+    {
+        { {-1.0f,  1.0f, 0.0f}, {0.0f, 0.0f} },
+        { { 1.0f,  1.0f, 0.0f}, {1.0f, 0.0f} },
+        { { 1.0f, -1.0f, 0.0f}, {1.0f, 1.0f} },
+        { {-1.0f, -1.0f, 0.0f}, {0.0f, 1.0f} },
+    };
+
+    FVertexInfo VertexInfo;
+    CreateVertexBuffer(TEXT("QuadBuffer"), Vertices, VertexInfo);
+
+    TArray<short> Indices =
+    {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    FIndexInfo IndexInfo;
+    CreateIndexBuffer(TEXT("QuadBuffer"), Indices, IndexInfo);
+}
+
+void FDXDBufferManager::GetQuadBuffer(FVertexInfo& OutVertexInfo, FIndexInfo& OutIndexInfo)
+{
+    OutVertexInfo = GetVertexBuffer(TEXT("QuadBuffer"));
+    OutIndexInfo = GetIndexBuffer(TEXT("QuadBuffer"));
 }

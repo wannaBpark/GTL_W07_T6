@@ -33,7 +33,7 @@ public:
     void PrepareSubUVConstant() const;
 
     // 상수 버퍼 업데이트 함수
-    void UpdateSubUVConstant(float _indexU, float _indexV) const;
+    void UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale) const;
     void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
 
     // Primitive 드로우 함수

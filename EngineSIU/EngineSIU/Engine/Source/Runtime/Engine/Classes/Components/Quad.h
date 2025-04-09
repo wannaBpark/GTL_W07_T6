@@ -8,7 +8,7 @@ FVertexTexture quadVertices[] =
     {-1.f, -1.f, 0.f, 0.f, 1.f},
     {1.f, -1.f, 0.f, 1.f, 1.f}
 };
-
+    
 uint32 quadIndices[] =
 {
     0,1,2,

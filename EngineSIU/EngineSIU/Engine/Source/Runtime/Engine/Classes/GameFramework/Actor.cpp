@@ -199,3 +199,8 @@ bool AActor::SetActorScale(const FVector& NewScale)
     }
     return false;
 }
+
+void AActor::SetActorTickInEditor(bool InbInTickInEditor)
+{
+    bTickInEditor = InbInTickInEditor;
+}
