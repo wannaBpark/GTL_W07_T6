@@ -6,4 +6,5 @@ class AFireballActor : public AActor
 public:
     AFireballActor();
     virtual ~AFireballActor();
+    virtual void BeginPlay() override;
 };
