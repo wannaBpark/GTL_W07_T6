@@ -42,9 +42,10 @@ void UEditorEngine::Tick(float DeltaTime)
                 World->Tick(DeltaTime);
                 EditorPlayer->Tick(DeltaTime);
                 ULevel* Level = World->GetActiveLevel();
+                TArray CachedActors = Level->Actors;
                 if (Level)
                 {
-                    for (AActor* Actor : Level->Actors)
+                    for (AActor* Actor : CachedActors)
                     {
                         if (Actor && Actor->IsActorTickInEditor())
                         {
@@ -60,9 +61,10 @@ void UEditorEngine::Tick(float DeltaTime)
             {
                 World->Tick(DeltaTime);
                 ULevel* Level = World->GetActiveLevel();
+                TArray CachedActors = Level->Actors;
                 if (Level)
                 {
-                    for (AActor* Actor : Level->Actors)
+                    for (AActor* Actor : CachedActors)
                     {
                         if (Actor)
                         {
@@ -105,6 +107,10 @@ void UEditorEngine::EndPIE()
         PIEWorld->Release();
         GUObjectArray.MarkRemoveObject(PIEWorld);
         PIEWorld = nullptr;
+
+        // TODO: PIE에서 EditorWorld로 돌아올 때, 기존 선택된 Picking이 유지되어야 함. 현재는 에러를 막기위해 임시조치.
+        DeselectActor(GetSelectedActor());
+        DeselectComponent(GetSelectedComponent());
     }
     // 다시 EditorWorld로 돌아옴.
     ActiveWorld = EditorWorld;

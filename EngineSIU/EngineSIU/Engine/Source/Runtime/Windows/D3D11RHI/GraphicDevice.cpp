@@ -391,8 +391,9 @@ void FGraphicsDevice::PrepareTexture() const
     {
         SceneColorRTV,
         UUIDFrameBufferRTV
-    };
+    };   
     DeviceContext->OMSetRenderTargets(2, tempRTVs, DepthStencilView);
+    DeviceContext->OMSetBlendState(AlphaBlendState, nullptr, 0xffffffff);
 }
 
 void FGraphicsDevice::OnResize(HWND hWindow)

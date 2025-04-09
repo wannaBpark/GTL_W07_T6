@@ -110,17 +110,17 @@ void PropertyEditorPanel::Render()
                 [&]() { return lightObj->GetAmbientColor(); },
                 [&](FVector4 c) { lightObj->SetAmbientColor(c); });
             */
-            DrawColorProperty("Diffuse Color",
+            DrawColorProperty("Base Color",
                 [&]() { return lightObj->GetDiffuseColor(); },
-                [&](FVector4 c) { lightObj->SetDiffuseColor(c); });
+                [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
 
             DrawColorProperty("Specular Color",
                 [&]() { return lightObj->GetSpecularColor(); },
-                [&](FVector4 c) { lightObj->SetSpecularColor(c); });
+                [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
 
-            float range = lightObj->GetRange();
-            if (ImGui::SliderFloat("Range", &range, 20.0f, 10000.0f, "%1.f"))
-                lightObj->SetRange(range);
+            float Intensity = lightObj->GetIntensity();
+            if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                lightObj->SetIntensity(Intensity);
 
             float falloff = lightObj->GetFalloff();
             if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
@@ -128,8 +128,13 @@ void PropertyEditorPanel::Render()
             }
 
             float attenuation = lightObj->GetAttenuation();
-            if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 1.f, "%.1f")) {
+            if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
                 lightObj->SetAttenuation(attenuation);
+            }
+            
+            float AttenuationRadius = lightObj->GetAttenuationRadius();
+            if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+                lightObj->SetAttenuationRadius(AttenuationRadius);
             }
 
             ImGui::TreePop();
@@ -249,7 +254,7 @@ void PropertyEditorPanel::Render()
             }
 
             float FogDensity = FogComponent->GetFogDensity();
-            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 0.2f))
+            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
             {
                 FogComponent->SetFogDensity(FogDensity);
             }
@@ -261,9 +266,15 @@ void PropertyEditorPanel::Render()
             }
 
             float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
-            if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.01f, 1.0f))
+            if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.001f, 0.15f))
             {
                 FogComponent->SetFogHeightFalloff(FogHeightFallOff);
+            }
+
+            float FogStartDistance = FogComponent->GetStartDistance();
+            if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
+            {
+                FogComponent->SetStartDistance(FogStartDistance);
             }
 
             ImGui::TreePop();

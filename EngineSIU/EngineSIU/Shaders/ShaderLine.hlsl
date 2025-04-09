@@ -11,6 +11,14 @@ cbuffer GridParametersData : register(b1)
     float3 GridOrigin; // Grid의 중심
     float Padding;
 };
+cbuffer CameraConstants : register(b2)
+{
+    row_major float4x4 View;
+    row_major float4x4 Projection;
+    float3 CameraPosition;
+    float CameraPad;
+};
+
 cbuffer PrimitiveCounts : register(b3)
 {
     int BoundingBoxCount; // 렌더링할 AABB의 개수
@@ -18,6 +26,7 @@ cbuffer PrimitiveCounts : register(b3)
     int ConeCount; // 렌더링할 cone의 개수
     int pad1;
 };
+
 struct FBoundingBoxData
 {
     float3 bbMin;
@@ -70,7 +79,9 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 Position : SV_Position;
+    float4 WorldPosition : POSITION;
     float4 Color : COLOR;
+    uint instanceID : SV_InstanceID;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -306,12 +317,25 @@ PS_INPUT mainVS(VS_INPUT input)
     }
 
     // 출력 변환
+    output.WorldPosition = float4(pos, 1.0);
     output.Position = mul(float4(pos, 1.0), MVP);
     output.Color = color;
+    output.instanceID = input.instanceID;
     return output;
 }
 
 float4 mainPS(PS_INPUT input) : SV_Target
 {
+    if (input.instanceID < GridCount || input.instanceID < GridCount + 3)
+    {
+        float Dist = length(input.WorldPosition.xyz - CameraPosition);
+
+        float MaxDist = 400 * 1.2f;
+        float MinDist = MaxDist * 0.3f;
+
+         // Fade out grid
+        float Fade = saturate(1.f - (Dist - MinDist) / (MaxDist - MinDist));
+        input.Color.a *= Fade * Fade * Fade;
+    }
     return input.Color;
 }

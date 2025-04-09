@@ -11,8 +11,8 @@ template<typename Getter, typename Setter>
 void DrawColorProperty(const char* label, Getter get, Setter set)
 {
     ImGui::PushItemWidth(200.0f);
-    FVector4 curr = get();
-    float col[4] = { curr.X, curr.Y, curr.Z, curr.W };
+    FLinearColor curr = get();
+    float col[4] = { curr.R, curr.G, curr.B, curr.A };
 
     if (ImGui::ColorEdit4(label, col,
         ImGuiColorEditFlags_DisplayRGB |
@@ -20,7 +20,7 @@ void DrawColorProperty(const char* label, Getter get, Setter set)
         ImGuiColorEditFlags_NoInputs |
         ImGuiColorEditFlags_Float))
     {
-        set(FVector4(col[0], col[1], col[2], col[3]));
+        set(FLinearColor(col[0], col[1], col[2], col[3]));
     }
     ImGui::PopItemWidth();
 }

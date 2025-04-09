@@ -8,7 +8,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Math/JungleMath.h"
-
+#include "Engine/EditorEngine.h"
 #include "World/World.h"
 #include "EngineLoop.h"
 #include "GameFramework/Actor.h"
@@ -40,13 +40,16 @@ void FUpdateLightBufferPass::PrepareRender()
 {
     for (const auto iter : TObjectRange<ULightComponentBase>())
     {
-        if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter)) {
-
-            PointLights.Add(PointLight);
-        }
-        else if (USpotLightComponent* PointLight = Cast<USpotLightComponent>(iter)) {
-
-            SpotLights.Add(PointLight);
+        if (iter->GetWorld() == GEngine->ActiveWorld)
+        {
+            if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter))
+            {
+                PointLights.Add(PointLight);
+            }
+            else if (USpotLightComponent* PointLight = Cast<USpotLightComponent>(iter))
+            {
+                SpotLights.Add(PointLight);
+            }
         }
     }
 }
@@ -56,14 +59,13 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     FLightBuffer LightBufferData = {};
     int LightCount = 0;
 
-    LightBufferData.GlobalAmbientLight = FVector4(0.01, 0.01, 0.01, 1);
+    LightBufferData.GlobalAmbientLight = FVector4(0.1f, 0.1f, 0.1f, 1.f);
     for (auto Light : PointLights)
     {
         if (LightCount < MAX_LIGHTS)
         {
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.01, 0.01, 0.01);
 
             LightCount++;
         }
