@@ -1,5 +1,9 @@
 #include "GraphicDevice.h"
 #include <cwchar>
+#include <Components/HeightFogComponent.h>
+#include <UObject/UObjectIterator.h>
+#include <Engine/Engine.h>
+#include "PropertyEditor/ShowFlags.h"
 
 void FGraphicsDevice::Initialize(HWND hWindow)
 {
@@ -332,6 +336,22 @@ void FGraphicsDevice::SwapBuffer() const
     SwapChain->Present(1, 0);
 }
 
+void FGraphicsDevice::Prepare(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const
+{
+    Prepare();
+    //TODO: 다른 곳으로 빼자
+    TArray<UHeightFogComponent*> Fogs;
+    for (const auto iter : TObjectRange<UHeightFogComponent>())
+    {
+        if (iter->GetWorld() == GEngine->ActiveWorld)
+        {
+            Fogs.Add(iter);
+        }
+    }
+    if ((ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Fog)) && Fogs.Num() > 0)
+        PrepareTexture();
+}
+
 void FGraphicsDevice::Prepare() const
 {
     DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor);
@@ -367,22 +387,6 @@ void FGraphicsDevice::Prepare(D3D11_VIEWPORT* viewport) const
 
     DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);            // 블렌뎅 상태 설정, 기본블렌딩 상태임
-}
-
-void FGraphicsDevice::PrepareUI() const
-{
-    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView);
-}
-
-void FGraphicsDevice::PrepareFog() const
-{
-    ID3D11RenderTargetView* nullRTVs[2] = { nullptr,nullptr };
-    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 정정 연결 방식 설정
-
-    DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
-
-    DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
-    DeviceContext->OMSetRenderTargets(2, nullRTVs, nullptr);
 }
 
 void FGraphicsDevice::PrepareTexture() const

@@ -125,28 +125,23 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
-    if (FogRenderPass->ShouldRender())
-    {
-        Graphics->PrepareTexture();
-    }
-
     StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
-    LineRenderPass->Render(ActiveViewport);
+    
 
     if (IsSceneDepth)
     {
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
     }
 
-    if (!IsSceneDepth && FogRenderPass->ShouldRender())
+    if (!IsSceneDepth)
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
         
         FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV());
     }
-
+    LineRenderPass->Render(ActiveViewport);
     GizmoRenderPass->Render(ActiveViewport);
 
     ClearRenderArr();
