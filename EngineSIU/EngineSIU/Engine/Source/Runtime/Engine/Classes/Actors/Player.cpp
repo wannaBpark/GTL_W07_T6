@@ -259,22 +259,8 @@ void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& v
 
 int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount)
 {
-	FMatrix scaleMatrix = FMatrix::CreateScale(
-		obj->GetWorldScale().X,
-		obj->GetWorldScale().Y,
-		obj->GetWorldScale().Z
-	);
-	FMatrix rotationMatrix = FMatrix::CreateRotation(
-		obj->GetWorldRotation().X,
-		obj->GetWorldRotation().Y,
-		obj->GetWorldRotation().Z
-	);
-
-	FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
-
-	// ���� ��ȯ ���
-	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
-	FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    FMatrix WorldMatrix = obj->GetWorldMatrix();
+	FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     
     bool bIsOrtho = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
     
@@ -282,7 +268,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
     if (bIsOrtho)
     {
         // 오쏘 모드: ScreenToViewSpace()에서 계산된 pickPosition이 클립/뷰 좌표라고 가정
-        FMatrix inverseView = FMatrix::Inverse(viewMatrix);
+        FMatrix inverseView = FMatrix::Inverse(ViewMatrix);
         // pickPosition을 월드 좌표로 변환
         FVector worldPickPos = inverseView.TransformPosition(pickPosition);  
         // 오쏘에서는 픽킹 원점은 unproject된 픽셀의 위치
@@ -291,16 +277,16 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().GetSafeNormal();
 
         // 객체의 로컬 좌표계로 변환
-        FMatrix localMatrix = FMatrix::Inverse(worldMatrix);
-        FVector localRayOrigin = localMatrix.TransformPosition(rayOrigin);
-        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).GetSafeNormal();
+        FMatrix LocalMatrix = FMatrix::Inverse(WorldMatrix);
+        FVector LocalRayOrigin = LocalMatrix.TransformPosition(rayOrigin);
+        FVector LocalRayDir = (LocalMatrix.TransformPosition(rayOrigin + orthoRayDir) - LocalRayOrigin).GetSafeNormal();
         
-        intersectCount = obj->CheckRayIntersection(localRayOrigin, localRayDir, hitDistance);
+        intersectCount = obj->CheckRayIntersection(LocalRayOrigin, LocalRayDir, hitDistance);
         return intersectCount;
     }
     else
     {
-        FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * viewMatrix);
+        FMatrix inverseMatrix = FMatrix::Inverse(WorldMatrix * ViewMatrix);
         FVector cameraOrigin = { 0,0,0 };
         FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
         // 퍼스펙티브 모드의 기존 로직 사용
@@ -356,7 +342,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     FVector CameraRight = ViewTransform->GetRightVector();
     FVector CameraUp = ViewTransform->GetUpVector();
 
-    FQuat currentRotation = pObj->GetQuat();
+    FQuat currentRotation = pObj->GetWorldRotation().ToQuaternion();
 
     FQuat rotationDelta;
 

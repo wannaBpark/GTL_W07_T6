@@ -1,5 +1,6 @@
 #pragma once
 #include "Define.h"
+#include "Rotator.h"
 #include "Quat.h"
 
 class JungleMath
@@ -12,8 +13,8 @@ public:
     static FMatrix CreateProjectionMatrix(float fov, float aspect, float nearPlane, float farPlane);
     static FMatrix CreateOrthoProjectionMatrix(float width, float height, float nearPlane, float farPlane);
 
-    static FVector FVectorRotate(FVector& origin, const FVector& rotation);
-    static FVector FVectorRotate(FVector& origin, const FQuat& rotation);
+    static FVector FVectorRotate(FVector& origin, const FVector& InRotation);
+    static FVector FVectorRotate(FVector& origin, const FRotator& InRotation);
     static FMatrix CreateRotationMatrix(FVector rotation);
     static FQuat EulerToQuaternion(const FVector& eulerDegrees);
     static FVector QuaternionToEuler(const FQuat& quat);

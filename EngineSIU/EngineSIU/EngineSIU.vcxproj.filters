@@ -372,12 +372,6 @@
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectTypes.h">
       <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UClass.cpp">
-      <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\UClass.h">
-      <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UObjectArray.cpp">
       <Filter>Engine\Source\Runtime\CoreUObject\UObject</Filter>
     </ClCompile>
@@ -804,6 +798,16 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\Archive.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Class.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Quat.cpp">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Rotator.cpp">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -860,6 +864,14 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Cube.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Class.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Rotator.h">
+      <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

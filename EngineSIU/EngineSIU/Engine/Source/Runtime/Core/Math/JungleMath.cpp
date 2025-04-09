@@ -2,6 +2,8 @@
 #include <DirectXMath.h>
 #include "MathUtility.h"
 
+#include "Rotator.h"
+
 using namespace DirectX;
 
 
@@ -18,10 +20,10 @@ FMatrix JungleMath::CreateModelMatrix(FVector translation, FVector rotation, FVe
 {
     FMatrix Translation = FMatrix::CreateTranslationMatrix(translation);
 
-    FMatrix Rotation = FMatrix::CreateRotation(rotation.X, rotation.Y, rotation.Z);
+    FMatrix Rotation = FMatrix::CreateRotationMatrix(rotation.X, rotation.Y, rotation.Z);
     //FMatrix Rotation = JungleMath::EulerToQuaternion(rotation).ToMatrix();
 
-    FMatrix Scale = FMatrix::CreateScale(scale.X, scale.Y, scale.Z);
+    FMatrix Scale = FMatrix::CreateScaleMatrix(scale.X, scale.Y, scale.Z);
     return Scale * Rotation * Translation;
 }
 
@@ -29,7 +31,7 @@ FMatrix JungleMath::CreateModelMatrix(FVector translation, FQuat rotation, FVect
 {
     FMatrix Translation = FMatrix::CreateTranslationMatrix(translation);
     FMatrix Rotation = rotation.ToMatrix();
-    FMatrix Scale = FMatrix::CreateScale(scale.X, scale.Y, scale.Z);
+    FMatrix Scale = FMatrix::CreateScaleMatrix(scale.X, scale.Y, scale.Z);
     return Scale * Rotation * Translation;
 }
 FMatrix JungleMath::CreateViewMatrix(FVector eye, FVector target, FVector up)
@@ -82,9 +84,9 @@ FMatrix JungleMath::CreateOrthoProjectionMatrix(float width, float height, float
     return Projection;
 }
 
-FVector JungleMath::FVectorRotate(FVector& origin, const FVector& rotation)
+FVector JungleMath::FVectorRotate(FVector& origin, const FVector& InRotation)
 {
-    FQuat quaternion = JungleMath::EulerToQuaternion(rotation);
+    FQuat quaternion = JungleMath::EulerToQuaternion(InRotation);
     // 쿼터니언을 이용해 벡터 회전 적용
     return quaternion.RotateVector(origin);
 }
@@ -144,9 +146,9 @@ FVector JungleMath::QuaternionToEuler(const FQuat& quat)
     euler.X = FMath::RadiansToDegrees(atan2(sinRoll, cosRoll));
     return euler;
 }
-FVector JungleMath::FVectorRotate(FVector& origin, const FQuat& rotation)
+FVector JungleMath::FVectorRotate(FVector& origin, const FRotator& InRotation)
 {
-    return rotation.RotateVector(origin);
+    return InRotation.ToQuaternion().RotateVector(origin);
 }
 
 FMatrix JungleMath::CreateRotationMatrix(FVector rotation)

@@ -4,6 +4,8 @@
 #include "MathUtility.h"
 #include "Vector.h"
 #include "Vector4.h"
+#include "Quat.h"
+#include "Rotator.h"
 #include "HAL/PlatformType.h"
 #include <cmath>
 
@@ -169,7 +171,7 @@ FMatrix FMatrix::Inverse(const FMatrix& Mat)
     return Result;
 }
 
-FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
+FMatrix FMatrix::CreateRotationMatrix(float roll, float pitch, float yaw)
 {
     float radRoll = roll * (PI / 180.0f);
     float radPitch = pitch * (PI / 180.0f);
@@ -189,17 +191,17 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
 
     // Y축 (Pitch) 회전
     FMatrix rotationY = { {
-        { cosPitch, 0, -sinPitch, 0 },
+        { cosPitch, 0, sinPitch, 0 },
         { 0, 1, 0, 0 },
-        { sinPitch, 0, cosPitch, 0 },
+        { -sinPitch, 0, cosPitch, 0 },
         { 0, 0, 0, 1 }
     } };
 
     // X축 (Roll) 회전
     FMatrix rotationX = { {
         { 1, 0, 0, 0 },
-        { 0, cosRoll, sinRoll, 0 },
-        { 0, -sinRoll, cosRoll, 0 },
+        { 0, cosRoll, -sinRoll, 0 },
+        { 0, sinRoll, cosRoll, 0 },
         { 0, 0, 0, 1 }
     } };
 
@@ -209,7 +211,7 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
 
 
 // 스케일 행렬 생성
-FMatrix FMatrix::CreateScale(float scaleX, float scaleY, float scaleZ)
+FMatrix FMatrix::CreateScaleMatrix(float scaleX, float scaleY, float scaleZ)
 {
     return { {
         { scaleX, 0, 0, 0 },
@@ -269,4 +271,67 @@ FVector FMatrix::TransformPosition(const FVector& vector) const
     float z = M[0][2] * vector.X + M[1][2] * vector.Y + M[2][2] * vector.Z + M[3][2];
     float w = M[0][3] * vector.X + M[1][3] * vector.Y + M[2][3] * vector.Z + M[3][3];
     return w != 0.0f ? FVector{x / w, y / w, z / w} : FVector{x, y, z};
+}
+
+FMatrix FMatrix::GetScaleMatrix(const FVector& InScale)
+{
+    return CreateScaleMatrix(InScale.X, InScale.Y, InScale.Z);
+}
+
+FMatrix FMatrix::GetTranslationMatrix(const FVector& position)
+{
+    return CreateTranslationMatrix(position);
+}
+
+FMatrix FMatrix::GetRotationMatrix(const FRotator& InRotation)
+{
+    return CreateRotationMatrix(InRotation.Roll, InRotation.Pitch, InRotation.Yaw);
+}
+
+FMatrix FMatrix::GetRotationMatrix(const FQuat& InRotation)
+{
+    // 쿼터니언 요소 추출
+    const float QuatX = InRotation.X, QuatY = InRotation.Y, QuatZ = InRotation.Z, w = InRotation.W;
+
+    // 중간 계산값
+    const float xx = QuatX * QuatX;
+    float yy = QuatY * QuatY;
+    float zz = QuatZ * QuatZ;
+    
+    const float xy = QuatX * QuatY;
+    float xz = QuatX * QuatZ;
+    float yz = QuatY * QuatZ;
+    const float wx = w * QuatX;
+    const float wy = w * QuatY;
+    const float wz = w * QuatZ;
+
+    // 회전 행렬 구성
+    FMatrix Result;
+
+    Result.M[0][0] = 1.0f - 2.0f * (yy + zz);
+    Result.M[0][1] = 2.0f * (xy - wz);
+    Result.M[0][2] = 2.0f * (xz + wy);
+    Result.M[0][3] = 0.0f;
+
+    Result.M[1][0] = 2.0f * (xy + wz);
+    Result.M[1][1] = 1.0f - 2.0f * (xx + zz);
+    Result.M[1][2] = 2.0f * (yz - wx);
+    Result.M[1][3] = 0.0f;
+
+    Result.M[2][0] = 2.0f * (xz - wy);
+    Result.M[2][1] = 2.0f * (yz + wx);
+    Result.M[2][2] = 1.0f - 2.0f * (xx + yy);
+    Result.M[2][3] = 0.0f;
+
+    Result.M[3][0] = 0.0f;
+    Result.M[3][1] = 0.0f;
+    Result.M[3][2] = 0.0f;
+    Result.M[3][3] = 1.0f; // 4x4 행렬이므로 마지막 값은 1
+
+    return Result;
+}
+
+FQuat FMatrix::ToQuat(const FMatrix& M) const
+{
+    return FQuat(M);
 }
