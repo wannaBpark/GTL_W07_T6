@@ -16,8 +16,6 @@
 #include "Engine/EditorEngine.h"
 
 
-using namespace DirectX;
-
 void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -64,7 +62,7 @@ void AEditorPlayer::Input()
     {
         if (bLeftMouseDown)
         {
-            bLeftMouseDown = false; // ���콺 ������ ��ư�� ���� ���� �ʱ�ȭ
+            bLeftMouseDown = false;
             std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
             ActiveViewport->SetPickedGizmoComponent(nullptr);
         }
@@ -383,11 +381,11 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     }
     if (cdMode == CDM_LOCAL)
     {
-        pObj->SetRotation(currentRotation * rotationDelta);
+        pObj->SetRelativeRotation(currentRotation * rotationDelta);
     }
     else if (cdMode == CDM_WORLD)
     {
-        pObj->SetRotation(rotationDelta * currentRotation);
+        pObj->SetRelativeRotation(rotationDelta * currentRotation);
     }
 }
 

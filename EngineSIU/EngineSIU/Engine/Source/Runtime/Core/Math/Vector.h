@@ -1,36 +1,56 @@
 ﻿#pragma once
-
-#include <DirectXMath.h>
-
+#include <cassert>
 #include "MathUtility.h"
+#include "Serialization/Archive.h"
+
 
 struct FVector2D
 {
 	float X, Y;
-	FVector2D(float _x = 0, float _y = 0) : X(_x), Y(_y) {}
 
-	FVector2D operator+(const FVector2D& rhs) const
-	{
-		return FVector2D(X + rhs.X, Y + rhs.Y);
-	}
-	FVector2D operator-(const FVector2D& rhs) const
-	{
-		return FVector2D(X - rhs.X, Y - rhs.Y);
-	}
-	FVector2D operator*(float rhs) const
-	{
-		return FVector2D(X * rhs, Y * rhs);
-	}
-	FVector2D operator/(float rhs) const
-	{
-		return FVector2D(X / rhs, Y / rhs);
-	}
-	FVector2D& operator+=(const FVector2D& rhs)
-	{
-		X += rhs.X;
-		Y += rhs.Y;
-		return *this;
-	}
+    FVector2D() : X(0), Y(0) {}
+	FVector2D(float InX, float InY) : X(InX), Y(InY) {}
+    FVector2D(float Scalar) : X(Scalar), Y(Scalar) {}
+
+public:
+    FVector2D operator+(const FVector2D& Rhs) const
+    {
+        return {
+            X + Rhs.X,
+            Y + Rhs.Y
+        };
+    }
+
+    FVector2D operator-(const FVector2D& Rhs) const
+    {
+        return {
+            X - Rhs.X,
+            Y - Rhs.Y
+        };
+    }
+
+    FVector2D operator*(float Scalar) const
+    {
+        return {
+            X * Scalar,
+            Y * Scalar
+        };
+    }
+
+    FVector2D operator/(float Scalar) const
+    {
+        return {
+            X / Scalar,
+            Y / Scalar
+        };
+    }
+
+    FVector2D& operator+=(const FVector2D& Rhs)
+    {
+        X += Rhs.X;
+        Y += Rhs.Y;
+        return *this;
+    }
 };
 
 // 3D 벡터
@@ -346,4 +366,14 @@ inline bool FVector::IsNearlyZero(float Tolerance) const
 inline bool FVector::IsZero() const
 {
     return X==0.f && Y==0.f && Z==0.f;
+}
+
+inline FArchive& operator<<(FArchive& Ar, FVector2D& V)
+{
+    return Ar << V.X << V.Y;
+}
+
+inline FArchive& operator<<(FArchive& Ar, FVector& V)
+{
+    return Ar << V.X << V.Y << V.Z;
 }

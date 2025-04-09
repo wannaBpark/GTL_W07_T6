@@ -15,9 +15,11 @@ public:
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& InRayOrigin, FVector& InRayDirection, float& pfNearHitDistance);
+    
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
     virtual FVector GetUpVector();
+    
     void AddLocation(FVector InAddValue);
     void AddRotation(FVector InAddValue);
     void AddScale(FVector InAddValue);
@@ -27,22 +29,14 @@ public:
 
     void AttachToComponent(USceneComponent* InParent);
 
-protected:
-    FVector RelativeLocation;
-    FRotator RelativeRotation;
-    FVector RelativeScale3D;
-
-    USceneComponent* AttachParent = nullptr;
-    TArray<USceneComponent*> AttachChildren;
-
 public:
-    FVector GetWorldScale() const;
-    FRotator GetWorldRotation();
-    FVector GetWorldLocation() const;
+    void SetRelativeLocation(FVector InNewLocation) { RelativeLocation = InNewLocation; }
+    void SetRelativeRotation(FRotator InNewRotation) { RelativeRotation = InNewRotation; }
+    void SetRelativeScale3D(FVector NewScale) { RelativeScale3D = NewScale; }
     
-    FVector GetRelativeScale() const { return RelativeScale3D; }
     FRotator GetRelativeRotation() const { return RelativeRotation; }
     FVector GetRelativeLocation() const { return RelativeLocation; }
+    FVector GetRelativeScale3D() const { return RelativeScale3D; }
 
     FMatrix GetScaleMatrix() const;
     FMatrix GetRotationMatrix() const;
@@ -50,9 +44,26 @@ public:
 
     FMatrix GetRTMatrix() const;
     FMatrix GetWorldMatrix() const;
-
-    void SetLocation(FVector _newLoc) { RelativeLocation = _newLoc; }
-    void SetRotation(FRotator InRotator) { RelativeRotation = InRotator; }
-    void SetScale(FVector _newScale) { RelativeScale3D = _newScale; }
+    
     void SetupAttachment(USceneComponent* InParent);
+
+protected:
+    /** 부모 컴포넌트로부터 상대적인 위치 */
+    UPROPERTY
+    (FVector, RelativeLocation);
+
+    /** 부모 컴포넌트로부터 상대적인 회전 */
+    UPROPERTY
+    (FRotator, RelativeRotation);
+
+    /** 부모 컴포넌트로부터 상대적인 크기 */
+    UPROPERTY
+    (FVector, RelativeScale3D);
+
+
+    UPROPERTY
+    (USceneComponent*, AttachParent, = nullptr);
+
+    UPROPERTY
+    (TArray<USceneComponent*>, AttachChildren);
 };

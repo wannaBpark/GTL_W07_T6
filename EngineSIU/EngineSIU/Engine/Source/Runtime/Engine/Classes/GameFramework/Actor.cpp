@@ -188,7 +188,7 @@ bool AActor::SetActorLocation(const FVector& NewLocation)
 {
     if (RootComponent)
     {
-       RootComponent->SetLocation(NewLocation);
+       RootComponent->SetRelativeLocation(NewLocation);
         return true;
     }
     return false;
@@ -198,7 +198,7 @@ bool AActor::SetActorRotation(const FRotator& NewRotation)
 {
     if (RootComponent)
     {
-        RootComponent->SetRotation(NewRotation);
+        RootComponent->SetRelativeRotation(NewRotation);
         return true;
     }
     return false;
@@ -208,7 +208,7 @@ bool AActor::SetActorScale(const FVector& NewScale)
 {
     if (RootComponent)
     {
-        RootComponent->SetScale(NewScale);
+        RootComponent->SetRelativeScale3D(NewScale);
         return true;
     }
     return false;

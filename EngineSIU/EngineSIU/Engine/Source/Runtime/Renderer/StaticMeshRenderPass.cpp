@@ -143,8 +143,7 @@ void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const 
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
     FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
-    FCameraConstantBuffer CameraData(View, Projection, {}, 0);
-    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
+   
 }
 
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
@@ -202,7 +201,7 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
 
@@ -219,6 +218,8 @@ void FStaticMeshRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorV
         bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
 
         UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
+        FCameraConstantBuffer CameraData(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), Viewport->ViewTransformPerspective.GetLocation(), 0);
+        BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
         OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
 

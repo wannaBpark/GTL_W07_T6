@@ -33,6 +33,10 @@ FFogRenderPass::~FFogRenderPass()
     if (SpritePixelShader) { SpritePixelShader->Release(); SpritePixelShader = nullptr; }
     if (InputLayout) { InputLayout->Release(); InputLayout = nullptr; }
     if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
+    if (FogBlendState) { FogBlendState->Release(); FogBlendState = nullptr; }
+    if (FogBuffer) { FogBuffer->Release(); FogBuffer = nullptr; }
+    if (FogRTV) { FogRTV->Release(); FogRTV = nullptr; }
+    if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
 }
 
 void FFogRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
@@ -40,8 +44,10 @@ void FFogRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDev
     Graphics = InGraphics;
     BufferManager = InBufferManager;
     ShaderManager = InShaderManager;
+    CreateRTV();
     CreateSpriteResources();
     CreateShader();
+    CreateBlendState();
 }
 
 void FFogRenderPass::CreateSpriteResources()
@@ -106,9 +112,16 @@ void FFogRenderPass::CreateShader()
         "mainPS"
     );
 
+    hr = ShaderManager->AddPixelShader(
+        L"FogQuadPixelShader",
+        L"Shaders/FogQuadPixelShader.hlsl",
+        "mainPS"
+    );
+
     // 생성된 셰이더와 입력 레이아웃 획득
     SpriteVertexShader = ShaderManager->GetVertexShaderByKey(L"FogVertexShader");
     SpritePixelShader = ShaderManager->GetPixelShaderByKey(L"FogPixelShader");
+    FinalPixelShader = ShaderManager->GetPixelShaderByKey(L"FogQuadPixelShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"FogVertexShader");
 
     CreateSceneSrv();
@@ -140,45 +153,79 @@ void FFogRenderPass::CreateSceneSrv()
     if (FAILED(hr)) {
         return;
     }
+
+    srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+
+    // 기존 SRV가 있다면 해제
+    if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
+
+    hr = Graphics->Device->CreateShaderResourceView(FogBuffer, &srvDesc, &FogSRV);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, L"FogSRV 생성 실패!", L"Error", MB_ICONERROR | MB_OK);
+        return;
+    }
 }
 
 void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)
 {
-    // 셰이더 설정
-    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
+    float Color[4] = { 0,0,0,0 };
+    Graphics->DeviceContext->ClearRenderTargetView(FogRTV, Color);
+    ID3D11RenderTargetView* nullRTV = nullptr;
+    Graphics->DeviceContext->OMSetRenderTargets(1, &nullRTV, nullptr);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &FogRTV, nullptr);
+    Graphics->DeviceContext->OMSetBlendState(FogBlendState, nullptr, 0xffffffff);
 
+    // 셰이더 설정
     Graphics->DeviceContext->VSSetShader(SpriteVertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(SpritePixelShader, nullptr, 0);
 
     // SRV & Sampler 바인딩
-    Graphics->DeviceContext->PSSetShaderResources(126, 1, &SceneSRV);
     Graphics->DeviceContext->PSSetShaderResources(127, 1, &DepthSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
 
-void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, UHeightFogComponent* Fog)
+void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, TArray< UHeightFogComponent*> Fogs)
 {
     D3D11_VIEWPORT vp = ActiveViewport->GetD3DViewport();
-    UpdateSceneSRV();
+    CheckResize();
 
     UpdateScreenConstant(vp);
 
     PrepareRenderState(DepthSRV);
 
-    UpdateFogConstant(ActiveViewport, Fog);
+    for (const auto& Fog : Fogs)
+    {
+        UpdateFogConstant(ActiveViewport, Fog);
 
-    UINT stride = sizeof(Vertex), offset = 0;
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &SpriteVertexBuffer, &stride, &offset);
-    Graphics->DeviceContext->IASetIndexBuffer(SpriteIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-    Graphics->DeviceContext->IASetInputLayout(InputLayout);
+        UINT stride = sizeof(Vertex), offset = 0;
+        Graphics->DeviceContext->IASetVertexBuffers(0, 1, &SpriteVertexBuffer, &stride, &offset);
+        Graphics->DeviceContext->IASetIndexBuffer(SpriteIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+        Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
-    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
+        Graphics->DeviceContext->DrawIndexed(6, 0, 0);
+    }
+
+    PrepareFinalRender();
+    FinalRender();
+
+    Graphics->DeviceContext->OMSetRenderTargets(2, Graphics->RTVs, Graphics->DepthStencilView);
+    Graphics->DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
+
 }
 
-void FFogRenderPass::UpdateSceneSRV()
+void FFogRenderPass::CheckResize()
 {
     // 화면 크기가 변경되었으면 SRV를 재생성
     if (screenWidth != Graphics->screenWidth || screenHeight != Graphics->screenHeight) {
+        if (FogBuffer) { FogBuffer->Release(); FogBuffer = nullptr; }
+        if (FogRTV) { FogRTV->Release(); FogRTV = nullptr; }
+        CreateRTV();
+
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
         srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -192,6 +239,23 @@ void FFogRenderPass::UpdateSceneSRV()
         if (FAILED(hr)) {
             return;
         }
+
+        srvDesc = {};
+        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+
+        // 기존 SRV가 있다면 해제
+        if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
+
+        hr = Graphics->Device->CreateShaderResourceView(FogBuffer, &srvDesc, &FogSRV);
+        if (FAILED(hr))
+        {
+            MessageBox(NULL, L"FogSRV 생성 실패!", L"Error", MB_ICONERROR | MB_OK);
+            return;
+        }
+
         screenWidth = Graphics->screenWidth;
         screenHeight = Graphics->screenHeight;
     }
@@ -239,4 +303,55 @@ void FFogRenderPass::UpdateFogConstant(const std::shared_ptr<FEditorViewportClie
     //상수버퍼 바인딩
     ID3D11Buffer* FogConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FFogConstants"));
     BufferManager->BindConstantBuffer(TEXT("FFogConstants"), 1, EShaderStage::Pixel);
+}
+
+void FFogRenderPass::CreateBlendState()
+{
+    D3D11_BLEND_DESC blendDesc = {};
+    blendDesc.AlphaToCoverageEnable = FALSE;
+    blendDesc.IndependentBlendEnable = FALSE;
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    HRESULT hr = Graphics->Device->CreateBlendState(&blendDesc, &FogBlendState);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, L"AlphaBlendState 생성에 실패했습니다!", L"Error", MB_ICONERROR | MB_OK);
+    }
+}
+
+void FFogRenderPass::PrepareFinalRender()
+{
+    // 셰이더 설정
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
+    Graphics->DeviceContext->OMSetBlendState(FogBlendState, nullptr, 0xffffffff);
+
+    Graphics->DeviceContext->VSSetShader(SpriteVertexShader, nullptr, 0);
+    Graphics->DeviceContext->PSSetShader(FinalPixelShader, nullptr, 0);
+
+    // SRV & Sampler 바인딩
+    Graphics->DeviceContext->PSSetShaderResources(126, 1, &SceneSRV);
+    Graphics->DeviceContext->PSSetShaderResources(127, 1, &FogSRV);
+    Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
+}
+
+void FFogRenderPass::FinalRender()
+{
+    UINT stride = sizeof(Vertex), offset = 0;
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &SpriteVertexBuffer, &stride, &offset);
+    Graphics->DeviceContext->IASetIndexBuffer(SpriteIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+    Graphics->DeviceContext->IASetInputLayout(InputLayout);
+
+    Graphics->DeviceContext->DrawIndexed(6, 0, 0);
+}
+
+void FFogRenderPass::CreateRTV()
+{
+    Graphics->CreateRTV(FogBuffer, FogRTV);
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include "Serialization/Archive.h"
+
 
 #include "Matrix.h"
 // 쿼터니언
@@ -123,3 +125,8 @@ struct FQuat
         return RotationMatrix;
     }
 };
+
+inline FArchive& operator<<(FArchive& Ar, FQuat& Q)
+{
+    return Ar << Q.X << Q.Y << Q.Z << Q.W;
+}

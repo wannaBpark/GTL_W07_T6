@@ -50,18 +50,19 @@ void FUpdateLightBufferPass::PrepareRender()
     }
 }
 
-void FUpdateLightBufferPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     FLightBuffer LightBufferData = {};
     int LightCount = 0;
 
-    LightBufferData.GlobalAmbientLight = FVector4(0.1, 0.1, 0.1, 1);
+    LightBufferData.GlobalAmbientLight = FVector4(0.01, 0.01, 0.01, 1);
     for (auto Light : PointLights)
     {
         if (LightCount < MAX_LIGHTS)
         {
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
+            LightBufferData.gLights[LightCount].AmbientColor = FVector(0.01, 0.01, 0.01);
 
             LightCount++;
         }

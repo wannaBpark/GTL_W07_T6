@@ -30,13 +30,21 @@ public:
 
     void PrepareRenderState(ID3D11ShaderResourceView* DepthSRV);
     // Fog를 화면에 렌더링
-    void RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, UHeightFogComponent* Fog);
+    void RenderFog(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, ID3D11ShaderResourceView* DepthSRV, TArray< UHeightFogComponent*> Fogs);
 
-    void UpdateSceneSRV();
+    void CheckResize();
 
     void UpdateScreenConstant(const D3D11_VIEWPORT& viewport);
 
     void UpdateFogConstant(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, UHeightFogComponent* Fog);
+
+    void CreateBlendState();
+
+    void PrepareFinalRender();
+
+    void FinalRender();
+
+    void CreateRTV();
 
 private:
     ID3D11SamplerState* Sampler = nullptr;
@@ -52,10 +60,17 @@ private:
     // Fog 렌더링용 셰이더 및 입력 레이아웃
     ID3D11VertexShader* SpriteVertexShader;
     ID3D11PixelShader* SpritePixelShader;
+    ID3D11PixelShader* FinalPixelShader;
     ID3D11InputLayout* InputLayout;
 
     // Scene SRV (외부에서 등록)
     ID3D11ShaderResourceView* SceneSRV;
+    ID3D11ShaderResourceView* FogSRV;
+
+    ID3D11Texture2D* FogBuffer = nullptr;
+    ID3D11RenderTargetView* FogRTV = nullptr;
+
+    ID3D11BlendState* FogBlendState = nullptr;
 
     bool bRender = false;
     float screenWidth = 0;

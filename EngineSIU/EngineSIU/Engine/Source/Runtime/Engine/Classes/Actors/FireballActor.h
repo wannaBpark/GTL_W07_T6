@@ -1,4 +1,9 @@
 #pragma once
-class UFireballActor
+#include"GameFramework/Actor.h"
+class AFireballActor : public AActor
 {
+    DECLARE_CLASS(AFireballActor, AActor)
+public:
+    AFireballActor();
+    virtual ~AFireballActor();
 };

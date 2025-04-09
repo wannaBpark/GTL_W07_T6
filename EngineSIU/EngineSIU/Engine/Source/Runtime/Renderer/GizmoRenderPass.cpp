@@ -53,6 +53,7 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+    CreateShader();
 }
 
 void FGizmoRenderPass::CreateShader()
@@ -121,12 +122,16 @@ void FGizmoRenderPass::PrepareRender()
     }*/
 }
 
-void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareRenderState();
     Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
-    ControlMode Mode = World->GetEditorPlayer()->GetControlMode();
+    
+    UWorld* ActiveWorld = GEngine->ActiveWorld.get();
+
+    ControlMode Mode = ActiveWorld->GetEditorPlayer()->GetControlMode();
+
     if (Mode == CM_TRANSLATION)
     {
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetArrowArr())
@@ -134,7 +139,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
             Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
 
-            RenderGizmoComponent(GizmoComp, Viewport, World);
+            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
 
             Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
             Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
@@ -148,7 +153,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
 
             Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
 
-            RenderGizmoComponent(GizmoComp, Viewport, World);
+            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
 
             Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
             Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
@@ -162,7 +167,7 @@ void FGizmoRenderPass::Render(UWorld* World, const std::shared_ptr<FEditorViewpo
             Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
             Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
 
-            RenderGizmoComponent(GizmoComp, Viewport, World);
+            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
 
             Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
             Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);

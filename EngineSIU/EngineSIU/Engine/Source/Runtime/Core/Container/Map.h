@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include <unordered_map>
+
 #include "ContainerAllocator.h"
 #include "Pair.h"
+#include "Serialization/Archive.h"
 
 
 template <typename KeyType, typename ValueType, typename Allocator = FDefaultAllocator<std::pair<const KeyType, ValueType>>>
@@ -124,6 +126,12 @@ public:
         ContainerPrivate.clear();
     }
 
+    void Empty(SizeType Number)
+    {
+        ContainerPrivate.clear();
+        ContainerPrivate.reserve(Number);
+    }
+
     // 검색 및 조회
     bool Contains(const KeyType& Key) const
     {
@@ -168,3 +176,40 @@ public:
         ContainerPrivate.reserve(Number);
     }
 };
+
+template <typename KeyType, typename ValueType, typename Allocator>
+FArchive& operator<<(FArchive& Ar, TMap<KeyType, ValueType, Allocator>& Map)
+{
+    using SizeType = typename TMap<KeyType, ValueType, Allocator>::SizeType;
+
+    // 맵 크기 직렬화
+    SizeType MapSize = Map.Num();
+    Ar << MapSize;
+
+    if (Ar.IsLoading())
+    {
+        // 로드 시 맵 초기화
+        Map.Empty(MapSize);
+
+        for (SizeType i = 0; i < MapSize; ++i)
+        {
+            KeyType TempKey;
+            ValueType TempValue;
+            Ar << TempKey;
+            Ar << TempValue;
+
+            Map.Emplace(std::move(TempKey), std::move(TempValue));
+        }
+    }
+    else
+    {
+        // 맵의 각 키-값 쌍 직렬화
+        for (auto& [Key, Value] : Map)
+        {
+            Ar << const_cast<KeyType&>(Key);
+            Ar << Value;
+        }
+    }
+
+    return Ar;
+}

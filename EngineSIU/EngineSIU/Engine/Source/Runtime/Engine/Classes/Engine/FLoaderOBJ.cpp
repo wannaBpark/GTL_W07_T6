@@ -96,7 +96,7 @@ bool FLoaderOBJ::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
         {
             float NormalX, NormalY, NormalZ;
             LineStream >> NormalX >> NormalY >> NormalZ;
-            OutObjInfo.Normals.Add(FVector(NormalX, NormalY, NormalZ));
+            OutObjInfo.Normals.Add(FVector(NormalX, NormalY * -1, NormalZ));
             continue;
         }
 
@@ -104,7 +104,7 @@ bool FLoaderOBJ::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
         {
             float U, V;
             LineStream >> U >> V;
-            OutObjInfo.UVs.Add(FVector2D(U, V));
+            OutObjInfo.UVs.Add(FVector2D(U, 1.f - V));
             continue;
         }
 
@@ -353,7 +353,7 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
             if (UVIndex != UINT32_MAX && UVIndex < RawData.UVs.Num())
             {
                 StaticMeshVertex.U = RawData.UVs[UVIndex].X;
-                StaticMeshVertex.V = 1.f - RawData.UVs[UVIndex].Y;
+                StaticMeshVertex.V = RawData.UVs[UVIndex].Y;
             }
 
             if (NormalIndex != UINT32_MAX && NormalIndex < RawData.Normals.Num())

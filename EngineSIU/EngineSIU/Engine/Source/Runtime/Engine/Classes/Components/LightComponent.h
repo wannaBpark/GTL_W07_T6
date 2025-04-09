@@ -15,17 +15,15 @@ public:
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
     void InitializeLight();
     
-    void SetAmbientColor(FVector4 NewColor);
     void SetDiffuseColor(FVector4 NewColor);
     void SetSpecularColor(FVector4 NewColor);
-    void SetAttenuation(FVector Attenuation);
+    void SetAttenuation(float Attenuation);
     void SetRange(float r);
     void SetFalloff(float fallOff);
 
-    FVector4 GetAmbientColor();
     FVector4 GetDiffuseColor();
     FVector4 GetSpecularColor();
-    FVector GetAttenuation();
+    float GetAttenuation();
     float GetFalloff();
     FLight GetLightInfo() const { return Light; };
 protected:

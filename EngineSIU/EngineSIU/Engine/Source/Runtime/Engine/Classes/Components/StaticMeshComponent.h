@@ -11,7 +11,8 @@ public:
 
     virtual UObject* Duplicate() override;
 
-    PROPERTY(int, selectedSubMeshIndex);
+    void SetselectedSubMeshIndex(const int& value) { selectedSubMeshIndex = value; }
+    int GetselectedSubMeshIndex() const { return selectedSubMeshIndex; };
 
     virtual uint32 GetNumMaterials() const override;
     virtual UMaterial* GetMaterial(uint32 ElementIndex) const override;

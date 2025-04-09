@@ -2,6 +2,8 @@
 #include "GameFramework/Actor.h"
 
 class UStaticMeshComponent;
+
+
 class AStaticMeshActor : public AActor
 {
     DECLARE_CLASS(AStaticMeshActor, AActor)
@@ -10,6 +12,8 @@ public:
     AStaticMeshActor();
 
     UStaticMeshComponent* GetStaticMeshComponent() const;
+
 private:
-    UStaticMeshComponent* StaticMeshComponent = nullptr;
+    UPROPERTY
+    (UStaticMeshComponent*, StaticMeshComponent, = nullptr);
 };
