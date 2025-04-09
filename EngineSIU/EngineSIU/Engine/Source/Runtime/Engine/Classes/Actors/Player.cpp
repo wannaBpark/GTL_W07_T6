@@ -44,7 +44,7 @@ void AEditorPlayer::Input()
 
                 UE_LOG(LogLevel::Display, *obj->GetName());
             }
-            ScreenToClient(GEngineLoop.hWnd, &mousePos);
+            ScreenToClient(GEngineLoop.AppWnd, &mousePos);
 
             FVector pickPosition;
 

@@ -41,7 +41,7 @@ void SLevelEditor::Tick(double deltaTime)
     if (bMultiViewportMode) {
         POINT pt;
         GetCursorPos(&pt);
-        ScreenToClient(GEngineLoop.hWnd, &pt);
+        ScreenToClient(GEngineLoop.AppWnd, &pt);
         if (VSplitter->IsHover(FPoint(pt.x, pt.y)) || HSplitter->IsHover(FPoint(pt.x, pt.y)))
         {
             SetCursor(LoadCursor(nullptr, IDC_SIZEALL));
@@ -74,7 +74,7 @@ void SLevelEditor::Input()
             POINT pt;
             GetCursorPos(&pt);
             GetCursorPos(&lastMousePos);
-            ScreenToClient(GEngineLoop.hWnd, &pt);
+            ScreenToClient(GEngineLoop.AppWnd, &pt);
 
             SelectViewport(pt);
 
@@ -116,7 +116,7 @@ void SLevelEditor::Input()
             POINT pt;
             GetCursorPos(&pt);
             GetCursorPos(&lastMousePos);
-            ScreenToClient(GEngineLoop.hWnd, &pt);
+            ScreenToClient(GEngineLoop.AppWnd, &pt);
 
             SelectViewport(pt);
         }
