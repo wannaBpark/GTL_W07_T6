@@ -330,9 +330,6 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor = World->SpawnActor<AFireballActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
 
-                    UProjectileMovementComponent* ProjectileMovementComponent = SpawnedActor->AddComponent<UProjectileMovementComponent>();
-                    
-                    PointLightComp->AttachToComponent(SpawnedActor->GetRootComponent());
                     break;
                 }
                 case OBJ_Fog:

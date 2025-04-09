@@ -9,12 +9,12 @@
 
 AFireballActor::AFireballActor()
 {
-    FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
+    FManagerOBJ::CreateStaticMesh("Contents/Sphere.obj");
 
 
     SphereComp = AddComponent<USphereComp>();
     
-    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
+    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/Sphere.obj"));
   
     PointLightComponent = AddComponent<UPointLightComponent>();
     
