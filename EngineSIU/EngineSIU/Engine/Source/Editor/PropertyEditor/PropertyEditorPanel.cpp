@@ -255,7 +255,7 @@ void PropertyEditorPanel::Render()
             }
 
             float FogDensity = FogComponent->GetFogDensity();
-            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 0.2f))
+            if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
             {
                 FogComponent->SetFogDensity(FogDensity);
             }
@@ -267,9 +267,15 @@ void PropertyEditorPanel::Render()
             }
 
             float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
-            if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.01f, 1.0f))
+            if (ImGui::SliderFloat("Height Fall Off", &FogHeightFallOff, 0.001f, 0.15f))
             {
                 FogComponent->SetFogHeightFalloff(FogHeightFallOff);
+            }
+
+            float FogStartDistance = FogComponent->GetStartDistance();
+            if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
+            {
+                FogComponent->SetStartDistance(FogStartDistance);
             }
 
             ImGui::TreePop();
