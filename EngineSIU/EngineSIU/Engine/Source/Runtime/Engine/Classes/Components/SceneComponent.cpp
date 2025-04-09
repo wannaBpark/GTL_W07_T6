@@ -1,4 +1,5 @@
 #include "Components/SceneComponent.h"
+#include "Math/Rotator.h"
 #include "Math/JungleMath.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
@@ -16,7 +17,6 @@ UObject* USceneComponent::Duplicate(UObject* InOuter)
 
     NewComponent->RelativeLocation = RelativeLocation;
     NewComponent->RelativeRotation = RelativeRotation;
-    NewComponent->QuatRotation = QuatRotation;
     NewComponent->RelativeScale3D = RelativeScale3D;
 
     return NewComponent;
@@ -34,7 +34,7 @@ void USceneComponent::TickComponent(float DeltaTime)
 }
 
 
-int USceneComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
+int USceneComponent::CheckRayIntersection(FVector& InRayOrigin, FVector& InRayDirection, float& pfNearHitDistance)
 {
     int nIntersections = 0;
     return nIntersections;
@@ -43,40 +43,40 @@ int USceneComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirect
 FVector USceneComponent::GetForwardVector()
 {
 	FVector Forward = FVector(1.f, 0.f, 0.0f);
-	Forward = JungleMath::FVectorRotate(Forward, QuatRotation);
+	Forward = JungleMath::FVectorRotate(Forward, RelativeRotation);
 	return Forward;
 }
 
 FVector USceneComponent::GetRightVector()
 {
 	FVector Right = FVector(0.f, 1.f, 0.0f);
-	Right = JungleMath::FVectorRotate(Right, QuatRotation);
+	Right = JungleMath::FVectorRotate(Right, RelativeRotation);
 	return Right;
 }
 
 FVector USceneComponent::GetUpVector()
 {
 	FVector Up = FVector(0.f, 0.f, 1.0f);
-	Up = JungleMath::FVectorRotate(Up, QuatRotation);
+	Up = JungleMath::FVectorRotate(Up, RelativeRotation);
 	return Up;
 }
 
 
-void USceneComponent::AddLocation(FVector _added)
+void USceneComponent::AddLocation(FVector InAddValue)
 {
-	RelativeLocation = RelativeLocation + _added;
+	RelativeLocation = RelativeLocation + InAddValue;
 
 }
 
-void USceneComponent::AddRotation(FVector _added)
+void USceneComponent::AddRotation(FVector InAddValue)
 {
-	RelativeRotation = RelativeRotation + _added;
+	RelativeRotation = RelativeRotation + InAddValue;
 
 }
 
-void USceneComponent::AddScale(FVector _added)
+void USceneComponent::AddScale(FVector InAddValue)
 {
-	RelativeScale3D = RelativeScale3D + _added;
+	RelativeScale3D = RelativeScale3D + InAddValue;
 
 }
 
@@ -106,42 +106,84 @@ void USceneComponent::AttachToComponent(USceneComponent* InParent)
     }
 }
 
-FVector USceneComponent::GetWorldRotation()
-{
-	if (AttachParent)
-	{
-		return FVector(AttachParent->GetRelativeRotation() + GetRelativeRotation());
-	}
-    return GetRelativeRotation();
-}
-
-FVector USceneComponent::GetWorldScale() const
-{
-	if (AttachParent)
-	{
-		return FVector(AttachParent->GetWorldScale() + GetRelativeScale3D());
-	}
-    return GetRelativeScale3D();
-}
-
 FVector USceneComponent::GetWorldLocation() const
 {
-	if (AttachParent)
-	{
-		return FVector(AttachParent->GetWorldLocation() + GetRelativeLocation());
-	}
-    return GetRelativeLocation();
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldLocation() + RelativeLocation;
+    }
+    return RelativeLocation;
 }
 
-FVector USceneComponent::GetRelativeRotation() const
+FRotator USceneComponent::GetWorldRotation() const
 {
-	return JungleMath::QuaternionToEuler(QuatRotation);
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldRotation().ToQuaternion() * RelativeRotation.ToQuaternion();
+    }
+    return RelativeRotation;
 }
 
-void USceneComponent::SetRelativeRotation(FVector NewRotation)
+FVector USceneComponent::GetWorldScale3D() const
 {
-	RelativeRotation = NewRotation;
-	QuatRotation = JungleMath::EulerToQuaternion(NewRotation);
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldScale3D() * RelativeScale3D;
+    }
+    return RelativeScale3D;
+}
+
+FMatrix USceneComponent::GetScaleMatrix() const
+{
+    FMatrix ScaleMat = FMatrix::GetScaleMatrix(RelativeScale3D);
+    if (AttachParent)
+    {
+        FMatrix ParentScaleMat = AttachParent->GetScaleMatrix();
+        ScaleMat = ScaleMat * ParentScaleMat;
+    }
+    return ScaleMat;
+}
+
+FMatrix USceneComponent::GetRotationMatrix() const
+{
+    FMatrix RotationMat = FMatrix::GetRotationMatrix(RelativeRotation);
+    if (AttachParent)
+    {
+        FMatrix ParentRotationMat = AttachParent->GetRotationMatrix();
+        RotationMat = RotationMat * ParentRotationMat;
+    }
+    return RotationMat;
+}
+
+FMatrix USceneComponent::GetTranslationMatrix() const
+{
+    FMatrix TranslationMat = FMatrix::GetTranslationMatrix(RelativeLocation);
+    if (AttachParent)
+    {
+        FMatrix ParentTranslationMat = AttachParent->GetTranslationMatrix();
+        TranslationMat = TranslationMat * ParentTranslationMat;
+    }
+    return TranslationMat;
+}
+
+FMatrix USceneComponent::GetWorldMatrix() const
+{
+    FMatrix ScaleMat = FMatrix::GetScaleMatrix(RelativeScale3D);
+    FMatrix RotationMat = FMatrix::GetRotationMatrix(RelativeRotation);
+    FMatrix TranslationMat = FMatrix::GetTranslationMatrix(RelativeLocation);
+
+    FMatrix RTMat = RotationMat * TranslationMat;
+    if (AttachParent)
+    {
+        FMatrix ParentScaleMat = AttachParent->GetScaleMatrix();
+        FMatrix ParentRotationMat = AttachParent->GetRotationMatrix();
+        FMatrix ParentTranslationMat = AttachParent->GetTranslationMatrix();
+        
+        ScaleMat = ScaleMat * ParentScaleMat;
+        FMatrix ParentRTMat = ParentRotationMat * ParentTranslationMat;
+        RTMat = RTMat * ParentRTMat;
+    }
+    return ScaleMat * RTMat;
 }
 
 void USceneComponent::SetupAttachment(USceneComponent* InParent)

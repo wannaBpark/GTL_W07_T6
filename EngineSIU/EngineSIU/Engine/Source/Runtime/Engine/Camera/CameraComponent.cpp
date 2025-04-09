@@ -16,7 +16,7 @@ void UCameraComponent::TickComponent(float DeltaTime)
     Super::TickComponent(DeltaTime);
 
 	Input();
-	QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
+	// QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
 }
 
 void UCameraComponent::Input()
@@ -97,10 +97,13 @@ void UCameraComponent::MoveUp(float _Value)
 
 void UCameraComponent::RotateYaw(float _Value)
 {
-	RelativeRotation.Z += _Value * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
+    RelativeRotation.Yaw += _Value * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
+	// RelativeRotation.Z += _Value * GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotatePitch(float _Value)
 {
-	RelativeRotation.Y = FMath::Clamp(RelativeRotation.Y + _Value, -90.f, 90.f);
+    RelativeRotation.Pitch += FMath::Clamp((RelativeRotation.Pitch + _Value), -90.f, 90.f);
+    
+	// RelativeRotation.Y = FMath::Clamp(RelativeRotation.Y + _Value, -90.f, 90.f);
 }

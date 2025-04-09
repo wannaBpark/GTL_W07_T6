@@ -171,6 +171,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Quat.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Rotator.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Serialization\Archive.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Matrix.cpp" />
@@ -266,6 +268,7 @@
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Rotator.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Serialization\MemoryArchive.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Matrix.h" />
