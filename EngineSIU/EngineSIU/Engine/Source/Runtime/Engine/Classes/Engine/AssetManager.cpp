@@ -2,6 +2,7 @@
 #include "Engine.h"
 
 #include <filesystem>
+#include "Engine/FLoaderOBJ.h"
 
 bool UAssetManager::IsInitialized()
 {
@@ -29,7 +30,14 @@ UAssetManager* UAssetManager::GetIfInitialized()
 
 void UAssetManager::InitAssetManager()
 {
+    AssetRegistry = std::make_unique<FAssetRegistry>();
+
     LoadObjFiles();
+}
+
+const TMap<FName, FAssetInfo>& UAssetManager::GetAssetRegistry()
+{
+    return AssetRegistry->PathNameToAssetInfo;
 }
 
 void UAssetManager::LoadObjFiles()
@@ -48,8 +56,10 @@ void UAssetManager::LoadObjFiles()
             NewAssetInfo.AssetType = EAssetType::StaticMesh; // obj 파일은 무조건 StaticMesh
             NewAssetInfo.Size = static_cast<uint32>(std::filesystem::file_size(Entry.path()));
             
-            AssetRegistry->PathNameToAssetInfo.Add(FName(Entry.path().filename().string()), NewAssetInfo);
+            AssetRegistry->PathNameToAssetInfo.Add(NewAssetInfo.AssetName, NewAssetInfo);
             
+            FString MeshName = NewAssetInfo.PackagePath.ToString() + "/" + NewAssetInfo.AssetName.ToString();
+            FManagerOBJ::CreateStaticMesh(MeshName);
             // ObjFileNames.push_back(UGTLStringLibrary::StringToWString(Entry.path().string()));
             // FObjManager::LoadObjStaticMeshAsset(UGTLStringLibrary::StringToWString(Entry.path().string()));
         }

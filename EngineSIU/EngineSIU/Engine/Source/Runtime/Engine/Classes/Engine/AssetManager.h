@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
@@ -42,6 +42,8 @@ public:
     static UAssetManager* GetIfInitialized();
     
     void InitAssetManager();
+
+    const TMap<FName, FAssetInfo>& GetAssetRegistry();
 
 private:
     void LoadObjFiles();
