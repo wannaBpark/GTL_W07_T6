@@ -8,7 +8,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Math/JungleMath.h"
-
+#include "Engine/EditorEngine.h"
 #include "World/World.h"
 #include "EngineLoop.h"
 
@@ -39,13 +39,16 @@ void FUpdateLightBufferPass::PrepareRender()
 {
     for (const auto iter : TObjectRange<ULightComponentBase>())
     {
-        if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter)) {
-
-            PointLights.Add(PointLight);
-        }
-        else if (USpotLightComponent* PointLight = Cast<USpotLightComponent>(iter)) {
-
-            SpotLights.Add(PointLight);
+        if (iter->GetWorld() == GEngine->ActiveWorld)
+        {
+            if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter))
+            {
+                PointLights.Add(PointLight);
+            }
+            else if (USpotLightComponent* PointLight = Cast<USpotLightComponent>(iter))
+            {
+                SpotLights.Add(PointLight);
+            }
         }
     }
 }
@@ -62,7 +65,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
         {
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-           
+
             LightCount++;
         }
     }

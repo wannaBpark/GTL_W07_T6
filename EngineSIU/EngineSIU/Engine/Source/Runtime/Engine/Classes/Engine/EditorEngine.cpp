@@ -42,10 +42,10 @@ void UEditorEngine::Tick(float DeltaTime)
                 World->Tick(DeltaTime);
                 EditorPlayer->Tick(DeltaTime);
                 ULevel* Level = World->GetActiveLevel();
-                TArray ActorCpy = Level->Actors;
+                TArray CachedActors = Level->Actors;
                 if (Level)
                 {
-                    for (AActor* Actor : ActorCpy)
+                    for (AActor* Actor : CachedActors)
                     {
                         if (Actor && Actor->IsActorTickInEditor())
                         {
@@ -61,9 +61,10 @@ void UEditorEngine::Tick(float DeltaTime)
             {
                 World->Tick(DeltaTime);
                 ULevel* Level = World->GetActiveLevel();
+                TArray CachedActors = Level->Actors;
                 if (Level)
                 {
-                    for (AActor* Actor : Level->Actors)
+                    for (AActor* Actor : CachedActors)
                     {
                         if (Actor)
                         {

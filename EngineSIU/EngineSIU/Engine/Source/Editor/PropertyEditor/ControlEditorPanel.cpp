@@ -351,12 +351,14 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
                     
                     FManagerOBJ::CreateStaticMesh("Assets/Sphere.obj");
+                    
                     SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Sphere.obj"));
                     SphereComp->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
+                    
                     UPointLightComponent* PointLightComp = SpawnedActor->AddComponent<UPointLightComponent>();
                     UProjectileMovementComponent* ProjectileMovementComponent = SpawnedActor->AddComponent<UProjectileMovementComponent>();
+                    
                     PointLightComp->AttachToComponent(SpawnedActor->GetRootComponent());
-                    ProjectileMovementComponent->AttachToComponent(PointLightComp);
                     break;
                 }
                 case OBJ_Fog:

@@ -37,20 +37,13 @@ void UProjectileMovementComponent::TickComponent(float dt)
         GetOwner()->GetRootComponent()->SetRelativeLocation(NewLocation);
     }
 
-    /*
-    * TODO: Picking 됐을 때 Destroy 호출시
-    * 
-    *  USceneComponent::GetWorldLocation() const
-	if (AttachParent)  예외 발생함.
-    */
-
-   /* 
-      AccumulatedTime += DeltaTime;
+    //ToDo : PIE모드 진입 후에도 PickedActor를 유지했을 때 예외발생할 수 있음.
+    AccumulatedTime += DeltaTime;
     if (AccumulatedTime >= ProjectileLifetime)
-      {
-          if (GetOwner())
-          {
-              GetOwner()->Destroy();
-          }
-      }*/
+    {
+        if (GetOwner())
+        {
+            GetOwner()->Destroy();
+        }
+    }
 }
