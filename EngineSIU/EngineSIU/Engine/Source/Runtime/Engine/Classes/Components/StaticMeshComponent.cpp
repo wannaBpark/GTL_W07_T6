@@ -4,10 +4,11 @@
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 
+#include "GameFramework/Actor.h"
 
-UObject* UStaticMeshComponent::Duplicate()
+UObject* UStaticMeshComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->staticMesh = staticMesh;
     NewComponent->selectedSubMeshIndex = selectedSubMeshIndex;

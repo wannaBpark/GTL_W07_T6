@@ -15,7 +15,7 @@ private:
 public:
     UActorComponent() = default;
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     /** AActor가 World에 Spawn되어 BeginPlay이전에 호출됩니다. */
     virtual void InitializeComponent();

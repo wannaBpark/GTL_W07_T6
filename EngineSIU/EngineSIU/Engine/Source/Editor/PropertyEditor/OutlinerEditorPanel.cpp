@@ -36,7 +36,7 @@ void OutlinerEditorPanel::Render()
     if (ImGui::TreeNode("Primitives")) // 트리 노드 생성
     {
         UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-        for (AActor* Actor : Engine->ActiveWorld->GetActiveLevel().lock()->Actors)
+        for (AActor* Actor : Engine->ActiveWorld->GetActiveLevel()->Actors)
         {
             
             if (ImGui::Selectable(*Actor->GetActorLabel(), Engine->GetSelectedActor() == Actor))

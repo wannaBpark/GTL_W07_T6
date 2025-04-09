@@ -15,7 +15,7 @@ public:
 
     void InitLevel(UWorld* InOwningWorld);
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     TArray<AActor*> Actors;
     UWorld* OwningWorld;

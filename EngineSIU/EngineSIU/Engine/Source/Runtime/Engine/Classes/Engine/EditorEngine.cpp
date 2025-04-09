@@ -22,10 +22,12 @@ void UEditorEngine::Init()
 
     FWorldContext& EditorWorldContext = CreateNewWorldContext(EWorldType::Editor);
 
-    EditorWorld.reset(UWorld::CreateWorld(EWorldType::Editor, FString("EditorWorld")));
+    EditorWorld = UWorld::CreateWorld(this, EWorldType::Editor, FString("EditorWorld"));
 
-    EditorWorldContext.SetCurrentWorld(EditorWorld.get());
+    EditorWorldContext.SetCurrentWorld(EditorWorld);
     ActiveWorld = EditorWorld;
+
+    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
 }
 
 void UEditorEngine::Tick(float DeltaTime)
@@ -38,13 +40,14 @@ void UEditorEngine::Tick(float DeltaTime)
             {
                 // TODO: World에서 EditorPlayer 제거 후 Tick 호출 제거 필요.
                 World->Tick(DeltaTime);
-                std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
+                EditorPlayer->Tick(DeltaTime);
+                ULevel* Level = World->GetActiveLevel();
                 TArray ActorCpy = Level->Actors;
                 if (Level)
                 {
                     for (AActor* Actor : ActorCpy)
                     {
-                        if (Actor)
+                        if (Actor && Actor->IsActorTickInEditor())
                         {
                             Actor->Tick(DeltaTime);
                         }
@@ -57,7 +60,7 @@ void UEditorEngine::Tick(float DeltaTime)
             if (UWorld* World = WorldContext->World())
             {
                 World->Tick(DeltaTime);
-                std::shared_ptr<ULevel> Level = World->GetActiveLevel().lock();
+                ULevel* Level = World->GetActiveLevel();
                 if (Level)
                 {
                     for (AActor* Actor : Level->Actors)
@@ -75,13 +78,23 @@ void UEditorEngine::Tick(float DeltaTime)
 
 void UEditorEngine::StartPIE()
 {
-    FWorldContext& PIEWorldContext = CreateNewWorldContext(EWorldType::PIE);
-    // PIEWorld = Cast<UWorld>(EditorWorld->Duplicate());
+    if (PIEWorld)
+    {
+        UE_LOG(LogLevel::Warning, TEXT("PIEWorld already exists!"));
+        return;
+    }
 
-    // PIEWorld->BeginPlay();
+    FWorldContext& PIEWorldContext = CreateNewWorldContext(EWorldType::PIE);
+
+    PIEWorld = Cast<UWorld>(EditorWorld->Duplicate(this));
+    PIEWorld->WorldType = EWorldType::PIE;
+
+    PIEWorldContext.SetCurrentWorld(PIEWorld);
+    ActiveWorld = PIEWorld;
+    
+    PIEWorld->BeginPlay();
     // 여기서 Actor들의 BeginPlay를 해줄지 안에서 해줄 지 고민.
-    // WorldList.Add(*GetWorldContextFromWorld(PIEWorld.get()));
-    // ActiveWorld = PIEWorld;
+    WorldList.Add(GetWorldContextFromWorld(PIEWorld));
 }
 
 void UEditorEngine::EndPIE()
@@ -89,13 +102,13 @@ void UEditorEngine::EndPIE()
     if (PIEWorld)
     {
         //WorldList.Remove(*GetWorldContextFromWorld(PIEWorld.get()));
-
+        WorldList.Remove(GetWorldContextFromWorld(PIEWorld));
         PIEWorld->Release();
-        PIEWorld.reset();
+        GUObjectArray.MarkRemoveObject(PIEWorld);
+        PIEWorld = nullptr;
     }
-
     // 다시 EditorWorld로 돌아옴.
-
+    ActiveWorld = EditorWorld;
 }
 
 FWorldContext& UEditorEngine::GetEditorWorldContext(/*bool bEnsureIsGWorld*/)
@@ -140,7 +153,7 @@ void UEditorEngine::DeselectActor(AActor* InActor)
 
 bool UEditorEngine::CanSelectActor(AActor* InActor) const
 {
-    return InActor != nullptr && InActor->GetWorld() == ActiveWorld.get() && !InActor->IsActorBeingDestroyed();
+    return InActor != nullptr && InActor->GetWorld() == ActiveWorld && !InActor->IsActorBeingDestroyed();
 }
 
 AActor* UEditorEngine::GetSelectedActor() const
@@ -174,7 +187,7 @@ void UEditorEngine::DeselectComponent(USceneComponent* InComponent)
 
 bool UEditorEngine::CanSelectComponent(USceneComponent* InComponent) const
 {
-    return InComponent != nullptr && InComponent->GetOwner() && InComponent->GetOwner()->GetWorld() == ActiveWorld.get() && !InComponent->GetOwner()->IsActorBeingDestroyed();
+    return InComponent != nullptr && InComponent->GetOwner() && InComponent->GetOwner()->GetWorld() == ActiveWorld && !InComponent->GetOwner()->IsActorBeingDestroyed();
 }
 
 USceneComponent* UEditorEngine::GetSelectedComponent() const
@@ -188,4 +201,9 @@ void UEditorEngine::HoverComponent(USceneComponent* InComponent)
     {
         PrivateEditorSelection::GComponentHovered = InComponent;
     }
+}
+
+AEditorPlayer* UEditorEngine::GetEditorPlayer()
+{
+    return EditorPlayer;
 }

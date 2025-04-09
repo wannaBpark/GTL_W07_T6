@@ -9,15 +9,15 @@ void ULevel::InitLevel(UWorld* InOwningWorld)
 
 }
 
-UObject* ULevel::Duplicate()
+UObject* ULevel::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewLevel = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewLevel = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewLevel->OwningWorld = OwningWorld;
 
     for (AActor* Actor : Actors)
     {
-        NewLevel->Actors.Emplace(static_cast<AActor*>(Actor->Duplicate()));
+        NewLevel->Actors.Emplace(static_cast<AActor*>(Actor->Duplicate(InOuter)));
     }
 
     return NewLevel;

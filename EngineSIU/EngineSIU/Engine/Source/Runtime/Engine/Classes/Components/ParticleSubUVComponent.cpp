@@ -11,9 +11,9 @@ UParticleSubUVComponent::UParticleSubUVComponent()
 }
 
 // Duplicate: 버퍼 포인터는 복사하지 않고 애니메이션 상태만 복제
-UObject* UParticleSubUVComponent::Duplicate()
+UObject* UParticleSubUVComponent::Duplicate(UObject* InOuter)
 {
-    UParticleSubUVComponent* NewComponent = Cast<UParticleSubUVComponent>(Super::Duplicate());
+    UParticleSubUVComponent* NewComponent = Cast<UParticleSubUVComponent>(Super::Duplicate(InOuter));
     if (NewComponent)
     {
         NewComponent->bIsLoop = bIsLoop;
