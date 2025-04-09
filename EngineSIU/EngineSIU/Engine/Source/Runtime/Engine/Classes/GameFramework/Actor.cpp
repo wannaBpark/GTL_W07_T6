@@ -117,6 +117,36 @@ bool AActor::Destroy()
     return IsActorBeingDestroyed();
 }
 
+UActorComponent* AActor::AddComponent(UClass* InClass)
+{
+    if (InClass->IsChildOf<UActorComponent>())
+    {
+        UActorComponent* Component = static_cast<UActorComponent*>(FObjectFactory::ConstructObject(InClass, this));
+        OwnedComponents.Add(Component);
+        Component->OwnerPrivate = this;
+
+        // 만약 SceneComponent를 상속 받았다면
+        if (USceneComponent* NewSceneComp = Cast<USceneComponent>(Component))
+        {
+            if (RootComponent == nullptr)
+            {
+                RootComponent = NewSceneComp;
+            }
+            // TODO: 나중에 RegisterComponent() 생기면 주석 해제
+            // else
+            // {
+            //     NewSceneComp->SetupAttachment(RootComponent);
+            // }
+        }
+
+        // TODO: RegisterComponent() 생기면 제거
+        Component->InitializeComponent();
+
+        return Component;
+    }
+    return nullptr;
+}
+
 void AActor::RemoveOwnedComponent(UActorComponent* Component)
 {
     OwnedComponents.Remove(Component);
