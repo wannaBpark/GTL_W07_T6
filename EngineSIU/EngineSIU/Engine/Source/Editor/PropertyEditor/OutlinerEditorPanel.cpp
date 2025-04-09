@@ -2,7 +2,7 @@
 #include "World/World.h"
 #include "GameFramework/Actor.h"
 #include "Engine/EditorEngine.h"
-
+#include <functional>
 
 void OutlinerEditorPanel::Render()
 {
@@ -33,20 +33,54 @@ void OutlinerEditorPanel::Render()
     /* Render Start */
     ImGui::Begin("Outliner", nullptr, PanelFlags);
 
-    if (ImGui::TreeNode("Primitives")) // 트리 노드 생성
-    {
-        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-        for (AActor* Actor : Engine->ActiveWorld->GetActiveLevel()->Actors)
+    
+    ImGui::BeginChild("Objects");
+    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    if (!Engine)
+        return;
+
+    std::function<void(USceneComponent*)> CreateNode = [&CreateNode, &Engine](USceneComponent* InComp)->void
         {
-            
-            if (ImGui::Selectable(*Actor->GetActorLabel(), Engine->GetSelectedActor() == Actor))
+            FString Name;
+
+            if (InComp == InComp->GetOwner()->GetRootComponent())
             {
-                Engine->SelectActor(Actor);
-                break;
+                Name = InComp->GetOwner()->GetActorLabel();
             }
-        }
-        ImGui::TreePop(); // 트리 닫기
+            else
+            {
+                Name = InComp->GetName();
+            }
+
+            ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags_None;
+            if (InComp->GetAttachChildren().Num() == 0)
+                Flags |= ImGuiTreeNodeFlags_Leaf;
+
+            bool NodeOpen = ImGui::TreeNodeEx(*Name, Flags);
+
+            if (ImGui::IsItemClicked())
+            {
+                Engine->SelectActor(InComp->GetOwner());
+                Engine->SelectComponent(InComp);
+            }
+
+            if (NodeOpen)
+            {
+                for (USceneComponent* Child : InComp->GetAttachChildren())
+                {
+                    CreateNode(Child);
+                }
+                ImGui::TreePop(); // 트리 닫기
+            }
+        };
+
+    for (AActor* Actor : Engine->ActiveWorld->GetActiveLevel()->Actors)
+    {
+        CreateNode(Actor->GetRootComponent());
     }
+
+    ImGui::EndChild();
+
     ImGui::End();
 }
     
