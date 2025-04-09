@@ -191,17 +191,17 @@ FMatrix FMatrix::CreateRotationMatrix(float roll, float pitch, float yaw)
 
     // Y축 (Pitch) 회전
     FMatrix rotationY = { {
-        { cosPitch, 0, -sinPitch, 0 },
+        { cosPitch, 0, sinPitch, 0 },
         { 0, 1, 0, 0 },
-        { sinPitch, 0, cosPitch, 0 },
+        { -sinPitch, 0, cosPitch, 0 },
         { 0, 0, 0, 1 }
     } };
 
     // X축 (Roll) 회전
     FMatrix rotationX = { {
         { 1, 0, 0, 0 },
-        { 0, cosRoll, sinRoll, 0 },
-        { 0, -sinRoll, cosRoll, 0 },
+        { 0, cosRoll, -sinRoll, 0 },
+        { 0, sinRoll, cosRoll, 0 },
         { 0, 0, 0, 1 }
     } };
 
