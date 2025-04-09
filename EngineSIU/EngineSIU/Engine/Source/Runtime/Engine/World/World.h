@@ -32,11 +32,9 @@ public:
     /**
      * World에 Actor를 Spawn합니다.
      * @param InClass Spawn할 Actor 정보
-     * @param InOuter
-     * @param InOuter
      * @return Spawn된 Actor
      */
-    AActor* SpawnActor(UClass* InClass, UObject* InOuter);
+    AActor* SpawnActor(UClass* InClass);
 
     /** 
      * World에 Actor를 Spawn합니다.
@@ -74,7 +72,7 @@ template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::SpawnActor()
 {
-    return Cast<T>(SpawnActor(T::StaticClass(), this));
+    return Cast<T>(SpawnActor(T::StaticClass()));
 }
 
 template <typename T>

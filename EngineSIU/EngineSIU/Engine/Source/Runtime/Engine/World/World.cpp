@@ -78,11 +78,11 @@ void UWorld::Release()
     GUObjectArray.ProcessPendingDestroyObjects();
 }
 
-AActor* UWorld::SpawnActor(UClass* InClass, UObject* InOuter)
+AActor* UWorld::SpawnActor(UClass* InClass)
 {
     if (InClass->IsChildOf<AActor>())
     {
-        AActor* NewActor = Cast<AActor>(FObjectFactory::ConstructObject(InClass, InOuter));
+        AActor* NewActor = Cast<AActor>(FObjectFactory::ConstructObject(InClass, this));
         // TODO: 일단 AddComponent에서 Component마다 초기화
         // 추후에 RegisterComponent() 만들어지면 주석 해제
         // Actor->InitializeComponents();
