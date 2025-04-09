@@ -13,9 +13,10 @@
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 #include "Engine/Engine.h"
-#include <Components/HeightFogComponent.h>
+#include "Components/HeightFogComponent.h"
 
 #include "Engine/AssetManager.h"
+#include "UObject/UObjectIterator.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -369,6 +370,31 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
                     {
                         StaticMeshComp->SetStaticMesh(StaticMesh);
                     }
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::TreePop();
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+    if (ImGui::TreeNodeEx("Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        ImGui::Text("Add");
+        ImGui::SameLine();
+
+        TArray<UClass*> CompClasses;
+        GetChildOfClass(UActorComponent::StaticClass(), CompClasses);
+
+        if (ImGui::BeginCombo("##AddComponent", "Components", ImGuiComboFlags_None))
+        {
+            for (UClass* Class : CompClasses)
+            {
+                if (ImGui::Selectable(GetData(Class->GetName()), false))
+                {
+                    StaticMeshComp->GetOwner()->AddComponent(Class);
                 }
             }
             ImGui::EndCombo();
