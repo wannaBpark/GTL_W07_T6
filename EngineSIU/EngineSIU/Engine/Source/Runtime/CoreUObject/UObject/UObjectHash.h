@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Container/Array.h"
 
 class UObject;
@@ -17,3 +17,10 @@ void AddToClassMap(UObject* Object);
 
 /** FUObjectHashTables에 저장된 Object정보를 제거합니다. */
 void RemoveFromClassMap(UObject* Object);
+
+/**
+ * ClassToLookFor와 일치하는 자식 UClass를 반환합니다.
+ * @param ClassToLookFor 찾을 자식클래스의 부모 클래스
+ * @param Results ClassToLookFor의 파생클래스가 담길 목록
+ */
+void GetChildOfClass(UClass* ClassToLookFor, TArray<UClass*>& Results);

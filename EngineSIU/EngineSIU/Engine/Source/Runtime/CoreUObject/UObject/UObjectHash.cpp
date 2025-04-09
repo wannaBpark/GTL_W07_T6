@@ -1,4 +1,4 @@
-﻿#include "UObjectHash.h"
+#include "UObjectHash.h"
 #include <cassert>
 #include "Object.h"
 #include "Class.h"
@@ -82,6 +82,14 @@ void RemoveFromClassMap(UObject* Object)
     {
         HashTable.ClassToObjectListMap.Remove(Object->GetClass());
     }
+}
+
+void GetChildOfClass(UClass* ClassToLookFor, TArray<UClass*>& Results)
+{
+    Results.Add(ClassToLookFor);
+
+    FUObjectHashTables& ThreadHash = FUObjectHashTables::Get();
+    RecursivelyPopulateDerivedClasses(ThreadHash, ClassToLookFor, Results);
 }
 
 void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results, bool bIncludeDerivedClasses)
