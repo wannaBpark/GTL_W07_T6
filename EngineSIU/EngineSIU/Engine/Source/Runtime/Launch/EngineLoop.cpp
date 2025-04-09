@@ -207,6 +207,7 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
     wndclass.lpfnWndProc = AppWndProc;
     wndclass.hInstance = hInstance;
     wndclass.lpszClassName = WindowClass;
+    wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 
     RegisterClassW(&wndclass);
 
