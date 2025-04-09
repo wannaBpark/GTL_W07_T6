@@ -128,7 +128,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
         if (iter)
         {
             UWorld* FogWorld = iter->GetOwner()->GetWorld();
-            if (FogWorld == GEngine->ActiveWorld.get() && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
+            if (FogWorld == GEngine->ActiveWorld && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
             {
                 Fogs.Add(iter);
             }
