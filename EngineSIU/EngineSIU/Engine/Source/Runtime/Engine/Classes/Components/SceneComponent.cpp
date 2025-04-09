@@ -168,9 +168,9 @@ FMatrix USceneComponent::GetTranslationMatrix() const
 
 FMatrix USceneComponent::GetWorldMatrix() const
 {
-    FMatrix ScaleMat = GetScaleMatrix();
-    FMatrix RotationMat = GetRotationMatrix();
-    FMatrix TranslationMat = GetTranslationMatrix();
+    FMatrix ScaleMat = FMatrix::GetScaleMatrix(RelativeScale3D);
+    FMatrix RotationMat = FMatrix::GetRotationMatrix(RelativeRotation);
+    FMatrix TranslationMat = FMatrix::GetTranslationMatrix(RelativeLocation);
 
     FMatrix RTMat = RotationMat * TranslationMat;
     if (AttachParent)
