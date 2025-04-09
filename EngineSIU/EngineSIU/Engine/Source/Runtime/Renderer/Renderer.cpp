@@ -105,6 +105,7 @@ void FRenderer::PrepareRender()
     GizmoRenderPass->PrepareRender();
     BillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
+    FogRenderPass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -113,6 +114,7 @@ void FRenderer::ClearRenderArr()
     BillboardRenderPass->ClearRenderArr();
     GizmoRenderPass->ClearRenderArr();
     UpdateLightBufferPass->ClearRenderArr();
+    FogRenderPass->ClearRenderArr();
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
@@ -122,20 +124,8 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
     ChangeViewMode(ActiveViewport->GetViewMode());
-    TArray< UHeightFogComponent*> Fogs;
-    for (UHeightFogComponent* iter : TObjectRange<UHeightFogComponent>())
-    {
-        if (iter)
-        {
-            UWorld* FogWorld = iter->GetOwner()->GetWorld();
-            if (FogWorld == GEngine->ActiveWorld && iter->GetFogDensity() != 0 && iter->GetFogMaxOpacity() != 0)
-            {
-                Fogs.Add(iter);
-            }
-        }
-    }
 
-    if (Fogs.Num() > 0)
+    if (FogRenderPass->ShouldRender())
     {
         Graphics->PrepareTexture();
     }
@@ -150,10 +140,11 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
     }
 
-    if (!IsSceneDepth && Fogs.Num() > 0)
+    if (!IsSceneDepth && FogRenderPass->ShouldRender())
     {
         DepthBufferDebugPass->UpdateDepthBufferSRV();
-        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV(), Fogs);
+        
+        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV());
     }
 
     GizmoRenderPass->Render(ActiveViewport);
