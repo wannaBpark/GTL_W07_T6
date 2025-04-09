@@ -1,7 +1,4 @@
-#define CAMERA_NEAR 0.1f
-#define CAMERA_FAR  100.0f
-
-Texture2D SceneDepth : register(t127);
+Texture2D SceneDepth : register(t0);
 SamplerState Sampler : register(s0);
 
 cbuffer ConstantBuffer : register(b1)
@@ -15,7 +12,8 @@ cbuffer ConstantBuffer : register(b1)
     float FogCutoffDistance;
     float FogMaxOpacity;
     float3 FogPosition;
-    float padding;
+    float CameraNear;
+    float CameraFar;
 };
 
 cbuffer ScreenConstants : register(b0)
@@ -40,10 +38,12 @@ float4 mainPS(PS_INPUT input) : SV_Target
     //픽셀 월드 위치 계산
     float rawDepth = SceneDepth.Sample(Sampler, TextureUV).r;
     float z_ndc = rawDepth * 2.0f - 1.0;  
-    float linearZ = CAMERA_NEAR * CAMERA_FAR / (CAMERA_FAR - rawDepth * (CAMERA_FAR - CAMERA_NEAR));
+    float linearZ = CameraNear * CameraFar / (CameraFar - rawDepth * (CameraFar - CameraNear));
+    if (rawDepth == 1)
+        linearZ = CameraNear * 100.0 / (100.0 - rawDepth * (100.0 - CameraNear));
 
     // NDC 기준 ray 방향 (정규화된 뷰 방향)
-    float2 ndc = float2(UV.x * 2.0 - 1.0, 1.0 - UV.y * 2.0);
+        float2 ndc = float2(UV.x * 2.0 - 1.0, 1.0 - UV.y * 2.0);
     float4 clip = float4(ndc.x, ndc.y, 1.0, 1.0);
     float4 viewRay4 = mul(clip, InvViewProj);
     float3 viewRay = normalize(viewRay4.xyz - CameraPos);
@@ -53,6 +53,8 @@ float4 mainPS(PS_INPUT input) : SV_Target
     
     //높이 감쇠
     float HeightDiff = max(worldPos.z - FogPosition.z, 1e-4);
+    
+    // 카메라 ~ 안개 중심 거리 기반 감쇠
     float CameraHeightDiff = max(CameraPos.z - FogPosition.z, 1e-4);
    
      //카메라 까지의 거리 계산
@@ -62,13 +64,12 @@ float4 mainPS(PS_INPUT input) : SV_Target
     //안개 까지의 거리 계산
     float FogDistance = length(worldPos - FogPosition);
     
-    float CameraFogDistance = length(CameraPos - FogPosition);
-    
     //안개 계수
     float FogFactor = exp((-FogHeightFalloff * HeightDiff));
     float CameraFogFactor = exp((-FogHeightFalloff * CameraHeightDiff));
     
-    float TotalFogFactor = FogDensity * (CameraFogFactor + FogFactor) / (max(FogHeightFalloff * distance, 1e-5f));
+    float TotalFogFactor = TotalFogFactor = FogDensity * (CameraFogFactor + FogFactor) / (max(FogHeightFalloff * distance, 1e-5));
+
     TotalFogFactor = saturate(TotalFogFactor);
     TotalFogFactor = min(TotalFogFactor, FogMaxOpacity);
     

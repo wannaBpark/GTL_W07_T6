@@ -1,5 +1,5 @@
-Texture2D SceneColor : register(t126);
-Texture2D Fog : register(t127);
+Texture2D SceneColor : register(t0);
+Texture2D Fog : register(t1);
 SamplerState Sampler : register(s0);
 
 cbuffer ScreenConstants : register(b0)

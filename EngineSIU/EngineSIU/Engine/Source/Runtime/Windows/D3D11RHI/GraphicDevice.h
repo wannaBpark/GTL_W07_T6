@@ -11,6 +11,8 @@
 #include "Core/HAL/PlatformType.h"
 #include "Core/Math/Vector4.h"
 
+class FEditorViewportClient;
+
 class FGraphicsDevice {
 public:
     ID3D11Device* Device = nullptr;
@@ -50,10 +52,9 @@ public:
     void ReleaseDepthStencilResources();
     void Release();
     void SwapBuffer() const;
+    void Prepare(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const;
     void Prepare() const;
     void Prepare(D3D11_VIEWPORT* viewport) const;
-    void PrepareUI() const;
-    void PrepareFog() const;
     void PrepareTexture() const;
     void OnResize(HWND hWindow);
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }

@@ -20,9 +20,6 @@ public:
     // 초기화: 그래픽 디바이스와 셰이더 매니저를 등록
     void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager);
 
-    // 스프라이트 렌더링에 필요한 버퍼 및 상태 생성
-    void CreateSpriteResources();
-
     // Fog 렌더링용 셰이더 생성 및 입력 레이아웃 설정
     void CreateShader();
 
@@ -50,18 +47,12 @@ public:
 
     void CreateRTV();
 
-    bool ShouldRender() { return bRender; }
-
 private:
     ID3D11SamplerState* Sampler = nullptr;
 
     FGraphicsDevice* Graphics;
     FDXDBufferManager* BufferManager;
     FDXDShaderManager* ShaderManager;
-
-    // 전체 화면 Quad 렌더링용 버퍼
-    ID3D11Buffer* FogVertexBuffer;
-    ID3D11Buffer* FogIndexBuffer;
 
     // Fog 렌더링용 셰이더 및 입력 레이아웃
     ID3D11VertexShader* FogVertexShader;
@@ -80,7 +71,6 @@ private:
 
     TArray<UHeightFogComponent*> FogComponents;
 
-    bool bRender = false;
     float screenWidth = 0;
     float screenHeight = 0;
 };

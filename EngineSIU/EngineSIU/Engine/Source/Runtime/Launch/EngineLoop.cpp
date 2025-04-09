@@ -148,7 +148,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
 void FEngineLoop::Render() const
 {
-    GraphicDevice.Prepare();
+    GraphicDevice.Prepare(LevelEditor->GetActiveViewportClient());
     if (LevelEditor->IsMultiViewport())
     {
         std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
@@ -175,11 +175,8 @@ void FEngineLoop::Render() const
         // renderer.UpdateLightBuffer();
         // RenderWorld();
         Renderer.PrepareRender();
-        
         Renderer.Render(LevelEditor->GetActiveViewportClient());
     }
-    //지금까지 렌더된걸 기반으로 쿼드 생성 (안개 적용)
-
 }
 
 void FEngineLoop::Tick()
@@ -215,7 +212,6 @@ void FEngineLoop::Tick()
         GEngine->Tick(DeltaTime);
         LevelEditor->Tick(DeltaTime);
         Render();
-        GraphicDevice.PrepareUI();
         UIMgr->BeginFrame();
         UnrealEditor->Render();
 
