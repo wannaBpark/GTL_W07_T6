@@ -1,6 +1,7 @@
-﻿#include "AssetManager.h"
+#include "AssetManager.h"
 #include "Engine.h"
 
+#include <filesystem>
 
 bool UAssetManager::IsInitialized()
 {
@@ -24,4 +25,33 @@ UAssetManager& UAssetManager::Get()
 UAssetManager* UAssetManager::GetIfInitialized()
 {
     return GEngine ? GEngine->AssetManager : nullptr;
+}
+
+void UAssetManager::InitAssetManager()
+{
+    LoadObjFiles();
+}
+
+void UAssetManager::LoadObjFiles()
+{
+    const std::string BasePathName = "Contents/";
+
+    // Obj 파일 로드
+	
+    for (const auto& Entry : std::filesystem::recursive_directory_iterator(BasePathName))
+    {
+        if (Entry.is_regular_file() && Entry.path().extension() == ".obj")
+        {
+            FAssetInfo NewAssetInfo;
+            NewAssetInfo.AssetName = FName(Entry.path().filename().string());
+            NewAssetInfo.PackagePath = FName(Entry.path().parent_path().string());
+            NewAssetInfo.AssetType = EAssetType::StaticMesh; // obj 파일은 무조건 StaticMesh
+            NewAssetInfo.Size = static_cast<uint32>(std::filesystem::file_size(Entry.path()));
+            
+            AssetRegistry->PathNameToAssetInfo.Add(FName(Entry.path().filename().string()), NewAssetInfo);
+            
+            // ObjFileNames.push_back(UGTLStringLibrary::StringToWString(Entry.path().string()));
+            // FObjManager::LoadObjStaticMeshAsset(UGTLStringLibrary::StringToWString(Entry.path().string()));
+        }
+    }
 }

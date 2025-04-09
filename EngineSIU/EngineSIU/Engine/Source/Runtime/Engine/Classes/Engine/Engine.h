@@ -18,7 +18,7 @@ public:
 
 public:
     UWorld* ActiveWorld;
-    UAssetManager* AssetManager;
+    UAssetManager* AssetManager = nullptr;
 
 protected:
     TArray<FWorldContext*> WorldList;

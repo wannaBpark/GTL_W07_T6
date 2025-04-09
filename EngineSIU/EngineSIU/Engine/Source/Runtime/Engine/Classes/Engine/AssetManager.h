@@ -41,4 +41,8 @@ public:
     /** UAssetManager가 존재하면 가져오고, 없으면 nullptr를 반환합니다. */
     static UAssetManager* GetIfInitialized();
     
+    void InitAssetManager();
+
+private:
+    void LoadObjFiles();
 };
