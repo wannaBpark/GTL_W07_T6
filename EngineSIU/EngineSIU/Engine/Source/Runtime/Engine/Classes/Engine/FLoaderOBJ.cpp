@@ -15,10 +15,10 @@ bool FLoaderOBJ::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
         return false;
     }
 
-    OutObjInfo.PathName = ObjFilePath.ToWideString().substr(0, ObjFilePath.ToWideString().find_last_of(L"\\/") + 1);
-    OutObjInfo.ObjectName = ObjFilePath.ToWideString().substr(ObjFilePath.ToWideString().find_last_of(L"\\/") + 1);
+    OutObjInfo.FilePath = ObjFilePath.ToWideString().substr(0, ObjFilePath.ToWideString().find_last_of(L"\\/") + 1);
+    OutObjInfo.ObjectName = ObjFilePath.ToWideString();
     // ObjectName은 wstring 타입이므로, 이를 string으로 변환 (간단한 ASCII 변환의 경우)
-    std::wstring wideName = OutObjInfo.ObjectName;
+    std::wstring wideName = OutObjInfo.ObjectName.substr(ObjFilePath.ToWideString().find_last_of(L"\\/") + 1);;
     std::string fileName(wideName.begin(), wideName.end());
 
     // 마지막 '.'을 찾아 확장자를 제거
@@ -216,7 +216,7 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
     // Subset
     OutFStaticMesh.MaterialSubsets = OutObjInfo.MaterialSubsets;
 
-    std::ifstream MtlFile(OutObjInfo.PathName + OutObjInfo.MatName.ToWideString());
+    std::ifstream MtlFile(OutObjInfo.FilePath + OutObjInfo.MatName.ToWideString());
     if (!MtlFile.is_open())
     {
         return false;
@@ -307,7 +307,7 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
             LineStream >> Line;
             OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName = Line;
 
-            FWString TexturePath = OutObjInfo.PathName + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
+            FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
             OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = TexturePath;
             OutFStaticMesh.Materials[MaterialIndex].bHasTexture = true;
 
@@ -321,7 +321,7 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
 {
     OutStaticMesh.ObjectName = RawData.ObjectName;
-    OutStaticMesh.PathName = RawData.PathName;
+    //OutStaticMesh.PathName = RawData.PathName;
     OutStaticMesh.DisplayName = RawData.DisplayName;
 
     // 고유 정점을 기반으로 FVertexSimple 배열 생성
@@ -549,9 +549,6 @@ bool FManagerOBJ::SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FS
     // Object Name
     Serializer::WriteFWString(File, StaticMesh.ObjectName);
 
-    // Path Name
-    Serializer::WriteFWString(File, StaticMesh.PathName);
-
     // Display Name
     Serializer::WriteFString(File, StaticMesh.DisplayName);
 
@@ -627,8 +624,8 @@ bool FManagerOBJ::LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStati
     // Object Name
     Serializer::ReadFWString(File, OutStaticMesh.ObjectName);
 
-    // Path Name
-    Serializer::ReadFWString(File, OutStaticMesh.PathName);
+    //// Path Name
+    //Serializer::ReadFWString(File, OutStaticMesh.PathName);
 
     // Display Name
     Serializer::ReadFString(File, OutStaticMesh.DisplayName);

@@ -131,3 +131,63 @@ void FString::Resize(int32 CharacterCount)
 {
     PrivateString.resize(CharacterCount);
 }
+
+FString FString::ToUpper() const &
+{
+    BaseStringType UpperCaseString = PrivateString;
+    std::ranges::transform(
+        UpperCaseString,
+        UpperCaseString.begin(),
+        [](ElementType Char) { return std::toupper(Char); }
+    );
+    return FString{std::move(UpperCaseString)};
+}
+
+FString FString::ToUpper() &&
+{
+    std::ranges::transform(
+        PrivateString,
+        PrivateString.begin(),
+        [](ElementType Char) { return std::toupper(Char); }
+    );
+    return std::move(*this);
+}
+
+void FString::ToUpperInline()
+{
+    std::ranges::transform(
+        PrivateString,
+        PrivateString.begin(),
+        [](ElementType Char) { return std::toupper(Char); }
+    );
+}
+
+FString FString::ToLower() const &
+{
+    BaseStringType LowerCaseString = PrivateString;
+    std::ranges::transform(
+        LowerCaseString,
+        LowerCaseString.begin(),
+        [](ElementType Char) { return std::tolower(Char); }
+    );
+    return FString{std::move(LowerCaseString)};
+}
+
+FString FString::ToLower() &&
+{
+    std::ranges::transform(
+        PrivateString,
+        PrivateString.begin(),
+        [](ElementType Char) { return std::tolower(Char); }
+    );
+    return std::move(*this);
+}
+
+void FString::ToLowerInline()
+{
+    std::ranges::transform(
+        PrivateString,
+        PrivateString.begin(),
+        [](ElementType Char) { return std::tolower(Char); }
+    );
+}

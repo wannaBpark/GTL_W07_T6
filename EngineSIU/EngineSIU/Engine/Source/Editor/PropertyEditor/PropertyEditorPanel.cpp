@@ -15,6 +15,8 @@
 #include "Engine/Engine.h"
 #include <Components/HeightFogComponent.h>
 
+#include "Engine/AssetManager.h"
+
 void PropertyEditorPanel::Render()
 {
     /* Pre Setup */
@@ -353,20 +355,25 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
         ImGui::SameLine();
 
         FString PreviewName = StaticMeshComp->GetStaticMesh()->GetRenderData()->DisplayName;
-        const TMap<FWString, UStaticMesh*> Meshes = FManagerOBJ::GetStaticMeshes();
+        const TMap<FName, FAssetInfo> Assets = UAssetManager::Get().GetAssetRegistry();
+
         if (ImGui::BeginCombo("##StaticMesh", GetData(PreviewName), ImGuiComboFlags_None))
         {
-            for (auto Mesh : Meshes)
+            for (const auto& Asset : Assets)
             {
-                if (ImGui::Selectable(GetData(Mesh.Value->GetRenderData()->DisplayName), false))
+                if (ImGui::Selectable(GetData(Asset.Value.AssetName.ToString()), false))
                 {
-                    StaticMeshComp->SetStaticMesh(Mesh.Value);
+                    FString MeshName = Asset.Value.PackagePath.ToString() + "/" + Asset.Value.AssetName.ToString();
+                    UStaticMesh* StaticMesh = FManagerOBJ::GetStaticMesh(MeshName.ToWideString());
+                    if (StaticMesh)
+                    {
+                        StaticMeshComp->SetStaticMesh(StaticMesh);
+                    }
                 }
             }
-
             ImGui::EndCombo();
         }
-        
+
         ImGui::TreePop();
     }
     ImGui::PopStyleColor();
