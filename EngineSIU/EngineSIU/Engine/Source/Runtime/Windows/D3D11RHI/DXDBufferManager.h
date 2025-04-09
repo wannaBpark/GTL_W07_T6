@@ -15,16 +15,30 @@ enum class EShaderStage
     Vertex,
     Pixel
 };
+struct QuadVertex
+{
+    float Position[3];
+    float TexCoord[2];
+};
 
 class FDXDBufferManager
 {
 public:
+    QuadVertex Q;
+
     FDXDBufferManager() = default;
     void Initialize(ID3D11Device* DXDevice, ID3D11DeviceContext* DXDeviceContext);
 
     // 템플릿을 활용한 버텍스 버퍼 생성 (정적/동적)
     template<typename T>
     HRESULT CreateVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo);
+    template<typename T>
+    HRESULT CreateVertexBuffer(const FWString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo);
+
+    template<typename T>
+    HRESULT CreateIndexBuffer(const FString& KeyName, const TArray<T>& indices, FIndexInfo& OutIndexInfo);
+    template<typename T>
+    HRESULT CreateIndexBuffer(const FWString& KeyName, const TArray<T>& indices, FIndexInfo& OutIndexInfo);
 
     template<typename T>
     HRESULT CreateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo);
@@ -34,7 +48,13 @@ public:
     HRESULT CreateVertexBufferInternal(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo,
         D3D11_USAGE usage, UINT cpuAccessFlags);
 
-    HRESULT CreateIndexBuffer(const FString& KeyName, const TArray<uint32>& indices, FIndexInfo& OutIndexInfo);
+    template<typename T>
+    HRESULT CreateVertexBufferInternal(const FWString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo,
+        D3D11_USAGE usage, UINT cpuAccessFlags);
+
+    HRESULT CreateUnicodeTextBuffer(const FWString& Text, FBufferInfo& OutBufferInfo, float BitmapWidth, float BitmapHeight, float ColCount, float RowCount);
+
+    void SetStartUV(wchar_t hangul, FVector2D& UVOffset);
     
     void ReleaseBuffers();
     void ReleaseConstantBuffer();
@@ -54,14 +74,19 @@ public:
     template<typename T>
     static void SafeRelease(T*& comObject);
 
+
     FVertexInfo GetVertexBuffer(const FString& InName) const;
     FIndexInfo GetIndexBuffer(const FString& InName) const;
+    FVertexInfo GetTextVertexBuffer(const FWString& InName) const;
+    FIndexInfo GetTextIndexBuffer(const FWString& InName) const;
     ID3D11Buffer* GetConstantBuffer(const FString& InName) const;
 
+    void GetQuadBuffer(FVertexInfo& OutVertexInfo, FIndexInfo& OutIndexInfo);
+    void GetTextBuffer(const FWString& Text, FVertexInfo& OutVertexInfo, FIndexInfo& OutIndexInfo);
+    void CreateQuadBuffer();
 private:
     // 16바이트 정렬
     inline UINT Align16(UINT size) { return (size + 15) & ~15; }
-
 private:
     ID3D11Device* DXDevice = nullptr;
     ID3D11DeviceContext* DXDeviceContext = nullptr;
@@ -69,6 +94,10 @@ private:
     TMap<FString, FVertexInfo> VertexBufferPool;
     TMap<FString, FIndexInfo> IndexBufferPool;
     TMap<FString, ID3D11Buffer*> ConstantBufferPool;
+
+    TMap<FWString, FBufferInfo> TextAtlasBufferPool;
+    TMap<FWString, FVertexInfo> TextAtlasVertexBufferPool;
+    TMap<FWString, FIndexInfo> TextAtlasIndexBufferPool;
 };
 
 // 템플릿 함수 구현부
@@ -82,10 +111,10 @@ HRESULT FDXDBufferManager::CreateVertexBufferInternal(const FString& KeyName, co
         OutVertexInfo = VertexBufferPool[KeyName];
         return S_OK;
     }
-
+    uint32_t Stride = sizeof(T);
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage = usage;
-    bufferDesc.ByteWidth = sizeof(T) * static_cast<uint32>(vertices.Num());
+    bufferDesc.ByteWidth = Stride * vertices.Num();
     bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bufferDesc.CPUAccessFlags = cpuAccessFlags;
 
@@ -99,7 +128,37 @@ HRESULT FDXDBufferManager::CreateVertexBufferInternal(const FString& KeyName, co
 
     OutVertexInfo.NumVertices = static_cast<uint32>(vertices.Num());
     OutVertexInfo.VertexBuffer = NewBuffer;
+    OutVertexInfo.Stride = Stride;
     VertexBufferPool.Add(KeyName, OutVertexInfo);
+
+    return S_OK;
+}
+template<typename T>
+HRESULT FDXDBufferManager::CreateIndexBuffer(const FString& KeyName, const TArray<T>& indices, FIndexInfo& OutIndexInfo)
+{
+    if (!KeyName.IsEmpty() && IndexBufferPool.Contains(KeyName))
+    {
+        OutIndexInfo = IndexBufferPool[KeyName];
+        return S_OK;
+    }
+
+    D3D11_BUFFER_DESC indexBufferDesc = {};
+    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexBufferDesc.ByteWidth = indices.Num() * sizeof(uint32);
+    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA indexInitData = {};
+    indexInitData.pSysMem = indices.GetData();
+
+    ID3D11Buffer* NewBuffer = nullptr;
+    HRESULT hr = DXDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &NewBuffer);
+    if (FAILED(hr))
+        return hr;
+
+    OutIndexInfo.NumIndices = static_cast<uint32>(indices.Num());
+    OutIndexInfo.IndexBuffer = NewBuffer;
+    IndexBufferPool.Add(KeyName, FIndexInfo(static_cast<uint32>(indices.Num()), NewBuffer));
+
 
     return S_OK;
 }
@@ -109,6 +168,77 @@ HRESULT FDXDBufferManager::CreateVertexBuffer(const FString& KeyName, const TArr
 {
     return CreateVertexBufferInternal(KeyName, vertices, OutVertexInfo, D3D11_USAGE_DEFAULT, 0);
 }
+
+
+// FWString 전용 버텍스 버퍼 생성 (내부)
+template<typename T>
+HRESULT FDXDBufferManager::CreateVertexBufferInternal(const FWString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo,
+    D3D11_USAGE usage, UINT cpuAccessFlags)
+{
+    if (!KeyName.empty() && TextAtlasVertexBufferPool.Contains(KeyName))
+    {
+        OutVertexInfo = TextAtlasVertexBufferPool[KeyName];
+        return S_OK;
+    }
+    uint32_t Stride = sizeof(T);
+    D3D11_BUFFER_DESC bufferDesc = {};
+    bufferDesc.Usage = usage;
+    bufferDesc.ByteWidth = Stride * vertices.Num();
+    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bufferDesc.CPUAccessFlags = cpuAccessFlags;
+
+    D3D11_SUBRESOURCE_DATA initData = {};
+    initData.pSysMem = vertices.GetData();
+
+    ID3D11Buffer* NewBuffer = nullptr;
+    HRESULT hr = DXDevice->CreateBuffer(&bufferDesc, &initData, &NewBuffer);
+    if (FAILED(hr))
+        return hr;
+
+    OutVertexInfo.NumVertices = static_cast<uint32>(vertices.Num());
+    OutVertexInfo.VertexBuffer = NewBuffer;
+    OutVertexInfo.Stride = Stride;
+    TextAtlasVertexBufferPool.Add(KeyName, OutVertexInfo);
+
+    return S_OK;
+}
+
+// FWString 전용 인덱스 버퍼 생성
+template<typename T>
+HRESULT FDXDBufferManager::CreateIndexBuffer(const FWString& KeyName, const TArray<T>& indices, FIndexInfo& OutIndexInfo)
+{
+    if (!KeyName.empty() && TextAtlasIndexBufferPool.Contains(KeyName))
+    {
+        OutIndexInfo = TextAtlasIndexBufferPool[KeyName];
+        return S_OK;
+    }
+
+    D3D11_BUFFER_DESC indexBufferDesc = {};
+    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexBufferDesc.ByteWidth = indices.Num() * sizeof(uint32);
+    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+    D3D11_SUBRESOURCE_DATA indexInitData = {};
+    indexInitData.pSysMem = indices.GetData();
+
+    ID3D11Buffer* NewBuffer = nullptr;
+    HRESULT hr = DXDevice->CreateBuffer(&indexBufferDesc, &indexInitData, &NewBuffer);
+    if (FAILED(hr))
+        return hr;
+
+    OutIndexInfo.NumIndices = static_cast<uint32>(indices.Num());
+    OutIndexInfo.IndexBuffer = NewBuffer;
+    TextAtlasIndexBufferPool.Add(KeyName, FIndexInfo(static_cast<uint32>(indices.Num()), NewBuffer));
+
+    return S_OK;
+}
+
+template<typename T>
+HRESULT FDXDBufferManager::CreateVertexBuffer(const FWString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo)
+{
+    return CreateVertexBufferInternal(KeyName, vertices, OutVertexInfo, D3D11_USAGE_DEFAULT, 0);
+}
+
 
 template<typename T>
 HRESULT FDXDBufferManager::CreateDynamicVertexBuffer(const FString& KeyName, const TArray<T>& vertices, FVertexInfo& OutVertexInfo)

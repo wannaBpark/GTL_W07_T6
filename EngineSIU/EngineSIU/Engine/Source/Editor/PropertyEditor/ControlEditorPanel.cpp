@@ -11,7 +11,7 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/ParticleSubUVComponent.h"
-#include "Components/UTextComponent.h"
+#include "Components/TextComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 
 #include "Engine/FLoaderOBJ.h"
@@ -265,7 +265,6 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         static const Primitive primitives[] = {
             { .label= "Cube",      .obj= OBJ_CUBE },
             { .label= "Sphere",    .obj= OBJ_SPHERE },
-            { .label= "SpotLight", .obj= OBJ_SpotLight },
             { .label= "PointLight", .obj= OBJ_PointLight },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
             { .label= "Text",      .obj= OBJ_Text },
@@ -292,33 +291,15 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_CUBE:
                 {
-                        // TODO: 다른 부분들 전부 Actor만 소환하도록 하고, Component 생성은 Actor가 자체적으로 하도록 변경.
+                    // TODO: 다른 부분들 전부 Actor만 소환하도록 하고, Component 생성은 Actor가 자체적으로 하도록 변경.
                     ACube* CubeActor = World->SpawnActor<ACube>();
                     CubeActor->SetActorLabel(TEXT("OBJ_CUBE"));
-                    break;
-                }
-                case OBJ_SpotLight:
-                {
-                    ALight* LightActor = World->SpawnActor<ALight>();
-                    LightActor->SetActorLabel(TEXT("OBJ_SpotLight"));
-
-                    UBillboardComponent* BillboardComponent = LightActor->AddComponent<UBillboardComponent>();
-                    BillboardComponent->SetTexture(L"Assets/Editor/Icon/SpotLight_64x.png");
-
-                    USpotLightComponent* SpotLightComp = LightActor->AddComponent<USpotLightComponent>();
-                    SpotLightComp->AttachToComponent(LightActor->GetRootComponent());
                     break;
                 }
                 case OBJ_PointLight:
                 {
                     ALight* LightActor = World->SpawnActor<ALight>();
                     LightActor->SetActorLabel(TEXT("OBJ_PointLight"));
-
-                    UBillboardComponent* BillboardComponent = LightActor->AddComponent<UBillboardComponent>();
-                    BillboardComponent->SetTexture(L"Assets/Editor/Icon/PointLight_64x.png");
-
-                    UPointLightComponent* PointLightComp = LightActor->AddComponent<UPointLightComponent>();
-                    PointLightComp->AttachToComponent(LightActor->GetRootComponent());
                     break;
                 }
                 case OBJ_PARTICLE:
@@ -330,6 +311,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     ParticleComponent->SetRowColumnCount(6, 6);
                     ParticleComponent->SetRelativeScale3D(FVector(10.0f, 10.0f, 1.0f));
                     ParticleComponent->Activate();
+                    SpawnedActor->SetActorTickInEditor(true);
                     break;
                 }
                 case OBJ_Text:
@@ -340,6 +322,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
                     TextComponent->SetText(L"안녕하세요 Jungle 1");
+                    
                     break;
                 }
                 case OBJ_Fireball:
@@ -347,14 +330,6 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor = World->SpawnActor<AFireballActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
 
-                    USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
-                    SphereComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/Sphere.obj"));
-                    SphereComp->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f));
-                    
-                    UPointLightComponent* PointLightComp = SpawnedActor->AddComponent<UPointLightComponent>();
-                    UProjectileMovementComponent* ProjectileMovementComponent = SpawnedActor->AddComponent<UProjectileMovementComponent>();
-                    
-                    PointLightComp->AttachToComponent(SpawnedActor->GetRootComponent());
                     break;
                 }
                 case OBJ_Fog:
@@ -363,6 +338,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor->SetActorLabel(TEXT("OBJ_HeightFog"));
                     break;
                 }
+                case OBJ_SpotLight:
                 case OBJ_TRIANGLE:
                 case OBJ_CAMERA:
                 case OBJ_PLAYER:

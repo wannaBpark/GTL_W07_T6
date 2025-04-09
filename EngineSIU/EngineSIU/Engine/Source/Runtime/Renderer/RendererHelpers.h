@@ -2,6 +2,7 @@
 #include "Launch/EngineLoop.h"
 
 namespace RendererHelpers {
+    
     inline FMatrix CalculateMVP(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection) {
         return Model * View * Projection;
     }

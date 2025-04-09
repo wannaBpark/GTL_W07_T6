@@ -41,10 +41,7 @@ private:
     FDXDBufferManager* BufferManager;
     FDXDShaderManager* ShaderManager;
 
-    // 전체 화면 Quad 렌더링용 버퍼
-    ID3D11Buffer* SpriteVertexBuffer;
-    ID3D11Buffer* SpriteIndexBuffer;
-
+    
     // Depth Buffer 렌더링용 셰이더 및 입력 레이아웃
     ID3D11VertexShader* SpriteVertexShader;
     ID3D11PixelShader* DepthBufferPixelShader;
