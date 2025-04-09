@@ -183,7 +183,6 @@
     <ClCompile Include="Engine\Source\Editor\LevelEditor\SLevelEditor.cpp" />
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\ViewportTypePanel.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\ImGuiWidget.cpp" />
-    <ClCompile Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UObjectArray.cpp" />
@@ -300,7 +299,6 @@
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\OutlinerEditorPanel.h" />
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\PropertyEditorPanel.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEd.h" />
-    <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\EngineStatics.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
