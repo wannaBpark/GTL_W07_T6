@@ -3,9 +3,9 @@
 #include "GameFramework/Actor.h"
 
 
-UObject* UActorComponent::Duplicate()
+UObject* UActorComponent::Duplicate(UObject* InOuter)
 {
-    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate());
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewComponent->OwnerPrivate = OwnerPrivate;
     NewComponent->bIsActive = bIsActive;

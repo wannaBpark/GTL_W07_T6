@@ -12,7 +12,7 @@ class UTextComponent : public UBillboardComponent
 public:
     UTextComponent();
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     virtual void InitializeComponent() override;
     

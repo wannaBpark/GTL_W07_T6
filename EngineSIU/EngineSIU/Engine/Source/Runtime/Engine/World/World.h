@@ -9,12 +9,7 @@
 class FObjectFactory;
 class AActor;
 class UObject;
-class UGizmoArrowComponent;
-class UCameraComponent;
-class AEditorPlayer;
 class USceneComponent;
-class ATransformGizmo;
-
 
 class UWorld : public UObject
 {
@@ -23,17 +18,15 @@ class UWorld : public UObject
 public:
     UWorld() = default;
 
-    static UWorld* CreateWorld(const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
+    static UWorld* CreateWorld(UObject* InOuter, const EWorldType InWorldType, const FString& InWorldName = "DefaultWorld");
 
     void InitializeNewWorld();
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     void Tick(float DeltaTime);
     void BeginPlay();
 
-    void CreateBaseObject();
-    void ReleaseBaseObject();
     void Release();
 
     /**
@@ -55,23 +48,23 @@ public:
     /** World에 존재하는 Actor를 제거합니다. */
     bool DestroyActor(AActor* ThisActor);
 
-    std::weak_ptr<ULevel> GetActiveLevel() const { return ActiveLevel; }
+    virtual UWorld* GetWorld() const override;
+    ULevel* GetActiveLevel() const { return ActiveLevel; }
 
     template <typename T>
         requires std::derived_from<T, AActor>
     T* DuplicateActor(T* InActor);
 
+    EWorldType WorldType = EWorldType::None;
+    
 private:
     FString WorldName = "DefaultWorld";
 
-    std::shared_ptr<ULevel> ActiveLevel;
+    ULevel* ActiveLevel;
 
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
-    AEditorPlayer* EditorPlayer = nullptr;
 
-public:
-    AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 };
 
 
@@ -86,9 +79,9 @@ template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::DuplicateActor(T* InActor)
 {
-    if (std::shared_ptr<ULevel> ActiveLevel = GetActiveLevel().lock())
+    if (ULevel* ActiveLevel = GetActiveLevel())
     {
-        T* NewActor = static_cast<T*>(InActor->Duplicate());
+        T* NewActor = static_cast<T*>(InActor->Duplicate(this));
         ActiveLevel->Actors.Add(NewActor);
         PendingBeginPlayActors.Add(NewActor);
         return NewActor;

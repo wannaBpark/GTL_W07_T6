@@ -30,9 +30,9 @@ UObject::UObject()
 {
 }
 
-UObject* UObject::Duplicate()
+UObject* UObject::Duplicate(UObject* InOuter)
 {
-    return FObjectFactory::ConstructObject(GetClass());
+    return FObjectFactory::ConstructObject(GetClass(), InOuter);
 }
 
 void UObject::Serialize(FArchive& Ar)
@@ -43,7 +43,11 @@ void UObject::Serialize(FArchive& Ar)
 
 UWorld* UObject::GetWorld() const
 {
-    return GEngine->ActiveWorld.get();
+    if (UObject* Outer = GetOuter())
+    {
+        return Outer->GetWorld();
+    }
+    return nullptr;
 }
 
 bool UObject::IsA(const UClass* SomeBase) const

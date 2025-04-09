@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine.h"
+#include "Actors/Player.h"
 
 /*
     Editor 모드에서 사용될 엔진.
@@ -20,8 +21,8 @@ public:
     virtual void Init() override;
     virtual void Tick(float DeltaTime) override;
 
-    std::shared_ptr<UWorld> PIEWorld;
-    std::shared_ptr<UWorld> EditorWorld;
+    UWorld* PIEWorld = nullptr;
+    UWorld* EditorWorld = nullptr;
 
     void StartPIE();
     void EndPIE();
@@ -45,5 +46,13 @@ public:
 
     void HoverComponent(USceneComponent* InComponent);
 
+public:
+    AEditorPlayer* GetEditorPlayer();
+    
+private:
+    AEditorPlayer* EditorPlayer = nullptr;
+
 };
+
+
 

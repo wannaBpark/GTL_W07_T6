@@ -13,7 +13,7 @@ public:
 
     UStaticMeshComponent* GetStaticMeshComponent() const;
 
-private:
+protected:
     UPROPERTY
     (UStaticMeshComponent*, StaticMeshComponent, = nullptr);
 };

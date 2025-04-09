@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Components/SceneComponent.h"
 #include "Container/Set.h"
 #include "Engine/EngineTypes.h"
@@ -17,7 +17,7 @@ class AActor : public UObject
 public:
     AActor() = default;
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     /** Actor가 게임에 배치되거나 스폰될 때 호출됩니다. */
     virtual void BeginPlay();
@@ -120,13 +120,20 @@ private:
     UPROPERTY
     (FString, ActorLabel)
 #endif
+
+public:
+    bool IsActorTickInEditor() const { return bTickInEditor; }
+
+private:
+    bool bTickInEditor = false;
+
 };
 
 
 template <typename T> requires std::derived_from<T, UActorComponent>
 T* AActor::AddComponent()
 {
-    T* Component = FObjectFactory::ConstructObject<T>();
+    T* Component = FObjectFactory::ConstructObject<T>(this);
     OwnedComponents.Add(Component);
     Component->OwnerPrivate = this;
 

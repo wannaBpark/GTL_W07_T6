@@ -8,7 +8,7 @@ class UPrimitiveComponent : public USceneComponent
 public:
     UPrimitiveComponent() = default;
 
-    virtual UObject* Duplicate() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
