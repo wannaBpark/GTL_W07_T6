@@ -29,4 +29,6 @@ public:
     void SetFogCutoffDistance(float value);
     void SetFogMaxOpacity(float value);
     void SetFogColor(FLinearColor color);
+
+    virtual UObject* Duplicate(UObject* InOuter) override;
 };

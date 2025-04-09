@@ -1,4 +1,5 @@
 #include "HeightFogComponent.h"
+#include <UObject/Casts.h>
 
 UHeightFogComponent::UHeightFogComponent(float Density, float HeightFalloff, float StartDist, float CutoffDist, float MaxOpacity)
     :FogDensity(Density), FogHeightFalloff(HeightFalloff), StartDistance(StartDist), FogCutoffDistance(CutoffDist), FogMaxOpacity(MaxOpacity)
@@ -34,4 +35,18 @@ void UHeightFogComponent::SetFogMaxOpacity(float value)
 void UHeightFogComponent::SetFogColor(FLinearColor color)
 {
     FogInscatteringColor = color;
+}
+
+UObject* UHeightFogComponent::Duplicate(UObject* InOuter)
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
+
+    NewComponent->FogDensity = FogDensity;
+    NewComponent->FogHeightFalloff = FogHeightFalloff;
+    NewComponent->StartDistance = StartDistance;
+    NewComponent->FogCutoffDistance = FogCutoffDistance;
+    NewComponent->FogMaxOpacity = FogMaxOpacity;
+    NewComponent->FogInscatteringColor = FogInscatteringColor;
+
+    return NewComponent;
 }
