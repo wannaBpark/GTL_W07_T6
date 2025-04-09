@@ -3,6 +3,7 @@
 #include "World/World.h"
 #include "Level.h"
 #include "GameFramework/Actor.h"
+#include "Classes/Engine/AssetManager.h"
 
 namespace PrivateEditorSelection
 {
@@ -28,6 +29,12 @@ void UEditorEngine::Init()
     ActiveWorld = EditorWorld;
 
     EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
+
+    if (AssetManager == nullptr)
+    {
+        AssetManager = FObjectFactory::ConstructObject<UAssetManager>(this);
+        assert(AssetManager);
+    }
 }
 
 void UEditorEngine::Tick(float DeltaTime)
