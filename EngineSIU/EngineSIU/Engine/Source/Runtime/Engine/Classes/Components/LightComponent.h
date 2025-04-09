@@ -10,6 +10,7 @@ class ULightComponentBase : public USceneComponent
 public:
     ULightComponentBase();
     virtual ~ULightComponentBase() override;
+    virtual UObject* Duplicate(UObject* InOuter) override;
 
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;

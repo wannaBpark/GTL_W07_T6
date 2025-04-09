@@ -1,6 +1,6 @@
 #include "LightComponent.h"
 #include "BillboardComponent.h"
-
+#include "UObject/Casts.h"
 
 ULightComponentBase::ULightComponentBase()
 {
@@ -12,6 +12,15 @@ ULightComponentBase::ULightComponentBase()
 ULightComponentBase::~ULightComponentBase()
 {
   
+}
+
+UObject* ULightComponentBase::Duplicate(UObject* InOuter)
+{
+    ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
+
+    NewComponent->Light = Light;
+
+    return NewComponent;
 }
 
 void ULightComponentBase::SetDiffuseColor(FLinearColor NewColor)

@@ -15,6 +15,7 @@
 #include "Components/BillboardComponent.h"
 #include "Components/ParticleSubUVComponent.h"
 #include "Components/TextComponent.h"
+#include "Engine/EditorEngine.h"
 
 #include "EngineLoop.h"
 
@@ -49,7 +50,10 @@ void FBillboardRenderPass::PrepareRender()
     BillboardObjs.Empty();
     for (const auto iter : TObjectRange<UBillboardComponent>())
     {
-        BillboardObjs.Add(iter);
+        if (iter->GetWorld() == GEngine->ActiveWorld)
+        {
+            BillboardObjs.Add(iter);
+        }
     }
 }
 

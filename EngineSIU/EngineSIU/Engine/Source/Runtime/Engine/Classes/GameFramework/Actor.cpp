@@ -7,7 +7,7 @@ UObject* AActor::Duplicate(UObject* InOuter)
     ThisClass* NewActor = Cast<ThisClass>(Super::Duplicate(InOuter));
 
     NewActor->Owner = Owner;
-
+    NewActor->bTickInEditor = bTickInEditor;
     // 기본적으로 있던 컴포넌트 제거
     TSet CopiedComponents = NewActor->OwnedComponents;
     for (UActorComponent* Components : CopiedComponents)
