@@ -30,7 +30,7 @@ float4 main(PSInput input) : SV_TARGET
     float2 uv = input.texCoord * uvScale + uvOffset;
     float4 col = gTexture.Sample(gSampler, uv);
     float threshold = 0.1f;
-     
+
     if (col.r < threshold && col.g < threshold && col.b < threshold || col.a < threshold)
     {
         discard;

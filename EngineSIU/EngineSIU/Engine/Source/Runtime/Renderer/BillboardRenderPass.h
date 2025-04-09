@@ -22,6 +22,7 @@ public:
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
 
     virtual void PrepareRender() override;
+    void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
 
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     
@@ -34,8 +35,7 @@ public:
 
     // 상수 버퍼 업데이트 함수
     void UpdateSubUVConstant(FVector2D uvOffset, FVector2D uvScale) const;
-    void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
-
+    
     // Primitive 드로우 함수
     void RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices,
         ID3D11Buffer* pIndexBuffer, UINT numIndices,

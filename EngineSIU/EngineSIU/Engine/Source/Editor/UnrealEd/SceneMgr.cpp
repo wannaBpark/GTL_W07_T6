@@ -8,7 +8,7 @@
 #include "Components/LightComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Components/SphereComp.h"
-#include "Components/UBillboardComponent.h"
+#include "Components/BillboardComponent.h"
 #include "Engine/Engine.h"
 #include "JSON/json.hpp"
 #include "UObject/Casts.h"

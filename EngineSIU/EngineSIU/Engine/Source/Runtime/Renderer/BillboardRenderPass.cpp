@@ -156,24 +156,30 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
 
         if (UParticleSubUVComponent* SubUVParticle = Cast<UParticleSubUVComponent>(BillboardComp))
         {
-           UpdateSubUVConstant(SubUVParticle->UVOffset, SubUVParticle->UVScale);
+            UpdateSubUVConstant(SubUVParticle->GetUVOffset(), SubUVParticle->GetUVScale());
 
-            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer, 
-                                   IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
+            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer,
+                IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
         }
         else if (UTextComponent* TextComp = Cast<UTextComponent>(BillboardComp))
         {
-            FVertexInfo VertexInfo = BufferManager->GetVertexBuffer(TextComp->GetBufferKey());
-            RenderTextPrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices,
-                                 TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
+            FBufferInfo Buffers;
+            float Height = TextComp->Texture->Height;
+            float Width = TextComp->Texture->Width;
+            BufferManager->CreateUnicodeTextBuffer(TextComp->GetText(), Buffers, Width, Height, TextComp->GetColumnCount(), TextComp->GetRowCount());
+
+            UpdateSubUVConstant(FVector2D(), FVector2D(1, 1));
+
+            RenderTextPrimitive(Buffers.VertexInfo.VertexBuffer, Buffers.VertexInfo.NumVertices, TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
+
         }
         else
         {
             UpdateSubUVConstant(FVector2D(BillboardComp->finalIndexU, BillboardComp->finalIndexV), FVector2D(1, 1));
 
-            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, 
-                                   IndexInfo.IndexBuffer, IndexInfo.NumIndices, BillboardComp->Texture->TextureSRV, 
-                                   BillboardComp->Texture->SamplerState);
+            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices,
+                IndexInfo.IndexBuffer, IndexInfo.NumIndices, BillboardComp->Texture->TextureSRV,
+                BillboardComp->Texture->SamplerState);
         }
     }
 }

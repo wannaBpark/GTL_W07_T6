@@ -187,7 +187,15 @@ public:
 
     FORCEINLINE bool operator==(const FString& Rhs) const;
     FORCEINLINE bool operator==(const ElementType* Rhs) const;
+    FORCEINLINE ElementType& operator[](int32 Index)
+    {
+        return PrivateString[Index];
+    }
 
+    FORCEINLINE const ElementType& operator[](int32 Index) const
+    {
+        return PrivateString[Index];
+    }
 public:
     static FString Printf(const ElementType* Format, ...)
     {

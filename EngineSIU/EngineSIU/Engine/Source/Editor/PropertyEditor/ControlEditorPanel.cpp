@@ -11,7 +11,7 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/ParticleSubUVComponent.h"
-#include "Components/UTextComponent.h"
+#include "Components/TextComponent.h"
 #include "Components/ProjectileMovementComponent.h"
 
 #include "Engine/FLoaderOBJ.h"
@@ -331,6 +331,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     ParticleComponent->SetRowColumnCount(6, 6);
                     ParticleComponent->SetRelativeScale3D(FVector(10.0f, 10.0f, 1.0f));
                     ParticleComponent->Activate();
+                    SpawnedActor->SetActorTickInEditor(true);
                     break;
                 }
                 case OBJ_Text:
@@ -341,6 +342,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
                     TextComponent->SetText(L"안녕하세요 Jungle 1");
+                    
                     break;
                 }
                 case OBJ_Fireball:

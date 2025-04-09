@@ -1,7 +1,7 @@
 #pragma once
 #define _TCHAR_DEFINED
 #include <wrl.h>
-#include "UBillboardComponent.h"
+#include "BillboardComponent.h"
 
 // ParticleSubUVComponent: 서브UV 파티클 컴포넌트 (Billboard 컴포넌트를 상속)
 class UParticleSubUVComponent : public UBillboardComponent
@@ -17,9 +17,17 @@ public:
 
     // 텍스처 아틀라스의 셀 수 설정 (행, 열)
     void SetRowColumnCount(int cellsPerRow, int cellsPerColumn);
-  
+   
     virtual void SetTexture(const FWString& _fileName) override;
+    
+    FVector2D GetUVOffset() const { return UVOffset; }
+    FVector2D GetUVScale() const { return UVScale; }
+
 protected:
+
+    FVector2D UVScale;
+    FVector2D UVOffset;
+
     // 애니메이션 반복 여부 (Loop)
     bool bIsLoop = true;
 
@@ -36,6 +44,4 @@ protected:
     int CellsPerRow = 1;
     int CellsPerColumn = 1;
 
-    // 버텍스 데이터(쿼드)를 생성하여 BufferManager를 통해 버퍼를 생성 또는 업데이트
-    void CreateOrUpdateVertexBuffer();
 };

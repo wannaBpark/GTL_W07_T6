@@ -19,14 +19,13 @@ void UProjectileMovementComponent::BeginPlay()
     Velocity = Forward * InitialSpeed;
 }
 
-void UProjectileMovementComponent::TickComponent(float dt)
+void UProjectileMovementComponent::TickComponent(float DeltaTime)
 {
-    float DeltaTime = dt / 1000;
-
     Super::TickComponent(DeltaTime);
 
     const float Gravity = -0.f;
     Velocity.Z += Gravity * ProjectileGravityScale * DeltaTime;
+
     if (Velocity.Length() > MaxSpeed)
     {
         Velocity = Velocity.GetSafeNormal() * MaxSpeed;
