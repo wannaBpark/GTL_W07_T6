@@ -43,8 +43,6 @@ void FLineRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDe
 
 void FLineRenderPass::PrepareRender()
 {
-    // 라인 렌더 패스에서는 별도의 렌더 대상 수집이 필요하지 않은 경우,
-    // 필요한 경우 TObjectRange 등을 통해 관련 데이터를 수집할 수 있습니다.
 }
 
 void FLineRenderPass::ClearRenderArr()

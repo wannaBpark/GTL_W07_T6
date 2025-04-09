@@ -125,6 +125,7 @@ private:
 
 public:
     bool IsActorTickInEditor() const { return bTickInEditor; }
+    void SetActorTickInEditor(bool InbInTickInEditor);
 
 private:
     bool bTickInEditor = false;

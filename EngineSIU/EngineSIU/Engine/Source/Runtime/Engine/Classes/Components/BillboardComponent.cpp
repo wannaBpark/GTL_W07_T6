@@ -1,4 +1,4 @@
-#include "UBillboardComponent.h"
+#include "BillboardComponent.h"
 #include <DirectXMath.h>
 #include "Define.h"
 #include "World/World.h"
@@ -7,15 +7,6 @@
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "EngineLoop.h"
-
-// 정적 상수: 기본 빌보드 쿼드 데이터
-static const TArray<uint32> QuadTextureIndices = { 0, 1, 2, 1, 3, 2 };
-static const TArray<FVertexTexture> QuadTextureVertices = {
-    { -1.0f,  1.0f, 0.0f, 0.0f, 0.0f },
-    {  1.0f,  1.0f, 0.0f, 1.0f, 0.0f },
-    { -1.0f, -1.0f, 0.0f, 0.0f, 1.0f },
-    {  1.0f, -1.0f, 0.0f, 1.0f, 1.0f }
-};
 
 UBillboardComponent::UBillboardComponent()
 {
@@ -58,13 +49,15 @@ FString UBillboardComponent::GetBufferKey()
 
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-    // 기본 빌보드 쿼드 정점을 월드 좌표로 변환하여 픽킹 판별
-    TArray<FVector> quadWorld;
-    for (const FVertexTexture& vt : QuadTextureVertices)
+    TArray<FVector> Vertices =
     {
-        quadWorld.Add(FVector(vt.x, vt.y, vt.z));
-    }
-    return CheckPickingOnNDC(quadWorld, pfNearHitDistance) ? 1 : 0;
+        FVector(-1.0f,  1.0f, 0.0f),
+        FVector(1.0f,  1.0f, 0.0f),
+        FVector(1.0f, -1.0f, 0.0f),
+        FVector(-1.0f, -1.0f, 0.0f),
+    };
+
+    return CheckPickingOnNDC(Vertices, pfNearHitDistance) ? 1 : 0;
 }
 
 void UBillboardComponent::SetTexture(const FWString& _fileName)
@@ -72,7 +65,6 @@ void UBillboardComponent::SetTexture(const FWString& _fileName)
     Texture = FEngineLoop::ResourceManager.GetTexture(_fileName);
     std::string str(_fileName.begin(), _fileName.end());
     BufferKey = FString(str);
-    CreateQuadTextureVertexBuffer();
 }
 
 void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
@@ -102,11 +94,6 @@ FMatrix UBillboardComponent::CreateBillboardMatrix() const
     return S * LookAtCamera * T;
 }
 
-void UBillboardComponent::CreateQuadTextureVertexBuffer()
-{
-    FEngineLoop::Renderer.CreateImmutableVertexBuffer(BufferKey, QuadTextureVertices);
-    FEngineLoop::Renderer.CreateImmutableIndexBuffer(BufferKey, QuadTextureIndices);
-}
 
 bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& quadVertices, float& hitDistance) const
 {

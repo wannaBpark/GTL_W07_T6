@@ -342,8 +342,8 @@ struct FCameraConstantBuffer
 
 struct FSubUVConstant
 {
-    float indexU;
-    float indexV;
+    FVector2D uvOffset;
+    FVector2D uvScale;
 };
 struct FLitUnlitConstants {
     int isLit; // 1 = Lit, 0 = Unlit 
@@ -375,6 +375,7 @@ struct FLinePrimitiveBatchArgs
 struct FVertexInfo
 {
     uint32_t NumVertices;
+    uint32_t Stride;
     ID3D11Buffer* VertexBuffer;
 };
 

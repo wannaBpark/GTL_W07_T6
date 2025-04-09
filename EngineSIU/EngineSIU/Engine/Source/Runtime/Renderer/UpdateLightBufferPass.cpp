@@ -46,9 +46,9 @@ void FUpdateLightBufferPass::PrepareRender()
             {
                 PointLights.Add(PointLight);
             }
-            else if (USpotLightComponent* PointLight = Cast<USpotLightComponent>(iter))
+            else if (USpotLightComponent* SpotLight = Cast<USpotLightComponent>(iter))
             {
-                SpotLights.Add(PointLight);
+                SpotLights.Add(SpotLight);
             }
         }
     }
