@@ -170,6 +170,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Editor\LevelEditor\SlateAppMessageHandler.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Quat.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Rotator.cpp" />
@@ -266,6 +267,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Editor\LevelEditor\SlateAppMessageHandler.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Rotator.h" />
