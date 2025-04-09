@@ -162,7 +162,7 @@ void FEngineLoop::Render() const
             // renderer.UpdateLightBuffer();
             // RenderWorld();
             Renderer.PrepareRender();
-            Renderer.Render(GEngine->ActiveWorld.get(),LevelEditor->GetActiveViewportClient());
+            Renderer.Render(LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -176,7 +176,7 @@ void FEngineLoop::Render() const
         // RenderWorld();
         Renderer.PrepareRender();
         
-        Renderer.Render(GEngine->ActiveWorld.get(), LevelEditor->GetActiveViewportClient());
+        Renderer.Render(LevelEditor->GetActiveViewportClient());
     }
     //지금까지 렌더된걸 기반으로 쿼드 생성 (안개 적용)
 
