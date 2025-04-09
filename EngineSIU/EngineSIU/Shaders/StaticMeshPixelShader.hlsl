@@ -95,7 +95,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     {
         float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
         float3 litColor = baseColor * lightRgb;
-        litColor = pow(litColor, 1.0f / 2.2f);
         output.color = float4(litColor, 1);
     }
     else
