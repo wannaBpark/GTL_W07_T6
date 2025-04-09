@@ -20,18 +20,7 @@ struct FAssetInfo
 
 struct FAssetRegistry
 {
-    TMap<FName, FAssetInfo> PathHashToAssetInfo;
-    TMap<FString, EAssetType> FileExtensionToAssetType;
-
-    /**
-     * 확장자를 AssetType에 등록합니다.
-     * @param Ext 추가할 수 있는 Asset의 확장자
-     * @param AssetType Asset의 타입
-     */
-    void RegisterAssetType(const FString& Ext, EAssetType AssetType)
-    {
-        FileExtensionToAssetType.Add(Ext.ToLower(), AssetType);
-    }
+    TMap<FName, FAssetInfo> PathNameToAssetInfo;
 };
 
 class UAssetManager : public UObject
@@ -51,4 +40,5 @@ public:
 
     /** UAssetManager가 존재하면 가져오고, 없으면 nullptr를 반환합니다. */
     static UAssetManager* GetIfInitialized();
+    
 };
