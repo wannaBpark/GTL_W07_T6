@@ -260,7 +260,7 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
     case WM_NCMOUSEMOVE: // 비클라이언트 영역(창 제목 표시줄 등)에서 마우스가 움직였을 때 발생하는 메시지
     case WM_MOUSEMOVE:   // 클라이언트 영역에서 마우스가 움직였을 때 발생하는 메시지
     {
-        // OnRawMouseMove() // TODO: UE [WindowsApplication.cpp:2286]
+        OnMouseMove(); // TODO: UE [WindowsApplication.cpp:2286]
         return;
     }
 
@@ -380,4 +380,22 @@ void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Butto
 void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D CursorPos) const
 {
     UE_LOG(LogLevel::Warning, "Mouse Wheel Scrolled %f at (%f, %f)", Delta, CursorPos.X, CursorPos.Y);
+}
+
+void FSlateAppMessageHandler::OnMouseMove() const
+{
+    UE_LOG(LogLevel::Warning, "Mouse Moved");
+}
+
+FVector2D FSlateAppMessageHandler::GetCursorPos() const
+{
+    POINT CursorPos;
+    ::GetCursorPos(&CursorPos);
+
+    return FVector2D{static_cast<float>(CursorPos.x), static_cast<float>(CursorPos.y)};
+}
+
+FVector2D FSlateAppMessageHandler::GetLastCursorPos() const
+{
+    return PreviousPosition;
 }

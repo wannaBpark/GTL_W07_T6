@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "HAL/PlatformType.h"
+#include "Math/Vector.h"
 
-
-struct FVector2D;
 
 // TODO: 나중에 적당한 파일로 옮기기
 namespace EMouseButtons
@@ -34,8 +33,10 @@ public:
     void OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos) const;
     void OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos) const;
     void OnMouseWheel(const float Delta, const FVector2D CursorPos) const;
-    void OnMouseMove();
-    void OnRawMouseMove(const int32 X, const int32 Y);
+    void OnMouseMove() const;
+
+    FVector2D GetCursorPos() const;
+    FVector2D GetLastCursorPos() const;
 
 private:
     struct EModifierKey
@@ -54,4 +55,5 @@ private:
     };
 
     bool ModifierKeyState[EModifierKey::Count];
+    FVector2D PreviousPosition;
 };
