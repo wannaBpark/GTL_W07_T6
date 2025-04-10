@@ -104,7 +104,7 @@ void PropertyEditorPanel::Render()
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
-        if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
+        if (ULightComponent* lightObj = PickedActor->GetComponentByClass<ULightComponent>())
         {
             ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 

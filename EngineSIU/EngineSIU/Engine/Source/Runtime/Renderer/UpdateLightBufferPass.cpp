@@ -35,7 +35,7 @@ void FUpdateLightBufferPass::Initialize(FDXDBufferManager* InBufferManager, FGra
 
 void FUpdateLightBufferPass::PrepareRender()
 {
-    for (const auto iter : TObjectRange<ULightComponentBase>())
+    for (const auto iter : TObjectRange<ULightComponent>())
     {
         if (iter->GetWorld() == GEngine->ActiveWorld)
         {
