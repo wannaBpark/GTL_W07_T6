@@ -14,6 +14,6 @@ void ACube::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    SetActorRotation(GetActorRotation() + FRotator(0, 0, 1));
+    //SetActorRotation(GetActorRotation() + FRotator(0, 0, 1));
 
 }

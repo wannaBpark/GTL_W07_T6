@@ -27,6 +27,12 @@ AFireballActor::AFireballActor()
     
     ProjectileMovementComponent = AddComponent<UProjectileMovementComponent>();
     PointLightComponent->AttachToComponent(RootComponent);
+
+    ProjectileMovementComponent->SetGravity(0);
+    ProjectileMovementComponent->SetVelocity(FVector(100, 0, 0));
+    ProjectileMovementComponent->SetInitialSpeed(100);
+    ProjectileMovementComponent->SetMaxSpeed(100);
+    ProjectileMovementComponent->SetLifetime(10);
 }
 
 AFireballActor::~AFireballActor()
