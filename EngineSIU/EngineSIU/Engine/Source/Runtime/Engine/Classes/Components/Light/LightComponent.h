@@ -1,5 +1,5 @@
 #pragma once
-#include "PrimitiveComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Define.h"
 class UBillboardComponent;
 

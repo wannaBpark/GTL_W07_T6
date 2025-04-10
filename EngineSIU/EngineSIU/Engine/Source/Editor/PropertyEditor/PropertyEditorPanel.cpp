@@ -2,9 +2,9 @@
 
 #include "World/World.h"
 #include "Actors/Player.h"
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
