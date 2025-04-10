@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: GitHub Branch Cleaner
-        uses: mmorenoregalado/action-branches-cleaner@v2.0.1
+        uses: mmorenoregalado/action-branches-cleaner@v2.0.2
         with:
           base_branches: main
           token: ${{ secrets.GITHUB_TOKEN }}
