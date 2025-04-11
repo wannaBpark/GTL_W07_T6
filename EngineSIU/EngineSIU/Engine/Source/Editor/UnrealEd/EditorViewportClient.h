@@ -108,11 +108,11 @@ public:
     FViewport* GetViewport() const { return Viewport; }
     
     D3D11_VIEWPORT& GetD3DViewport() const;
-
+    
     //카메라
     /** Viewport camera transform data for perspective viewports */
-    FViewportCamera ViewTransformPerspective;
-    FViewportCamera ViewTransformOrthographic;
+    FViewportCamera PerspectiveCamera;
+    FViewportCamera OrthogonalCamera;
     // 카메라 정보 
     float ViewFOV = 90.0f;
     float AspectRatio;

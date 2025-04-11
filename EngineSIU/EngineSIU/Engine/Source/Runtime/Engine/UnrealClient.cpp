@@ -4,83 +4,83 @@ void FViewport::Initialize()
 {
 }
 
-void FViewport::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
+void FViewport::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& SwapchainDesc)
 {
-    float width = (float)swapchaindesc.BufferDesc.Width;
-    float height = (float)swapchaindesc.BufferDesc.Height;
+    float width = (float)SwapchainDesc.BufferDesc.Width;
+    float height = (float)SwapchainDesc.BufferDesc.Height;
     float halfWidth = width * 0.5f;
     float halfHeight = height * 0.5f;
-    switch (viewLocation)
+    switch (ViewLocation)
     {
     case EViewScreenLocation::TopLeft:
-        viewport.TopLeftX = 0.0f;
-        viewport.TopLeftY = 0.0f;
-        viewport.Width = halfWidth;
-        viewport.Height = halfHeight;
+        D3DViewport.TopLeftX = 0.0f;
+        D3DViewport.TopLeftY = 0.0f;
+        D3DViewport.Width = halfWidth;
+        D3DViewport.Height = halfHeight;
         break;
     case EViewScreenLocation::TopRight:
-        viewport.TopLeftX = halfWidth;
-        viewport.TopLeftY = 0.0f;
-        viewport.Width = halfWidth;
-        viewport.Height = halfHeight;
+        D3DViewport.TopLeftX = halfWidth;
+        D3DViewport.TopLeftY = 0.0f;
+        D3DViewport.Width = halfWidth;
+        D3DViewport.Height = halfHeight;
         break;
     case EViewScreenLocation::BottomLeft:
-        viewport.TopLeftX = 0.0f;
-        viewport.TopLeftY = halfHeight;
-        viewport.Width = halfWidth;
-        viewport.Height = halfHeight;
+        D3DViewport.TopLeftX = 0.0f;
+        D3DViewport.TopLeftY = halfHeight;
+        D3DViewport.Width = halfWidth;
+        D3DViewport.Height = halfHeight;
         break;
     case EViewScreenLocation::BottomRight:
-        viewport.TopLeftX = halfWidth;
-        viewport.TopLeftY = halfHeight;
-        viewport.Width = halfWidth;
-        viewport.Height = halfHeight;
+        D3DViewport.TopLeftX = halfWidth;
+        D3DViewport.TopLeftY = halfHeight;
+        D3DViewport.Width = halfWidth;
+        D3DViewport.Height = halfHeight;
         break;
     default:
         break;
     }
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
+    D3DViewport.MinDepth = 0.0f;
+    D3DViewport.MaxDepth = 1.0f;
 }
 
-void FViewport::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
+void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRect& Left, const FRect& Right)
 {
-    switch (viewLocation)
+    switch (ViewLocation)
     {
     case EViewScreenLocation::TopLeft:
-        viewport.TopLeftX = Left.leftTopX;
-        viewport.TopLeftY = Top.leftTopY;
-        viewport.Width = Left.width;
-        viewport.Height = Top.height;
+        D3DViewport.TopLeftX = Left.leftTopX;
+        D3DViewport.TopLeftY = Top.leftTopY;
+        D3DViewport.Width = Left.width;
+        D3DViewport.Height = Top.height;
         break;
     case EViewScreenLocation::TopRight:
-        viewport.TopLeftX = Right.leftTopX;
-        viewport.TopLeftY = Top.leftTopY;
-        viewport.Width = Right.width;
-        viewport.Height = Top.height;
+        D3DViewport.TopLeftX = Right.leftTopX;
+        D3DViewport.TopLeftY = Top.leftTopY;
+        D3DViewport.Width = Right.width;
+        D3DViewport.Height = Top.height;
         break;
     case EViewScreenLocation::BottomLeft:
-        viewport.TopLeftX = Left.leftTopX;
-        viewport.TopLeftY = Bottom.leftTopY;
-        viewport.Width = Left.width;
-        viewport.Height = Bottom.height;
+        D3DViewport.TopLeftX = Left.leftTopX;
+        D3DViewport.TopLeftY = Bottom.leftTopY;
+        D3DViewport.Width = Left.width;
+        D3DViewport.Height = Bottom.height;
         break;
     case EViewScreenLocation::BottomRight:
-        viewport.TopLeftX = Right.leftTopX;
-        viewport.TopLeftY = Bottom.leftTopY;
-        viewport.Width = Right.width;
-        viewport.Height = Bottom.height;
+        D3DViewport.TopLeftX = Right.leftTopX;
+        D3DViewport.TopLeftY = Bottom.leftTopY;
+        D3DViewport.Width = Right.width;
+        D3DViewport.Height = Bottom.height;
         break;
     default:
         break;
     }
 }
 
-void FViewport::ResizeViewport(FRect newRect)
+void FViewport::ResizeViewport(const FRect& newRect)
 {
-    viewport.TopLeftX = newRect.leftTopX;
-    viewport.TopLeftY = newRect.leftTopY;
-    viewport.Width = newRect.width;
-    viewport.Height = newRect.height;
+    D3DViewport.TopLeftX = newRect.leftTopX;
+    D3DViewport.TopLeftY = newRect.leftTopY;
+    D3DViewport.Width = newRect.width;
+    D3DViewport.Height = newRect.height;
 }
 

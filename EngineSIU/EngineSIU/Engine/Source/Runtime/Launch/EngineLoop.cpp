@@ -151,29 +151,17 @@ void FEngineLoop::Render() const
     GraphicDevice.Prepare(LevelEditor->GetActiveViewportClient());
     if (LevelEditor->IsMultiViewport())
     {
-        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
+        std::shared_ptr<FEditorViewportClient> CachedActiveViewport = GetLevelEditor()->GetActiveViewportClient();
         for (int i = 0; i < 4; ++i)
         {
             LevelEditor->SetActiveViewportClient(i);
-            // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
-            // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            // renderer.PrepareShader();
-            // renderer.UpdateLightBuffer();
-            // RenderWorld();
             Renderer.PrepareRender();
             Renderer.Render(LevelEditor->GetActiveViewportClient());
         }
-        GetLevelEditor()->SetActiveViewportClient(viewportClient);
+        GetLevelEditor()->SetActiveViewportClient(CachedActiveViewport);
     }
     else
     {
-        // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
-        // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        // renderer.PrepareShader();
-        // renderer.UpdateLightBuffer();
-        // RenderWorld();
         Renderer.PrepareRender();
         Renderer.Render(LevelEditor->GetActiveViewportClient());
     }

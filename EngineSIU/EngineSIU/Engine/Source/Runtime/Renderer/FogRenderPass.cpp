@@ -268,7 +268,7 @@ void FFogRenderPass::UpdateFogConstant(const std::shared_ptr<FEditorViewportClie
     {
         Constants.InvViewProj = Inverse;
         Constants.FogColor = Fog->GetFogColor();
-        Constants.CameraPos = ActiveViewport->ViewTransformPerspective.GetLocation();
+        Constants.CameraPos = ActiveViewport->PerspectiveCamera.GetLocation();
         Constants.FogDensity = Fog->GetFogDensity();
         Constants.FogHeightFalloff = Fog->GetFogHeightFalloff();
         Constants.StartDistance = Fog->GetStartDistance();

@@ -62,7 +62,7 @@ void UGizmoBaseComponent::TickComponent(float DeltaTime)
     {
         if (ViewportClient->IsPerspective())
         {
-            float Scaler = (ViewportClient->ViewTransformPerspective.GetLocation() - GetOwner()->GetActorLocation()).Length();
+            float Scaler = (ViewportClient->PerspectiveCamera.GetLocation() - GetOwner()->GetActorLocation()).Length();
             
             Scaler *= 0.1f;
             RelativeScale3D = FVector(Scaler);
