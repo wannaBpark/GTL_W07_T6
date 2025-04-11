@@ -8,6 +8,7 @@
 
 
 FSlateAppMessageHandler::FSlateAppMessageHandler()
+    : PreviousPosition(FVector2D::ZeroVector)
 {
     for (bool& KeyState : ModifierKeyState)
     {
@@ -25,7 +26,7 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
         const TCHAR Character = static_cast<TCHAR>(wParam);
 
         // lParam의 30번째 비트(0x40000000)는 키가 계속 눌려져 있는 상태(키 반복)인지 확인
-        const bool bIsRepeat = ( lParam & 0x40000000 ) != 0;
+        const bool bIsRepeat = (lParam & 0x40000000) != 0;
         OnKeyChar(Character, bIsRepeat);
         return;
     }
@@ -98,8 +99,8 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
         return;
     }
 
-    case WM_SYSKEYUP:      // 시스템 키(Alt, F10 등)가 눌렸다가 떼어질 때 발생하는 메시지
-    case WM_KEYUP:         // 키보드 키가 떼어졌을 때 발생하는 메시지
+    case WM_SYSKEYUP: // 시스템 키(Alt, F10 등)가 눌렸다가 떼어질 때 발생하는 메시지
+    case WM_KEYUP:    // 키보드 키가 떼어졌을 때 발생하는 메시지
     {
         // Character code is stored in WPARAM
         const int32 Win32Key = static_cast<int32>(wParam);
@@ -272,13 +273,13 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
 
         POINT CursorPoint;
         CursorPoint.x = GET_X_LPARAM(lParam);
-        CursorPoint.y = GET_Y_LPARAM(lParam); 
+        CursorPoint.y = GET_Y_LPARAM(lParam);
 
         const FVector2D CursorPos{
             static_cast<float>(CursorPoint.x),
             static_cast<float>(CursorPoint.y)
         };
-        OnMouseWheel( static_cast<float>( WheelDelta ) * SpinFactor, CursorPos );
+        OnMouseWheel(static_cast<float>(WheelDelta) * SpinFactor, CursorPos);
         return;
     }
     default:
