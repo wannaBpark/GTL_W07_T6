@@ -52,12 +52,22 @@ public:
 	}
 };
 
+template <>
+struct std::hash<FDelegateHandle>
+{
+    size_t operator()(const FDelegateHandle& InHandle) const noexcept
+    {
+        return std::hash<uint64>()(InHandle.HandleId);
+    }
+};
+
 template <typename Signature>
 class TDelegate;
 
 template <typename ReturnType, typename... ParamTypes>
 class TDelegate<ReturnType(ParamTypes...)>
 {
+    // TODO: std::function 사용 안하고 직접 TFunction 구현하기
 	using FuncType = std::function<ReturnType(ParamTypes...)>;
 	FuncType Func;
 
@@ -97,21 +107,13 @@ public:
 	}
 };
 
-template <>
-struct std::hash<FDelegateHandle>
-{
-	size_t operator()(const FDelegateHandle& InHandle) const noexcept
-	{
-		return std::hash<uint64>()(InHandle.HandleId);
-	}
-};
-
 template <typename Signature>
 class TMulticastDelegate;
 
 template <typename ReturnType, typename... ParamTypes>
 class TMulticastDelegate<ReturnType(ParamTypes...)>
 {
+    // TODO: std::function 사용 안하고 직접 TFunction 구현하기
 	using FuncType = std::function<ReturnType(ParamTypes...)>;
 	TMap<FDelegateHandle, FuncType> DelegateHandles;
 
