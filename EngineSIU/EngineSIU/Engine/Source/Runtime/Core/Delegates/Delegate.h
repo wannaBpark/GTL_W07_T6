@@ -152,7 +152,7 @@ public:
 		auto CopyDelegates = DelegateHandles;
 		for (const auto& [Handle, Delegate] : CopyDelegates)
 		{
-			Delegate(std::forward<Params>(Params)...);
+			Delegate(std::forward<ParamTypes>(Params)...);  // NOLINT(bugprone-use-after-move)
 		}
 	}
 };
