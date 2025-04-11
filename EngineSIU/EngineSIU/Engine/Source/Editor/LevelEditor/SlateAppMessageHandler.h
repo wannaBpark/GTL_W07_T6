@@ -34,6 +34,12 @@ public:
     void OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos) const;
     void OnMouseWheel(const float Delta, const FVector2D CursorPos) const;
     void OnMouseMove() const;
+    // 추가적인 함수는 UnrealEngine [SlateApplication.h:1628]을 참조
+
+    /**
+     * Cursor와 관련된 변수를 업데이트 합니다.
+     */
+    void UpdateCursorPosition(const FVector2D& NewPos);
 
     FVector2D GetCursorPos() const;
     FVector2D GetLastCursorPos() const;
@@ -54,6 +60,7 @@ private:
         };
     };
 
+    // Cursor Position
     FVector2D CurrentPosition;
     FVector2D PreviousPosition;
 

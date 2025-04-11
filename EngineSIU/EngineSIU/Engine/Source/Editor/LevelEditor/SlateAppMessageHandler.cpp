@@ -4,11 +4,13 @@
 #include <windowsx.h>
 
 #include "Define.h"
+#include "WindowsCursor.h"
 #include "Math/Vector.h"
 
 
 FSlateAppMessageHandler::FSlateAppMessageHandler()
-    : PreviousPosition(FVector2D::ZeroVector)
+    : CurrentPosition(FVector2D::ZeroVector)
+    , PreviousPosition(FVector2D::ZeroVector)
 {
     for (bool& KeyState : ModifierKeyState)
     {
@@ -261,6 +263,7 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
     case WM_NCMOUSEMOVE: // 비클라이언트 영역(창 제목 표시줄 등)에서 마우스가 움직였을 때 발생하는 메시지
     case WM_MOUSEMOVE:   // 클라이언트 영역에서 마우스가 움직였을 때 발생하는 메시지
     {
+        UpdateCursorPosition(FWindowsCursor::GetPosition());
         OnMouseMove(); // TODO: UE [WindowsApplication.cpp:2286]
         return;
     }
@@ -385,15 +388,21 @@ void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D Cu
 
 void FSlateAppMessageHandler::OnMouseMove() const
 {
-    UE_LOG(LogLevel::Warning, "Mouse Moved");
+    const FVector2D CurrentCursorPosition = GetCursorPos();
+    const FVector2D LastCursorPosition = GetLastCursorPos();
+
+    UE_LOG(LogLevel::Warning, "Mouse Moved (%f, %f) to (%f, %f)", LastCursorPosition.X, LastCursorPosition.Y, CurrentCursorPosition.X, CurrentCursorPosition.Y);
+}
+
+void FSlateAppMessageHandler::UpdateCursorPosition(const FVector2D& NewPos)
+{
+    PreviousPosition = CurrentPosition;
+    CurrentPosition = NewPos;
 }
 
 FVector2D FSlateAppMessageHandler::GetCursorPos() const
 {
-    POINT CursorPos;
-    ::GetCursorPos(&CursorPos);
-
-    return FVector2D{static_cast<float>(CursorPos.x), static_cast<float>(CursorPos.y)};
+    return CurrentPosition;
 }
 
 FVector2D FSlateAppMessageHandler::GetLastCursorPos() const
