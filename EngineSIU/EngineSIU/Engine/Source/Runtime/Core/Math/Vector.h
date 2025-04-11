@@ -13,6 +13,9 @@ struct FVector2D
 	FVector2D(float InX, float InY) : X(InX), Y(InY) {}
     FVector2D(float Scalar) : X(Scalar), Y(Scalar) {}
 
+    static const FVector2D ZeroVector;
+    static const FVector2D OneVector;
+
 public:
     FVector2D operator+(const FVector2D& Rhs) const
     {
