@@ -54,6 +54,8 @@ private:
         };
     };
 
-    bool ModifierKeyState[EModifierKey::Count];
+    FVector2D CurrentPosition;
     FVector2D PreviousPosition;
+
+    bool ModifierKeyState[EModifierKey::Count];
 };
