@@ -6,7 +6,7 @@
 #include "BaseGizmos/GizmoCircleComponent.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
-#include "Components/LightComponent.h"
+#include "Components/Light/LightComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/JungleMath.h"
 #include "Math/MathUtility.h"
@@ -193,7 +193,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     for (const auto iter : TObjectRange<UPrimitiveComponent>())
     {
         UPrimitiveComponent* pObj;
-        if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
+        if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponent>())
         {
             pObj = static_cast<UPrimitiveComponent*>(iter);
         }

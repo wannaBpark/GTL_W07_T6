@@ -5,7 +5,7 @@
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CubeComp.h"
-#include "Components/LightComponent.h"
+#include "Components/Light/LightComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/BillboardComponent.h"
@@ -54,9 +54,9 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 {
                     obj = FObjectFactory::ConstructObject<UBillboardComponent>(GEngine->ActiveWorld);
                 }
-                else if (TypeName == ULightComponentBase::StaticClass()->GetName())
+                else if (TypeName == ULightComponent::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<ULightComponentBase>(GEngine->ActiveWorld);
+                    obj = FObjectFactory::ConstructObject<ULightComponent>(GEngine->ActiveWorld);
                 }
                 else if (TypeName == USkySphereComponent::StaticClass()->GetName())
                 {
