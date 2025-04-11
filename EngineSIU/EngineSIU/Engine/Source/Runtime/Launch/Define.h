@@ -19,6 +19,10 @@
 #include "UserInterface/Console.h"
 #include <Math/Color.h>
 
+#define GOURAUD "LIGHTING_MODEL_GOURAUD"
+#define LAMBERT "LIGHTING_MODEL_LAMBERT"
+#define PHONG "LIGHTING_MODEL_PHONG"
+
 struct FStaticMeshVertex
 {
     float X, Y, Z;    // Position

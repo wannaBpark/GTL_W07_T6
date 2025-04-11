@@ -184,6 +184,53 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
     return S_OK;
 }
 
+HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize, const D3D_SHADER_MACRO* defines)
+{
+    UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+    shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+    if (DXDDevice == nullptr)
+        return S_FALSE;
+
+    HRESULT hr = S_OK;
+
+    ID3DBlob* VertexShaderCSO = nullptr;
+    ID3DBlob* ErrorBlob = nullptr;
+
+    hr = D3DCompileFromFile(FileName.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "vs_5_0", shaderFlags, 0, &VertexShaderCSO, &ErrorBlob);
+    if (FAILED(hr))
+    {
+        if (ErrorBlob) {
+            OutputDebugStringA((char*)ErrorBlob->GetBufferPointer());
+            ErrorBlob->Release();
+        }
+        return hr;
+    }
+
+    ID3D11VertexShader* NewVertexShader;
+    hr = DXDDevice->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &NewVertexShader);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    ID3D11InputLayout* NewInputLayout;
+    hr = DXDDevice->CreateInputLayout(Layout, LayoutSize, VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &NewInputLayout);
+    if (FAILED(hr))
+    {
+        VertexShaderCSO->Release();
+        return hr;
+    }
+
+    VertexShaders[Key] = NewVertexShader;
+    InputLayouts[Key] = NewInputLayout;
+
+    VertexShaderCSO->Release();
+
+    return S_OK;
+}
+
 ID3D11InputLayout* FDXDShaderManager::GetInputLayoutByKey(const std::wstring& Key) const
 {
     if (InputLayouts.Contains(Key))
