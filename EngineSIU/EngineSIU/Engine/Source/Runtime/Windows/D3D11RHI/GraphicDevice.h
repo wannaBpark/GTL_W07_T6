@@ -43,6 +43,9 @@ public:
     void Initialize(HWND hWindow);
     void CreateDeviceAndSwapChain(HWND hWindow);
     void CreateDepthStencilBuffer(HWND hWindow);
+
+    ID3D11Texture2D* CreateTexture2D(const D3D11_TEXTURE2D_DESC& Description, const void* InitialData);
+    
     void CreateDepthStencilState();
     void CreateRasterizerState();
     void ReleaseDeviceAndSwapChain();

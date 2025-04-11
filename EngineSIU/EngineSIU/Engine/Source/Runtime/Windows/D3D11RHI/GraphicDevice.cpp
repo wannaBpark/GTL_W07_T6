@@ -105,6 +105,22 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow)
     }
 }
 
+ID3D11Texture2D* FGraphicsDevice::CreateTexture2D(const D3D11_TEXTURE2D_DESC& Description, const void* InitialData)
+{
+    D3D11_SUBRESOURCE_DATA Data = {};
+    Data.pSysMem = InitialData;
+    Data.SysMemPitch = Description.Width * 4;
+    
+    ID3D11Texture2D* Texture2D;
+    HRESULT hr = Device->CreateTexture2D(&Description, InitialData ? &Data : nullptr, &Texture2D);
+    
+    if (FAILED(hr))
+    {
+        return nullptr;
+    }
+    return Texture2D;
+}
+
 void FGraphicsDevice::CreateDepthStencilState()
 {
     // DepthStencil 상태 설명 설정

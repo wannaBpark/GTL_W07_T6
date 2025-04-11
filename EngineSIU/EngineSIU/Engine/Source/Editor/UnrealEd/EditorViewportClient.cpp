@@ -141,6 +141,7 @@ void FEditorViewportClient::Input()
         }
     }
 }
+
 void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
 {
     if (Viewport)
@@ -155,6 +156,7 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
+
 void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
 {
     if (Viewport)
@@ -169,12 +171,13 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
+
 bool FEditorViewportClient::IsSelected(POINT InPoint) const
 {
-    float TopLeftX = Viewport->GetViewport().TopLeftX;
-    float TopLeftY = Viewport->GetViewport().TopLeftY;
-    float Width = Viewport->GetViewport().Width;
-    float Height = Viewport->GetViewport().Height;
+    float TopLeftX = Viewport->GetD3DViewport().TopLeftX;
+    float TopLeftY = Viewport->GetD3DViewport().TopLeftY;
+    float Width = Viewport->GetD3DViewport().Width;
+    float Height = Viewport->GetD3DViewport().Height;
 
     if (InPoint.x >= TopLeftX && InPoint.x <= TopLeftX + Width &&
         InPoint.y >= TopLeftY && InPoint.y <= TopLeftY + Height)
@@ -186,7 +189,7 @@ bool FEditorViewportClient::IsSelected(POINT InPoint) const
 
 D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
 {
-    return Viewport->GetViewport();
+    return Viewport->GetD3DViewport();
 }
 
 void FEditorViewportClient::CameraMoveForward(float InValue)
@@ -284,7 +287,7 @@ void FEditorViewportClient::UpdateViewMatrix()
 
 void FEditorViewportClient::UpdateProjectionMatrix()
 {
-    AspectRatio = GetViewport()->GetViewport().Width/ GetViewport()->GetViewport().Height;
+    AspectRatio = GetViewport()->GetD3DViewport().Width / GetViewport()->GetD3DViewport().Height;
     if (IsPerspective())
     {
         Projection = JungleMath::CreateProjectionMatrix(
