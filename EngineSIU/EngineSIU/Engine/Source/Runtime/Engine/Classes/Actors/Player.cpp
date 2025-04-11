@@ -226,6 +226,10 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     {
         Cast<UEditorEngine>(GEngine)->SelectActor(Possible->GetOwner());
     }
+    else
+    {
+        Cast<UEditorEngine>(GEngine)->DeselectActor(Cast<UEditorEngine>(GEngine)->GetSelectedActor());
+    }
 }
 
 void AEditorPlayer::AddControlMode()

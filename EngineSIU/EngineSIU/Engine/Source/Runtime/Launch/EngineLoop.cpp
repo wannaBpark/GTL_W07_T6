@@ -287,7 +287,7 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 
     hWnd = CreateWindowExW(
         0, WindowClass, Title, WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, 1000, 1000,
+        CW_USEDEFAULT, CW_USEDEFAULT, 1300, 1000,
         nullptr, nullptr, hInstance, nullptr
     );
 }
