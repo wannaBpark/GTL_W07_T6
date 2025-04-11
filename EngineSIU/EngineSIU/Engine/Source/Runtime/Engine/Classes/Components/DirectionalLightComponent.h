@@ -8,5 +8,8 @@ class UDirectionalLightComponent : public ULightComponentBase
 public:
     UDirectionalLightComponent();
     virtual ~UDirectionalLightComponent() override;
+    
+    FVector GetDirection();
+    void SetDirection(const FVector& dir);
 };
 

@@ -277,7 +277,8 @@ enum ELightType {
     POINT_LIGHT = 1,
     SPOT_LIGHT = 2,
     DIRECTIONAL_LIGHT = 3,
-    NUM_LIGHT_TYPES = 4
+    AMBIENT_LIGHT = 4,
+    NUM_LIGHT_TYPES = 5
 };
 
 struct FLight
