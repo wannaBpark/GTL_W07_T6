@@ -16,6 +16,109 @@ FSlateAppMessageHandler::FSlateAppMessageHandler()
     {
         KeyState = false;
     }
+
+    OnKeyCharDelegate.AddLambda([](const TCHAR Character, const bool IsRepeat)
+    {
+        UE_LOG(LogLevel::Warning, "OnKeyChar: %c, %s", Character, IsRepeat ? "Repeat" : "");
+    });
+
+    OnKeyDownDelegate.AddLambda([](const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
+    {
+        UE_LOG(LogLevel::Warning, "OnKeyDown: %d, %c, %s", KeyCode, CharacterCode, IsRepeat ? "Repeat" : "");
+    });
+
+    OnKeyUpDelegate.AddLambda([](const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
+    {
+        UE_LOG(LogLevel::Warning, "OnKeyUp: %d, %c, %s", KeyCode, CharacterCode, IsRepeat ? "Repeat" : "");
+    });
+
+    OnMouseDownDelegate.AddLambda([](const EMouseButtons::Type Button, const FVector2D CursorPos)
+    {
+        switch (Button)
+        {
+        case EMouseButtons::Left:
+            UE_LOG(LogLevel::Warning, "OnMouseDown: Left at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Middle:
+            UE_LOG(LogLevel::Warning, "OnMouseDown: Middle at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Right:
+            UE_LOG(LogLevel::Warning, "OnMouseDown: Right at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Thumb01:
+            UE_LOG(LogLevel::Warning, "OnMouseDown: Thumb01 at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Thumb02:
+            UE_LOG(LogLevel::Warning, "OnMouseDown: Thumb02 at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        default:
+            UE_LOG(LogLevel::Warning, "OnMouseDown: Invalid at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        }
+    });
+
+    OnMouseUpDelegate.AddLambda([](const EMouseButtons::Type Button, const FVector2D CursorPos)
+    {
+        switch (Button)
+        {
+        case EMouseButtons::Left:
+            UE_LOG(LogLevel::Warning, "OnMouseUp: Left at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Middle:
+            UE_LOG(LogLevel::Warning, "OnMouseUp: Middle at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Right:
+            UE_LOG(LogLevel::Warning, "OnMouseUp: Right at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Thumb01:
+            UE_LOG(LogLevel::Warning, "OnMouseUp: Thumb01 at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Thumb02:
+            UE_LOG(LogLevel::Warning, "OnMouseUp: Thumb02 at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        default:
+            UE_LOG(LogLevel::Warning, "OnMouseUp: Invalid at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        }
+    });
+
+    OnMouseDoubleClickDelegate.AddLambda([](const EMouseButtons::Type Button, const FVector2D CursorPos)
+    {
+        switch (Button)
+        {
+        case EMouseButtons::Left:
+            UE_LOG(LogLevel::Warning, "OnMouseDoubleClick: Left at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Middle:
+            UE_LOG(LogLevel::Warning, "OnMouseDoubleClick: Middle at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Right:
+            UE_LOG(LogLevel::Warning, "OnMouseDoubleClick: Right at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Thumb01:
+            UE_LOG(LogLevel::Warning, "OnMouseDoubleClick: Thumb01 at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        case EMouseButtons::Thumb02:
+            UE_LOG(LogLevel::Warning, "OnMouseDoubleClick: Thumb02 at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        default:
+            UE_LOG(LogLevel::Warning, "OnMouseDoubleClick: Invalid at (%f, %f)", CursorPos.X, CursorPos.Y);
+            break;
+        }
+    });
+
+    OnMouseWheelDelegate.AddLambda([](const float Delta, const FVector2D CursorPos)
+    {
+        UE_LOG(LogLevel::Warning, "OnMouseWheel: %f at (%f, %f)", Delta, CursorPos.X, CursorPos.Y);
+    });
+
+    OnMouseMoveDelegate.AddLambda([this]()
+    {
+        const FVector2D CurrentCursorPosition = GetCursorPos();
+        const FVector2D LastCursorPosition = GetLastCursorPos();
+
+        UE_LOG(LogLevel::Warning, "Mouse Moved (%f, %f) to (%f, %f)", LastCursorPosition.X, LastCursorPosition.Y, CurrentCursorPosition.X, CurrentCursorPosition.Y);
+    });
 }
 
 void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wParam, LPARAM lParam)
@@ -296,102 +399,42 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
 
 void FSlateAppMessageHandler::OnKeyChar(const TCHAR Character, const bool IsRepeat) const
 {
-    UE_LOG(LogLevel::Warning, "%c, %s", Character, IsRepeat ? "Repeat" : "");
+    OnKeyCharDelegate.Broadcast(Character, IsRepeat);
 }
 
 void FSlateAppMessageHandler::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat) const
 {
-    UE_LOG(LogLevel::Warning, "%d, %c, %s", KeyCode, CharacterCode, IsRepeat ? "Repeat" : "");
+    OnKeyDownDelegate.Broadcast(KeyCode, CharacterCode, IsRepeat);
 }
 
 void FSlateAppMessageHandler::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat) const
 {
-    UE_LOG(LogLevel::Warning, "%d, %c, %s", KeyCode, CharacterCode, IsRepeat ? "Repeat" : "");
+    OnKeyUpDelegate.Broadcast(KeyCode, CharacterCode, IsRepeat);
 }
 
 void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos) const
 {
-    switch (Button)
-    {
-    case EMouseButtons::Left:
-        UE_LOG(LogLevel::Warning, "Left Mouse Button Down at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Middle:
-        UE_LOG(LogLevel::Warning, "Middle Mouse Button Down at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Right:
-        UE_LOG(LogLevel::Warning, "Right Mouse Button Down at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Thumb01:
-        UE_LOG(LogLevel::Warning, "Thumb01 Mouse Button Down at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Thumb02:
-        UE_LOG(LogLevel::Warning, "Thumb02 Mouse Button Down at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    default:
-        break;
-    }
+    OnMouseDownDelegate.Broadcast(Button, CursorPos);
 }
 
 void FSlateAppMessageHandler::OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos) const
 {
-    switch (Button)
-    {
-    case EMouseButtons::Left:
-        UE_LOG(LogLevel::Warning, "Left Mouse Button Up at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Middle:
-        UE_LOG(LogLevel::Warning, "Middle Mouse Button Up at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Right:
-        UE_LOG(LogLevel::Warning, "Right Mouse Button Up at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Thumb01:
-        UE_LOG(LogLevel::Warning, "Thumb01 Mouse Button Up at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Thumb02:
-        UE_LOG(LogLevel::Warning, "Thumb02 Mouse Button Up at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    default:
-        break;
-    }
+    OnMouseUpDelegate.Broadcast(Button, CursorPos);
 }
 
 void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos) const
 {
-    switch (Button)
-    {
-    case EMouseButtons::Left:
-        UE_LOG(LogLevel::Warning, "Left Mouse Button Double Click at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Middle:
-        UE_LOG(LogLevel::Warning, "Middle Mouse Button Double Click at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Right:
-        UE_LOG(LogLevel::Warning, "Right Mouse Button Double Click at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Thumb01:
-        UE_LOG(LogLevel::Warning, "Thumb01 Mouse Button Double Click at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    case EMouseButtons::Thumb02:
-        UE_LOG(LogLevel::Warning, "Thumb02 Mouse Button Double Click at (%f, %f)", CursorPos.X, CursorPos.Y);
-        break;
-    default:
-        break;
-    }
+    OnMouseDoubleClickDelegate.Broadcast(Button, CursorPos);
 }
 
 void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D CursorPos) const
 {
-    UE_LOG(LogLevel::Warning, "Mouse Wheel Scrolled %f at (%f, %f)", Delta, CursorPos.X, CursorPos.Y);
+    OnMouseWheelDelegate.Broadcast(Delta, CursorPos);
 }
 
 void FSlateAppMessageHandler::OnMouseMove() const
 {
-    const FVector2D CurrentCursorPosition = GetCursorPos();
-    const FVector2D LastCursorPosition = GetLastCursorPos();
-
-    UE_LOG(LogLevel::Warning, "Mouse Moved (%f, %f) to (%f, %f)", LastCursorPosition.X, LastCursorPosition.Y, CurrentCursorPosition.X, CurrentCursorPosition.Y);
+    OnMouseMoveDelegate.Broadcast();
 }
 
 void FSlateAppMessageHandler::UpdateCursorPosition(const FVector2D& NewPos)
