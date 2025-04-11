@@ -118,20 +118,16 @@ class TMulticastDelegate<ReturnType(ParamTypes...)>
 	TMap<FDelegateHandle, FuncType> DelegateHandles;
 
 public:
-	template <typename FunctorType, typename... Args>
-	FDelegateHandle AddLambda(FunctorType&& InFunctor, Args&&... InArgs)
+	template <typename FunctorType>
+	FDelegateHandle AddLambda(FunctorType&& InFunctor)
 	{
 		FDelegateHandle DelegateHandle = FDelegateHandle::CreateHandle();
-        auto BoundFunc = std::bind(
-            std::forward<FunctorType>(InFunctor),
-            std::forward<Args>(InArgs)...
-        );
 
         DelegateHandles.Add(
             DelegateHandle,
-            [BoundFunc](ParamTypes... Params) mutable
+            [Func = std::forward<FunctorType>(InFunctor)](ParamTypes... Params) mutable
             {
-                BoundFunc(std::forward<ParamTypes>(Params)...);
+                Func(std::forward<ParamTypes>(Params)...);
             }
         );
 		return DelegateHandle;
