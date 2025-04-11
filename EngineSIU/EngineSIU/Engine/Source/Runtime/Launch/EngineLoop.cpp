@@ -68,7 +68,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             {
                 if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetIsOnRBMouseClick())
                 {
-                    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(
+                    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeed(
                         static_cast<float>(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01)
                     );
                 }
@@ -154,7 +154,7 @@ void FEngineLoop::Render() const
         std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
         for (int i = 0; i < 4; ++i)
         {
-            LevelEditor->SetViewportClient(i);
+            LevelEditor->SetActiveViewportClient(i);
             // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
             // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
             // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
@@ -164,7 +164,7 @@ void FEngineLoop::Render() const
             Renderer.PrepareRender();
             Renderer.Render(LevelEditor->GetActiveViewportClient());
         }
-        GetLevelEditor()->SetViewportClient(viewportClient);
+        GetLevelEditor()->SetActiveViewportClient(viewportClient);
     }
     else
     {
@@ -248,10 +248,10 @@ void FEngineLoop::Input()
             bTestInput = true;
             if (LevelEditor->IsMultiViewport())
             {
-                LevelEditor->OffMultiViewport();
+                LevelEditor->DisableMultiViewport();
             }
             else
-                LevelEditor->OnMultiViewport();
+                LevelEditor->EnableMultiViewport();
         }
     }
     else

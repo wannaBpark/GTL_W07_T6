@@ -15,22 +15,22 @@ public:
     SLevelEditor();
 
     void Initialize();
-    void Tick(double deltaTime);
+    void Tick(float DeltaTime);
     void Input();
     void Release();
     
     void SelectViewport(POINT point);
     void OnResize();
     void ResizeViewports();
-    void OnMultiViewport();
-    void OffMultiViewport();
+    void EnableMultiViewport();
+    void DisableMultiViewport();
     bool IsMultiViewport() const;
 
 private:
-    bool bInitialize;
+    bool bInitialized;
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
-    UWorld* World;
+    
     std::shared_ptr<FEditorViewportClient> ViewportClients[4];
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
 
@@ -39,7 +39,7 @@ private:
     
     bool bMultiViewportMode;
 
-    POINT lastMousePos;
+    POINT PrevCursorLocation;
     float EditorWidth;
     float EditorHeight;
 
@@ -49,13 +49,13 @@ public:
     {
         return ActiveViewportClient;
     }
-    void SetViewportClient(const std::shared_ptr<FEditorViewportClient>& viewportClient)
+    void SetActiveViewportClient(const std::shared_ptr<FEditorViewportClient>& InViewportClient)
     {
-        ActiveViewportClient = viewportClient;
+        ActiveViewportClient = InViewportClient;
     }
-    void SetViewportClient(int index)
+    void SetActiveViewportClient(int Index)
     {
-        ActiveViewportClient = ViewportClients[index];
+        ActiveViewportClient = ViewportClients[Index];
     }
 
     //Save And Load

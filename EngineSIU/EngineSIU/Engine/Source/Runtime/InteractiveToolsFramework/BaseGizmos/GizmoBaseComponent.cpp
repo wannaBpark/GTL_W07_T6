@@ -69,7 +69,7 @@ void UGizmoBaseComponent::TickComponent(float DeltaTime)
         }
         else
         {
-            float Scaler = FEditorViewportClient::orthoSize * 0.1f;
+            float Scaler = FEditorViewportClient::OrthoSize * 0.1f;
             RelativeScale3D = FVector(Scaler);
         }
     }

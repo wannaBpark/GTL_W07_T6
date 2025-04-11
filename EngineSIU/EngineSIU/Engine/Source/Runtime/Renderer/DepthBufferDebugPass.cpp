@@ -111,7 +111,7 @@ void FDepthBufferDebugPass::PrepareRenderState()
 void FDepthBufferDebugPass::UpdateDepthBufferSRV()
 {
     // 화면 크기가 변경되었으면 SRV를 재생성
-    if (screenWidth != Graphics->screenWidth || screenHeight != Graphics->screenHeight) {
+    if (screenWidth != Graphics->ScreenWidth || screenHeight != Graphics->ScreenHeight) {
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
         srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -125,8 +125,8 @@ void FDepthBufferDebugPass::UpdateDepthBufferSRV()
         if (FAILED(hr)) {
             return;
         }
-        screenWidth = Graphics->screenWidth;
-        screenHeight = Graphics->screenHeight;
+        screenWidth = Graphics->ScreenWidth;
+        screenHeight = Graphics->ScreenHeight;
 
     }
 }

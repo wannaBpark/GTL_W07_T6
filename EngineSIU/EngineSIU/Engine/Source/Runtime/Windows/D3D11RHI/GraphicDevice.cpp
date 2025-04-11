@@ -48,8 +48,8 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow)
 
     // 스왑 체인 정보 가져오기 (이후에 사용을 위해)
     SwapChain->GetDesc(&SwapchainDesc);
-    screenWidth = SwapchainDesc.BufferDesc.Width;
-    screenHeight = SwapchainDesc.BufferDesc.Height;
+    ScreenWidth = SwapchainDesc.BufferDesc.Width;
+    ScreenHeight = SwapchainDesc.BufferDesc.Height;
 }
 
 
@@ -199,8 +199,8 @@ void FGraphicsDevice::CreateFrameBuffer()
     Device->CreateRenderTargetView(FrameBuffer, &framebufferRTVdesc, &FrameBufferRTV);
 
     D3D11_TEXTURE2D_DESC textureDesc = {};
-    textureDesc.Width = screenWidth;
-    textureDesc.Height = screenHeight;
+    textureDesc.Width = ScreenWidth;
+    textureDesc.Height = ScreenHeight;
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -217,8 +217,8 @@ void FGraphicsDevice::CreateFrameBuffer()
     Device->CreateRenderTargetView(UUIDFrameBuffer, &UUIDFrameBufferRTVDesc, &UUIDFrameBufferRTV);
 
     D3D11_TEXTURE2D_DESC TextureDesc = {};
-    TextureDesc.Width = screenWidth;
-    TextureDesc.Height = screenHeight;
+    TextureDesc.Width = ScreenWidth;
+    TextureDesc.Height = ScreenHeight;
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
     TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -419,7 +419,7 @@ void FGraphicsDevice::OnResize(HWND hWindow)
     ReleaseFrameBuffer();
 
 
-    if (screenWidth == 0 || screenHeight == 0)
+    if (ScreenWidth == 0 || ScreenHeight == 0)
     {
         MessageBox(hWindow, L"Invalid width or height for ResizeBuffers!", L"Error", MB_ICONERROR | MB_OK);
         return;
@@ -435,8 +435,8 @@ void FGraphicsDevice::OnResize(HWND hWindow)
     }
 
     SwapChain->GetDesc(&SwapchainDesc);
-    screenWidth = SwapchainDesc.BufferDesc.Width;
-    screenHeight = SwapchainDesc.BufferDesc.Height;
+    ScreenWidth = SwapchainDesc.BufferDesc.Width;
+    ScreenHeight = SwapchainDesc.BufferDesc.Height;
 
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
@@ -487,8 +487,8 @@ void FGraphicsDevice::ChangeDepthStencilState(ID3D11DepthStencilState* newDetptS
 void FGraphicsDevice::CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTargetView*& OutRTV)
 {
     D3D11_TEXTURE2D_DESC TextureDesc = {};
-    TextureDesc.Width = screenWidth;
-    TextureDesc.Height = screenHeight;
+    TextureDesc.Width = ScreenWidth;
+    TextureDesc.Height = ScreenHeight;
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
     TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -514,9 +514,9 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt) const
     {
         pt.x = 0;
     }
-    else if (pt.x > screenWidth)
+    else if (pt.x > ScreenWidth)
     {
-        pt.x = screenWidth;
+        pt.x = ScreenWidth;
     }
 
     // pt.y 값 제한하기
@@ -524,9 +524,9 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt) const
     {
         pt.y = 0;
     }
-    else if (pt.y > screenHeight)
+    else if (pt.y > ScreenHeight)
     {
-        pt.y = screenHeight;
+        pt.y = ScreenHeight;
     }
 
     // 1. Staging 텍스처 생성 (1x1 픽셀)

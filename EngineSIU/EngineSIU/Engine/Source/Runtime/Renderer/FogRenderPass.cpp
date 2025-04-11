@@ -203,7 +203,7 @@ void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& Act
 void FFogRenderPass::CheckResize()
 {
     // 화면 크기가 변경되었으면 SRV를 재생성
-    if (screenWidth != Graphics->screenWidth || screenHeight != Graphics->screenHeight) {
+    if (screenWidth != Graphics->ScreenWidth || screenHeight != Graphics->ScreenHeight) {
         if (FogBuffer) { FogBuffer->Release(); FogBuffer = nullptr; }
         if (FogRTV) { FogRTV->Release(); FogRTV = nullptr; }
         CreateRTV();
@@ -238,8 +238,8 @@ void FFogRenderPass::CheckResize()
             return;
         }
 
-        screenWidth = Graphics->screenWidth;
-        screenHeight = Graphics->screenHeight;
+        screenWidth = Graphics->ScreenWidth;
+        screenHeight = Graphics->ScreenHeight;
     }
 }
 
@@ -275,8 +275,8 @@ void FFogRenderPass::UpdateFogConstant(const std::shared_ptr<FEditorViewportClie
         Constants.FogCutoffDistance = Fog->GetFogCutoffDistance();
         Constants.FogMaxOpacity = Fog->GetFogMaxOpacity();
         Constants.FogPosition = Fog->GetWorldLocation();
-        Constants.CameraNear = ActiveViewport->nearPlane;
-        Constants.CameraFar = ActiveViewport->farPlane;
+        Constants.CameraNear = ActiveViewport->NearClip;
+        Constants.CameraFar = ActiveViewport->FarClip;
     }
     //상수버퍼 업데이트
     BufferManager->UpdateConstantBuffer(TEXT("FFogConstants"), Constants);

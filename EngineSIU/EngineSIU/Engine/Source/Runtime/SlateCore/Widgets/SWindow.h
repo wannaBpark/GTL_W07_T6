@@ -6,21 +6,25 @@ class SWindow
 {
 public:
     SWindow() = default;
-    SWindow(FRect initRect);
+    SWindow(FRect InRect);
     virtual ~SWindow() = default;
 
-    virtual void Initialize(FRect initRect);
-    virtual void OnResize(float width, float height);
+    virtual void Initialize(FRect InitRect);
+    virtual void OnResize(float InWidth, float InHeight);
 
     FRect Rect;
     void SetRect(FRect newRect) { Rect = newRect; }
-    bool IsHover(FPoint coord);
-    virtual bool OnPressed(FPoint coord);
+    
+    bool IsHover(FPoint InPoint);
+    
+    virtual bool OnPressed(FPoint InPoint);
+    
     virtual bool OnReleased();
-    bool IsPressing() const { return bIsPressed; }
+    
+    bool IsPressed() const { return bIsPressed; }
 
 protected:
-    bool bIsHoverd = false;
+    bool bIsHovered = false;
     bool bIsPressed = false;
 
 };

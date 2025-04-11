@@ -9,10 +9,9 @@
 #include "UnrealEd/EditorViewportClient.h"
 
 SLevelEditor::SLevelEditor()
-    : bInitialize(false)
+    : bInitialized(false)
     , HSplitter(nullptr)
     , VSplitter(nullptr)
-    , World(nullptr)
     , bMultiViewportMode(false)
 {
 }
@@ -33,12 +32,13 @@ void SLevelEditor::Initialize()
     HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
     HSplitter->OnDrag(FPoint(0, 0));
     LoadConfig();
-    bInitialize = true;
+    bInitialized = true;
 }
 
-void SLevelEditor::Tick(double deltaTime)
+void SLevelEditor::Tick(float DeltaTime)
 {
-    if (bMultiViewportMode) {
+    if (bMultiViewportMode)
+    {
         POINT pt;
         GetCursorPos(&pt);
         ScreenToClient(GEngineLoop.hWnd, &pt);
@@ -55,11 +55,10 @@ void SLevelEditor::Tick(double deltaTime)
     //Test Code Cursor icon End
     OnResize();
     ActiveViewportClient->Input();
-    for (std::shared_ptr<FEditorViewportClient> Viewport : ViewportClients)
+    for (const std::shared_ptr<FEditorViewportClient>& Viewport : ViewportClients)
     {
-        Viewport->Tick(deltaTime);
+        Viewport->Tick(DeltaTime);
     }
-
 }
 
 void SLevelEditor::Input()
@@ -73,7 +72,7 @@ void SLevelEditor::Input()
             bLButtonDown = true;
             POINT pt;
             GetCursorPos(&pt);
-            GetCursorPos(&lastMousePos);
+            GetCursorPos(&PrevCursorLocation);
             ScreenToClient(GEngineLoop.hWnd, &pt);
 
             SelectViewport(pt);
@@ -87,19 +86,19 @@ void SLevelEditor::Input()
             GetCursorPos(&currentMousePos);
 
             // 마우스 이동 차이 계산
-            int32 deltaX = currentMousePos.x - lastMousePos.x;
-            int32 deltaY = currentMousePos.y - lastMousePos.y;
+            int32 DeltaX = currentMousePos.x - PrevCursorLocation.x;
+            int32 DeltaY = currentMousePos.y - PrevCursorLocation.y;
 
-            if (VSplitter->IsPressing())
+            if (VSplitter->IsPressed())
             {
-                VSplitter->OnDrag(FPoint(deltaX, deltaY));
+                VSplitter->OnDrag(FPoint(DeltaX, DeltaY));
             }
-            if (HSplitter->IsPressing())
+            if (HSplitter->IsPressed())
             {
-                HSplitter->OnDrag(FPoint(deltaX, deltaY));
+                HSplitter->OnDrag(FPoint(DeltaX, DeltaY));
             }
             ResizeViewports();
-            lastMousePos = currentMousePos;
+            PrevCursorLocation = currentMousePos;
         }
     }
     else
@@ -115,7 +114,7 @@ void SLevelEditor::Input()
             bRButtonDown = true;
             POINT pt;
             GetCursorPos(&pt);
-            GetCursorPos(&lastMousePos);
+            GetCursorPos(&PrevCursorLocation);
             ScreenToClient(GEngineLoop.hWnd, &pt);
 
             SelectViewport(pt);
@@ -140,7 +139,7 @@ void SLevelEditor::SelectViewport(POINT point)
     {
         if (ViewportClients[i]->IsSelected(point))
         {
-            SetViewportClient(i);
+            SetActiveViewportClient(i);
             break;
         }
     }
@@ -150,9 +149,9 @@ void SLevelEditor::OnResize()
 {
     float PrevWidth = EditorWidth;
     float PrevHeight = EditorHeight;
-    EditorWidth = FEngineLoop::GraphicDevice.screenWidth;
-    EditorHeight = FEngineLoop::GraphicDevice.screenHeight;
-    if (bInitialize) {
+    EditorWidth = FEngineLoop::GraphicDevice.ScreenWidth;
+    EditorHeight = FEngineLoop::GraphicDevice.ScreenHeight;
+    if (bInitialized) {
         //HSplitter 에는 바뀐 width 비율이 들어감 
         HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
         //HSplitter 에는 바뀐 Height 비율이 들어감 
@@ -178,13 +177,13 @@ void SLevelEditor::ResizeViewports()
     }
 }
 
-void SLevelEditor::OnMultiViewport()
+void SLevelEditor::EnableMultiViewport()
 {
     bMultiViewportMode = true;
     ResizeViewports();
 }
 
-void SLevelEditor::OffMultiViewport()
+void SLevelEditor::DisableMultiViewport()
 {
     bMultiViewportMode = false;
 }
@@ -200,9 +199,9 @@ void SLevelEditor::LoadConfig()
     ActiveViewportClient->Pivot.X = GetValueFromConfig(config, "OrthoPivotX", 0.0f);
     ActiveViewportClient->Pivot.Y = GetValueFromConfig(config, "OrthoPivotY", 0.0f);
     ActiveViewportClient->Pivot.Z = GetValueFromConfig(config, "OrthoPivotZ", 0.0f);
-    ActiveViewportClient->orthoSize = GetValueFromConfig(config, "OrthoZoomSize", 10.0f);
+    ActiveViewportClient->OrthoSize = GetValueFromConfig(config, "OrthoZoomSize", 10.0f);
 
-    SetViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
+    SetActiveViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
     bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
     for (size_t i = 0; i < 4; i++)
     {
@@ -234,7 +233,7 @@ void SLevelEditor::SaveConfig()
     config["OrthoPivotX"] = std::to_string(ActiveViewportClient->Pivot.X);
     config["OrthoPivotY"] = std::to_string(ActiveViewportClient->Pivot.Y);
     config["OrthoPivotZ"] = std::to_string(ActiveViewportClient->Pivot.Z);
-    config["OrthoZoomSize"] = std::to_string(ActiveViewportClient->orthoSize);
+    config["OrthoZoomSize"] = std::to_string(ActiveViewportClient->OrthoSize);
     WriteIniFile(IniFilePath, config);
 }
 

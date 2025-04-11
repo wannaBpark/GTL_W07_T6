@@ -1,5 +1,4 @@
 #include "UnrealClient.h"
-//#include "UnrealEd/EditorViewportClient.h"
 
 void FViewport::Initialize()
 {

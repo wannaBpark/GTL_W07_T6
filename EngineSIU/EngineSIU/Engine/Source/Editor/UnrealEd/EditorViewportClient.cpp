@@ -12,7 +12,7 @@
 #include "BaseGizmos/TransformGizmo.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
-float FEditorViewportClient::orthoSize = 10.0f;
+float FEditorViewportClient::OrthoSize = 10.0f;
 
 FEditorViewportClient::FEditorViewportClient()
     : Viewport(nullptr)
@@ -31,14 +31,13 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 {
 }
 
-void FEditorViewportClient::Initialize(int32 viewportIndex)
+void FEditorViewportClient::Initialize(int32 InViewportIndex)
 {
-
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
-    Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
+    Viewport = new FViewport(static_cast<EViewScreenLocation>(InViewportIndex));
     ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
-    ViewportIndex = viewportIndex;
+    ViewportIndex = InViewportIndex;
 
     GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
     GizmoActor->Initialize(this);
@@ -59,7 +58,11 @@ void FEditorViewportClient::Release() const
 void FEditorViewportClient::Input()
 {
     ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse) return;
+    if (io.WantCaptureMouse)
+    {
+        return;
+    }
+    
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄
     {
         ImGui::SetMouseCursor(ImGuiMouseCursor_None);
@@ -80,7 +83,8 @@ void FEditorViewportClient::Input()
             int32 DeltaY = currentMousePos.y - lastMousePos.y;
 
             // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
-            if (IsPerspective()) {
+            if (IsPerspective())
+            {
                 CameraRotateYaw(DeltaX * 0.1f);  // X 이동에 따라 좌우 회전
                 CameraRotatePitch(DeltaY * 0.1f);  // Y 이동에 따라 상하 회전
             }
@@ -129,7 +133,7 @@ void FEditorViewportClient::Input()
         UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
         if (AActor* PickedActor = Engine->GetSelectedActor())
         {
-            FViewportCameraTransform& ViewTransform = ViewTransformPerspective;
+            FViewportCamera& ViewTransform = ViewTransformPerspective;
             ViewTransform.SetLocation(
                 // TODO: 10.0f 대신, 정점의 min, max의 거리를 구해서 하면 좋을 듯
                 PickedActor->GetActorLocation() - (ViewTransform.GetForwardVector() * 10.0f)
@@ -139,10 +143,12 @@ void FEditorViewportClient::Input()
 }
 void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
 {
-    if (Viewport) { 
+    if (Viewport)
+    { 
         Viewport->ResizeViewport(swapchaindesc);    
     }
-    else {
+    else
+    {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
     AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
@@ -151,10 +157,12 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
 }
 void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
 {
-    if (Viewport) {
+    if (Viewport)
+    {
         Viewport->ResizeViewport(Top, Bottom, Left, Right);
     }
-    else {
+    else
+    {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
     AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
@@ -207,12 +215,14 @@ void FEditorViewportClient::CameraMoveRight(float InValue)
 
 void FEditorViewportClient::CameraMoveUp(float InValue)
 {
-    if (IsPerspective()) {
+    if (IsPerspective())
+    {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
         curCameraLoc.Z = curCameraLoc.Z + GetCameraSpeedScalar() * InValue;
         ViewTransformPerspective.SetLocation(curCameraLoc);
     }
-    else {
+    else
+    {
         Pivot.Z += InValue * 0.1f;
     }
 }
@@ -243,56 +253,59 @@ void FEditorViewportClient::PivotMoveUp(float InValue)
 
 void FEditorViewportClient::UpdateViewMatrix()
 {
-    if (IsPerspective()) {
+    if (IsPerspective())
+    {
         View = JungleMath::CreateViewMatrix(ViewTransformPerspective.GetLocation(),
             ViewTransformPerspective.GetLocation() + ViewTransformPerspective.GetForwardVector(),
-            FVector{ 0.0f,0.0f, 1.0f });
+            FVector{ 0.0f,0.0f, 1.0f }
+        );
     }
     else 
     {
         UpdateOrthoCameraLoc();
-        if (ViewportType == LVT_OrthoXY || ViewportType == LVT_OrthoNegativeXY) {
+        if (ViewportType == LVT_OrthoXY || ViewportType == LVT_OrthoNegativeXY)
+        {
             View = JungleMath::CreateViewMatrix(ViewTransformOrthographic.GetLocation(),
-                Pivot, FVector(0.0f, -1.0f, 0.0f));
+                Pivot, FVector(0.0f, -1.0f, 0.0f)
+            );
         }
         else
         {
             View = JungleMath::CreateViewMatrix(ViewTransformOrthographic.GetLocation(),
-                Pivot, FVector(0.0f, 0.0f, 1.0f));
+                Pivot, FVector(0.0f, 0.0f, 1.0f)
+            );
         }
     }
 }
 
 void FEditorViewportClient::UpdateProjectionMatrix()
 {
-    if (IsPerspective()) {
+    if (IsPerspective())
+    {
         Projection = JungleMath::CreateProjectionMatrix(
-            ViewFOV * (PI / 180.0f),
-            GetViewport()->GetViewport().Width/ GetViewport()->GetViewport().Height,
-            nearPlane,
-            farPlane
+            FMath::DegreesToRadians(ViewFOV),
+            AspectRatio,
+            NearClip,
+            FarClip
         );
     }
     else
     {
-        // 스왑체인의 가로세로 비율을 구합니다.
-        float aspectRatio = GetViewport()->GetViewport().Width / GetViewport()->GetViewport().Height;
-
         // 오쏘그래픽 너비는 줌 값과 가로세로 비율에 따라 결정됩니다.
-        float orthoWidth = orthoSize * aspectRatio;
-        float orthoHeight = orthoSize;
+        float OrthoWidth = OrthoSize * AspectRatio;
+        float OrthoHeight = OrthoSize;
 
         // 오쏘그래픽 투영 행렬 생성 (nearPlane, farPlane 은 기존 값 사용)
         Projection = JungleMath::CreateOrthoProjectionMatrix(
-            orthoWidth,
-            orthoHeight,
-            nearPlane,
-            farPlane
+            OrthoWidth,
+            OrthoHeight,
+            NearClip,
+            FarClip
         );
     }
 }
 
-bool FEditorViewportClient::IsOrtho() const
+bool FEditorViewportClient::IsOrthographic() const
 {
     return !IsPerspective();
 }
@@ -332,35 +345,32 @@ void FEditorViewportClient::UpdateOrthoCameraLoc()
     switch (ViewportType)
     {
     case LVT_OrthoXY: // Top
-        ViewTransformOrthographic.SetLocation(Pivot + FVector::UpVector*100000.0f);
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::UpVector * FarClip * 0.5f);
         ViewTransformOrthographic.SetRotation(FVector(0.0f, 90.0f, -90.0f));
         break;
     case LVT_OrthoXZ: // Front
-        ViewTransformOrthographic.SetLocation(Pivot + FVector::ForwardVector*100000.0f);
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::ForwardVector * FarClip * 0.5f);
         ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 180.0f));
         break;
     case LVT_OrthoYZ: // Left
-        ViewTransformOrthographic.SetLocation(Pivot + FVector::RightVector*100000.0f);
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::RightVector * FarClip * 0.5f);
         ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 270.0f));
         break;
-    case LVT_Perspective:
-        break;
     case LVT_OrthoNegativeXY: // Bottom
-        ViewTransformOrthographic.SetLocation(Pivot + FVector::UpVector * -1.0f*100000.0f);
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::UpVector * -1.0f * FarClip * 0.5f);
         ViewTransformOrthographic.SetRotation(FVector(0.0f, -90.0f, 90.0f));
         break;
     case LVT_OrthoNegativeXZ: // Back
-        ViewTransformOrthographic.SetLocation(Pivot + FVector::ForwardVector * -1.0f*100000.0f);
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::ForwardVector * -1.0f * FarClip * 0.5f);
         ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 0.0f));
         break;
     case LVT_OrthoNegativeYZ: // Right
-        ViewTransformOrthographic.SetLocation(Pivot + FVector::RightVector * -1.0f*100000.0f);
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::RightVector * -1.0f * FarClip * 0.5f);
         ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 90.0f));
         break;
-    case LVT_MAX:
-        break;
     case LVT_None:
-        break;
+    case LVT_Perspective:
+    case LVT_MAX:
     default:
         break;
     }
@@ -368,17 +378,15 @@ void FEditorViewportClient::UpdateOrthoCameraLoc()
 
 void FEditorViewportClient::SetOthoSize(float InValue)
 {
-    orthoSize += InValue;
-    if (orthoSize <= 0.1f)
-        orthoSize = 0.1f;
-    
+    OrthoSize += InValue;
+    OrthoSize = FMath::Max(OrthoSize, 0.1f);
 }
 
 void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
 {
     FString ViewportNum = std::to_string(ViewportIndex);
     CameraSpeedSetting = GetValueFromConfig(config, "CameraSpeedSetting" + ViewportNum, 1);
-    CameraSpeedScalar = GetValueFromConfig(config, "CameraSpeedScalar" + ViewportNum, 1.0f);
+    CameraSpeed = GetValueFromConfig(config, "CameraSpeedScalar" + ViewportNum, 1.0f);
     GridSize = GetValueFromConfig(config, "GridSize"+ ViewportNum, 10.0f);
     ViewTransformPerspective.ViewLocation.X = GetValueFromConfig(config, "PerspectiveCameraLocX" + ViewportNum, 0.0f);
     ViewTransformPerspective.ViewLocation.Y = GetValueFromConfig(config, "PerspectiveCameraLocY" + ViewportNum, 0.0f);
@@ -390,11 +398,12 @@ void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
     ViewMode = static_cast<EViewModeIndex>(GetValueFromConfig(config, "ViewMode" + ViewportNum, 0));
     ViewportType = static_cast<ELevelViewportType>(GetValueFromConfig(config, "ViewportType" + ViewportNum, 3));
 }
+
 void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config) const
 {
     FString ViewportNum = std::to_string(ViewportIndex);
     config["CameraSpeedSetting"+ ViewportNum] = std::to_string(CameraSpeedSetting);
-    config["CameraSpeedScalar"+ ViewportNum] = std::to_string(CameraSpeedScalar);
+    config["CameraSpeedScalar"+ ViewportNum] = std::to_string(CameraSpeed);
     config["GridSize"+ ViewportNum] = std::to_string(GridSize);
     config["PerspectiveCameraLocX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().X);
     config["PerspectiveCameraLocY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().Y);
@@ -406,6 +415,7 @@ void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config) const
     config["ViewMode" + ViewportNum] = std::to_string(int32(ViewMode));
     config["ViewportType" + ViewportNum] = std::to_string(int32(ViewportType));
 }
+
 TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath) const
 {
     TMap<FString, FString> config;
@@ -431,30 +441,30 @@ void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FSt
     }
 }
 
-void FEditorViewportClient::SetCameraSpeedScalar(float value)
+void FEditorViewportClient::SetCameraSpeed(float InValue)
 {
-    if (value < 0.198f)
-        value = 0.198f;
-    else if (value > 176.0f)
-        value = 176.0f;
-    CameraSpeedScalar = value;
+    if (InValue < 0.198f)
+        InValue = 0.198f;
+    else if (InValue > 176.0f)
+        InValue = 176.0f;
+    CameraSpeed = InValue;
 }
 
-
-FVector FViewportCameraTransform::GetForwardVector() const
+FVector FViewportCamera::GetForwardVector() const
 {
     FVector Forward = FVector(1.f, 0.f, 0.0f);
     Forward = JungleMath::FVectorRotate(Forward, ViewRotation);
     return Forward;
 }
-FVector FViewportCameraTransform::GetRightVector() const
+
+FVector FViewportCamera::GetRightVector() const
 {
     FVector Right = FVector(0.f, 1.f, 0.0f);
 	Right = JungleMath::FVectorRotate(Right, ViewRotation);
 	return Right;
 }
 
-FVector FViewportCameraTransform::GetUpVector() const
+FVector FViewportCamera::GetUpVector() const
 {
     FVector Up = FVector(0.f, 0.f, 1.0f);
     Up = JungleMath::FVectorRotate(Up, ViewRotation);

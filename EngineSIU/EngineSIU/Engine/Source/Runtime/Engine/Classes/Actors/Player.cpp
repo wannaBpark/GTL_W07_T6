@@ -247,7 +247,7 @@ void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& v
 
     rayOrigin.X = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
     rayOrigin.Y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
-    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrtho())
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrthographic())
     {
         rayOrigin.Z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
     }
@@ -262,7 +262,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
     FMatrix WorldMatrix = obj->GetWorldMatrix();
 	FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     
-    bool bIsOrtho = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
+    bool bIsOrtho = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrthographic();
     
 
     if (bIsOrtho)
@@ -334,7 +334,7 @@ void AEditorPlayer::PickedObjControl()
 void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-    const FViewportCameraTransform* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
+    const FViewportCamera* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
                                                         ? &ActiveViewport->ViewTransformPerspective
                                                         : &ActiveViewport->ViewTransformOrthographic;
 
@@ -380,7 +380,7 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
     const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-    const FViewportCameraTransform* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
+    const FViewportCamera* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
                                                         ? &ActiveViewport->ViewTransformPerspective
                                                         : &ActiveViewport->ViewTransformOrthographic;
 
@@ -436,7 +436,7 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Giz
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
     const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-    const FViewportCameraTransform* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
+    const FViewportCamera* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
                                                         ? &ActiveViewport->ViewTransformPerspective
                                                         : &ActiveViewport->ViewTransformOrthographic;
     FVector CameraRight = ViewTransform->GetRightVector();

@@ -30,8 +30,8 @@ public:
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;
     ID3D11BlendState* AlphaBlendState = nullptr;
     
-    UINT screenWidth = 0;
-    UINT screenHeight = 0;
+    UINT ScreenWidth = 0;
+    UINT ScreenHeight = 0;
     // Depth-Stencil 관련 변수
     ID3D11Texture2D* DepthStencilBuffer = nullptr;  // 깊이/스텐실 텍스처
     ID3D11DepthStencilView* DepthStencilView = nullptr;  // 깊이/스텐실 뷰

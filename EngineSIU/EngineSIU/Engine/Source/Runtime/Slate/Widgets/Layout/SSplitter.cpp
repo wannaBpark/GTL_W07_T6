@@ -16,13 +16,13 @@ void SSplitter::Initialize(FRect initRect)
     }
 }
 
-void SSplitter::OnResize(float width, float height)
+void SSplitter::OnResize(float Width, float Height)
 {
 }
 
-bool SSplitter::OnPressed(FPoint coord)
+bool SSplitter::OnPressed(FPoint InPoint)
 {
-    if (!IsHover(coord))
+    if (!IsHover(InPoint))
         return false;
     
     return bIsPressed = true;
@@ -34,41 +34,40 @@ bool SSplitter::OnReleased()
     return false;
 }
 
-void SSplitter::LoadConfig(const TMap<FString, FString>& config)
+void SSplitter::LoadConfig(const TMap<FString, FString>& Config)
 {
 }
 
-void SSplitter::SaveConfig(TMap<FString, FString>& config) const
+void SSplitter::SaveConfig(TMap<FString, FString>& Config) const
 {
 }
 
-void SSplitterH::Initialize(FRect initRect)
+void SSplitterH::Initialize(FRect InRect)
 {
-    __super::Initialize(initRect);
+    __super::Initialize(InRect);
     if (SideLT)
     {
-        SideLT->Initialize(FRect(0.0f, 0.0f, initRect.leftTopX, initRect.height));
+        SideLT->Initialize(FRect(0.0f, 0.0f, InRect.leftTopX, InRect.height));
     }
     if (SideRB)
     {
-        SideRB->Initialize(FRect(initRect.leftTopX + initRect.width, 0.0f, initRect.leftTopX, initRect.height));
+        SideRB->Initialize(FRect(InRect.leftTopX + InRect.width, 0.0f, InRect.leftTopX, InRect.height));
     }
 }
 
-void SSplitterH::OnResize(float width, float height)
+void SSplitterH::OnResize(float InWidth, float InHeight)
 {
-    Rect.height = height;
-    Rect.leftTopX *= width;
+    Rect.height = InHeight;
+    Rect.leftTopX *= InWidth;
     if (SideLT)
     {
-        SideLT->Rect.height = height;
+        SideLT->Rect.height = InHeight;
     }
     if (SideRB)
     {
-        SideRB->Rect.leftTopX *= width;
-        SideRB->Rect.width *= width;
-        SideLT->Rect.height = height;
-
+        SideRB->Rect.leftTopX *= InWidth;
+        SideRB->Rect.width *= InWidth;
+        SideLT->Rect.height = InHeight;
     }
     UpdateChildRects();
 }
@@ -76,13 +75,13 @@ void SSplitterH::OnResize(float width, float height)
 void SSplitterH::LoadConfig(const TMap<FString, FString>& config)
 {
     // 각 키에 대해 기본값을 지정 (예: 기본 위치 및 크기)
-    Rect.leftTopX = GetValueFromConfig(config, "SplitterH.X", FEngineLoop::GraphicDevice.screenWidth *0.5f);
+    Rect.leftTopX = GetValueFromConfig(config, "SplitterH.X", FEngineLoop::GraphicDevice.ScreenWidth *0.5f);
     Rect.leftTopY = GetValueFromConfig(config, "SplitterH.Y", 0.0f);
 
     Rect.width = GetValueFromConfig(config, "SplitterH.Width", 20.0f);
     Rect.height = GetValueFromConfig(config, "SplitterH.Height", 10.0f); // 수평 스플리터는 높이 고정
     
-    Rect.leftTopX *= FEngineLoop::GraphicDevice.screenWidth /GetValueFromConfig(config, "SplitterV.Width", 1000.0f);
+    Rect.leftTopX *= FEngineLoop::GraphicDevice.ScreenWidth /GetValueFromConfig(config, "SplitterV.Width", 1000.0f);
 }
 
 void SSplitterH::SaveConfig(TMap<FString, FString>& config) const
@@ -126,11 +125,11 @@ void SSplitterV::OnResize(float width, float height)
 void SSplitterV::LoadConfig(const TMap<FString, FString>& config)
 {
     Rect.leftTopX = GetValueFromConfig(config, "SplitterV.X", 0.0f);
-    Rect.leftTopY = GetValueFromConfig(config, "SplitterV.Y", FEngineLoop::GraphicDevice.screenHeight * 0.5f);
-    Rect.width = GetValueFromConfig(config, "SplitterV.Width", 10); // 수직 스플리터는 너비 고정
-    Rect.height = GetValueFromConfig(config, "SplitterV.Height", 20);
+    Rect.leftTopY = GetValueFromConfig(config, "SplitterV.Y", FEngineLoop::GraphicDevice.ScreenHeight * 0.5f);
+    Rect.width = GetValueFromConfig(config, "SplitterV.Width", 10.f); // 수직 스플리터는 너비 고정
+    Rect.height = GetValueFromConfig(config, "SplitterV.Height", 20.f);
 
-    Rect.leftTopY *= FEngineLoop::GraphicDevice.screenHeight / GetValueFromConfig(config, "SplitterH.Height", 1000.0f);
+    Rect.leftTopY *= FEngineLoop::GraphicDevice.ScreenHeight / GetValueFromConfig(config, "SplitterH.Height", 1000.0f);
 
 }
 
