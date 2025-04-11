@@ -46,15 +46,19 @@ public:
         const bool bInIsRightControlDown,
         const bool bInIsLeftAltDown,
         const bool bInIsRightAltDown,
+        const bool bInIsLeftWinDown,
+        const bool bInIsRightWinDown,
         const bool bInAreCapsLocked
     )
-        : bIsLeftShiftDown(static_cast<uint8>(bInIsLeftShiftDown))
-        , bIsRightShiftDown(static_cast<uint8>(bInIsRightShiftDown))
-        , bIsLeftControlDown(static_cast<uint8>(bInIsLeftControlDown))
-        , bIsRightControlDown(static_cast<uint8>(bInIsRightControlDown))
-        , bIsLeftAltDown(static_cast<uint8>(bInIsLeftAltDown))
-        , bIsRightAltDown(static_cast<uint8>(bInIsRightAltDown))
-        , bAreCapsLocked(static_cast<uint8>(bInAreCapsLocked))
+        : bIsLeftShiftDown(static_cast<uint16>(bInIsLeftShiftDown))
+        , bIsRightShiftDown(static_cast<uint16>(bInIsRightShiftDown))
+        , bIsLeftControlDown(static_cast<uint16>(bInIsLeftControlDown))
+        , bIsRightControlDown(static_cast<uint16>(bInIsRightControlDown))
+        , bIsLeftAltDown(static_cast<uint16>(bInIsLeftAltDown))
+        , bIsRightAltDown(static_cast<uint16>(bInIsRightAltDown))
+        , bIsLeftWinDown(static_cast<uint16>(bInIsLeftWinDown))
+        , bIsRightWinDown(static_cast<uint16>(bInIsRightWinDown))
+        , bAreCapsLocked(static_cast<uint16>(bInAreCapsLocked))
     {
     }
 
@@ -65,12 +69,14 @@ public:
         , bIsRightControlDown(false)
         , bIsLeftAltDown(false)
         , bIsRightAltDown(false)
+        , bIsLeftWinDown(false)
+        , bIsRightWinDown(false)
         , bAreCapsLocked(false)
     {
     }
 
     /**
-     * 이 이벤트 발생 시 Shift 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
+     * Shift 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
      *
      * @return  Shift 키가 눌려 있으면 true
      */
@@ -80,7 +86,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 왼쪽 Shift 키가 눌려 있었는지 여부를 반환합니다.
+     * 왼쪽 Shift 키가 눌려 있었는지 여부를 반환합니다.
      *
      * @return  왼쪽 Shift 키가 눌려 있으면 true
      */
@@ -90,7 +96,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 오른쪽 Shift 키가 눌려 있었는지 여부를 반환합니다.
+     * 오른쪽 Shift 키가 눌려 있었는지 여부를 반환합니다.
      *
      * @return  오른쪽 Shift 키가 눌려 있으면 true
      */
@@ -100,7 +106,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 Control 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
+     * Control 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
      *
      * @return  Control 키가 눌려 있으면 true
      */
@@ -110,7 +116,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 왼쪽 Control 키가 눌려 있었는지 여부를 반환합니다.
+     * 왼쪽 Control 키가 눌려 있었는지 여부를 반환합니다.
      *
      * @return  왼쪽 Control 키가 눌려 있으면 true
      */
@@ -120,7 +126,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 오른쪽 Control 키가 눌려 있었는지 여부를 반환합니다.
+     * 오른쪽 Control 키가 눌려 있었는지 여부를 반환합니다.
      *
      * @return  오른쪽 Control 키가 눌려 있으면 true
      */
@@ -130,7 +136,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 Alt 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
+     * Alt 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
      *
      * @return  Alt 키가 눌려 있으면 true
      */
@@ -140,7 +146,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 왼쪽 Alt 키가 눌려 있었는지 여부를 반환합니다.
+     * 왼쪽 Alt 키가 눌려 있었는지 여부를 반환합니다.
      *
      * @return  왼쪽 Alt 키가 눌려 있으면 true
      */
@@ -150,7 +156,7 @@ public:
     }
 
     /**
-     * 이 이벤트 발생 시 오른쪽 Alt 키가 눌려 있었는지 여부를 반환합니다.
+     * 오른쪽 Alt 키가 눌려 있었는지 여부를 반환합니다.
      *
      * @return  오른쪽 Alt 키가 눌려 있으면 true
      */
@@ -158,7 +164,37 @@ public:
     {
         return bIsRightAltDown;
     }
-	
+
+    /**
+     * Windows 키 중 하나라도 눌려 있었는지 여부를 반환합니다.
+     *
+     * @return  Windows 키가 눌려 있으면 true
+     */
+    bool IsWindowsKeyDown() const
+    {
+        return bIsLeftWinDown || bIsRightWinDown;
+    }
+
+    /**
+     * 왼쪽 Windows 키가 눌려 있었는지 여부를 반환합니다.
+     *
+     * @return  왼쪽 Windows 키가 눌려 있으면 true
+     */
+    bool IsLeftWinDown() const
+    {
+        return bIsLeftWinDown;
+    }
+
+    /**
+     * 오른쪽 Windows 키가 눌려 있었는지 여부를 반환합니다.
+     *
+     * @return  오른쪽 Windows 키가 눌려 있으면 true
+     */
+    bool IsRightWinDown() const
+    {
+        return bIsRightWinDown;
+    }
+
     /**
      * Caps Lock 키가 활성화 상태인지 여부를 반환합니다.
      *
@@ -169,14 +205,17 @@ public:
         return bAreCapsLocked;
     }
 
+
 private:
-    uint8 bIsLeftShiftDown : 1;
-    uint8 bIsRightShiftDown : 1;
-    uint8 bIsLeftControlDown : 1;
-    uint8 bIsRightControlDown : 1;
-    uint8 bIsLeftAltDown : 1;
-    uint8 bIsRightAltDown : 1;
-    uint8 bAreCapsLocked : 1;
+    uint16 bIsLeftShiftDown : 1;
+    uint16 bIsRightShiftDown : 1;
+    uint16 bIsLeftControlDown : 1;
+    uint16 bIsRightControlDown : 1;
+    uint16 bIsLeftAltDown : 1;
+    uint16 bIsRightAltDown : 1;
+    uint16 bIsLeftWinDown : 1;
+    uint16 bIsRightWinDown : 1;
+    uint16 bAreCapsLocked : 1;
 };
 
 class FSlateAppMessageHandler
@@ -195,6 +234,9 @@ public:
 
     /** 한 프레임 전의 마우스 포인터의 위치를 가져옵니다. */
     FVector2D GetLastCursorPos() const;
+
+    /** ModifierKeys의 상태를 가져옵니다. */
+    FModifierKeysState GetModifierKeys() const;
 
 protected:
     void OnKeyChar(const TCHAR Character, const bool IsRepeat) const;
@@ -228,6 +270,8 @@ private:
             RightControl, // VK_RCONTROL
             LeftAlt,      // VK_LMENU
             RightAlt,     // VK_RMENU
+            LeftWin,      // VK_LWIN
+            RightWin,     // VK_RWIN
             CapsLock,     // VK_CAPITAL
             Count,
         };

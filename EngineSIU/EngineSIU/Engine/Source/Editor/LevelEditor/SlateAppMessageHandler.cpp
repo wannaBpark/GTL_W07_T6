@@ -191,6 +191,22 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
                 ModifierKeyState[EModifierKey::RightShift] = true;
             }
             break;
+        case VK_LWIN:
+        case VK_RWIN:
+            // Differentiate between left and right window key
+            if ((lParam & 0x1000000) == 0)
+            {
+                ActualKey = VK_LWIN;
+                bIsRepeat = ModifierKeyState[EModifierKey::LeftWin];
+                ModifierKeyState[EModifierKey::LeftWin] = true;
+            }
+            else
+            {
+                ActualKey = VK_RWIN;
+                bIsRepeat = ModifierKeyState[EModifierKey::RightWin];
+                ModifierKeyState[EModifierKey::RightWin] = true;
+            }
+            break;
         case VK_CAPITAL:
             ModifierKeyState[EModifierKey::CapsLock] = (GetKeyState(VK_CAPITAL) & 0x0001) != 0;
             break;
@@ -249,6 +265,20 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
             else
             {
                 ModifierKeyState[EModifierKey::RightShift] = false;
+            }
+            break;
+        case VK_LWIN:
+        case VK_RWIN:
+            // Differentiate between left and right window key
+            if ((lParam & 0x1000000) == 0)
+            {
+                ActualKey = VK_LWIN;
+                ModifierKeyState[EModifierKey::LeftWin] = false;
+            }
+            else
+            {
+                ActualKey = VK_RWIN;
+                ModifierKeyState[EModifierKey::RightWin] = false;
             }
             break;
         case VK_CAPITAL:
@@ -451,4 +481,19 @@ FVector2D FSlateAppMessageHandler::GetCursorPos() const
 FVector2D FSlateAppMessageHandler::GetLastCursorPos() const
 {
     return PreviousPosition;
+}
+
+FModifierKeysState FSlateAppMessageHandler::GetModifierKeys() const
+{
+    return FModifierKeysState{
+        ModifierKeyState[EModifierKey::LeftShift],
+        ModifierKeyState[EModifierKey::RightShift],
+        ModifierKeyState[EModifierKey::LeftControl],
+        ModifierKeyState[EModifierKey::RightControl],
+        ModifierKeyState[EModifierKey::LeftAlt],
+        ModifierKeyState[EModifierKey::RightAlt],
+        ModifierKeyState[EModifierKey::LeftWin],
+        ModifierKeyState[EModifierKey::RightWin],
+        ModifierKeyState[EModifierKey::CapsLock]
+    };
 }
