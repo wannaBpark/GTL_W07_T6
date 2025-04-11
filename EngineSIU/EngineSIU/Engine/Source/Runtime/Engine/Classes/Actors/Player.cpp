@@ -294,6 +294,21 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         FVector rayDirection = (transformedPick - pickRayOrigin).GetSafeNormal();
         
         intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
+
+        if (intersectCount > 0)
+        {
+            FVector LocalHitPoint = pickRayOrigin + rayDirection * hitDistance;
+
+            FVector WorldHitPoint = WorldMatrix.TransformPosition(LocalHitPoint);
+
+            FVector WorldRayOrigin;
+            FMatrix InverseView = FMatrix::Inverse(ViewMatrix);
+            WorldRayOrigin = InverseView.TransformPosition(cameraOrigin);
+
+            float WorldDistance = FVector::Distance(WorldRayOrigin, WorldHitPoint);
+
+            hitDistance = WorldDistance;
+        }
         return intersectCount;
     }
 }
