@@ -66,9 +66,35 @@ void FStaticMeshRenderPass::CreateShader()
 
     hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS");
 
+#pragma region UberShader
+
+    D3D_SHADER_MACRO definesGouraud[] =
+    {
+        { "LIGHTING_MODEL_GOURAUD", "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesGouraud);
+    
+    D3D_SHADER_MACRO definesLambert[] =
+    {
+        { "LIGHTING_MODEL_LAMBERT", "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"LAMBERT_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesLambert);
+
+    D3D_SHADER_MACRO definesPhong[] =
+    {
+        { "LIGHTING_MODEL_PHONG", "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesPhong);
+
+#pragma endregion UberShader
+
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
 
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
+    // auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+    PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
 
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
 
@@ -80,11 +106,20 @@ void FStaticMeshRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
-void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi) const
+void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi)
 {
     switch (evi)
     {
-    case EViewModeIndex::VMI_Lit:
+    case EViewModeIndex::VMI_Lit_Gouraud:
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"GOURAUD_StaticMeshPixelShader");
+        UpdateLitUnlitConstant(1);
+        break;
+    case EViewModeIndex::VMI_Lit_Lambert:
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"LAMBERT_StaticMeshPixelShader");
+        UpdateLitUnlitConstant(1);
+        break;
+    case EViewModeIndex::VMI_Lit_Phong:
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
         break;
     case EViewModeIndex::VMI_Wireframe:

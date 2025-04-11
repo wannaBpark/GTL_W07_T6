@@ -62,6 +62,36 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::ws
     return S_OK;
 }
 
+HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* defines)
+{
+	UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+#ifdef _DEBUG
+	shaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+	HRESULT hr = S_OK;
+
+	if (DXDDevice == nullptr)
+		return S_FALSE;
+
+	ID3DBlob* PsBlob = nullptr;
+	hr = D3DCompileFromFile(FileName.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
+	if (FAILED(hr))
+		return hr;
+
+	ID3D11PixelShader* NewPixelShader;
+	hr = DXDDevice->CreatePixelShader(PsBlob->GetBufferPointer(), PsBlob->GetBufferSize(), nullptr, &NewPixelShader);
+	if (PsBlob)
+	{
+		PsBlob->Release();
+	}
+	if (FAILED(hr))
+		return hr;
+
+	PixelShaders[Key] = NewPixelShader;
+
+	return S_OK;
+}
+
 HRESULT FDXDShaderManager::AddVertexShader(const std::wstring& Key, const std::wstring& FileName)
 {
     return E_NOTIMPL;
