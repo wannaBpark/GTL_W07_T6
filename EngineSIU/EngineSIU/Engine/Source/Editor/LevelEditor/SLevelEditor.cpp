@@ -4,9 +4,13 @@
 #include <sstream>
 #include "EngineLoop.h"
 #include "UnrealClient.h"
+#include "WindowsCursor.h"
 #include "Slate/Widgets/Layout/SSplitter.h"
 #include "SlateCore/Widgets/SWindow.h"
 #include "UnrealEd/EditorViewportClient.h"
+
+extern FEngineLoop GEngineLoop;
+
 
 SLevelEditor::SLevelEditor()
     : bInitialize(false)
@@ -34,6 +38,37 @@ void SLevelEditor::Initialize()
     HSplitter->OnDrag(FPoint(0, 0));
     LoadConfig();
     bInitialize = true;
+
+    FSlateAppMessageHandler* Handler = GEngineLoop.GetAppMessageHandler();
+
+    Handler->OnMouseDownDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
+    {
+        if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+        {
+            // TODO: 지금 우클릭 하면 무조건 커서를 숨기게 되어있는데, Viewport에 Focus가 되어있을때만 숨겨지게 만들기
+            // FWindowsCursor::SetMouseCursor(ECursorType::None);
+            MousePinPosition = InMouseEvent.GetScreenSpacePosition();
+        }
+    });
+
+    Handler->OnMouseMoveDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
+    {
+        if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+        {
+            ActiveViewportClient->MouseMove(InMouseEvent);
+            // TODO: 무한마우스 구현하기
+            // FWindowsCursor::SetPosition(static_cast<int32>(MousePinPosition.X), static_cast<int32>(MousePinPosition.Y));
+        }
+    });
+
+    Handler->OnMouseUpDelegate.AddLambda([](const FPointerEvent& InMouseEvent)
+    {
+        if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+        {
+            // FWindowsCursor::SetMouseCursor(ECursorType::Arrow);
+        }
+    });
+
 }
 
 void SLevelEditor::Tick(double deltaTime)
@@ -54,7 +89,6 @@ void SLevelEditor::Tick(double deltaTime)
     }
     //Test Code Cursor icon End
     OnResize();
-    ActiveViewportClient->Input();
     for (std::shared_ptr<FEditorViewportClient> Viewport : ViewportClients)
     {
         Viewport->Tick(deltaTime);

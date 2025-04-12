@@ -36,7 +36,10 @@ private:
 
     bool bLButtonDown = false;
     bool bRButtonDown = false;
-    
+
+    /** 우클릭 시 캡처된 마우스 커서의 초기 위치 (스크린 좌표계) */
+    FVector2D MousePinPosition;
+
     bool bMultiViewportMode;
 
     POINT lastMousePos;
