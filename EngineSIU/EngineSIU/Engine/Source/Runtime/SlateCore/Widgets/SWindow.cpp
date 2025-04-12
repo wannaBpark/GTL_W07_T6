@@ -12,15 +12,15 @@ void SWindow::Initialize(FRect InitRect)
 
 void SWindow::OnResize(float InWidth, float InHeight)
 {
-    Rect.width = InWidth;
-    Rect.height = InHeight;
+    Rect.Width = InWidth;
+    Rect.Height = InHeight;
 }
 
 
 bool SWindow::IsHover(FPoint InPoint) 
 {
-    return bIsHovered = InPoint.x >= Rect.leftTopX && InPoint.x < Rect.leftTopX + Rect.width &&
-        InPoint.y >= Rect.leftTopY && InPoint.y < Rect.leftTopY + Rect.height;
+    return bIsHovered = InPoint.x >= Rect.LeftTopX && InPoint.x < Rect.LeftTopX + Rect.Width &&
+        InPoint.y >= Rect.LeftTopY && InPoint.y < Rect.LeftTopY + Rect.Height;
 }
 
 bool SWindow::OnPressed(FPoint InPoint)

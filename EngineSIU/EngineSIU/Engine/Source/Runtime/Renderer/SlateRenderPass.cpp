@@ -25,7 +25,7 @@ void FSlateRenderPass::PrepareRender()
 
 void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    
+    /*
     float LeftNDC   = (2.0f * LeftOffset) / ScreenWidth - 1.0f;
     float RightNDC  = (2.0f * (LeftOffset + Width)) / ScreenWidth - 1.0f;
     float TopNDC    = 1.0f - (2.0f * TopOffset) / ScreenHeight;
@@ -36,6 +36,7 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
 
     float OffsetX = (LeftNDC + RightNDC) * 0.5f;
     float OffsetY = (TopNDC + BottomNDC) * 0.5f;
+    */
 }
 
 void FSlateRenderPass::ClearRenderArr()

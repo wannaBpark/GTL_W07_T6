@@ -35,7 +35,9 @@ void AEditorPlayer::Input()
             POINT mousePos;
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
+            ScreenToClient(GEngineLoop.hWnd, &mousePos);
 
+            /*
             uint32 UUID = FEngineLoop::GraphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
             for ( const USceneComponent* obj : TObjectRange<USceneComponent>())
@@ -44,7 +46,7 @@ void AEditorPlayer::Input()
 
                 UE_LOG(LogLevel::Display, *obj->GetName());
             }
-            ScreenToClient(GEngineLoop.hWnd, &mousePos);
+            */
 
             FVector pickPosition;
 

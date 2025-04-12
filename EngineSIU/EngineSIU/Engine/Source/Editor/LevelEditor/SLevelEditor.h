@@ -14,13 +14,13 @@ class SLevelEditor
 public:
     SLevelEditor();
 
-    void Initialize();
+    void Initialize(uint32 InEditorWidth, uint32 InEditorHeight);
     void Tick(float DeltaTime);
     void Input();
     void Release();
-    
+
+    void ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight);
     void SelectViewport(POINT point);
-    void OnResize();
     void ResizeViewports();
     void EnableMultiViewport();
     void DisableMultiViewport();
@@ -40,8 +40,9 @@ private:
     bool bMultiViewportMode;
 
     POINT PrevCursorLocation;
-    float EditorWidth;
-    float EditorHeight;
+    
+    uint32 EditorWidth;
+    uint32 EditorHeight;
 
 public:
     std::shared_ptr<FEditorViewportClient>* GetViewports() { return ViewportClients; }

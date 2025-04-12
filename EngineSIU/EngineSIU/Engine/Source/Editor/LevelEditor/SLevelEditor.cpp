@@ -16,7 +16,7 @@ SLevelEditor::SLevelEditor()
 {
 }
 
-void SLevelEditor::Initialize()
+void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
 {
     for (size_t i = 0; i < 4; i++)
     {
@@ -24,14 +24,19 @@ void SLevelEditor::Initialize()
         ViewportClients[i]->Initialize(i);
     }
     ActiveViewportClient = ViewportClients[0];
-    OnResize();
+    
+    ResizeEditor(InEditorWidth, InEditorHeight);
+    
     VSplitter = new SSplitterV();
     VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
     VSplitter->OnDrag(FPoint(0, 0));
+    
     HSplitter = new SSplitterH();
     HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
     HSplitter->OnDrag(FPoint(0, 0));
+    
     LoadConfig();
+    
     bInitialized = true;
 }
 
@@ -52,8 +57,7 @@ void SLevelEditor::Tick(float DeltaTime)
         }
         Input();
     }
-    //Test Code Cursor icon End
-    OnResize();
+    
     ActiveViewportClient->Input();
     for (const std::shared_ptr<FEditorViewportClient>& Viewport : ViewportClients)
     {
@@ -133,6 +137,28 @@ void SLevelEditor::Release()
     delete HSplitter;
 }
 
+void SLevelEditor::ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight)
+{
+    if (InEditorWidth == EditorWidth && InEditorHeight == EditorHeight)
+    {
+        return;
+    }
+    
+    const uint32 PrevEditorWidth = EditorWidth;
+    const uint32 PrevEditorHeight = EditorHeight;
+    EditorWidth = InEditorWidth;
+    EditorHeight = InEditorHeight;
+
+    if (bInitialized)
+    {
+        //HSplitter 에는 바뀐 width 비율이 들어감 
+        HSplitter->OnResize(EditorWidth / PrevEditorWidth, EditorHeight);
+        //HSplitter 에는 바뀐 Height 비율이 들어감 
+        VSplitter->OnResize(EditorWidth, EditorHeight / PrevEditorHeight);
+        ResizeViewports();
+    }
+}
+
 void SLevelEditor::SelectViewport(POINT point)
 {
     for (int i = 0; i < 4; i++)
@@ -142,21 +168,6 @@ void SLevelEditor::SelectViewport(POINT point)
             SetActiveViewportClient(i);
             break;
         }
-    }
-}
-
-void SLevelEditor::OnResize()
-{
-    float PrevWidth = EditorWidth;
-    float PrevHeight = EditorHeight;
-    EditorWidth = FEngineLoop::GraphicDevice.ScreenWidth;
-    EditorHeight = FEngineLoop::GraphicDevice.ScreenHeight;
-    if (bInitialized) {
-        //HSplitter 에는 바뀐 width 비율이 들어감 
-        HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
-        //HSplitter 에는 바뀐 Height 비율이 들어감 
-        VSplitter->OnResize(EditorWidth, EditorHeight/PrevHeight);
-        ResizeViewports();
     }
 }
 

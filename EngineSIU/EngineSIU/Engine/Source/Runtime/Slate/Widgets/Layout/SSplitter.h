@@ -18,9 +18,7 @@ public:
     virtual bool OnPressed(FPoint InPoint) override;
     virtual bool OnReleased() override;
 
-    virtual void OnDragEnd() {
-
-    }
+    virtual void OnDragEnd() {}
 
     virtual void LoadConfig(const TMap<FString, FString>& Config);
     virtual void SaveConfig(TMap<FString, FString>& Config) const;
@@ -52,50 +50,21 @@ public:
     virtual void LoadConfig(const TMap<FString, FString>& config) override;
     virtual void SaveConfig(TMap<FString, FString>& config) const override;
 
-    virtual void OnDrag(const FPoint& delta) override {
-        // 수평 스플리터의 경우, 좌우로 이동
-        Rect.leftTopX += delta.x;
+    virtual void OnDrag(const FPoint& delta) override;
 
-        UpdateChildRects();
-    }
-
-    virtual void UpdateChildRects() override {
-
-        if (SideLT)
-            SideLT->Rect.width = Rect.leftTopX - SideLT->Rect.leftTopX;
-        if (SideRB)
-        {
-            float prevleftTopX = SideRB->Rect.leftTopX;
-            SideRB->Rect.leftTopX = Rect.leftTopX + Rect.width;
-            SideRB->Rect.width =  SideRB->Rect.width + prevleftTopX  - SideRB->Rect.leftTopX;
-        }
-    }
+    virtual void UpdateChildRects() override;
 };
 
 class SSplitterV : public SSplitter
 {
 public:
     virtual void Initialize(FRect initRect) override;
-    virtual void OnResize(float width, float height)    override;
+    virtual void OnResize(float width, float height) override;
 
-    virtual void LoadConfig(const TMap<FString, FString>& config)   override;
-    virtual void SaveConfig(TMap<FString, FString>& config) const   override;
+    virtual void LoadConfig(const TMap<FString, FString>& config) override;
+    virtual void SaveConfig(TMap<FString, FString>& config) const override;
 
-    virtual void OnDrag(const FPoint& delta) override {
+    virtual void OnDrag(const FPoint& delta) override;
 
-        Rect.leftTopY += delta.y;
-        UpdateChildRects();
-    }
-
-    virtual void UpdateChildRects() override {
-
-        if (SideLT)
-            SideLT->Rect.height = Rect.leftTopY - SideLT->Rect.leftTopY;
-        if (SideRB)
-        {
-            float prevleftTopY = SideRB->Rect.leftTopY;
-            SideRB->Rect.leftTopY = Rect.leftTopY + Rect.height;
-            SideRB->Rect.height = SideRB->Rect.height + prevleftTopY - SideRB->Rect.leftTopY;
-        }
-    }
+    virtual void UpdateChildRects() override;
 };

@@ -154,7 +154,6 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -169,7 +168,6 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -194,7 +192,7 @@ D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
     return Viewport->GetD3DViewport();
 }
 
-FRenderTarget* FEditorViewportClient::GetRenderTarget()
+FRenderTargetRHI* FEditorViewportClient::GetRenderTarget()
 {
     if (!RenderTargetCache)
     {

@@ -309,7 +309,7 @@ void FFogRenderPass::CreateBlendState()
 void FFogRenderPass::PrepareFinalRender()
 {
     // 셰이더 설정
-    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, nullptr);
     Graphics->DeviceContext->OMSetBlendState(FogBlendState, nullptr, 0xffffffff);
 
     Graphics->DeviceContext->VSSetShader(FogVertexShader, nullptr, 0);

@@ -2,117 +2,74 @@
 
 #include "EngineLoop.h"
 
-FRenderTarget::FRenderTarget()
+FRenderTargetRHI::FRenderTargetRHI()
 {
 }
 
-FRenderTarget::~FRenderTarget()
+FRenderTargetRHI::~FRenderTargetRHI()
 {
     Release();
 }
 
-void FRenderTarget::Initialize(uint32 InWidth, uint32 InHeight)
+void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)
 {
-    HRESULT hr = S_OK;
-    hr = CreateSceneResources(InWidth, InHeight);
-    if (FAILED(hr))
-    {
-        return;
-    }
+    D3DViewport.Height = static_cast<float>(InHeight);
+    D3DViewport.Width = static_cast<float>(InWidth);
+    D3DViewport.MaxDepth = 1.0f;
+    D3DViewport.MinDepth = 0.0f;
 
+    HRESULT hr = S_OK;
     hr = CreateDepthStencilResources(InWidth, InHeight);
     if (FAILED(hr))
     {
         return;
     }
-}
 
-void FRenderTarget::Resize(uint32 NewWidth, uint32 NewHeight)
-{
-}
+    // Essential resources
+    hr = CreateResource(EResourceType::ERT_Final, InWidth, InHeight);
+    if (FAILED(hr))
+    {
+        return;
+    }
 
-void FRenderTarget::Release()
-{
-    if (SceneTexture)
+    hr = CreateResource(EResourceType::ERT_Scene, InWidth, InHeight);
+    if (FAILED(hr))
     {
-        SceneTexture->Release();
-        SceneTexture = nullptr;
-    }
-    if (SceneRTV)
-    {
-        SceneRTV->Release();
-        SceneRTV = nullptr;
-    }
-    if (SceneSRV)
-    {
-        SceneSRV->Release();
-        SceneSRV = nullptr;
-    }
-    if (DepthStencilTexture)
-    {
-        DepthStencilTexture->Release();
-        DepthStencilTexture = nullptr;
-    }
-    if (DepthStencilView)
-    {
-        DepthStencilView->Release();
-        DepthStencilView = nullptr;
-    }
-    if (DepthStencilSRV)
-    {
-        DepthStencilSRV->Release();
-        DepthStencilSRV = nullptr;
+        return;
     }
 }
 
-void FRenderTarget::ClearRenderTarget(ID3D11DeviceContext* DeviceContext)
+void FRenderTargetRHI::Resize(uint32 NewWidth, uint32 NewHeight)
 {
-    DeviceContext->ClearRenderTargetView(SceneRTV, ClearColor);
+    D3DViewport.Width = static_cast<float>(NewWidth);
+    D3DViewport.Height = static_cast<float>(NewHeight);
+    
+    Release();
+    Initialize(NewWidth, NewHeight);
+}
+
+void FRenderTargetRHI::Release()
+{
+    ReleaseDepthStencilResources();
+    ReleaseResources();
+}
+
+FViewportResources* FRenderTargetRHI::GetResource(EResourceType Type)
+{
+    if (Resources.Contains(Type))
+    {
+        return Resources.Find(Type);
+    }
+    return nullptr;
+}
+
+void FRenderTargetRHI::ClearRenderTarget(ID3D11DeviceContext* DeviceContext)
+{
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    DeviceContext->ClearRenderTargetView(GetResource(EResourceType::ERT_Scene)->RTV, ClearColor);
 }
 
-HRESULT FRenderTarget::CreateSceneResources(uint32 InWidth, uint32 InHeight)
-{
-    HRESULT hr = S_OK;
-    
-    D3D11_TEXTURE2D_DESC SceneTextureDesc = {};
-    SceneTextureDesc.Width = InWidth;
-    SceneTextureDesc.Height = InHeight;
-    SceneTextureDesc.MipLevels = 1;
-    SceneTextureDesc.ArraySize = 1;
-    SceneTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    SceneTextureDesc.SampleDesc.Count = 1;
-    SceneTextureDesc.SampleDesc.Quality = 0;
-    SceneTextureDesc.Usage = D3D11_USAGE_DEFAULT;
-    SceneTextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-    SceneTextureDesc.CPUAccessFlags = 0;
-    SceneTextureDesc.MiscFlags = 0;
-    SceneTexture = FEngineLoop::GraphicDevice.CreateTexture2D(SceneTextureDesc, nullptr);
-
-    D3D11_RENDER_TARGET_VIEW_DESC SceneRTVDesc = {};
-    SceneRTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // TODO: srgb 옵션 고려해보기
-    SceneRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-    hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(SceneTexture, &SceneRTVDesc, &SceneRTV);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-    
-    D3D11_SHADER_RESOURCE_VIEW_DESC SceneSRVDesc = {};
-    SceneSRVDesc.Format = SceneTextureDesc.Format;
-    SceneSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    SceneSRVDesc.Texture2D.MostDetailedMip = 0;
-    SceneSRVDesc.Texture2D.MipLevels = 1;
-    hr = FEngineLoop::GraphicDevice.Device->CreateShaderResourceView(SceneTexture, &SceneSRVDesc, &SceneSRV);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return hr;
-}
-
-HRESULT FRenderTarget::CreateDepthStencilResources(uint32 InWidth, uint32 InHeight)
+HRESULT FRenderTargetRHI::CreateDepthStencilResources(uint32 InWidth, uint32 InHeight)
 {
     HRESULT hr = S_OK;
     
@@ -158,6 +115,78 @@ HRESULT FRenderTarget::CreateDepthStencilResources(uint32 InWidth, uint32 InHeig
     return hr;
 }
 
+HRESULT FRenderTargetRHI::CreateResource(EResourceType Type, uint32 InWidth, uint32 InHeight)
+{
+    FViewportResources NewResource;
+    
+    HRESULT hr = S_OK;
+    
+    D3D11_TEXTURE2D_DESC TextureDesc = {};
+    TextureDesc.Width = InWidth;
+    TextureDesc.Height = InHeight;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.CPUAccessFlags = 0;
+    TextureDesc.MiscFlags = 0;
+    NewResource.Texture2D = FEngineLoop::GraphicDevice.CreateTexture2D(TextureDesc, nullptr);
+
+    D3D11_RENDER_TARGET_VIEW_DESC RTVDesc = {};
+    RTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // TODO: srgb 옵션 고려해보기
+    RTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(NewResource.Texture2D, &RTVDesc, &NewResource.RTV);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+    
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+    SRVDesc.Format = TextureDesc.Format;
+    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SRVDesc.Texture2D.MostDetailedMip = 0;
+    SRVDesc.Texture2D.MipLevels = 1;
+    hr = FEngineLoop::GraphicDevice.Device->CreateShaderResourceView(NewResource.Texture2D, &SRVDesc, &NewResource.SRV);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    Resources.Add(Type, NewResource);
+
+    return hr;
+}
+
+void FRenderTargetRHI::ReleaseDepthStencilResources()
+{
+    if (DepthStencilView)
+    {
+        DepthStencilView->Release();
+        DepthStencilView = nullptr;
+    }
+    if (DepthStencilSRV)
+    {
+        DepthStencilSRV->Release();
+        DepthStencilSRV = nullptr;
+    }
+    if (DepthStencilTexture)
+    {
+        DepthStencilTexture->Release();
+        DepthStencilTexture = nullptr;
+    }
+}
+
+void FRenderTargetRHI::ReleaseResources()
+{
+    for (auto& [Type, Resource] : Resources)
+    {
+        Resource.Release();
+    }
+}
+
 
 FViewport::FViewport()
     : FViewport(EViewScreenLocation::EVL_MAX)
@@ -165,7 +194,7 @@ FViewport::FViewport()
 }
 
 FViewport::FViewport(EViewScreenLocation InViewLocation)
-    : RenderTarget(new FRenderTarget())
+    : RenderTarget(new FRenderTargetRHI())
     , ViewLocation(InViewLocation) 
 {
 }
@@ -223,28 +252,28 @@ void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRec
     switch (ViewLocation)
     {
     case EViewScreenLocation::EVL_TopLeft:
-        GetD3DViewport().TopLeftX = Left.leftTopX;
-        GetD3DViewport().TopLeftY = Top.leftTopY;
-        GetD3DViewport().Width = Left.width;
-        GetD3DViewport().Height = Top.height;
+        GetD3DViewport().TopLeftX = Left.LeftTopX;
+        GetD3DViewport().TopLeftY = Top.LeftTopY;
+        GetD3DViewport().Width = Left.Width;
+        GetD3DViewport().Height = Top.Height;
         break;
     case EViewScreenLocation::EVL_TopRight:
-        GetD3DViewport().TopLeftX = Right.leftTopX;
-        GetD3DViewport().TopLeftY = Top.leftTopY;
-        GetD3DViewport().Width = Right.width;
-        GetD3DViewport().Height = Top.height;
+        GetD3DViewport().TopLeftX = Right.LeftTopX;
+        GetD3DViewport().TopLeftY = Top.LeftTopY;
+        GetD3DViewport().Width = Right.Width;
+        GetD3DViewport().Height = Top.Height;
         break;
     case EViewScreenLocation::EVL_BottomLeft:
-        GetD3DViewport().TopLeftX = Left.leftTopX;
-        GetD3DViewport().TopLeftY = Bottom.leftTopY;
-        GetD3DViewport().Width = Left.width;
-        GetD3DViewport().Height = Bottom.height;
+        GetD3DViewport().TopLeftX = Left.LeftTopX;
+        GetD3DViewport().TopLeftY = Bottom.LeftTopY;
+        GetD3DViewport().Width = Left.Width;
+        GetD3DViewport().Height = Bottom.Height;
         break;
     case EViewScreenLocation::EVL_BottomRight:
-        GetD3DViewport().TopLeftX = Right.leftTopX;
-        GetD3DViewport().TopLeftY = Bottom.leftTopY;
-        GetD3DViewport().Width = Right.width;
-        GetD3DViewport().Height = Bottom.height;
+        GetD3DViewport().TopLeftX = Right.LeftTopX;
+        GetD3DViewport().TopLeftY = Bottom.LeftTopY;
+        GetD3DViewport().Width = Right.Width;
+        GetD3DViewport().Height = Bottom.Height;
         break;
     default:
         break;
@@ -253,10 +282,10 @@ void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRec
 
 void FViewport::ResizeViewport(const FRect& NewRect)
 {
-    GetD3DViewport().TopLeftX = NewRect.leftTopX;
-    GetD3DViewport().TopLeftY = NewRect.leftTopY;
-    GetD3DViewport().Width = NewRect.width;
-    GetD3DViewport().Height = NewRect.height;
+    GetD3DViewport().TopLeftX = NewRect.LeftTopX;
+    GetD3DViewport().TopLeftY = NewRect.LeftTopY;
+    GetD3DViewport().Width = NewRect.Width;
+    GetD3DViewport().Height = NewRect.Height;
 
-    RenderTarget->Initialize(static_cast<uint32>(NewRect.width), static_cast<uint32>(NewRect.height));
+    RenderTarget->Resize(static_cast<uint32>(NewRect.Width), static_cast<uint32>(NewRect.Height));
 }

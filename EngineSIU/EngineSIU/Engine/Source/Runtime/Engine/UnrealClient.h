@@ -2,7 +2,9 @@
 #include "Define.h" 
 #include <d3d11.h>
 
-class FRenderTarget;
+#include "Container/Map.h"
+
+class FRenderTargetRHI;
 
 enum class EViewScreenLocation : uint8
 {
@@ -13,11 +15,47 @@ enum class EViewScreenLocation : uint8
     EVL_MAX,
 };
 
-class FRenderTarget
+enum class EResourceType : uint8
+{
+    ERT_Final,
+    ERT_Scene,
+    ERT_Depth,
+    ERT_WorldNormal,
+    ERT_PP_Fog,
+    ERT_MAX,
+};
+
+struct FViewportResources
+{
+    ID3D11Texture2D* Texture2D;
+    ID3D11RenderTargetView* RTV;
+    ID3D11ShaderResourceView* SRV;
+
+    void Release()
+    {
+        if (SRV)
+        {
+            SRV->Release();
+            SRV = nullptr;
+        }
+        if (RTV)
+        {
+            RTV->Release();
+            RTV = nullptr;
+        }
+        if (Texture2D)
+        {
+            Texture2D->Release();
+            Texture2D = nullptr;
+        }
+    }
+};
+
+class FRenderTargetRHI
 {
 public:
-    FRenderTarget();
-    ~FRenderTarget();
+    FRenderTargetRHI();
+    ~FRenderTargetRHI();
 
     void Initialize(uint32 InWidth, uint32 InHeight);
     void Resize(uint32 NewWidth, uint32 NewHeight);
@@ -25,44 +63,34 @@ public:
     void Release();
     
     D3D11_VIEWPORT& GetD3DViewport() { return D3DViewport; }
-
-    ID3D11Texture2D*& GetSceneTexture() { return SceneTexture; }
-    ID3D11RenderTargetView*& GetSceneRTV() { return SceneRTV; }
-    ID3D11ShaderResourceView*& GetSceneSRV() { return SceneSRV; }
     
     ID3D11Texture2D*& GetDepthStencilTexture() { return DepthStencilTexture; }
     ID3D11DepthStencilView*& GetDepthStencilView() { return DepthStencilView; }
     ID3D11ShaderResourceView*& GetDepthStencilSRV() { return DepthStencilSRV; }
-    
-    void SetViewport(const D3D11_VIEWPORT& InViewport) { D3DViewport = InViewport; }
-    
-    void SetSceneTexture(ID3D11Texture2D* InSceneTexture) { SceneTexture = InSceneTexture; }
-    void SetSceneRTV(ID3D11RenderTargetView* InSceneRTV) { SceneRTV = InSceneRTV; }
-    void SetSceneShaderResourceView(ID3D11ShaderResourceView* InSceneSRV) { SceneSRV = InSceneSRV; }
-    
-    void SetDepthStencilTexture(ID3D11Texture2D* InDepthStencilTexture) { DepthStencilTexture = InDepthStencilTexture; }
-    void SetDepthStencilView(ID3D11DepthStencilView* InDepthStencilView) { DepthStencilView = InDepthStencilView; }
-    void SetDepthStencilSRV(ID3D11ShaderResourceView* InDepthStencilSRV) { DepthStencilSRV = InDepthStencilSRV; }
 
+    FViewportResources* GetResource(EResourceType Type);
+    
     void ClearRenderTarget(ID3D11DeviceContext* DeviceContext);
     
 private:
     // DirectX
     D3D11_VIEWPORT D3DViewport = {};
 
-    ID3D11Texture2D* SceneTexture = nullptr;
-    ID3D11RenderTargetView* SceneRTV = nullptr;
-    ID3D11ShaderResourceView* SceneSRV = nullptr;
-
     ID3D11Texture2D* DepthStencilTexture = nullptr;
     ID3D11DepthStencilView* DepthStencilView = nullptr;
     ID3D11ShaderResourceView* DepthStencilSRV = nullptr;
 
-    HRESULT CreateSceneResources(uint32 InWidth, uint32 InHeight);
-    HRESULT CreateDepthStencilResources(uint32 InWidth, uint32 InHeight);
+    TMap<EResourceType, FViewportResources> Resources;
 
-    float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    HRESULT CreateDepthStencilResources(uint32 InWidth, uint32 InHeight);
+    HRESULT CreateResource(EResourceType Type, uint32 InWidth, uint32 InHeight);
+
+    void ReleaseDepthStencilResources();
+    void ReleaseResources();
+
+    float ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f };
 };
+
 
 class FViewport
 {
@@ -80,10 +108,10 @@ public:
 
     EViewScreenLocation GetViewLocation() const { return ViewLocation; }
 
-    FRenderTarget* GetRenderTarget() const { return RenderTarget; }
+    FRenderTargetRHI* GetRenderTarget() const { return RenderTarget; }
 
 private:
-    FRenderTarget* RenderTarget;
+    FRenderTargetRHI* RenderTarget;
 
     EViewScreenLocation ViewLocation;   // 뷰포트 위치
 };
