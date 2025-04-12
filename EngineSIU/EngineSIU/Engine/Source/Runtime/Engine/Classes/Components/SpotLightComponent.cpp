@@ -2,6 +2,8 @@
 USpotLightComponent::USpotLightComponent()
 {
     Light.Type = ELightType::SPOT_LIGHT;
+    Light.InnerCos = 0.9659;
+    Light.OuterCos = 0.8660;
 }
 
 USpotLightComponent::~USpotLightComponent()

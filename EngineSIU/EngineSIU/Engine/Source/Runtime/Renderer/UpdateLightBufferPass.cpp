@@ -7,6 +7,7 @@
 #include "Components/LightComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/DirectionalLightComponent.h"
 #include "Math/JungleMath.h"
 #include "Engine/EditorEngine.h"
 #include "World/World.h"
@@ -50,6 +51,10 @@ void FUpdateLightBufferPass::PrepareRender()
             {
                 SpotLights.Add(SpotLight);
             }
+            else if (UDirectionalLightComponent* DirectionalLight = Cast<UDirectionalLightComponent>(iter))
+            {
+                DirectionalLights.Add(DirectionalLight);
+            }
         }
     }
 }
@@ -85,7 +90,19 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
             LightBufferData.gLights[LightCount].Direction = Light->GetForwardVector();
             LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
+            //LightBufferData.gLights[LightCount].InnerCos = 0.9659;
+            //LightBufferData.gLights[LightCount].OuterCos = 0.8660;
+            LightCount++;
+        }
+    }
 
+    for (auto Light : DirectionalLights)
+    {
+        if (LightCount < MAX_LIGHTS)
+        {
+            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
+            LightBufferData.gLights[LightCount].Direction = Light->GetDirection();
+            LightBufferData.gLights[LightCount].Type = ELightType::DIRECTIONAL_LIGHT;
             LightCount++;
         }
     }
