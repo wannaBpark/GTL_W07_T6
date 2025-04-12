@@ -15,11 +15,11 @@ public:
     SLevelEditor();
 
     void Initialize();
-    void Tick(double deltaTime);
-    void Input();
+    void Tick(float DeltaTime);
     void Release();
-    
-    void SelectViewport(POINT point);
+
+    void SelectViewport(FVector2D InPoint);
+
     void ResizeLevelEditor();
     void ResizeViewports();
     void SetEnableMultiViewport(bool bIsEnable);
