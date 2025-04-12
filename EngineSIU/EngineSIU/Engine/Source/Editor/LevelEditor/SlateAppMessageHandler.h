@@ -41,14 +41,14 @@ public:
     FModifierKeysState GetModifierKeys() const;
 
 protected:
-    void OnKeyChar(const TCHAR Character, const bool IsRepeat) const;
-    void OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat) const;
-    void OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat) const;
-    void OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos) const;
-    void OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos) const;
-    void OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos) const;
-    void OnMouseWheel(const float Delta, const FVector2D CursorPos) const;
-    void OnMouseMove() const;
+    void OnKeyChar(const TCHAR Character, const bool IsRepeat);
+    void OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat);
+    void OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat);
+    void OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos);
+    void OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos);
+    void OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos);
+    void OnMouseWheel(const float Delta, const FVector2D CursorPos);
+    void OnMouseMove();
     // 추가적인 함수는 UnrealEngine [SlateApplication.h:1628]을 참조
 
 public:
@@ -84,4 +84,5 @@ private:
     FVector2D PreviousPosition;
 
     bool ModifierKeyState[EModifierKey::Count];
+    TSet<EKeys::Type> PressedMouseButtons;
 };

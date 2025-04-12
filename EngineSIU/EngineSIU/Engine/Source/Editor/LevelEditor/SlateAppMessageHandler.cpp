@@ -1,4 +1,5 @@
-﻿#include "SlateAppMessageHandler.h"
+﻿// ReSharper disable CppMemberFunctionMayBeConst
+#include "SlateAppMessageHandler.h"
 
 #define _TCHAR_DEFINED
 #include <windowsx.h>
@@ -324,22 +325,22 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
     }
 }
 
-void FSlateAppMessageHandler::OnKeyChar(const TCHAR Character, const bool IsRepeat) const
+void FSlateAppMessageHandler::OnKeyChar(const TCHAR Character, const bool IsRepeat)
 {
     OnKeyCharDelegate.Broadcast(Character, IsRepeat);
 }
 
-void FSlateAppMessageHandler::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat) const
+void FSlateAppMessageHandler::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
 {
     OnKeyDownDelegate.Broadcast(KeyCode, CharacterCode, IsRepeat);
 }
 
-void FSlateAppMessageHandler::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat) const
+void FSlateAppMessageHandler::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
 {
     OnKeyUpDelegate.Broadcast(KeyCode, CharacterCode, IsRepeat);
 }
 
-void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos) const
+void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos)
 {
     EKeys::Type EffectingButton = EKeys::Invalid;
     switch (Button)
@@ -364,17 +365,18 @@ void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, cons
         break;
     }
 
+    PressedMouseButtons.Add(EffectingButton);
     OnMouseDownDelegate.Broadcast(FPointerEvent{
         CursorPos,
         GetLastCursorPos(),
         0.0f,
         EffectingButton,
-        FKeySet::EmptySet, // TODO: 값 설정
+        PressedMouseButtons,
         GetModifierKeys()
     });
 }
 
-void FSlateAppMessageHandler::OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos) const
+void FSlateAppMessageHandler::OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos)
 {
     EKeys::Type EffectingButton = EKeys::Invalid;
     switch (Button)
@@ -399,17 +401,18 @@ void FSlateAppMessageHandler::OnMouseUp(const EMouseButtons::Type Button, const 
         break;
     }
 
+    PressedMouseButtons.Remove(EffectingButton);
     OnMouseUpDelegate.Broadcast(FPointerEvent{
         CursorPos,
         GetLastCursorPos(),
         0.0f,
         EffectingButton,
-        FKeySet::EmptySet, // TODO: 값 설정
+        PressedMouseButtons,
         GetModifierKeys()
     });
 }
 
-void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos) const
+void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos)
 {
     EKeys::Type EffectingButton = EKeys::Invalid;
     switch (Button)
@@ -434,36 +437,37 @@ void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Butto
         break;
     }
 
+    PressedMouseButtons.Add(EffectingButton);
     OnMouseDoubleClickDelegate.Broadcast(FPointerEvent{
         CursorPos,
         GetLastCursorPos(),
         0.0f,
         EffectingButton,
-        FKeySet::EmptySet, // TODO: 값 설정
+        PressedMouseButtons,
         GetModifierKeys()
     });
 }
 
-void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D CursorPos) const
+void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D CursorPos)
 {
-    OnMouseDownDelegate.Broadcast(FPointerEvent{
+    OnMouseWheelDelegate.Broadcast(FPointerEvent{
         CursorPos,
         GetLastCursorPos(),
         Delta,
         EKeys::MouseWheelAxis,
-        FKeySet::EmptySet, // TODO: 값 설정
+        PressedMouseButtons,
         GetModifierKeys()
     });
 }
 
-void FSlateAppMessageHandler::OnMouseMove() const
+void FSlateAppMessageHandler::OnMouseMove()
 {
     OnMouseMoveDelegate.Broadcast(FPointerEvent{
         GetCursorPos(),
         GetLastCursorPos(),
         0.0f,
         EKeys::Invalid,
-        FKeySet::EmptySet, // TODO: 값 설정
+        PressedMouseButtons,
         GetModifierKeys()
     });
 }
