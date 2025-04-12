@@ -134,7 +134,6 @@ void FEngineLoop::Tick()
 
         float DeltaTime = elapsedTime / 1000.f;
 
-        Input();
         GEngine->Tick(DeltaTime);
         LevelEditor->Tick(DeltaTime);
         Render();
@@ -163,26 +162,6 @@ float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain) const
     DXGI_SWAP_CHAIN_DESC desc;
     swapChain->GetDesc(&desc);
     return static_cast<float>(desc.BufferDesc.Width) / static_cast<float>(desc.BufferDesc.Height);
-}
-
-void FEngineLoop::Input()
-{
-    if (GetAsyncKeyState('M') & 0x8000)
-    {
-        if (!bTestInput)
-        {
-            bTestInput = true;
-            GraphicDevice.OnResize(AppWnd);
-            if (LevelEditor)
-            {
-                LevelEditor->SetEnableMultiViewport(!LevelEditor->IsMultiViewport());
-            }
-        }
-    }
-    else
-    {
-        bTestInput = false;
-    }
 }
 
 void FEngineLoop::Exit()

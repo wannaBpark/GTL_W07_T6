@@ -29,7 +29,6 @@ public:
     void Tick();
     void Exit();
     float GetAspectRatio(IDXGISwapChain* swapChain) const;
-    void Input();
 
 private:
     void WindowInit(HINSTANCE hInstance);
@@ -57,7 +56,6 @@ private:
 
     bool bIsExit = false;
     const int32 targetFPS = 60;
-    bool bTestInput = false;
 
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
