@@ -101,8 +101,8 @@ void SLevelEditor::Input()
             }
             if (VSplitter->IsPressing() || HSplitter->IsPressing())
             {
-                ResizeViewports();
                 FEngineLoop::GraphicDevice.OnResize(GEngineLoop.hWnd);
+                ResizeViewports();
                 if (GEngineLoop.GetLevelEditor())
                 {
                     GEngineLoop.GetLevelEditor()->ResizeLevelEditor();
