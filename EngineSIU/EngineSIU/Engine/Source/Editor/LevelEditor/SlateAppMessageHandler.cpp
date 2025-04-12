@@ -336,7 +336,7 @@ void FSlateAppMessageHandler::OnKeyDown(const uint32 KeyCode, const uint32 Chara
     OnKeyDownDelegate.Broadcast(FKeyEvent{
         EKeys::Invalid, // TODO: 나중에 FInputKeyManager구현되면 바꾸기
         GetModifierKeys(),
-        IsRepeat ? IE_Pressed : IE_Repeat,
+        IsRepeat ? IE_Repeat : IE_Pressed,
         CharacterCode,
         KeyCode,
     });
@@ -344,7 +344,7 @@ void FSlateAppMessageHandler::OnKeyDown(const uint32 KeyCode, const uint32 Chara
 
 void FSlateAppMessageHandler::OnKeyUp(const uint32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
 {
-    assert(!IsRepeat);  // KeyUp 이벤트에서 IsRepeat가 true일수가 있나?
+    assert(!IsRepeat);  // KeyUp 이벤트에서 IsRepeat가 true일수가 없기 때문에
 
     OnKeyUpDelegate.Broadcast(FKeyEvent{
         EKeys::Invalid, // TODO: 나중에 FInputKeyManager구현되면 바꾸기
