@@ -78,6 +78,6 @@ private:
 
     const UINT32 ConstantBufferSizeAABB = 8;
     const UINT32 ConstantBufferSizeSphere = 8;
-    const UINT32 ConstantBufferSizeCone = 8;
+    const UINT32 ConstantBufferSizeCone = 100; // 최대
 };
 

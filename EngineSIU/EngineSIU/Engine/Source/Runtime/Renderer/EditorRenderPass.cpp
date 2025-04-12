@@ -966,7 +966,7 @@ void FEditorRenderPass::RenderSpotlightInstanced(const UWorld* World)
     TArray<FConstantBufferDebugCone> BufferAll;
     for (ULightComponentBase* LightComp : Resources.Components.Light)
     {
-        if (USpotLightComponent* SpotComp = Cast< USpotLightComponent>(LightComp))
+        if (USpotLightComponent* SpotComp = Cast<USpotLightComponent>(LightComp))
         {
             FConstantBufferDebugCone b;
             b.ApexPosiiton = SpotComp->GetWorldLocation();
@@ -974,6 +974,7 @@ void FEditorRenderPass::RenderSpotlightInstanced(const UWorld* World)
             b.OuterRadius = SpotComp->GetRadius() * FMath::Tan(SpotComp->GetOuterRad() * 0.5);
             b.Height = 10.f;
             b.Direction = SpotComp->GetDirection();
+            BufferAll.Add(b);
             BufferAll.Add(b);
         }
     }
@@ -983,7 +984,7 @@ void FEditorRenderPass::RenderSpotlightInstanced(const UWorld* World)
     for (int i = 0; i < (1 + BufferAll.Num() / ConstantBufferSizeCone) * ConstantBufferSizeCone; ++i)
     {
         TArray<FConstantBufferDebugCone> SubBuffer;
-        for (int j = 0; j < ConstantBufferSizeAABB; ++j)
+        for (int j = 0; j < ConstantBufferSizeCone; ++j)
         {
             if (BufferIndex < BufferAll.Num())
             {

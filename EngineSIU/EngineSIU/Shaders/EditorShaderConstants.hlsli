@@ -28,7 +28,7 @@ struct ConeData
 };
 cbuffer ConstantBufferDebugCone : register(b13)
 {
-    ConeData DataCone[8];
+    ConeData DataCone[100];
 }
 
 cbuffer ConstantBufferDebugGrid : register(b13)
