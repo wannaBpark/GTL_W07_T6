@@ -66,7 +66,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
         {
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-
+            LightBufferData.gLights[LightCount].Type = ELightType::POINT_LIGHT;
             LightCount++;
         }
     }

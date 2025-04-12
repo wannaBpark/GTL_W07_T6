@@ -170,6 +170,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\DirectionalLightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\AmbientLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Property.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Quat.cpp" />
@@ -265,8 +266,11 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\SpotLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\PointLightActor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\DirectionalLightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\AmbientLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h" />
@@ -407,6 +411,8 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\DirectionalLightComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\SpotLightActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\PointLightActor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\DepthBufferPixelShader.hlsl">
