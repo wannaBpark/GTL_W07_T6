@@ -89,6 +89,7 @@ public:
     void Tick(float DeltaTime);
     void Release() const;
 
+    void UpdateEditorCameraMovement(float DeltaTime);
     void InputKey(const FKeyEvent& InKeyEvent);
     void MouseMove(const FPointerEvent& InMouseEvent);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
@@ -160,6 +161,9 @@ public: //Camera Movement
 private: // Input
     POINT lastMousePos;
     bool bRightMouseDown = false;
+
+    // 카메라 움직임에 사용될 키를 임시로 저장해서 사용할 예정
+    TSet<EKeys::Type> PressedKeys;
 
 public:
     void LoadConfig(const TMap<FString, FString>& config);

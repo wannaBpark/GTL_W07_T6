@@ -54,24 +54,22 @@ void SLevelEditor::Initialize()
             // TODO: 지금 우클릭 하면 무조건 커서를 숨기게 되어있는데, Viewport에 Focus가 되어있을때만 숨겨지게 만들기
             // FWindowsCursor::SetMouseCursor(ECursorType::None);
             MousePinPosition = InMouseEvent.GetScreenSpacePosition();
-            return;
+            break;
+        }
+        default:
+            break;
         }
 
-        default:
+        // 마우스 이벤트가 일어난 위치의 뷰포트를 선택
+        if (bMultiViewportMode)
         {
-            if (bMultiViewportMode)
-            {
-                // 마우스 이벤트가 일어난 위치의 뷰포트를 선택
-                POINT Point;
-                GetCursorPos(&Point);
-                ScreenToClient(GEngineLoop.AppWnd, &Point);
-                FVector2D ClientPos = FVector2D{static_cast<float>(Point.x), static_cast<float>(Point.y)};
-                SelectViewport(ClientPos);
-                VSplitter->OnPressed({ClientPos.X, ClientPos.Y});
-                HSplitter->OnPressed({ClientPos.X, ClientPos.Y});
-            }
-            return;
-        }
+            POINT Point;
+            GetCursorPos(&Point);
+            ScreenToClient(GEngineLoop.AppWnd, &Point);
+            FVector2D ClientPos = FVector2D{static_cast<float>(Point.x), static_cast<float>(Point.y)};
+            SelectViewport(ClientPos);
+            VSplitter->OnPressed({ClientPos.X, ClientPos.Y});
+            HSplitter->OnPressed({ClientPos.X, ClientPos.Y});
         }
     });
 
@@ -159,11 +157,12 @@ void SLevelEditor::Initialize()
 
     Handler->OnKeyDownDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
     {
-        if (InKeyEvent.GetCharacter() == 'M')
-        {
-            FEngineLoop::GraphicDevice.OnResize(GEngineLoop.AppWnd);
-            SetEnableMultiViewport(!IsMultiViewport());
-        }
+        ActiveViewportClient->InputKey(InKeyEvent);
+    });
+
+    Handler->OnKeyUpDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
+    {
+        ActiveViewportClient->InputKey(InKeyEvent);
     });
 }
 
