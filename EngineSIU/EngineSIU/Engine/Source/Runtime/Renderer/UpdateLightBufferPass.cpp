@@ -88,9 +88,7 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            FRotator rotator = Light->GetWorldRotation();
-            FVector WorldForward = rotator.ToQuaternion().RotateVector(Light->GetForwardVector());
-            LightBufferData.gLights[LightCount].Direction = WorldForward;
+            LightBufferData.gLights[LightCount].Direction = Light->GetDirection();
             LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
             LightBufferData.gLights[LightCount].InnerCos = Light->GetInnerRad();
             LightBufferData.gLights[LightCount].OuterCos = Light->GetOuterRad();

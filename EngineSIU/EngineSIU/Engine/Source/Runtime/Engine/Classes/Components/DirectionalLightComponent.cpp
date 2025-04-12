@@ -1,5 +1,7 @@
 #include "DirectionalLightComponent.h"
 #include "Components/SceneComponent.h"
+#include "Math/Rotator.h"
+#include "Math/Quat.h"
 
 UDirectionalLightComponent::UDirectionalLightComponent()
 {
@@ -18,8 +20,10 @@ UDirectionalLightComponent::~UDirectionalLightComponent()
 
 
 FVector UDirectionalLightComponent::GetDirection()  
-{  
-  return -GetUpVector();  
+{
+    FRotator rotator = GetWorldRotation();
+    FVector WorldDown= rotator.ToQuaternion().RotateVector(-GetUpVector());
+    return WorldDown;  
 }
 
 void UDirectionalLightComponent::SetDirection(const FVector& dir)
