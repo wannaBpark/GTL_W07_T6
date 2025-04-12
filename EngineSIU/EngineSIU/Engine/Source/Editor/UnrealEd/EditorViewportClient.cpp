@@ -137,18 +137,7 @@ void FEditorViewportClient::Input()
         }
     }
 }
-void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
-{
-    if (Viewport) { 
-        Viewport->InitializeViewport(swapchaindesc);    
-    }
-    else {
-        UE_LOG(LogLevel::Error, "Viewport is nullptr");
-    }
-    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
-    UpdateProjectionMatrix();
-    UpdateViewMatrix();
-}
+
 void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
 {
     if (Viewport) {
