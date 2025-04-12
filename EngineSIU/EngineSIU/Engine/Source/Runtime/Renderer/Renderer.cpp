@@ -109,7 +109,6 @@ void FRenderer::PrepareRender()
     BillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
-    //EditorRenderPass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -133,7 +132,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
-    //EditorRenderPass->Render(ActiveViewport);
+    EditorRenderPass->Render(GEngine->ActiveWorld, ActiveViewport);
     
 
     if (IsSceneDepth)

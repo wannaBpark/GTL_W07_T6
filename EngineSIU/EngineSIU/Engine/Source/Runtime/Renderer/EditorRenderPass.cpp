@@ -602,7 +602,7 @@ void FEditorRenderPass::PrepareComponents(UWorld* World)
     Resources.Components.Fog.Empty();
     // gizmo 제외하고 넣기
 
-    if (GEngine->GetWorld()->WorldType != EWorldType::Editor)
+    if (World->WorldType != EWorldType::Editor)
     {
         return;
     }
@@ -1083,14 +1083,14 @@ void FEditorRenderPass::LazyLoad()
 {
     // Resourcemanager에서 로드된 texture의 포인터를 가져옴
     // FResourceMgr::Initialize에 추가되어야함
-    Resources.IconTextures[IconType::DirectionalLight] = GEngineLoop.ResourceManager.GetTexture(L"Assets/Icons/DirectionalLight_64x.png");
-    Resources.IconTextures[IconType::PointLight] = GEngineLoop.ResourceManager.GetTexture(L"Assets/Icons/PointLight_64x.png");
-    Resources.IconTextures[IconType::SpotLight] = GEngineLoop.ResourceManager.GetTexture(L"Assets/Icons/SpotLight_64x.png");
-    Resources.IconTextures[IconType::ExponentialFog] = GEngineLoop.ResourceManager.GetTexture(L"Assets/Icons/ExponentialHeightFog_64.png");
-    Resources.IconTextures[IconType::AtmosphericFog] = GEngineLoop.ResourceManager.GetTexture(L"Assets/Icons/AtmosphericFog_64.png");
+    Resources.IconTextures[IconType::DirectionalLight] = FEngineLoop::ResourceManager.GetTexture(L"Assets/Editor/Icon/DirectionalLight_64x.png");
+    Resources.IconTextures[IconType::PointLight] = FEngineLoop::ResourceManager.GetTexture(L"Assets/Editor/Icon/PointLight_64x.png");
+	Resources.IconTextures[IconType::SpotLight] = FEngineLoop::ResourceManager.GetTexture(L"Assets/Editor/Icon/SpotLight_64x.png");
+	Resources.IconTextures[IconType::ExponentialFog] = FEngineLoop::ResourceManager.GetTexture(L"Assets/Editor/Icon/ExponentialHeightFog_64.png");
+	Resources.IconTextures[IconType::AtmosphericFog] = FEngineLoop::ResourceManager.GetTexture(L"Assets/Editor/Icon/AtmosphericFog_64.png");
 
     // Gizmo arrow 로드
-    UStaticMesh* Mesh = FManagerOBJ::GetStaticMesh(L"gizmo_loc_z.obj");
+    UStaticMesh* Mesh = FManagerOBJ::GetStaticMesh(L"Assets/GizmoTranslationZ.obj");
     Resources.Primitives.Arrow.Vertex = Mesh->GetRenderData()->VertexBuffer;
     Resources.Primitives.Arrow.Index = Mesh->GetRenderData()->IndexBuffer;
     Resources.Primitives.Arrow.NumVertices = Mesh->GetRenderData()->Vertices.Num();
