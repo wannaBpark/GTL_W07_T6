@@ -91,7 +91,6 @@ public:
 
     void InputKey(const FKeyEvent& InKeyEvent);
     void MouseMove(const FPointerEvent& InMouseEvent);
-    void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
     bool IsSelected(const FVector2D& InPoint) const;
