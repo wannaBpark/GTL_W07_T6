@@ -341,27 +341,131 @@ void FSlateAppMessageHandler::OnKeyUp(const int32 KeyCode, const uint32 Characte
 
 void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos) const
 {
-    OnMouseDownDelegate.Broadcast(Button, CursorPos);
+    EKeys::Type EffectingButton = EKeys::Invalid;
+    switch (Button)
+    {
+    case EMouseButtons::Left:
+        EffectingButton = EKeys::LeftMouseButton;
+        break;
+    case EMouseButtons::Middle:
+        EffectingButton = EKeys::MiddleMouseButton;
+        break;
+    case EMouseButtons::Right:
+        EffectingButton = EKeys::RightMouseButton;
+        break;
+    case EMouseButtons::Thumb01:
+        EffectingButton = EKeys::ThumbMouseButton;
+        break;
+    case EMouseButtons::Thumb02:
+        EffectingButton = EKeys::ThumbMouseButton2;
+        break;
+    case EMouseButtons::Invalid:
+        EffectingButton = EKeys::Invalid;
+        break;
+    }
+
+    OnMouseDownDelegate.Broadcast(FPointerEvent{
+        CursorPos,
+        GetLastCursorPos(),
+        0.0f,
+        EffectingButton,
+        FKeySet::EmptySet, // TODO: 값 설정
+        GetModifierKeys()
+    });
 }
 
 void FSlateAppMessageHandler::OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos) const
 {
-    OnMouseUpDelegate.Broadcast(Button, CursorPos);
+    EKeys::Type EffectingButton = EKeys::Invalid;
+    switch (Button)
+    {
+    case EMouseButtons::Left:
+        EffectingButton = EKeys::LeftMouseButton;
+        break;
+    case EMouseButtons::Middle:
+        EffectingButton = EKeys::MiddleMouseButton;
+        break;
+    case EMouseButtons::Right:
+        EffectingButton = EKeys::RightMouseButton;
+        break;
+    case EMouseButtons::Thumb01:
+        EffectingButton = EKeys::ThumbMouseButton;
+        break;
+    case EMouseButtons::Thumb02:
+        EffectingButton = EKeys::ThumbMouseButton2;
+        break;
+    case EMouseButtons::Invalid:
+        EffectingButton = EKeys::Invalid;
+        break;
+    }
+
+    OnMouseUpDelegate.Broadcast(FPointerEvent{
+        CursorPos,
+        GetLastCursorPos(),
+        0.0f,
+        EffectingButton,
+        FKeySet::EmptySet, // TODO: 값 설정
+        GetModifierKeys()
+    });
 }
 
 void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos) const
 {
-    OnMouseDoubleClickDelegate.Broadcast(Button, CursorPos);
+    EKeys::Type EffectingButton = EKeys::Invalid;
+    switch (Button)
+    {
+    case EMouseButtons::Left:
+        EffectingButton = EKeys::LeftMouseButton;
+        break;
+    case EMouseButtons::Middle:
+        EffectingButton = EKeys::MiddleMouseButton;
+        break;
+    case EMouseButtons::Right:
+        EffectingButton = EKeys::RightMouseButton;
+        break;
+    case EMouseButtons::Thumb01:
+        EffectingButton = EKeys::ThumbMouseButton;
+        break;
+    case EMouseButtons::Thumb02:
+        EffectingButton = EKeys::ThumbMouseButton2;
+        break;
+    case EMouseButtons::Invalid:
+        EffectingButton = EKeys::Invalid;
+        break;
+    }
+
+    OnMouseDoubleClickDelegate.Broadcast(FPointerEvent{
+        CursorPos,
+        GetLastCursorPos(),
+        0.0f,
+        EffectingButton,
+        FKeySet::EmptySet, // TODO: 값 설정
+        GetModifierKeys()
+    });
 }
 
 void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D CursorPos) const
 {
-    OnMouseWheelDelegate.Broadcast(Delta, CursorPos);
+    OnMouseDownDelegate.Broadcast(FPointerEvent{
+        CursorPos,
+        GetLastCursorPos(),
+        Delta,
+        EKeys::MouseWheelAxis,
+        FKeySet::EmptySet, // TODO: 값 설정
+        GetModifierKeys()
+    });
 }
 
 void FSlateAppMessageHandler::OnMouseMove() const
 {
-    OnMouseMoveDelegate.Broadcast();
+    OnMouseMoveDelegate.Broadcast(FPointerEvent{
+        GetCursorPos(),
+        GetLastCursorPos(),
+        0.0f,
+        EKeys::Invalid,
+        FKeySet::EmptySet, // TODO: 값 설정
+        GetModifierKeys()
+    });
 }
 
 void FSlateAppMessageHandler::UpdateCursorPosition(const FVector2D& NewPos)

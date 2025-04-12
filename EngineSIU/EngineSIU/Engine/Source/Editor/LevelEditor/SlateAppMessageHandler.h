@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "Delegates/DelegateCombination.h"
 #include "HAL/PlatformType.h"
+#include "InputCore/InputCoreTypes.h"
 #include "Math/Vector.h"
+#include "SlateCore/Input/Events.h"
 
 namespace EMouseButtons
 {
@@ -11,6 +13,11 @@ enum Type : uint8;
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnKeyCharDelegate, const TCHAR /*Character*/, const bool /*IsRepeat*/);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnKeyDownDelegate, const int32 /*KeyCode*/, const uint32 /*CharacterCode*/, const bool /*IsRepeat*/);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnKeyUpDelegate, const int32 /*KeyCode*/, const uint32 /*CharacterCode*/, const bool /*IsRepeat*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDownDelegate, const FPointerEvent& /*InMouseEvent*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseUpDelegate, const FPointerEvent& /*InMouseEvent*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDoubleClickDelegate, const FPointerEvent& /*InMouseEvent*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseWheelDelegate, const FPointerEvent& /*InMouseEvent*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseMoveDelegate, const FPointerEvent& /*InMouseEvent*/);
 
 
 class FSlateAppMessageHandler
