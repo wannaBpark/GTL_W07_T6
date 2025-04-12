@@ -6,14 +6,15 @@
 enum class ECursorType : uint8
 {
     None = 0,
-    Arrow,
-    TextEditBeam,
-    Crosshairs,
-    Hand,
-    ResizeLeftRight,
-    ResizeUpDown,
-    ResizeSouthEast,
-    ResizeSouthWest,
+    Arrow,           // IDC_ARROW
+    TextEditBeam,    // IDC_IBEAM
+    Crosshairs,      // IDC_CROSS
+    Hand,            // IDC_HAND
+    ResizeLeftRight, // IDC_SIZEWE
+    ResizeUpDown,    // IDC_SIZENS
+    ResizeSouthEast, // IDC_SIZENWSE
+    ResizeSouthWest, // IDC_SIZENESW
+    ResizeAll,       // IDC_SIZEALL
     Max
 };
 

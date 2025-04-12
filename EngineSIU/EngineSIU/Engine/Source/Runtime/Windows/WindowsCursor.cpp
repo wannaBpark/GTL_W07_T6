@@ -58,6 +58,10 @@ ECursorType FWindowsCursor::GetMouseCursor()
     {
         return ECursorType::ResizeSouthWest; // 실제 WinAPI는 NE-SW 방향
     }
+    else if (Cursor == LoadCursor(nullptr, IDC_SIZEALL))
+    {
+        return ECursorType::ResizeAll;
+    }
 
     return ECursorType::None;
 }
@@ -65,10 +69,10 @@ ECursorType FWindowsCursor::GetMouseCursor()
 
 void FWindowsCursor::SetMouseCursor(const ECursorType CursorType)
 {
-    HCURSOR NewCursor;
+    HCURSOR NewCursor = nullptr;
 
     // 커서 타입별 핸들 매핑
-    switch (CursorType)  // NOLINT(clang-diagnostic-switch-enum)
+    switch (CursorType)
     {
     case ECursorType::Arrow:
         NewCursor = LoadCursor(nullptr, IDC_ARROW);
@@ -94,8 +98,11 @@ void FWindowsCursor::SetMouseCursor(const ECursorType CursorType)
     case ECursorType::ResizeSouthWest:
         NewCursor = LoadCursor(nullptr, IDC_SIZENESW); // 실제 WinAPI는 NE-SW 방향
         break;
+    case ECursorType::ResizeAll:
+        NewCursor = LoadCursor(nullptr, IDC_SIZEALL);
+        break;
     case ECursorType::None:
-    default:
+    case ECursorType::Max:
         NewCursor = nullptr; // 커서 숨김
         break;
     }
