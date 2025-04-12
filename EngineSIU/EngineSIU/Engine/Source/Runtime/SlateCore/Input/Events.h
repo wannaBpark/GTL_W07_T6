@@ -22,13 +22,13 @@ struct FInputEvent
 {
     FInputEvent()
         : ModifierKeys(FModifierKeysState{})
-        , bIsRepeat(false)
+        , InputEvent(IE_None)
     {
     }
 
-    FInputEvent(const FModifierKeysState& InModifierKeys, const bool bInIsRepeat)
+    FInputEvent(const FModifierKeysState& InModifierKeys, EInputEvent InInputEvent)
         : ModifierKeys(InModifierKeys)
-        , bIsRepeat(bInIsRepeat)
+        , InputEvent(InInputEvent)
     {
     }
 
@@ -50,7 +50,7 @@ public:
     /** 이 키 이벤트가 자동 반복 입력인지 여부를 반환합니다. */
     bool IsRepeat() const
     {
-        return bIsRepeat;
+        return InputEvent == IE_Repeat;
     }
 
     /** Shift 키 중 하나라도 눌려 있었는지 여부를 반환합니다. */
@@ -136,9 +136,14 @@ public:
         return ModifierKeys;
     }
 
+    EInputEvent GetInputEvent() const
+    {
+        return InputEvent;
+    }
+
 protected:
     FModifierKeysState ModifierKeys;
-    bool bIsRepeat;
+    EInputEvent InputEvent;
 };
 
 /**
@@ -147,7 +152,7 @@ protected:
 struct FKeyEvent : public FInputEvent
 {
     FKeyEvent()
-        : FInputEvent(FModifierKeysState{}, false)
+        : FInputEvent(FModifierKeysState{}, IE_None)
         , Key(EKeys::Invalid)
         , CharacterCode(0)
         , KeyCode(0)
@@ -157,11 +162,11 @@ struct FKeyEvent : public FInputEvent
     FKeyEvent(
         const EKeys::Type InKey,
         const FModifierKeysState& InModifierKeys,
-        const bool bInIsRepeat,
+        EInputEvent InInputEvent,
         const uint32 InCharacterCode,
         const uint32 InKeyCode
     )
-        : FInputEvent(InModifierKeys, bInIsRepeat)
+        : FInputEvent(InModifierKeys, InInputEvent)
         , Key(InKey)
         , CharacterCode(InCharacterCode)
         , KeyCode(InKeyCode)
@@ -198,7 +203,7 @@ private:
 struct FPointerEvent : public FInputEvent
 {
     FPointerEvent()
-        : FInputEvent(FModifierKeysState{}, false)
+        : FInputEvent(FModifierKeysState{}, IE_None)
         , ScreenSpacePosition(FVector2D::ZeroVector)
         , LastScreenSpacePosition(FVector2D::ZeroVector)
         , CursorDelta(FVector2D::ZeroVector)
@@ -214,9 +219,10 @@ struct FPointerEvent : public FInputEvent
         float InWheelDelta,
         EKeys::Type InEffectingButton,
         const TSet<EKeys::Type>& InPressedButtons,
-        const FModifierKeysState& InModifierKeys
+        const FModifierKeysState& InModifierKeys,
+        EInputEvent InInputEvent
     )
-        : FInputEvent(InModifierKeys, false)
+        : FInputEvent(InModifierKeys, InInputEvent)
         , ScreenSpacePosition(InScreenSpacePosition)
         , LastScreenSpacePosition(InLastScreenSpacePosition)
         , CursorDelta(InScreenSpacePosition - InLastScreenSpacePosition)

@@ -336,7 +336,7 @@ void FSlateAppMessageHandler::OnKeyDown(const uint32 KeyCode, const uint32 Chara
     OnKeyDownDelegate.Broadcast(FKeyEvent{
         EKeys::Invalid, // TODO: 나중에 FInputKeyManager구현되면 바꾸기
         GetModifierKeys(),
-        IsRepeat,
+        IsRepeat ? IE_Pressed : IE_Repeat,
         CharacterCode,
         KeyCode,
     });
@@ -344,10 +344,12 @@ void FSlateAppMessageHandler::OnKeyDown(const uint32 KeyCode, const uint32 Chara
 
 void FSlateAppMessageHandler::OnKeyUp(const uint32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
 {
+    assert(!IsRepeat);  // KeyUp 이벤트에서 IsRepeat가 true일수가 있나?
+
     OnKeyUpDelegate.Broadcast(FKeyEvent{
         EKeys::Invalid, // TODO: 나중에 FInputKeyManager구현되면 바꾸기
         GetModifierKeys(),
-        IsRepeat,
+        IE_Released,
         CharacterCode,
         KeyCode,
     });
@@ -385,7 +387,8 @@ void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, cons
         0.0f,
         EffectingButton,
         PressedMouseButtons,
-        GetModifierKeys()
+        GetModifierKeys(),
+        IE_Pressed,
     });
 }
 
@@ -421,7 +424,8 @@ void FSlateAppMessageHandler::OnMouseUp(const EMouseButtons::Type Button, const 
         0.0f,
         EffectingButton,
         PressedMouseButtons,
-        GetModifierKeys()
+        GetModifierKeys(),
+        IE_Released,
     });
 }
 
@@ -457,7 +461,8 @@ void FSlateAppMessageHandler::OnMouseDoubleClick(const EMouseButtons::Type Butto
         0.0f,
         EffectingButton,
         PressedMouseButtons,
-        GetModifierKeys()
+        GetModifierKeys(),
+        IE_DoubleClick,
     });
 }
 
@@ -469,7 +474,8 @@ void FSlateAppMessageHandler::OnMouseWheel(const float Delta, const FVector2D Cu
         Delta,
         EKeys::MouseWheelAxis,
         PressedMouseButtons,
-        GetModifierKeys()
+        GetModifierKeys(),
+        IE_Axis,
     });
 }
 
@@ -481,7 +487,8 @@ void FSlateAppMessageHandler::OnMouseMove()
         0.0f,
         EKeys::Invalid,
         PressedMouseButtons,
-        GetModifierKeys()
+        GetModifierKeys(),
+        IE_Axis,
     });
 }
 

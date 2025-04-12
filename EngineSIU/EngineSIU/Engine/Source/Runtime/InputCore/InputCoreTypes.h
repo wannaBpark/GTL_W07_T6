@@ -23,7 +23,8 @@ enum EInputEvent : uint8
     IE_Repeat = 2,
     IE_DoubleClick = 3,
     IE_Axis = 4,
-    IE_MAX = 5,
+    IE_None = 5,
+    IE_MAX = 6,
 };
 
 /**
