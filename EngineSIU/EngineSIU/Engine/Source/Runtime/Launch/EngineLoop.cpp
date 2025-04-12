@@ -242,7 +242,6 @@ void FEngineLoop::Input()
             if (LevelEditor)
             {
                 LevelEditor->SetEnableMultiViewport(!LevelEditor->IsMultiViewport());
-                LevelEditor->ResizeViewports();
             }
         }
     }
