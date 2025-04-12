@@ -126,7 +126,8 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
     }
     
     float fSpotCos = dot(-vToLight, normalize(light.m_vDirection));
-    float fSpotFactor = saturate((fSpotCos - light.m_fOuterCos) / (light.m_fInnerCos - light.m_fOuterCos));
+    float fSpotFactor = smoothstep(light.m_fOuterCos, light.m_fInnerCos, fSpotCos);
+
     if (fSpotFactor <= 0.0f)
         return float4(0, 0, 0, 0);
     //float fSpotFactor = pow(max(dot(-vToLight, gLights[nIndex].m_vDirection), 0.0f), gLights[nIndex].m_fFalloff);
