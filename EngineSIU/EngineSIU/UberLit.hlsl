@@ -1,11 +1,6 @@
 #ifndef UBERLIT_HLSL
 #define UBERLIT_HLSL
 
-#define LIGHTING_MODEL_UNLIT
-#define LIGHTING_MODEL_GOURAUD
-#define LIGHTING_MODEL_LAMBERT
-#define LIGHTING_MODEL_BLINN_PHONG
-
 //#define USE_NORMAL_MAP
 //#define USE_SPECULAR_MAP
 
@@ -350,10 +345,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     float3 specularColor = gMaterial.SpecularColor;
     
-#if defined(USE_SPECULAR_MAP) && defined(USE_NORMAL_MAP)
-    float specularIntensity = gSpecularMap.Sample(gSampler, input.texcoord).r;
-    specularColor *= specularIntensity;
-#endif
     
     if (gIsUnlit == 0)
     {

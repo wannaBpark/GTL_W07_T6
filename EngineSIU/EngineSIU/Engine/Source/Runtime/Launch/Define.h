@@ -21,7 +21,7 @@
 
 #define GOURAUD "LIGHTING_MODEL_GOURAUD"
 #define LAMBERT "LIGHTING_MODEL_LAMBERT"
-#define PHONG "LIGHTING_MODEL_PHONG"
+#define PHONG "LIGHTING_MODEL_BLINN_PHONG"
 
 struct FStaticMeshVertex
 {
@@ -279,7 +279,8 @@ struct FPrimitiveCounts
 #define MAX_LIGHTS 16
 enum ELightType {
     POINT_LIGHT = 1,
-    SPOT_LIGHT = 2
+    SPOT_LIGHT = 2,
+    DIRECTIONAL_LIGHT = 3
 };
 
 struct FLight

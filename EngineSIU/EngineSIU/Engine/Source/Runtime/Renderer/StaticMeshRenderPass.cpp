@@ -74,9 +74,6 @@ void FStaticMeshRenderPass::CreateShader()
         { GOURAUD, "1" },
         { nullptr, nullptr }
     };
-    // 여기서 "Shaders/UberLit.hlsl"
-    //hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/UberLit.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc),definesGouraud);
-    //hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/UberLit.hlsl", "mainPS", definesGouraud);
 
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc),definesGouraud);
     hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesGouraud);
