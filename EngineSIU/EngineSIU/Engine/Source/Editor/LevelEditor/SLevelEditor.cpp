@@ -47,12 +47,14 @@ void SLevelEditor::Initialize()
 
     Handler->OnMouseDownDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
     {
+        const ImGuiIO& IO = ImGui::GetIO();
+        if (IO.WantCaptureMouse) return;
+
         switch (InMouseEvent.GetEffectingButton())  // NOLINT(clang-diagnostic-switch-enum)
         {
         case EKeys::RightMouseButton:
         {
-            // TODO: 지금 우클릭 하면 무조건 커서를 숨기게 되어있는데, Viewport에 Focus가 되어있을때만 숨겨지게 만들기
-            // FWindowsCursor::SetMouseCursor(ECursorType::None);
+            FWindowsCursor::SetMouseCursor(ECursorType::None);
             MousePinPosition = InMouseEvent.GetScreenSpacePosition();
             break;
         }
@@ -104,8 +106,11 @@ void SLevelEditor::Initialize()
         }
 
         // 멀티 뷰포트일 때, 커서 변경 로직
-        if (bMultiViewportMode)
-        {
+        if (
+            bMultiViewportMode
+            && !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)
+            && !InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)
+        ) {
             POINT Point;
             GetCursorPos(&Point);
             ScreenToClient(GEngineLoop.AppWnd, &Point);
@@ -138,7 +143,7 @@ void SLevelEditor::Initialize()
         {
         case EKeys::RightMouseButton:
         {
-            // FWindowsCursor::SetMouseCursor(ECursorType::Arrow);
+            FWindowsCursor::SetMouseCursor(ECursorType::Arrow);
             return;
         }
 
@@ -163,6 +168,12 @@ void SLevelEditor::Initialize()
     Handler->OnKeyUpDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
     {
         ActiveViewportClient->InputKey(InKeyEvent);
+    });
+
+    Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
+    {
+        // 우클 + 휠
+        // 걍 휠
     });
 }
 
