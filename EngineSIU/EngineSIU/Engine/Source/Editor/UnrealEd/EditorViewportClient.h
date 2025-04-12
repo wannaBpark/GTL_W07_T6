@@ -159,7 +159,6 @@ public: //Camera Movement
     static void SetOthoSize(float InValue);
 
 private: // Input
-    POINT lastMousePos;
     bool bRightMouseDown = false;
 
     // 카메라 움직임에 사용될 키를 임시로 저장해서 사용할 예정

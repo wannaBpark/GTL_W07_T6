@@ -233,8 +233,6 @@ void FEditorViewportClient::MouseMove(const FPointerEvent& InMouseEvent)
         PivotMoveRight(DeltaX);
         PivotMoveUp(DeltaY);
     }
-
-    FWindowsCursor::SetPosition(LastPos.X, LastPos.Y);
 }
 
 void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
