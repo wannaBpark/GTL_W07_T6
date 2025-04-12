@@ -136,7 +136,7 @@ void FUpdateLightBufferPass::UpdateLightBuffer() const
         {
             LightBufferData.SpotLights[SpotLightsCount] = Light->GetSpotLightInfo();
             LightBufferData.SpotLights[SpotLightsCount].Position = Light->GetWorldLocation();
-            LightBufferData.SpotLights[SpotLightsCount].Direction = Light->GetForwardVector();
+            LightBufferData.SpotLights[SpotLightsCount].Direction = Light->GetDirection();
             SpotLightsCount++;
         }
     }
@@ -156,7 +156,7 @@ void FUpdateLightBufferPass::UpdateLightBuffer() const
         if (DirectionalLightsCount < MAX_DIRECTIONAL_LIGHT)
         {
             LightBufferData.Directional[DirectionalLightsCount] = Light->GetDirectionalLightInfo();
-            LightBufferData.Directional[DirectionalLightsCount].Direction = -Light->GetUpVector();
+            LightBufferData.Directional[DirectionalLightsCount].Direction = Light->GetDirection();
             DirectionalLightsCount++;
         }
     }
