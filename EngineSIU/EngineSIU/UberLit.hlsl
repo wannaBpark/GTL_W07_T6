@@ -7,7 +7,7 @@
 #define LIGHTING_MODEL_BLINN_PHONG
 
 //#define USE_NORMAL_MAP
-#define USE_SPECULAR_MAP
+//#define USE_SPECULAR_MAP
 
 #define DIRECTIONAL_LIGHT   0
 #define POINT_LIGHT         1

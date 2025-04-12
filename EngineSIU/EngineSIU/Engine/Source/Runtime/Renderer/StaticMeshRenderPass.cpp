@@ -74,6 +74,10 @@ void FStaticMeshRenderPass::CreateShader()
         { GOURAUD, "1" },
         { nullptr, nullptr }
     };
+    // 여기서 "Shaders/UberLit.hlsl"
+    //hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/UberLit.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc),definesGouraud);
+    //hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/UberLit.hlsl", "mainPS", definesGouraud);
+
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc),definesGouraud);
     hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesGouraud);
     
@@ -85,13 +89,13 @@ void FStaticMeshRenderPass::CreateShader()
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"LAMBERT_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), definesLambert);
     hr = ShaderManager->AddPixelShader(L"LAMBERT_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesLambert);
 
-    D3D_SHADER_MACRO definesPhong[] =
+    D3D_SHADER_MACRO definesBlinnPhong[] =
     {
         { PHONG, "1" },
         { nullptr, nullptr }
     };
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"PHONG_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), definesPhong);
-    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesPhong);
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"PHONG_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), definesBlinnPhong);
+    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesBlinnPhong);
 
 #pragma endregion UberShader
 
@@ -124,7 +128,7 @@ void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi)
         PixelShader = ShaderManager->GetPixelShaderByKey(L"LAMBERT_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
         break;
-    case EViewModeIndex::VMI_Lit_Phong:
+    case EViewModeIndex::VMI_Lit_BlinnPhong:
         VertexShader = ShaderManager->GetVertexShaderByKey(L"PHONG_StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
