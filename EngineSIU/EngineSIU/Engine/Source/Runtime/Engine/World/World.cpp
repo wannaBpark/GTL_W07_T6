@@ -7,6 +7,11 @@
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Actors/HeightFogActor.h"
+#include "Engine/EditorEngine.h"
+#include "Engine/Engine.h"
+#include "UnrealEd/SceneManager.h"
+
+class UEditorEngine;
 
 UWorld* UWorld::CreateWorld(UObject* InOuter, const EWorldType InWorldType, const FString& InWorldName)
 {
@@ -61,20 +66,11 @@ void UWorld::Release()
 {
     if (ActiveLevel)
     {
-	    for (AActor* Actor : ActiveLevel->Actors)
-	    {
-		    Actor->EndPlay(EEndPlayReason::WorldTransition);
-            TSet<UActorComponent*> Components = Actor->GetComponents();
-	        for (UActorComponent* Component : Components)
-	        {
-	            GUObjectArray.MarkRemoveObject(Component);
-	        }
-	        GUObjectArray.MarkRemoveObject(Actor);
-	    }
-        ActiveLevel->Actors.Empty();
+        ActiveLevel->Release();
+        GUObjectArray.MarkRemoveObject(ActiveLevel);
         ActiveLevel = nullptr;
     }
-
+    
     GUObjectArray.ProcessPendingDestroyObjects();
 }
 
@@ -116,6 +112,10 @@ bool UWorld::DestroyActor(AActor* ThisActor)
     {
         return true;
     }
+    
+    // UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    //
+    // Engine->DeselectActor(ThisActor);
 
     // 액터의 Destroyed 호출
     ThisActor->Destroyed();
@@ -143,3 +143,4 @@ UWorld* UWorld::GetWorld() const
 {
     return const_cast<UWorld*>(this);
 }
+

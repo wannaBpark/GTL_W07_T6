@@ -52,9 +52,9 @@ void SceneManager::LoadSceneFromJsonFile(const FString& filename, UWorld& world)
     LoadWorldFromData(SceneData, &world);
 }
 
-bool SceneManager::SaveSceneToJsonFile(const FString& FilePath, const UWorld* World)
+bool SceneManager::SaveSceneToJsonFile(const FString& FilePath, const UWorld& World)
 {
-    FSceneData sceneData  = WorldToSceneData(*World);
+    FSceneData sceneData  = WorldToSceneData(World);
     
     std::ofstream outFile(*FilePath);
     if (!outFile) {

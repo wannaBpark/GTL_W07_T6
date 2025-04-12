@@ -33,6 +33,10 @@ public:
     FWorldContext* GetWorldContextFromWorld(const UWorld* InWorld);
 
     FWorldContext& CreateNewWorldContext(EWorldType InWorldType);
+
+    
+    void LoadLevel(const FString& FileName);
+    void SaveLevel(const FString& FileName);
 };
 
 extern class UEngine* GEngine;

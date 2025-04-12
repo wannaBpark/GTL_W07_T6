@@ -56,6 +56,7 @@ public:
     T* DuplicateActor(T* InActor);
 
     EWorldType WorldType = EWorldType::None;
+
     
 private:
     FString WorldName = "DefaultWorld";

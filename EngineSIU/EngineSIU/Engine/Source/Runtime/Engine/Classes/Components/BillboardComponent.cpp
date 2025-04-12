@@ -89,7 +89,7 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 void UBillboardComponent::SetTexture(const FWString& _fileName)
 {
     Texture = FEngineLoop::ResourceManager.GetTexture(_fileName);
-    TexturePath = FString(_fileName);
+    TexturePath = FString(_fileName.c_str());
     //std::string str(_fileName.begin(), _fileName.end());
 }
 

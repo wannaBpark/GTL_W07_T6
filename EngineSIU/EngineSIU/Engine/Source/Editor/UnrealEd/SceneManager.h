@@ -60,7 +60,7 @@ public:
      * @param World 저장할 World
      * @return 성공적으로 저장되었는지 여부
      */
-    static bool SaveSceneToJsonFile(const FString& FilePath, const UWorld* World);
+    static bool SaveSceneToJsonFile(const FString& FilePath, const UWorld& World);
 
 private:
     /**
