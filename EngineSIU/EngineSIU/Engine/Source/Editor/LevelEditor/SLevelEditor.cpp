@@ -235,6 +235,8 @@ void SLevelEditor::LoadConfig()
     ActiveViewportClient->Pivot.Y = GetValueFromConfig(config, "OrthoPivotY", 0.0f);
     ActiveViewportClient->Pivot.Z = GetValueFromConfig(config, "OrthoPivotZ", 0.0f);
     ActiveViewportClient->orthoSize = GetValueFromConfig(config, "OrthoZoomSize", 10.0f);
+    EditorWidth = GetValueFromConfig(config, "EditorWidth", 0.0f);
+    EditorHeight = GetValueFromConfig(config, "EditorHeight", 0.0f);
 
     SetViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
     bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
@@ -263,8 +265,8 @@ void SLevelEditor::SaveConfig()
     ActiveViewportClient->SaveConfig(config);
     config["bMutiView"] = std::to_string(bMultiViewportMode);
     config["ActiveViewportIndex"] = std::to_string(ActiveViewportClient->ViewportIndex);
-    config["ScreenWidth"] = std::to_string(ActiveViewportClient->ViewportIndex);
-    config["ScreenHeight"] = std::to_string(ActiveViewportClient->ViewportIndex);
+    config["ScreenWidth"] = std::to_string(EditorWidth);
+    config["ScreenHeight"] = std::to_string(EditorHeight);
     config["OrthoPivotX"] = std::to_string(ActiveViewportClient->Pivot.X);
     config["OrthoPivotY"] = std::to_string(ActiveViewportClient->Pivot.Y);
     config["OrthoPivotZ"] = std::to_string(ActiveViewportClient->Pivot.Z);
