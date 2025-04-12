@@ -681,12 +681,12 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     ID3D11DepthStencilState* DepthStateEnable = Graphics->DepthStencilState;
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateEnable, 0);
 
-    RenderAABBInstanced(World);
+    //RenderAABBInstanced(World);
     RenderPointlightInstanced(World);
     RenderSpotlightInstanced(World);
-    RenderAxis();
-    RenderGrid(ActiveViewport);
-
+    //RenderAxis();
+    //RenderGrid(ActiveViewport); // 기존 동적 LOD 월드 그리드 렌더 X
+	
     // 기즈모는 depth 무시
     ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
@@ -896,7 +896,7 @@ void FEditorRenderPass::RenderPointlightInstanced(const UWorld* World)
         {
             FConstantBufferDebugSphere b;
             b.Position = PointLightComp->GetWorldLocation();
-            b.Radius = PointLightComp->GetAttenuationRadius(); // TOFIX!
+            b.Radius = PointLightComp->GetAttenuation(); // TOFIX!
             BufferAll.Add(b);
         }
 
@@ -1031,51 +1031,51 @@ void FEditorRenderPass::UdpateConstantbufferSpotlightInstanced(TArray<FConstantB
     }
 }
 
-void FEditorRenderPass::RenderGrid(std::shared_ptr<FEditorViewportClient> ActiveViewport)
-{
-    PrepareShader(Resources.Shaders.Grid);
-    PrepareConstantbufferGlobal();
-    PrepareConstantbufferGrid();
-    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    FMatrix view = ActiveViewport->GetViewMatrix();
-    FMatrix proj = ActiveViewport->GetProjectionMatrix();
-    FConstantBufferDebugGrid buf;
-    buf.InverseViewProj = FMatrix::Inverse(view * proj);
-
-    FConstantBufferCamera cameraBuf;
-    cameraBuf.ViewMatrix = view;
-    cameraBuf.ProjMatrix = proj;
-    cameraBuf.CameraPos = ActiveViewport->ViewTransformPerspective.GetLocation();
-    cameraBuf.CameraLookAt = {
-        ActiveViewport->GetD3DViewport().Width,
-        ActiveViewport->GetD3DViewport().Height,
-        static_cast<float>(ActiveViewport->GetViewportType())
-    };
-    UpdateConstantbufferGlobal(cameraBuf);
-    UpdateConstantbufferGrid(buf);
-    Graphics->DeviceContext->Draw(12, 0); // 내부에서 버텍스 사용중
-}
-
-void FEditorRenderPass::PrepareConstantbufferGrid()
-{
-    if (Resources.ConstantBuffers.Grid13)
-    {
-        Graphics->DeviceContext->VSSetConstantBuffers(13, 1, &Resources.ConstantBuffers.Grid13);
-    }
-}
-
-void FEditorRenderPass::UpdateConstantbufferGrid(FConstantBufferDebugGrid Buffer)
-{
-    if (Resources.ConstantBuffers.Grid13)
-    {
-        D3D11_MAPPED_SUBRESOURCE ConstantBufferMSR; // GPU�� �޸� �ּ� ����
-
-        Graphics->DeviceContext->Map(Resources.ConstantBuffers.Grid13, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
-        memcpy(ConstantBufferMSR.pData, &Buffer, sizeof(FConstantBufferDebugGrid)); // TArray이니까 실제 값을 받아와야함
-        Graphics->DeviceContext->Unmap(Resources.ConstantBuffers.Grid13, 0); // GPU�� �ٽ� ��밡���ϰ� �����
-    }
-}
+//void FEditorRenderPass::RenderGrid(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+//{
+//    PrepareShader(Resources.Shaders.Grid);
+//    PrepareConstantbufferGlobal();
+//    PrepareConstantbufferGrid();
+//    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//
+//    FMatrix view = ActiveViewport->GetViewMatrix();
+//    FMatrix proj = ActiveViewport->GetProjectionMatrix();
+//    FConstantBufferDebugGrid buf;
+//    buf.InverseViewProj = FMatrix::Inverse(view * proj);
+//
+//    FConstantBufferCamera cameraBuf;
+//    cameraBuf.ViewMatrix = view;
+//    cameraBuf.ProjMatrix = proj;
+//    cameraBuf.CameraPos = ActiveViewport->ViewTransformPerspective.GetLocation();
+//    cameraBuf.CameraLookAt = {
+//        ActiveViewport->GetD3DViewport().Width,
+//        ActiveViewport->GetD3DViewport().Height,
+//        static_cast<float>(ActiveViewport->GetViewportType())
+//    };
+//    UpdateConstantbufferGlobal(cameraBuf);
+//    UpdateConstantbufferGrid(buf);
+//    Graphics->DeviceContext->Draw(12, 0); // 내부에서 버텍스 사용중
+//}
+//
+//void FEditorRenderPass::PrepareConstantbufferGrid()
+//{
+//    if (Resources.ConstantBuffers.Grid13)
+//    {
+//        Graphics->DeviceContext->VSSetConstantBuffers(13, 1, &Resources.ConstantBuffers.Grid13);
+//    }
+//}
+//
+//void FEditorRenderPass::UpdateConstantbufferGrid(FConstantBufferDebugGrid Buffer)
+//{
+//    if (Resources.ConstantBuffers.Grid13)
+//    {
+//        D3D11_MAPPED_SUBRESOURCE ConstantBufferMSR; // GPU�� �޸� �ּ� ����
+//
+//        Graphics->DeviceContext->Map(Resources.ConstantBuffers.Grid13, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
+//        memcpy(ConstantBufferMSR.pData, &Buffer, sizeof(FConstantBufferDebugGrid)); // TArray이니까 실제 값을 받아와야함
+//        Graphics->DeviceContext->Unmap(Resources.ConstantBuffers.Grid13, 0); // GPU�� �ٽ� ��밡���ϰ� �����
+//    }
+//}
 
 // 꼼수로 이미 로드된 리소스를 사용
 // GUObjectArray에 안올라가게 우회

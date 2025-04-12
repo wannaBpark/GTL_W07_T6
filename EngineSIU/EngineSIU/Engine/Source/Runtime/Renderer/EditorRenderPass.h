@@ -59,9 +59,9 @@ private:
     void UdpateConstantbufferSpotlightInstanced(TArray<FConstantBufferDebugCone> Buffer);
 
     // Grid
-    void RenderGrid(std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void PrepareConstantbufferGrid();
-    void UpdateConstantbufferGrid(FConstantBufferDebugGrid Buffer);
+    // void RenderGrid(std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    // void PrepareConstantbufferGrid();
+    // void UpdateConstantbufferGrid(FConstantBufferDebugGrid Buffer);
 
     // Icon
     void RenderIcons(const UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
