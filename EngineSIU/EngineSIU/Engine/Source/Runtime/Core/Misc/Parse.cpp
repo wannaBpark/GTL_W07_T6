@@ -15,7 +15,7 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int32 
         return false;
     }
     
-    check(Value && MaxLen > 0);
+    assert(Value && MaxLen > 0);
 
     bool bSuccess = false;
     int32 MatchLen = FCString::Strlen(Match);
