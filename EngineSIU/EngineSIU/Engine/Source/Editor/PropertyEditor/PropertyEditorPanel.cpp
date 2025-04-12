@@ -123,7 +123,7 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
 
                 float Intensity = lightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 100.0f, "%1.f"))
                     lightObj->SetIntensity(Intensity);
 
                  /*  

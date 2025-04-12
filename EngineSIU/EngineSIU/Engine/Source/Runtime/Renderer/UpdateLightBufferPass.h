@@ -24,13 +24,13 @@ public:
     virtual void PrepareRender() override;
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     virtual void ClearRenderArr() override;
-    void UpdateLightBuffer(FLight Light) const;
+    void UpdateLightBuffer() const;
 
 private:
     TArray<USpotLightComponent*> SpotLights;
     TArray<UPointLightComponent*> PointLights;
     TArray<UDirectionalLightComponent*> DirectionalLights;
-    TArray<UAmbientLightComponent*> AmbientLights;
+    UAmbientLightComponent* AmbientLights;
 
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;

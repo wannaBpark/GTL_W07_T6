@@ -4,7 +4,6 @@
 #include "Core/Container/String.h"
 #include "Core/Container/Array.h"
 #include "UObject/NameTypes.h"
-
 // 수학 관련
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
@@ -18,6 +17,7 @@
 
 #include "UserInterface/Console.h"
 #include <Math/Color.h>
+#include "LightDefine.h"
 
 struct FStaticMeshVertex
 {
@@ -301,6 +301,11 @@ struct FLight
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
+
+    float InnerCos; // cos(inner angle)
+    float OuterCos; // cos(outer angle)
+    float pad4;
+    float pad5;
 };
 
 struct FLightBuffer
@@ -310,6 +315,7 @@ struct FLightBuffer
     int nLights;
     float    pad0, pad1, pad2;
 };
+
 
 
 struct FMaterialConstants {
