@@ -373,7 +373,7 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
 
                 CalculateTangent(Vertex0, Vertex1, Vertex2);
                 CalculateTangent(Vertex1, Vertex2, Vertex0);
-                CalculateTangent(Vertex2, Vertex0, Vertex1);
+                CalculateTangent(Vertex2, Vertex0, Vertex1); // 가장 마지막에 계산된 PivotVertex의 Tangent로 덮어씌워짐
             }
 
             for (int32 j = 0; j < OutStaticMesh.MaterialSubsets.Num(); j++)

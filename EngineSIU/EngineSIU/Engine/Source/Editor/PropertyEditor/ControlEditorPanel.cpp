@@ -391,10 +391,13 @@ void ControlEditorPanel::CreateFlagButton() const
 
     ImGui::SameLine();
 
-    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "SceneDepth" };
+    const char* ViewModeNames[] = { 
+        "Lit_Gouraud", "Lit_Lambert", "Lit_Phong", 
+        "Unlit", "Wireframe", "SceneDepth", "WorldNormal"
+    };
     
     int rawViewMode = (int)ActiveViewport->GetViewMode();
-    int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 4) : 0;
+    int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 8) : 0;
     FString ViewModeControl = ViewModeNames[safeIndex];
 
     ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
@@ -412,8 +415,8 @@ void ControlEditorPanel::CreateFlagButton() const
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
                 ActiveViewport->SetViewMode((EViewModeIndex)i);
-                FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                //FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
+                //FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
             }
 
             if (bIsSelected)
