@@ -391,7 +391,7 @@ void ControlEditorPanel::CreateFlagButton() const
 
     ImGui::SameLine();
 
-    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "SceneDepth" };
+    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "Scene Depth", "World Normal" };
     
     int rawViewMode = (int)ActiveViewport->GetViewMode();
     int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 4) : 0;
@@ -408,12 +408,10 @@ void ControlEditorPanel::CreateFlagButton() const
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
-            bool bIsSelected = ((int)ActiveViewport->GetViewMode() == i);
+            bool bIsSelected = (static_cast<int>(ActiveViewport->GetViewMode()) == i);
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
-                ActiveViewport->SetViewMode((EViewModeIndex)i);
-                FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                ActiveViewport->SetViewMode(static_cast<EViewModeIndex>(i));
             }
 
             if (bIsSelected)

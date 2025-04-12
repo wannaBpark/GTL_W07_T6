@@ -55,15 +55,6 @@ void FRenderer::Release()
 }
 
 
-void FRenderer::ChangeViewMode(EViewModeIndex evi)
-{
-    StaticMeshRenderPass->ChangeViewMode(evi);
-    if (evi == EViewModeIndex::VMI_SceneDepth)
-        IsSceneDepth = true;
-    else
-        IsSceneDepth = false;
-}
-
 //------------------------------------------------------------------------------
 // 사용하는 모든 상수 버퍼 생성
 //------------------------------------------------------------------------------
@@ -125,36 +116,62 @@ void FRenderer::ClearRenderArr()
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
-    Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
+    FRenderTargetRHI* RenderTargetRHI = ActiveViewport->GetRenderTargetRHI();
+    if (!RenderTargetRHI)
+    {
+        return;
+    }
+
+    Graphics->DeviceContext->RSSetViewports(1, &RenderTargetRHI->GetD3DViewport());
+    
+    const EViewModeIndex ViewMode = ActiveViewport->GetViewMode();
+    FViewportResources* ResourceRHI = nullptr;
+    if (ViewMode == VMI_WorldNormal)
+    {
+        ResourceRHI = RenderTargetRHI->GetResource(EResourceType::ERT_WorldNormal);
+    }
+    else
+    {
+        ResourceRHI = RenderTargetRHI->GetResource(EResourceType::ERT_Scene);
+    }
+
+    if (!ResourceRHI)
+    {
+        return;
+    }
+    
     Graphics->DeviceContext->OMSetRenderTargets(
         1,
-        &ActiveViewport->GetRenderTarget()->GetSceneRTV(),
-        ActiveViewport->GetRenderTarget()->GetDepthStencilView()
+        &ResourceRHI->RTV,
+        RenderTargetRHI->GetDepthStencilView()
     );
-    ActiveViewport->GetRenderTarget()->ClearRenderTarget(Graphics->DeviceContext);
-
+    RenderTargetRHI->ClearRenderTargets(Graphics->DeviceContext);
+    
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 
-    ChangeViewMode(ActiveViewport->GetViewMode());
-
-    StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
-    BillboardRenderPass->Render(ActiveViewport);
-    
 
-    if (IsSceneDepth)
+    StaticMeshRenderPass->ChangeViewMode(ActiveViewport->GetViewMode());
+    StaticMeshRenderPass->Render(ActiveViewport);
+    
+    BillboardRenderPass->Render(ActiveViewport);
+
+    // 현재 시점의 depth 정보 활용
+    if (ViewMode == EViewModeIndex::VMI_SceneDepth)
     {
+        // TODO: 뎁스스텐실 버퍼를 쉐이더 리소스 뷰로 전달.
         DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
     }
-
-    if (!IsSceneDepth)
+    if (ViewMode == EViewModeIndex::VMI_Lit)
     {
-        DepthBufferDebugPass->UpdateDepthBufferSRV();
-        
-        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV());
+        // Render PostProcess
+        FogRenderPass->RenderFog(ActiveViewport, RenderTargetRHI->GetDepthStencilSRV());
     }
+    
     LineRenderPass->Render(ActiveViewport);
     GizmoRenderPass->Render(ActiveViewport);
+
+    // TODO: 최종 결과 렌더하고, 결과 텍스처를 SRV를 통해 전달
 
     ClearRenderArr();
 }

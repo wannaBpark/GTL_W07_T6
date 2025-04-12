@@ -48,7 +48,7 @@ public:
     void CreateShader();
     void ReleaseShader();
 
-    void ChangeViewMode(EViewModeIndex evi) const;
+    void ChangeViewMode(EViewModeIndex ViewModeIndex) const;
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
 

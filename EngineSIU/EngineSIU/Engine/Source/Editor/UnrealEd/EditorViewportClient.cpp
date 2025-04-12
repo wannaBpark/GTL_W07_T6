@@ -192,11 +192,11 @@ D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
     return Viewport->GetD3DViewport();
 }
 
-FRenderTargetRHI* FEditorViewportClient::GetRenderTarget()
+FRenderTargetRHI* FEditorViewportClient::GetRenderTargetRHI()
 {
     if (!RenderTargetCache)
     {
-        RenderTargetCache = Viewport->GetRenderTarget();
+        RenderTargetCache = Viewport->GetRenderTargetRHI();
     }
     return RenderTargetCache;
 }

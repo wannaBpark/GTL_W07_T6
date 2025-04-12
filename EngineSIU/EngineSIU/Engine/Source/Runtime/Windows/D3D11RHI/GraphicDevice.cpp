@@ -279,6 +279,7 @@ void FGraphicsDevice::ChangeRasterizer(EViewModeIndex ViewModeIndex)
     case EViewModeIndex::VMI_Lit:
     case EViewModeIndex::VMI_Unlit:
     case EViewModeIndex::VMI_SceneDepth:
+    case EViewModeIndex::VMI_WorldNormal:
         CurrentRasterizer = RasterizerSolidBack;
         break;
     }

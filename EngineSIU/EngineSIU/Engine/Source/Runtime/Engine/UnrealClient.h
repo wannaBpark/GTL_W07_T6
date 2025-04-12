@@ -61,6 +61,8 @@ public:
     void Resize(uint32 NewWidth, uint32 NewHeight);
 
     void Release();
+
+    HRESULT CreateResource(EResourceType Type);
     
     D3D11_VIEWPORT& GetD3DViewport() { return D3DViewport; }
     
@@ -69,8 +71,10 @@ public:
     ID3D11ShaderResourceView*& GetDepthStencilSRV() { return DepthStencilSRV; }
 
     FViewportResources* GetResource(EResourceType Type);
+
+    bool HasResource(EResourceType Type) const;
     
-    void ClearRenderTarget(ID3D11DeviceContext* DeviceContext);
+    void ClearRenderTargets(ID3D11DeviceContext* DeviceContext);
     
 private:
     // DirectX
@@ -82,13 +86,13 @@ private:
 
     TMap<EResourceType, FViewportResources> Resources;
 
-    HRESULT CreateDepthStencilResources(uint32 InWidth, uint32 InHeight);
-    HRESULT CreateResource(EResourceType Type, uint32 InWidth, uint32 InHeight);
+    HRESULT CreateDepthStencilResources();
 
     void ReleaseDepthStencilResources();
     void ReleaseResources();
+    void ReleaseResource(EResourceType Type);
 
-    float ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f };
+    TMap<EResourceType, float[4]> ClearColors;
 };
 
 
@@ -104,14 +108,14 @@ public:
     void ResizeViewport(const FRect& Top, const FRect& Bottom, const FRect& Left, const FRect& Right);
     void ResizeViewport(const FRect& NewRect);
 
-    D3D11_VIEWPORT& GetD3DViewport() const { return RenderTarget->GetD3DViewport(); }
+    D3D11_VIEWPORT& GetD3DViewport() const { return RenderTargetRHI->GetD3DViewport(); }
 
     EViewScreenLocation GetViewLocation() const { return ViewLocation; }
 
-    FRenderTargetRHI* GetRenderTarget() const { return RenderTarget; }
+    FRenderTargetRHI* GetRenderTargetRHI() const { return RenderTargetRHI; }
 
 private:
-    FRenderTargetRHI* RenderTarget;
+    FRenderTargetRHI* RenderTargetRHI;
 
     EViewScreenLocation ViewLocation;   // 뷰포트 위치
 };

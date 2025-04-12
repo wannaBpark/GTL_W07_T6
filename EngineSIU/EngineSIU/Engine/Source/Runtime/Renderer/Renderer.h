@@ -46,8 +46,6 @@ public:
     void ClearRenderArr();
     void Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
-    // 뷰 모드 변경
-    void ChangeViewMode(EViewModeIndex evi);
     //==========================================================================
     // 버퍼 생성/해제 함수 (템플릿 포함)
     //==========================================================================

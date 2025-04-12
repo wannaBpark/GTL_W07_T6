@@ -80,9 +80,9 @@ void FStaticMeshRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
-void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi) const
+void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex) const
 {
-    switch (evi)
+    switch (ViewModeIndex)
     {
     case EViewModeIndex::VMI_Lit:
         UpdateLitUnlitConstant(1);

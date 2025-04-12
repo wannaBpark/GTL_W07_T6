@@ -110,7 +110,7 @@ public:
     
     D3D11_VIEWPORT& GetD3DViewport() const;
 
-    FRenderTargetRHI* GetRenderTarget();
+    FRenderTargetRHI* GetRenderTargetRHI();
 
 private:
     FRenderTargetRHI* RenderTargetCache = nullptr;
@@ -158,14 +158,14 @@ public:
     void UpdateOrthoCameraLoc();
     
     EViewModeIndex GetViewMode() const { return ViewMode; }
-    void SetViewMode(EViewModeIndex newMode) { ViewMode = newMode; }
+    void SetViewMode(EViewModeIndex InViewMode) { ViewMode = InViewMode; }
     
     uint64 GetShowFlag() const { return ShowFlag; }
-    void SetShowFlag(uint64 newMode) { ShowFlag = newMode; }
+    void SetShowFlag(uint64 InShowFlag) { ShowFlag = InShowFlag; }
     
     bool GetIsOnRBMouseClick() const { return bRightMouseDown; }
 
-    //Flag Test Code
+    // Flag Test Code
     static void SetOthoSize(float InValue);
 
 private: // Input
