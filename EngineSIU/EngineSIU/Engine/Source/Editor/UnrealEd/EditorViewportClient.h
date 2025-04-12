@@ -90,7 +90,6 @@ public:
     void Release() const;
 
     void Input();
-    void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
     bool IsSelected(POINT InPoint) const;

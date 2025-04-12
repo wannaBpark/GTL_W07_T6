@@ -9,8 +9,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 
 SLevelEditor::SLevelEditor()
-    : bInitialize(false)
-    , HSplitter(nullptr)
+    : HSplitter(nullptr)
     , VSplitter(nullptr)
     , World(nullptr)
     , bMultiViewportMode(false)
@@ -19,13 +18,15 @@ SLevelEditor::SLevelEditor()
 
 void SLevelEditor::Initialize()
 {
+    EditorWidth = FEngineLoop::GraphicDevice.screenWidth;
+    EditorHeight = FEngineLoop::GraphicDevice.screenHeight;
+    
     for (size_t i = 0; i < 4; i++)
     {
         ViewportClients[i] = std::make_shared<FEditorViewportClient>();
         ViewportClients[i]->Initialize(i);
     }
     ActiveViewportClient = ViewportClients[0];
-    OnResize();
     VSplitter = new SSplitterV();
     VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
     VSplitter->OnDrag(FPoint(0, 0));
@@ -33,7 +34,9 @@ void SLevelEditor::Initialize()
     HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
     HSplitter->OnDrag(FPoint(0, 0));
     LoadConfig();
-    bInitialize = true;
+
+    SetEnableMultiViewport(bMultiViewportMode);
+    ResizeLevelEditor();
 }
 
 void SLevelEditor::Tick(double deltaTime)
@@ -52,14 +55,12 @@ void SLevelEditor::Tick(double deltaTime)
         }
         Input();
     }
-    //Test Code Cursor icon End
-    OnResize();
+
     ActiveViewportClient->Input();
     for (std::shared_ptr<FEditorViewportClient> Viewport : ViewportClients)
     {
         Viewport->Tick(deltaTime);
     }
-
 }
 
 void SLevelEditor::Input()
@@ -98,7 +99,15 @@ void SLevelEditor::Input()
             {
                 HSplitter->OnDrag(FPoint(deltaX, deltaY));
             }
-            ResizeViewports();
+            if (VSplitter->IsPressing() || HSplitter->IsPressing())
+            {
+                FEngineLoop::GraphicDevice.OnResize(GEngineLoop.hWnd);
+                ResizeViewports();
+                if (GEngineLoop.GetLevelEditor())
+                {
+                    GEngineLoop.GetLevelEditor()->ResizeLevelEditor();
+                }
+            }
             lastMousePos = currentMousePos;
         }
     }
@@ -146,19 +155,18 @@ void SLevelEditor::SelectViewport(POINT point)
     }
 }
 
-void SLevelEditor::OnResize()
+void SLevelEditor::ResizeLevelEditor()
 {
     float PrevWidth = EditorWidth;
     float PrevHeight = EditorHeight;
     EditorWidth = FEngineLoop::GraphicDevice.screenWidth;
     EditorHeight = FEngineLoop::GraphicDevice.screenHeight;
-    if (bInitialize) {
-        //HSplitter 에는 바뀐 width 비율이 들어감 
-        HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
-        //HSplitter 에는 바뀐 Height 비율이 들어감 
-        VSplitter->OnResize(EditorWidth, EditorHeight/PrevHeight);
-        ResizeViewports();
-    }
+    
+    //HSplitter 에는 바뀐 width 비율이 들어감 
+    HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
+    //HSplitter 에는 바뀐 Height 비율이 들어감 
+    VSplitter->OnResize(EditorWidth, EditorHeight/PrevHeight);
+    ResizeViewports();
 }
 
 void SLevelEditor::ResizeViewports()
@@ -178,15 +186,10 @@ void SLevelEditor::ResizeViewports()
     }
 }
 
-void SLevelEditor::OnMultiViewport()
+void SLevelEditor::SetEnableMultiViewport(bool bIsEnable)
 {
-    bMultiViewportMode = true;
+    bMultiViewportMode = bIsEnable;
     ResizeViewports();
-}
-
-void SLevelEditor::OffMultiViewport()
-{
-    bMultiViewportMode = false;
 }
 
 bool SLevelEditor::IsMultiViewport() const
