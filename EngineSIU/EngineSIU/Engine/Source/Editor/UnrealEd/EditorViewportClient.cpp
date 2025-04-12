@@ -10,6 +10,7 @@
 
 #include "UObject/ObjectFactory.h"
 #include "BaseGizmos/TransformGizmo.h"
+#include "SlateCore/Input/Events.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::orthoSize = 10.0f;
@@ -33,7 +34,6 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 
 void FEditorViewportClient::Initialize(int32 viewportIndex)
 {
-
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
@@ -56,8 +56,10 @@ void FEditorViewportClient::Release() const
     delete Viewport;
 }
 
-void FEditorViewportClient::Input()
+void FEditorViewportClient::InputKey(const FKeyEvent& InKeyEvent)
 {
+    UE_LOG(LogLevel::Warning, "Key: %s", EKeys::to_string(InKeyEvent.GetKey()));
+
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄
@@ -137,6 +139,27 @@ void FEditorViewportClient::Input()
         }
     }
 }
+
+void FEditorViewportClient::MouseMove(const FPointerEvent& InMouseEvent)
+{
+    const FVector2D& CntPos = InMouseEvent.GetScreenSpacePosition();
+    const FVector2D& LastPos = InMouseEvent.GetLastScreenSpacePosition();
+    UE_LOG(LogLevel::Warning, "this: 0x%x Mouse Moved (%f, %f) to (%f, %f)", this, LastPos.X, LastPos.Y, CntPos.X, CntPos.Y);
+
+    const auto& [DeltaX, DeltaY] = InMouseEvent.GetCursorDelta();
+
+    // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
+    if (IsPerspective()) {
+        CameraRotateYaw(DeltaX * 0.1f);  // X 이동에 따라 좌우 회전
+        CameraRotatePitch(DeltaY * 0.1f);  // Y 이동에 따라 상하 회전
+    }
+    else
+    {
+        PivotMoveRight(DeltaX);
+        PivotMoveUp(DeltaY);
+    }
+}
+
 void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
 {
     if (Viewport) { 

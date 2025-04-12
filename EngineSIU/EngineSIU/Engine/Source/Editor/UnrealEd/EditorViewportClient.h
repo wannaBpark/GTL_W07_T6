@@ -3,14 +3,14 @@
 
 #include "Define.h"
 #include "Container/Map.h"
-#include "UObject/ObjectMacros.h"
 #include "ViewportClient.h"
 #include "EngineLoop.h"
 #include "EngineBaseTypes.h"
 
-#define MIN_ORTHOZOOM				1.0							/* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
-#define MAX_ORTHOZOOM				1e25
+#define MIN_ORTHOZOOM           1.0		// 2D ortho viewport zoom >= MIN_ORTHOZOOM
+#define MAX_ORTHOZOOM           1e25
 
+struct FPointerEvent;
 class ATransformGizmo;
 class USceneComponent;
 
@@ -89,7 +89,8 @@ public:
     void Tick(float DeltaTime);
     void Release() const;
 
-    void Input();
+    void InputKey(const FKeyEvent& InKeyEvent);
+    void MouseMove(const FPointerEvent& InMouseEvent);
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
