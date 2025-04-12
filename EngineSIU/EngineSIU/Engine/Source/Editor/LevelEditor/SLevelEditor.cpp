@@ -235,14 +235,14 @@ void SLevelEditor::LoadConfig()
     ActiveViewportClient->Pivot.Y = GetValueFromConfig(config, "OrthoPivotY", 0.0f);
     ActiveViewportClient->Pivot.Z = GetValueFromConfig(config, "OrthoPivotZ", 0.0f);
     ActiveViewportClient->orthoSize = GetValueFromConfig(config, "OrthoZoomSize", 10.0f);
-    EditorWidth = GetValueFromConfig(config, "EditorWidth", 0.0f);
-    EditorHeight = GetValueFromConfig(config, "EditorHeight", 0.0f);
+    EditorWidth = GetValueFromConfig(config, "EditorWidth", FEngineLoop::GraphicDevice.screenWidth);
+    EditorHeight = GetValueFromConfig(config, "EditorHeight", FEngineLoop::GraphicDevice.screenHeight);
 
     SetViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
     bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
-    for (size_t i = 0; i < 4; i++)
+    for (const auto& ViewportClient : ViewportClients)
     {
-        ViewportClients[i]->LoadConfig(config);
+        ViewportClient->LoadConfig(config);
     }
     if (HSplitter)
         HSplitter->LoadConfig(config);
