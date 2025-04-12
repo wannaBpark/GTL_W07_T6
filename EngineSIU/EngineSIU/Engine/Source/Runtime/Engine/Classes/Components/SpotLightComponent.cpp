@@ -12,8 +12,8 @@ USpotLightComponent::USpotLightComponent()
     SpotLightInfo.SpecularColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
     SpotLightInfo.Intensity = 10.0f;
     SpotLightInfo.Type = ELightType::SPOT_LIGHT;
-    SpotLightInfo.InnerCos = 0.9659;
-    SpotLightInfo.OuterCos = 0.8660;
+    SpotLightInfo.InnerRad = 0.9659;
+    SpotLightInfo.OuterRad = 0.8660;
 }
 
 USpotLightComponent::~USpotLightComponent()
@@ -92,22 +92,22 @@ void USpotLightComponent::SetType(int InType)
     SpotLightInfo.Type = InType;
 }
 
-float USpotLightComponent::GetInnerCos() const
+float USpotLightComponent::GetInnerRad() const
 {
-    return SpotLightInfo.InnerCos;
+    return SpotLightInfo.InnerRad;
 }
 
-void USpotLightComponent::SetInnerCos(float InInnerCos)
+void USpotLightComponent::SetInnerRad(float InInnerCos)
 {
-    SpotLightInfo.InnerCos = InInnerCos;
+    SpotLightInfo.InnerRad = InInnerCos;
 }
 
-float USpotLightComponent::GetOuterCos() const
+float USpotLightComponent::GetOuterRad() const
 {
-    return SpotLightInfo.OuterCos;
+    return SpotLightInfo.OuterRad;
 }
 
-void USpotLightComponent::SetOuterCos(float InOuterCos)
+void USpotLightComponent::SetOuterRad(float InOuterCos)
 {
-    SpotLightInfo.OuterCos = InOuterCos;
+    SpotLightInfo.OuterRad = InOuterCos;
 }

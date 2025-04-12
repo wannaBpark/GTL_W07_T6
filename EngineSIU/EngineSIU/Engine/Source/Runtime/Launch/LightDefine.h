@@ -46,8 +46,8 @@ struct FSpotLightInfo
 
     float   Intensity;      // 밝기
     int     Type;           // 라이트 타입 구분용 (예: 2 = Spot)
-    float   InnerCos; // cos(inner angle)
-    float   OuterCos; // cos(outer angle)
+    float   InnerRad; // cos(inner angle)
+    float   OuterRad; // cos(outer angle)
 };
 
 struct FLightInfoBuffer

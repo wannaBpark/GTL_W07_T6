@@ -31,11 +31,11 @@ public:
     int GetType() const;
     void SetType(int InType);
 
-    float GetInnerCos() const;
-    void SetInnerCos(float InInnerCos);
+    float GetInnerRad() const;
+    void SetInnerRad(float InInnerCos);
 
-    float GetOuterCos() const;
-    void SetOuterCos(float InOuterCos);
+    float GetOuterRad() const;
+    void SetOuterRad(float InOuterCos);
 private:
     FSpotLightInfo SpotLightInfo;
 };
