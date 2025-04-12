@@ -11,8 +11,8 @@ enum Type : uint8;
 }
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnKeyCharDelegate, const TCHAR /*Character*/, const bool /*IsRepeat*/);
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnKeyDownDelegate, const int32 /*KeyCode*/, const uint32 /*CharacterCode*/, const bool /*IsRepeat*/);
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnKeyUpDelegate, const int32 /*KeyCode*/, const uint32 /*CharacterCode*/, const bool /*IsRepeat*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyDownDelegate, const FKeyEvent& /*InKeyEvent*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnKeyUpDelegate, const FKeyEvent& /*InKeyEvent*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDownDelegate, const FPointerEvent& /*InMouseEvent*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseUpDelegate, const FPointerEvent& /*InMouseEvent*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDoubleClickDelegate, const FPointerEvent& /*InMouseEvent*/);
@@ -42,8 +42,8 @@ public:
 
 protected:
     void OnKeyChar(const TCHAR Character, const bool IsRepeat);
-    void OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat);
-    void OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat);
+    void OnKeyDown(uint32 KeyCode, const uint32 CharacterCode, const bool IsRepeat);
+    void OnKeyUp(uint32 KeyCode, const uint32 CharacterCode, const bool IsRepeat);
     void OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos);
     void OnMouseUp(const EMouseButtons::Type Button, const FVector2D CursorPos);
     void OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos);

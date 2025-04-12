@@ -330,14 +330,27 @@ void FSlateAppMessageHandler::OnKeyChar(const TCHAR Character, const bool IsRepe
     OnKeyCharDelegate.Broadcast(Character, IsRepeat);
 }
 
-void FSlateAppMessageHandler::OnKeyDown(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
+void FSlateAppMessageHandler::OnKeyDown(const uint32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
 {
-    OnKeyDownDelegate.Broadcast(KeyCode, CharacterCode, IsRepeat);
+    FInputKeyManager::Get();
+    OnKeyDownDelegate.Broadcast(FKeyEvent{
+        EKeys::Invalid, // TODO: 나중에 FInputKeyManager구현되면 바꾸기
+        GetModifierKeys(),
+        IsRepeat,
+        CharacterCode,
+        KeyCode,
+    });
 }
 
-void FSlateAppMessageHandler::OnKeyUp(const int32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
+void FSlateAppMessageHandler::OnKeyUp(const uint32 KeyCode, const uint32 CharacterCode, const bool IsRepeat)
 {
-    OnKeyUpDelegate.Broadcast(KeyCode, CharacterCode, IsRepeat);
+    OnKeyUpDelegate.Broadcast(FKeyEvent{
+        EKeys::Invalid, // TODO: 나중에 FInputKeyManager구현되면 바꾸기
+        GetModifierKeys(),
+        IsRepeat,
+        CharacterCode,
+        KeyCode,
+    });
 }
 
 void FSlateAppMessageHandler::OnMouseDown(const EMouseButtons::Type Button, const FVector2D CursorPos)
