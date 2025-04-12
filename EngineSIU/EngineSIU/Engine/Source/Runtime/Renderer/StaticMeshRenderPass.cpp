@@ -101,7 +101,7 @@ void FStaticMeshRenderPass::CreateShader()
     // auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
     PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
 
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
+    InputLayout = ShaderManager->GetInputLayoutByKey(L"PHONG_StaticMeshVertexShader");
 
 }
 void FStaticMeshRenderPass::ReleaseShader()

@@ -161,20 +161,30 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float fSpecularFactor = 0.0f;
     vToLight /= fDistance; // 정규화
     float fDiffuseFactor = max(dot(vNormal, vToLight), 0.0f);
-
+    //float fDiffuseFactor = max(dot(float3(1, 0, 0), vToLight), 0.0f);
+    
     if (fDiffuseFactor > 0.0f)
     {
-        float3 vView = normalize(CameraPosition - vPosition);
-        float3 vHalf = normalize(vToLight + vView);
-        fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
+        float3 vToEye = normalize(CameraPosition - vPosition);
+        float3 vHalf = normalize(vToLight + vToEye);
+        fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 20);
+        
+        //return float4(1, 0, 0, 1);
     }
 
     float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
    
-    float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+    float3 lit = /*(gcGlobalAmbientLight * Material.AmbientColor.rgb) +*/
                  (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
                  (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
+       
+    //float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+    //             (gLights[nIndex].m_cDiffuse.rgb * 1 * Material.DiffuseColor) +
+    //             (gLights[nIndex].m_cSpecular.rgb * 1 * Material.SpecularColor);
     
+    //return float4(vNormal, 1);
+    
+    //return float4(fDiffuseFactor * 100, fDiffuseFactor * 100, fDiffuseFactor * 100, 1);
     
     return float4(lit * fAttenuationFactor * gLights[nIndex].m_fIntensity, 1.0f);
     
@@ -331,20 +341,20 @@ float4 Lighting(float3 vPosition, float3 vNormal)
             {
                 cColor += PointLight(i, vPosition, normalizedNormal);
             }
-            else if (gLights[i].m_nType == SPOT_LIGHT)
-            {
-                cColor += SpotLight(i, vPosition, normalizedNormal);
-            }
-            else if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
-            {
-                cColor += DirectionalLight(i, vPosition, normalizedNormal);
-            }
+            //else if (gLights[i].m_nType == SPOT_LIGHT)
+            //{
+            //    cColor += SpotLight(i, vPosition, normalizedNormal);
+            //}
+            //else if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
+            //{
+            //    cColor += DirectionalLight(i, vPosition, normalizedNormal);
+            //}
 #endif
         }
     }
 
     // Add global ambient light
-    cColor += float4(gcGlobalAmbientLight.rgb * Material.AmbientColor, 0.0);
+    //cColor += float4(gcGlobalAmbientLight.rgb * Material.AmbientColor, 0.0);
     cColor.a = 1.0;
     
     return cColor;

@@ -83,5 +83,7 @@ PS_INPUT mainVS(VS_INPUT input)
     output.normal = worldNormal;
     output.texcoord = input.texcoord;
 #endif
+    //output.normal = input.normal;
+    
     return output;
 }

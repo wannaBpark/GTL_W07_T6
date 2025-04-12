@@ -177,6 +177,8 @@ PS_OUTPUT mainPS(PS_INPUT input)
     {
         output.color += float4(0.02, 0.02, 0.02, 0);
     }
+    
+    //output.color = float4(input.normal, 1);
 
     return output;
 }
