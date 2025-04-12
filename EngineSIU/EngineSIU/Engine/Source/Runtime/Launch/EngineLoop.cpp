@@ -30,20 +30,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED)
         {
-            //UGraphicsDevice 객체의 OnResize 함수 호출
-            if (FEngineLoop::GraphicDevice.SwapChain)
+            auto LevelEditor = GEngineLoop.GetLevelEditor();
+            if (LevelEditor)
             {
                 FEngineLoop::GraphicDevice.OnResize(hWnd);
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                if (GEngineLoop.GetLevelEditor())
-                {
-                    if (GEngineLoop.GetLevelEditor()->GetViewports()[i])
-                    {
-                        GEngineLoop.GetLevelEditor()->GetViewports()[i]->ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
-                    }
-                }
+                //UGraphicsDevice 객체의 OnResize 함수 호출
+                LevelEditor->ResizeLevelEditor();
             }
         }
         Console::GetInstance().OnResize(hWnd);
@@ -246,12 +238,12 @@ void FEngineLoop::Input()
         if (!bTestInput)
         {
             bTestInput = true;
-            if (LevelEditor->IsMultiViewport())
+            GraphicDevice.OnResize(hWnd);
+            if (LevelEditor)
             {
-                LevelEditor->OffMultiViewport();
+                LevelEditor->SetEnableMultiViewport(!LevelEditor->IsMultiViewport());
+                LevelEditor->ResizeViewports();
             }
-            else
-                LevelEditor->OnMultiViewport();
         }
     }
     else

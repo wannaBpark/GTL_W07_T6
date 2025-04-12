@@ -20,14 +20,12 @@ public:
     void Release();
     
     void SelectViewport(POINT point);
-    void OnResize();
+    void ResizeLevelEditor();
     void ResizeViewports();
-    void OnMultiViewport();
-    void OffMultiViewport();
+    void SetEnableMultiViewport(bool bIsEnable);
     bool IsMultiViewport() const;
 
 private:
-    bool bInitialize;
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
     UWorld* World;
