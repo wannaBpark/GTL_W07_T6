@@ -92,8 +92,8 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
             FVector WorldForward = rotator.ToQuaternion().RotateVector(Light->GetForwardVector());
             LightBufferData.gLights[LightCount].Direction = WorldForward;
             LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
-            //LightBufferData.gLights[LightCount].InnerCos = 0.9659;
-            //LightBufferData.gLights[LightCount].OuterCos = 0.8660;
+            LightBufferData.gLights[LightCount].InnerCos = Light->GetInnerRad();
+            LightBufferData.gLights[LightCount].OuterCos = Light->GetOuterRad();
             LightCount++;
         }
     }

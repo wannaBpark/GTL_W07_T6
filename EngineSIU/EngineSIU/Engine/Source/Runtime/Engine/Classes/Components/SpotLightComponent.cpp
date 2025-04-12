@@ -1,4 +1,6 @@
 #include "SpotLightComponent.h"
+#include "Math/Rotator.h"
+#include "Math/Quat.h"
 USpotLightComponent::USpotLightComponent()
 {
     Light.Type = ELightType::SPOT_LIGHT;
@@ -23,7 +25,9 @@ USpotLightComponent::~USpotLightComponent()
 
 FVector USpotLightComponent::GetDirection()
 {
-    return Light.Direction;
+    FRotator rotator = GetWorldRotation();
+    FVector WorldForward = rotator.ToQuaternion().RotateVector(GetForwardVector());
+    return WorldForward;
 }
 
 void USpotLightComponent::SetDirection(const FVector& dir)
