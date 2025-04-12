@@ -94,7 +94,7 @@ public:
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
-    bool IsSelected(POINT InPoint) const;
+    bool IsSelected(const FVector2D& InPoint) const;
 
 protected:
     /** Camera speed setting */

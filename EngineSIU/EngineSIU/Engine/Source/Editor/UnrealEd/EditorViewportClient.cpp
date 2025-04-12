@@ -162,49 +162,62 @@ void FEditorViewportClient::MouseMove(const FPointerEvent& InMouseEvent)
 
 void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
 {
-    if (Viewport) { 
-        Viewport->ResizeViewport(swapchaindesc);    
+    if (Viewport)
+    {
+        Viewport->ResizeViewport(swapchaindesc);
     }
-    else {
+    else
+    {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
     AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
+
 void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
 {
-    if (Viewport) {
+    if (Viewport)
+    {
         Viewport->ResizeViewport(Top, Bottom, Left, Right);
     }
-    else {
+    else
+    {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
     AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::GraphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
-bool FEditorViewportClient::IsSelected(POINT InPoint) const
-{
-    float TopLeftX = Viewport->GetViewport().TopLeftX;
-    float TopLeftY = Viewport->GetViewport().TopLeftY;
-    float Width = Viewport->GetViewport().Width;
-    float Height = Viewport->GetViewport().Height;
 
-    if (InPoint.x >= TopLeftX && InPoint.x <= TopLeftX + Width &&
-        InPoint.y >= TopLeftY && InPoint.y <= TopLeftY + Height)
-    {
+bool FEditorViewportClient::IsSelected(const FVector2D& InPoint) const
+{
+    const float TopLeftX = Viewport->GetViewport().TopLeftX;
+    const float TopLeftY = Viewport->GetViewport().TopLeftY;
+    const float Width = Viewport->GetViewport().Width;
+    const float Height = Viewport->GetViewport().Height;
+
+    if (
+        InPoint.X >= TopLeftX
+        && InPoint.X <= TopLeftX + Width
+        && InPoint.Y >= TopLeftY
+        && InPoint.Y <= TopLeftY + Height
+    ) {
         return true;
     }
     return false;
 }
+
+
 D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
 {
     return Viewport->GetViewport();
 }
+
 void FEditorViewportClient::CameraMoveForward(float InValue)
 {
-    if (IsPerspective()) {
+    if (IsPerspective())
+    {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
         curCameraLoc = curCameraLoc + ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * InValue;
         ViewTransformPerspective.SetLocation(curCameraLoc);
