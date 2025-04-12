@@ -54,7 +54,7 @@ void SLevelEditor::Initialize()
         {
         case EKeys::RightMouseButton:
         {
-            FWindowsCursor::SetMouseCursor(ECursorType::None);
+            FWindowsCursor::SetShowMouseCursor(false);
             MousePinPosition = InMouseEvent.GetScreenSpacePosition();
             break;
         }
@@ -143,7 +143,7 @@ void SLevelEditor::Initialize()
         {
         case EKeys::RightMouseButton:
         {
-            FWindowsCursor::SetMouseCursor(ECursorType::Arrow);
+            FWindowsCursor::SetShowMouseCursor(true);
             return;
         }
 

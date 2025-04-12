@@ -1,5 +1,7 @@
 ﻿#include "WindowsCursor.h"
 
+#include "Define.h"
+
 bool FWindowsCursor::bShowCursor = true;
 
 
@@ -119,6 +121,9 @@ bool FWindowsCursor::GetShowMouseCursor()
 
 void FWindowsCursor::SetShowMouseCursor(bool ShowCursor)
 {
-    ::ShowCursor(ShowCursor);
-    bShowCursor = ShowCursor;
+    if (bShowCursor != ShowCursor)
+    {
+        ::ShowCursor(ShowCursor);
+        bShowCursor = ShowCursor;
+    }
 }
