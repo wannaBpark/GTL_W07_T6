@@ -25,6 +25,8 @@ FEditorViewportClient::FEditorViewportClient()
 FEditorViewportClient::~FEditorViewportClient()
 {
     Release();
+
+    RenderTargetCache = nullptr;
 }
 
 void FEditorViewportClient::Draw(FViewport* Viewport)
@@ -190,6 +192,15 @@ bool FEditorViewportClient::IsSelected(POINT InPoint) const
 D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
 {
     return Viewport->GetD3DViewport();
+}
+
+FRenderTarget* FEditorViewportClient::GetRenderTarget()
+{
+    if (!RenderTargetCache)
+    {
+        RenderTargetCache = Viewport->GetRenderTarget();
+    }
+    return RenderTargetCache;
 }
 
 void FEditorViewportClient::CameraMoveForward(float InValue)

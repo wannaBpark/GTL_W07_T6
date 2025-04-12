@@ -12,8 +12,12 @@
 #include "LineRenderPass.h"
 #include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
+#include "SlateRenderPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
+
+#include "SlateRenderPass.h"
+#include "UnrealClient.h"
 #include "GameFrameWork/Actor.h"
 
 //------------------------------------------------------------------------------
@@ -32,6 +36,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass = new FLineRenderPass();
     DepthBufferDebugPass = new FDepthBufferDebugPass();
     FogRenderPass = new FFogRenderPass();
+    SlateRenderPass = new FSlateRenderPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -40,6 +45,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    SlateRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
 }
@@ -120,6 +126,12 @@ void FRenderer::ClearRenderArr()
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
+    Graphics->DeviceContext->OMSetRenderTargets(
+        1,
+        &ActiveViewport->GetRenderTarget()->GetSceneRTV(),
+        ActiveViewport->GetRenderTarget()->GetDepthStencilView()
+    );
+    ActiveViewport->GetRenderTarget()->ClearRenderTarget(Graphics->DeviceContext);
 
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
 

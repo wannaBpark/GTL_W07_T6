@@ -22,7 +22,7 @@ class FStaticMeshRenderPass : public IRenderPass
 public:
     FStaticMeshRenderPass();
     
-    ~FStaticMeshRenderPass();
+    virtual ~FStaticMeshRenderPass();
     
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
     

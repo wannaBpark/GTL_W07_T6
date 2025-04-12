@@ -10,15 +10,15 @@ struct VSInput
     float2 texCoord : TEXCOORD;
 };
 
-struct PSInput {
+struct PS_Input {
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
 };
 
-PSInput main(VSInput input) {
+PS_Input main(VSInput input) {
 
 
-    PSInput output;
+    PS_Input output;
     output.position = mul(float4(input.position, 1.0f), MVP);
     
     output.texCoord = input.texCoord;

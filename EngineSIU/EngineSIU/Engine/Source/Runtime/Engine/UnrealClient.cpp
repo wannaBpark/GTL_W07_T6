@@ -65,6 +65,12 @@ void FRenderTarget::Release()
     }
 }
 
+void FRenderTarget::ClearRenderTarget(ID3D11DeviceContext* DeviceContext)
+{
+    DeviceContext->ClearRenderTargetView(SceneRTV, ClearColor);
+    DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
 HRESULT FRenderTarget::CreateSceneResources(uint32 InWidth, uint32 InHeight)
 {
     HRESULT hr = S_OK;

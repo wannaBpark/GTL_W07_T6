@@ -12,7 +12,7 @@ cbuffer UUIDConstant : register(b2)
     float4 UUID;
 }
 
-struct PSInput
+struct PS_Input
 {
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
@@ -24,7 +24,7 @@ struct PSOutput
     float4 uuid : SV_Target1;
 };
 
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_Input input) : SV_TARGET
 {
     PSOutput output;
     float2 uv = input.texCoord * uvScale + uvOffset;

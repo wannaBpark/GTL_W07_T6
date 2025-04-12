@@ -26,13 +26,13 @@ public:
     
     D3D11_VIEWPORT& GetD3DViewport() { return D3DViewport; }
 
-    ID3D11Texture2D* GetSceneTexture() const { return SceneTexture; }
-    ID3D11RenderTargetView* GetSceneRTV() const { return SceneRTV; }
-    ID3D11ShaderResourceView* GetSceneSRV() const { return SceneSRV; }
+    ID3D11Texture2D*& GetSceneTexture() { return SceneTexture; }
+    ID3D11RenderTargetView*& GetSceneRTV() { return SceneRTV; }
+    ID3D11ShaderResourceView*& GetSceneSRV() { return SceneSRV; }
     
-    ID3D11Texture2D* GetDepthStencilTexture() const { return DepthStencilTexture; }
-    ID3D11DepthStencilView* GetDepthStencilView() const { return DepthStencilView; }
-    ID3D11ShaderResourceView* GetDepthStencilSRV() const { return DepthStencilSRV; }
+    ID3D11Texture2D*& GetDepthStencilTexture() { return DepthStencilTexture; }
+    ID3D11DepthStencilView*& GetDepthStencilView() { return DepthStencilView; }
+    ID3D11ShaderResourceView*& GetDepthStencilSRV() { return DepthStencilSRV; }
     
     void SetViewport(const D3D11_VIEWPORT& InViewport) { D3DViewport = InViewport; }
     
@@ -44,6 +44,8 @@ public:
     void SetDepthStencilView(ID3D11DepthStencilView* InDepthStencilView) { DepthStencilView = InDepthStencilView; }
     void SetDepthStencilSRV(ID3D11ShaderResourceView* InDepthStencilSRV) { DepthStencilSRV = InDepthStencilSRV; }
 
+    void ClearRenderTarget(ID3D11DeviceContext* DeviceContext);
+    
 private:
     // DirectX
     D3D11_VIEWPORT D3DViewport = {};
@@ -58,6 +60,8 @@ private:
 
     HRESULT CreateSceneResources(uint32 InWidth, uint32 InHeight);
     HRESULT CreateDepthStencilResources(uint32 InWidth, uint32 InHeight);
+
+    float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 };
 
 class FViewport
@@ -75,6 +79,8 @@ public:
     D3D11_VIEWPORT& GetD3DViewport() const { return RenderTarget->GetD3DViewport(); }
 
     EViewScreenLocation GetViewLocation() const { return ViewLocation; }
+
+    FRenderTarget* GetRenderTarget() const { return RenderTarget; }
 
 private:
     FRenderTarget* RenderTarget;

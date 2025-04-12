@@ -11,6 +11,7 @@
 #define MIN_ORTHOZOOM (1.0)  /* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
 #define MAX_ORTHOZOOM (1e25)
 
+class FRenderTarget;
 class ATransformGizmo;
 class USceneComponent;
 
@@ -108,6 +109,13 @@ public:
     FViewport* GetViewport() const { return Viewport; }
     
     D3D11_VIEWPORT& GetD3DViewport() const;
+
+    FRenderTarget* GetRenderTarget();
+
+private:
+    FRenderTarget* RenderTargetCache = nullptr;
+
+public:
     
     //카메라
     /** Viewport camera transform data for perspective viewports */
