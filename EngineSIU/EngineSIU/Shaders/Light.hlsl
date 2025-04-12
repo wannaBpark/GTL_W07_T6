@@ -133,7 +133,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
     //float fSpotFactor = pow(max(dot(-vToLight, gLights[nIndex].m_vDirection), 0.0f), gLights[nIndex].m_fFalloff);
     float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
     
-    float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+    float3 lit = (Ambient.AmbientColor * Material.AmbientColor.rgb) +
                  (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
                  (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
 
@@ -166,7 +166,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
 
     float fAttenuationFactor = 1.0f / (1.0f + gLights[nIndex].m_fAttenuation * fDistance * fDistance);
    
-    float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+    float3 lit = (Ambient.AmbientColor * Material.AmbientColor.rgb) +
                  (gLights[nIndex].m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
                  (gLights[nIndex].m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
 
@@ -189,7 +189,7 @@ float4 DirectionalLight(int nIndex, float3 vPosition, float3 vNormal)
         fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1); // 또는 Material.Shininess
     }
 
-    float3 lit = (gcGlobalAmbientLight * Material.AmbientColor.rgb) +
+    float3 lit = (Ambient.AmbientColor * Material.AmbientColor.rgb) +
                  (light.m_cDiffuse.rgb * fDiffuseFactor * Material.DiffuseColor) +
                  (light.m_cSpecular.rgb * fSpecularFactor * Material.SpecularColor);
     
@@ -221,7 +221,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     }
     
     // 전역 환경광 추가
-    cColor += gcGlobalAmbientLight;
+    cColor += Ambient.AmbientColor;
     cColor.a = 1;
     
     return cColor;
