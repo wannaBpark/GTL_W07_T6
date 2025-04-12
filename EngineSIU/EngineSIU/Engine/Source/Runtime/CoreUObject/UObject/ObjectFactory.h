@@ -12,22 +12,21 @@ public:
     static UObject* ConstructObject(UClass* InClass, UObject* InOuter, FName InName = NAME_None)
     {
         const uint32 Id = UEngineStatics::GenUUID();
-        FName ObjectName = InName;
-        if (ObjectName == NAME_None) // 이름이 제공되지 않으면 자동 생성
+        FString Name = InClass->GetName() + "_" + std::to_string(Id);
+        if (InName != NAME_None)
         {
-            ObjectName = FName(*FString::Printf(TEXT("%s_%u"), *InClass->GetName(), Id));
+            Name = InName.ToString();
         }
-        //const FString Name = InClass->GetName() + "_" + std::to_string(Id);
 
         UObject* Obj = InClass->ClassCTOR();
         Obj->ClassPrivate = InClass;
-        Obj->NamePrivate = ObjectName;
+        Obj->NamePrivate = Name;
         Obj->UUID = Id;
         Obj->OuterPrivate = InOuter;
 
         GUObjectArray.AddObject(Obj);
 
-        UE_LOG(LogLevel::Display, "Created New Object : %s", ObjectName.ToString());
+        UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
         return Obj;
     }
 

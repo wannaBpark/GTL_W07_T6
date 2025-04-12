@@ -237,7 +237,7 @@ public:
 
 		const CharType* FindRest = Find + 1; // Find의 두 번째 문자부터 포인터
 
-		bool bAlnumPrev = true; // 이전 문자가 영숫자였는지 여부 (시작은 true로 가정하여 첫 문자 바로 앞은 조건 만족 못하게 함)
+		bool bAlnumPrev = false; // 이전 문자가 영숫자였는지 여부 (시작은 true로 가정하여 첫 문자 바로 앞은 조건 만족 못하게 함)
 		CharType CurrentChar = *Str;
 
 		if (bSkipQuotedChars)

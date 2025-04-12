@@ -369,7 +369,7 @@ bool SceneManager::LoadWorldFromData(const FSceneData& sceneData, UWorld* target
             continue;
         }
 
-        SpawnedActor->SetActorLabel(actorData.ActorLabel); // 액터 레이블 설정
+        SpawnedActor->SetActorLabel(actorData.ActorLabel, false); // 액터 레이블 설정
         SpawnedActorsMap.Add(actorData.ActorID, SpawnedActor); // 맵에 추가
 
         // 액터별 로컬 컴포넌트 맵: ComponentID -> 생성/재사용된 컴포넌트 포인터
@@ -511,12 +511,12 @@ bool SceneManager::LoadWorldFromData(const FSceneData& sceneData, UWorld* target
             const FString* LocStr = componentData.Properties.Find(TEXT("RelativeLocation"));
             if (LocStr) RelativeLocation.InitFromString(*LocStr); // 또는 직접 파싱
 
-            FVector RelativeRotation;
+            FRotator RelativeRotation;
             const FString* RotatStr = componentData.Properties.Find(TEXT("RelativeRotation")); // 쿼터니언 저장/로드 권장
             if (RotatStr) RelativeRotation.InitFromString(*RotatStr);
 
             FVector RelativeScale3D = FVector::OneVector;
-            const FString* ScaleStr = componentData.Properties.Find(TEXT("RelativeScale")); // 스케일 키 이름 확인! (GetProperties와 일치해야 함)
+            const FString* ScaleStr = componentData.Properties.Find(TEXT("RelativeScale3D")); // 스케일 키 이름 확인! (GetProperties와 일치해야 함)
             if (ScaleStr) RelativeScale3D.InitFromString(*ScaleStr);
 
             CurrentSceneComp->SetRelativeLocation(RelativeLocation);
