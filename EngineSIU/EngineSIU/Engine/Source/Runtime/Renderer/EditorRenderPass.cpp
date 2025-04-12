@@ -692,7 +692,7 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
     RenderIcons(World, ActiveViewport);
     RenderArrows(World);
-    RenderGizmos(World);
+    //RenderGizmos(World);
 }
 
 
@@ -970,8 +970,8 @@ void FEditorRenderPass::RenderSpotlightInstanced(const UWorld* World)
         {
             FConstantBufferDebugCone b;
             b.ApexPosiiton = SpotComp->GetWorldLocation();
-            b.InnerConeAngle = SpotComp->GetInnerRad();
-            b.OuterConeAngle = SpotComp->GetOuterRad();
+            b.InnerRadius = SpotComp->GetRadius() * FMath::Tan(SpotComp->GetInnerRad() * 0.5);
+            b.OuterRadius = SpotComp->GetRadius() * FMath::Tan(SpotComp->GetOuterRad() * 0.5);
             b.Height = 10.f;
             b.Direction = SpotComp->GetDirection();
             BufferAll.Add(b);
@@ -1103,7 +1103,7 @@ void FEditorRenderPass::LazyLoad()
 void FEditorRenderPass::RenderIcons(const UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     // ULightComponentBase::CheckRayIntersection에서도 수정 필요
-    const float IconScale = 5;
+    const float IconScale = 0.3;
     PrepareShader(Resources.Shaders.Icon);
     UINT offset = 0;
     // input vertex index 없음

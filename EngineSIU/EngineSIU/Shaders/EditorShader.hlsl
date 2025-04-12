@@ -191,7 +191,7 @@ PS_INPUT coneVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
     PS_INPUT output;
     
     float3 pos = DataCone[instanceID].ApexPosiiton;
-    float3 scale = float3(DataCone[instanceID].Radius.xx, DataCone[instanceID].Height);
+    float3 scale = float3(DataCone[instanceID].InnerRadius.xx, DataCone[instanceID].Height);
     float3x3 rot = CreateRotationMatrixFromZ(DataCone[instanceID].Direction);
     
     float3 localPos3 = input.position.xyz;

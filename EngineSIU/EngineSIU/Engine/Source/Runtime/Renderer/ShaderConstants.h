@@ -187,8 +187,8 @@ struct alignas(16) FConstantBufferDebugSphere
 struct alignas(16) FConstantBufferDebugCone
 {
     alignas(16) FVector ApexPosiiton;
-    float InnerConeAngle;
-    float OuterConeAngle;
+    float InnerRadius;
+    float OuterRadius;
     FVector Direction;
     float Height;
 };
