@@ -40,6 +40,66 @@ cbuffer cbLights : register(b2)
     float3 padCB;
 };
 
+#define MAX_DIRECTIONAL_LIGHT 16
+#define MAX_POINT_LIGHT 16
+#define MAX_SPOT_LIGHT 16
+
+struct FAmbientLightInfo
+{
+    float4 AmbientColor;
+};
+
+struct FDirectionalLightInfo
+{
+    float3 Direction;
+    float Intensity;
+
+    float4 DiffuseColor;
+    float4 SpecularColor;
+};
+
+struct FPointLightInfo
+{
+    float3 Position;
+    float Radius;
+
+    float4 DiffuseColor;
+    float4 SpecularColor;
+
+    float Intensity;
+    int Type;
+    float2 Padding; // float[2]
+};
+
+struct FSpotLightInfo
+{
+    float3 Position;
+    float Radius;
+
+    float3 Direction;
+    float pad3;
+
+    float4 DiffuseColor;
+    float4 SpecularColor;
+
+    float Intensity;
+    int Type;
+    float InnerCos;
+    float OuterCos;
+};
+
+cbuffer Lighting : register(b7)
+{
+    FAmbientLightInfo Ambient;
+    FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];
+    FPointLightInfo PointLights[MAX_POINT_LIGHT];
+    FSpotLightInfo SpotLights[MAX_SPOT_LIGHT];
+    int DirectionalLightsCount;
+    int PointLightsCount;
+    int SpotLightsCount;
+    float pad0;
+};
+
 float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
 {
     LIGHT light = gLights[nIndex];

@@ -284,6 +284,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\EditorEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Launch\LightDefine.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\Delegate.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\DelegateCombination.h" />
@@ -535,6 +536,9 @@
   <ItemGroup>
     <Content Include=".editorconfig" />
     <Natvis Include="EngineSIU.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

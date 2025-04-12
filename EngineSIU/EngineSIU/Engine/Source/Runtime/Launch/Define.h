@@ -4,7 +4,6 @@
 #include "Core/Container/String.h"
 #include "Core/Container/Array.h"
 #include "UObject/NameTypes.h"
-
 // 수학 관련
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
@@ -18,6 +17,7 @@
 
 #include "UserInterface/Console.h"
 #include <Math/Color.h>
+#include "LightDefine.h"
 
 struct FStaticMeshVertex
 {
