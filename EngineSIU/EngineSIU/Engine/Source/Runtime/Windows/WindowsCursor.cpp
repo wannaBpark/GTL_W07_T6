@@ -1,5 +1,7 @@
 ﻿#include "WindowsCursor.h"
 
+bool FWindowsCursor::bShowCursor = true;
+
 
 FVector2D FWindowsCursor::GetPosition()
 {
@@ -110,3 +112,13 @@ void FWindowsCursor::SetMouseCursor(const ECursorType CursorType)
     ::SetCursor(NewCursor);
 }
 
+bool FWindowsCursor::GetShowMouseCursor()
+{
+    return bShowCursor;
+}
+
+void FWindowsCursor::SetShowMouseCursor(bool ShowCursor)
+{
+    ::ShowCursor(ShowCursor);
+    bShowCursor = ShowCursor;
+}

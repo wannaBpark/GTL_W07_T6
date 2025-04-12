@@ -34,4 +34,14 @@ struct FWindowsCursor
 
     /** Cursor의 모양을 설정합니다. */
     static void SetMouseCursor(const ECursorType CursorType = ECursorType::Arrow);
+
+    /** Cursor의 표시 여부를 반환합니다. */
+    static bool GetShowMouseCursor();
+
+    /** Cursor의 표시 여부를 설정합니다. */
+    static void SetShowMouseCursor(bool ShowCursor);
+
+private:
+    /** Cursor의 표시 여부 */
+    static bool bShowCursor;
 };
