@@ -100,7 +100,7 @@ cbuffer Lighting : register(b7)
 };
 
 float CalculateAttenuation(float distance, float attenuationFactor, float radius)
-
+{
     if (distance > radius)
         return 0.0;
         
