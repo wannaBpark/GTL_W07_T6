@@ -217,10 +217,6 @@ void FEditorViewportClient::InputKey(const FKeyEvent& InKeyEvent)
 
 void FEditorViewportClient::MouseMove(const FPointerEvent& InMouseEvent)
 {
-    const FVector2D& CntPos = InMouseEvent.GetScreenSpacePosition();
-    const FVector2D& LastPos = InMouseEvent.GetLastScreenSpacePosition();
-    UE_LOG(LogLevel::Warning, "this: 0x%x Mouse Moved (%f, %f) to (%f, %f)", this, LastPos.X, LastPos.Y, CntPos.X, CntPos.Y);
-
     const auto& [DeltaX, DeltaY] = InMouseEvent.GetCursorDelta();
 
     // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
