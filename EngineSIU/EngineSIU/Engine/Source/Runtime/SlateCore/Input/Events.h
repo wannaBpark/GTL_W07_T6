@@ -216,6 +216,26 @@ struct FPointerEvent : public FInputEvent
     FPointerEvent(
         FVector2D InScreenSpacePosition,
         FVector2D InLastScreenSpacePosition,
+        FVector2D InCursorDelta,
+        float InWheelDelta,
+        EKeys::Type InEffectingButton,
+        const TSet<EKeys::Type>& InPressedButtons,
+        const FModifierKeysState& InModifierKeys,
+        EInputEvent InInputEvent
+    )
+        : FInputEvent(InModifierKeys, InInputEvent)
+        , ScreenSpacePosition(InScreenSpacePosition)
+        , LastScreenSpacePosition(InLastScreenSpacePosition)
+        , CursorDelta(InCursorDelta)
+        , PressedButtons(&InPressedButtons)
+        , EffectingButton(InEffectingButton)
+        , WheelDelta(InWheelDelta)
+    {
+    }
+
+    FPointerEvent(
+        FVector2D InScreenSpacePosition,
+        FVector2D InLastScreenSpacePosition,
         float InWheelDelta,
         EKeys::Type InEffectingButton,
         const TSet<EKeys::Type>& InPressedButtons,
