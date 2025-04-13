@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "RawInput.h"
 #include "Delegates/DelegateCombination.h"
 #include "HAL/PlatformType.h"
 #include "InputCore/InputCoreTypes.h"
@@ -18,6 +19,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseUpDelegate, const FPointerEvent& /*I
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseDoubleClickDelegate, const FPointerEvent& /*InMouseEvent*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseWheelDelegate, const FPointerEvent& /*InMouseEvent*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMouseMoveDelegate, const FPointerEvent& /*InMouseEvent*/);
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRawMouseInputDelegate, const FPointerEvent& /*InRawMouseEvent*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRawKeyboardInputDelegate, const FKeyEvent& /*InRawKeyboardEvent*/);
 
 
 class FSlateAppMessageHandler
@@ -49,6 +53,9 @@ protected:
     void OnMouseDoubleClick(const EMouseButtons::Type Button, const FVector2D CursorPos);
     void OnMouseWheel(const float Delta, const FVector2D CursorPos);
     void OnMouseMove();
+
+    void OnRawMouseInput(const RAWMOUSE& RawMouseInput);
+    void OnRawKeyboardInput(const RAWKEYBOARD& RawKeyboardInput);
     // 추가적인 함수는 UnrealEngine [SlateApplication.h:1628]을 참조
 
 public:
@@ -60,6 +67,9 @@ public:
     FOnMouseDoubleClickDelegate OnMouseDoubleClickDelegate;
     FOnMouseWheelDelegate OnMouseWheelDelegate;
     FOnMouseMoveDelegate OnMouseMoveDelegate;
+
+    FOnRawMouseInputDelegate OnRawMouseInputDelegate;
+    FOnRawKeyboardInputDelegate OnRawKeyboardInputDelegate;
 
 private:
     struct EModifierKey
@@ -85,4 +95,9 @@ private:
 
     bool ModifierKeyState[EModifierKey::Count];
     TSet<EKeys::Type> PressedMouseButtons;
+
+    std::unique_ptr<FRawInput> RawInputHandler;
+
+private:
+    void HandleRawInput(const RAWINPUT& RawInput);
 };
