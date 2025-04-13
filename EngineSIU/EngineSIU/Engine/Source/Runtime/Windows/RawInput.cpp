@@ -57,7 +57,8 @@ void FRawInput::RegisterDevices()
     const RAWINPUTDEVICE KeyboardRid = {
         HID_USAGE_PAGE_GENERIC,
         HID_USAGE_GENERIC_KEYBOARD,        // 키보드 사용
-        RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, // 백그라운드 입력 수신 및 장치 변경시 알림
+        // RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, // 백그라운드 입력 수신 및 장치 변경시 알림
+        RIDEV_DEVNOTIFY,
         AppWnd                             // RawInput 메시지를 받을 대상 창
     };
 
@@ -71,7 +72,8 @@ void FRawInput::RegisterDevices()
     const RAWINPUTDEVICE MouseRid = {
         HID_USAGE_PAGE_GENERIC,
         HID_USAGE_GENERIC_MOUSE,           // 마우스 사용
-        RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, // 백그라운드 입력 수신 및 장치 변경시 알림
+        // RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, // 백그라운드 입력 수신 및 장치 변경시 알림
+        RIDEV_DEVNOTIFY,
         AppWnd                             // RawInput 메시지를 받을 대상 창
     };
 
