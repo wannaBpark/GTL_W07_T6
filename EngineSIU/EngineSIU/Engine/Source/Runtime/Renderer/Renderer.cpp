@@ -1,5 +1,8 @@
 
 #include "Renderer.h"
+
+#include <array>
+
 #include "World/World.h"
 #include "Engine/EditorEngine.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -16,9 +19,14 @@
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 
+#include "CompositingPass.h"
+#include "SceneRenderPass.h"
 #include "SlateRenderPass.h"
 #include "UnrealClient.h"
+#include "WorldNormalDebugPass.h"
 #include "GameFrameWork/Actor.h"
+
+#include "PropertyEditor/ShowFlags.h"
 
 //------------------------------------------------------------------------------
 // 초기화 및 해제 관련 함수
@@ -29,13 +37,14 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     BufferManager = InBufferManager;
 
     ShaderManager = new FDXDShaderManager(Graphics->Device);
+    
     StaticMeshRenderPass = new FStaticMeshRenderPass();
     BillboardRenderPass = new FBillboardRenderPass();
     GizmoRenderPass = new FGizmoRenderPass();
     UpdateLightBufferPass = new FUpdateLightBufferPass();
     LineRenderPass = new FLineRenderPass();
-    DepthBufferDebugPass = new FDepthBufferDebugPass();
     FogRenderPass = new FFogRenderPass();
+    CompositingPass = new FCompositingPass();
     SlateRenderPass = new FSlateRenderPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -43,8 +52,10 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     GizmoRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-    DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    
+    CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
+    
     SlateRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
@@ -52,8 +63,10 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
 
 void FRenderer::Release()
 {
-}
+    delete ShaderManager;
 
+    // TODO: 생성한 렌더 패스 객체 모두 해제
+}
 
 //------------------------------------------------------------------------------
 // 사용하는 모든 상수 버퍼 생성
@@ -83,6 +96,9 @@ void FRenderer::CreateConstantBuffers()
 
     UINT litUnlitBufferSize = sizeof(FLitUnlitConstants);
     BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, litUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT ViewModeBufferSize = sizeof(FViewModeConstants);
+    BufferManager->CreateBufferGeneric<FViewModeConstants>("FViewModeConstants", nullptr, ViewModeBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
     UINT ScreenConstantsBufferSize = sizeof(FScreenConstants);
     BufferManager->CreateBufferGeneric<FScreenConstants>("FScreenConstants", nullptr, ScreenConstantsBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -114,8 +130,22 @@ void FRenderer::ClearRenderArr()
     FogRenderPass->ClearRenderArr();
 }
 
+void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI)
+{
+    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(Type);
+    if (!ResourceRHI)
+    {
+        return;
+    }
+
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+    Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
+}
+
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
+    // Setup
     FRenderTargetRHI* RenderTargetRHI = ActiveViewport->GetRenderTargetRHI();
     if (!RenderTargetRHI)
     {
@@ -123,55 +153,42 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     }
 
     Graphics->DeviceContext->RSSetViewports(1, &RenderTargetRHI->GetD3DViewport());
+
+    const uint64 ShowFlag = ActiveViewport->GetShowFlag();
     
-    const EViewModeIndex ViewMode = ActiveViewport->GetViewMode();
-    FViewportResources* ResourceRHI = nullptr;
-    if (ViewMode == VMI_WorldNormal)
+    // Render Scene
+    SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI);
+
+    if (ShowFlag & EEngineShowFlags::SF_Primitives)
     {
-        ResourceRHI = RenderTargetRHI->GetResource(EResourceType::ERT_WorldNormal);
-    }
-    else
-    {
-        ResourceRHI = RenderTargetRHI->GetResource(EResourceType::ERT_Scene);
+        UpdateLightBufferPass->Render(ActiveViewport);
+        StaticMeshRenderPass->Render(ActiveViewport);
     }
 
-    if (!ResourceRHI)
+    // Render Postprocess
+    if (ActiveViewport->GetViewMode() == VMI_Lit)
     {
-        return;
+        if (ShowFlag & EEngineShowFlags::SF_Fog)
+        {
+            // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달해야 함
+        }
     }
     
-    Graphics->DeviceContext->OMSetRenderTargets(
-        1,
-        &ResourceRHI->RTV,
-        RenderTargetRHI->GetDepthStencilView()
-    );
-    RenderTargetRHI->ClearRenderTargets(Graphics->DeviceContext);
-    
-    Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
-
-    UpdateLightBufferPass->Render(ActiveViewport);
-
-    StaticMeshRenderPass->ChangeViewMode(ActiveViewport->GetViewMode());
-    StaticMeshRenderPass->Render(ActiveViewport);
-    
-    BillboardRenderPass->Render(ActiveViewport);
-
-    // 현재 시점의 depth 정보 활용
-    if (ViewMode == EViewModeIndex::VMI_SceneDepth)
+    // Render Billboard
+    if (ShowFlag & EEngineShowFlags::SF_BillboardText)
     {
-        // TODO: 뎁스스텐실 버퍼를 쉐이더 리소스 뷰로 전달.
-        DepthBufferDebugPass->RenderDepthBuffer(ActiveViewport);
+        BillboardRenderPass->Render(ActiveViewport);
     }
-    if (ViewMode == EViewModeIndex::VMI_Lit)
-    {
-        // Render PostProcess
-        FogRenderPass->RenderFog(ActiveViewport, RenderTargetRHI->GetDepthStencilSRV());
-    }
-    
-    LineRenderPass->Render(ActiveViewport);
-    GizmoRenderPass->Render(ActiveViewport);
 
-    // TODO: 최종 결과 렌더하고, 결과 텍스처를 SRV를 통해 전달
+    // Render for Editor
+    if (GEngine->ActiveWorld->WorldType != EWorldType::PIE && false)  // TODO: false 제거
+    {
+        LineRenderPass->Render(ActiveViewport); // TODO: 여기에서는 기존 뎁스를 그대로 사용하고
+        GizmoRenderPass->Render(ActiveViewport); // TODO: 여기에서는 기존 뎁스를 SRV로 전달해서 샘플 후 비교해야 함
+    }
+
+    // Compositing
+    CompositingPass->Render(ActiveViewport);
 
     ClearRenderArr();
 }

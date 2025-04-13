@@ -345,8 +345,15 @@ struct FSubUVConstant
     FVector2D uvOffset;
     FVector2D uvScale;
 };
+
 struct FLitUnlitConstants {
     int isLit; // 1 = Lit, 0 = Unlit 
+    FVector pad;
+};
+
+struct FViewModeConstants
+{
+    uint32 ViewMode;
     FVector pad;
 };
 

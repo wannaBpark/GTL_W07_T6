@@ -18,14 +18,14 @@ SLevelEditor::SLevelEditor()
 
 void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
 {
+    ResizeEditor(InEditorWidth, InEditorHeight);
+    
     for (size_t i = 0; i < 4; i++)
     {
         ViewportClients[i] = std::make_shared<FEditorViewportClient>();
         ViewportClients[i]->Initialize(i);
     }
     ActiveViewportClient = ViewportClients[0];
-    
-    ResizeEditor(InEditorWidth, InEditorHeight);
     
     VSplitter = new SSplitterV();
     VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
@@ -206,23 +206,28 @@ bool SLevelEditor::IsMultiViewport() const
 
 void SLevelEditor::LoadConfig()
 {
-    auto config = ReadIniFile(IniFilePath);
-    ActiveViewportClient->Pivot.X = GetValueFromConfig(config, "OrthoPivotX", 0.0f);
-    ActiveViewportClient->Pivot.Y = GetValueFromConfig(config, "OrthoPivotY", 0.0f);
-    ActiveViewportClient->Pivot.Z = GetValueFromConfig(config, "OrthoPivotZ", 0.0f);
-    ActiveViewportClient->OrthoSize = GetValueFromConfig(config, "OrthoZoomSize", 10.0f);
+    auto Config = ReadIniFile(IniFilePath);
+    FEditorViewportClient::Pivot.X = GetValueFromConfig(Config, "OrthoPivotX", 0.0f);
+    FEditorViewportClient::Pivot.Y = GetValueFromConfig(Config, "OrthoPivotY", 0.0f);
+    FEditorViewportClient::Pivot.Z = GetValueFromConfig(Config, "OrthoPivotZ", 0.0f);
+    FEditorViewportClient::OrthoSize = GetValueFromConfig(Config, "OrthoZoomSize", 10.0f);
 
-    SetActiveViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
-    bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
+    SetActiveViewportClient(GetValueFromConfig(Config, "ActiveViewportIndex", 0));
+    bMultiViewportMode = GetValueFromConfig(Config, "bMultiView", false);
+    
     for (size_t i = 0; i < 4; i++)
     {
-        ViewportClients[i]->LoadConfig(config);
+        ViewportClients[i]->LoadConfig(Config);
     }
+    
     if (HSplitter)
-        HSplitter->LoadConfig(config);
+    {
+        HSplitter->LoadConfig(Config);
+    }
     if (VSplitter)
-        VSplitter->LoadConfig(config);
-
+    {
+        VSplitter->LoadConfig(Config);
+    }
 }
 
 void SLevelEditor::SaveConfig()

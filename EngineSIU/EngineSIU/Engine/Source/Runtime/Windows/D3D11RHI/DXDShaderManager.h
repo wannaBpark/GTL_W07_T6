@@ -16,6 +16,8 @@ public:
 	FDXDShaderManager() = default;
 	FDXDShaderManager(ID3D11Device* Device);
 
+    ~FDXDShaderManager();
+
 	void ReleaseAllShader();
 
 private:

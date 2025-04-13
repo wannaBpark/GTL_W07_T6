@@ -137,8 +137,6 @@ void FBillboardRenderPass::ReleaseShader()
 
 void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) return;
-
     PrepareTextureShader();
 
     PrepareSubUVConstant();

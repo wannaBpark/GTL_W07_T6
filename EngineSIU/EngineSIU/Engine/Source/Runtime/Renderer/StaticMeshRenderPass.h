@@ -6,15 +6,10 @@
 #include "Define.h"
 
 class FDXDShaderManager;
-
 class UWorld;
-
 class UMaterial;
-
 class FEditorViewportClient;
-
 class UStaticMeshComponent;
-
 struct FStaticMaterial;
 
 class FStaticMeshRenderPass : public IRenderPass
@@ -49,8 +44,9 @@ public:
     void ReleaseShader();
 
     void ChangeViewMode(EViewModeIndex ViewModeIndex) const;
+    
 private:
-    TArray<UStaticMeshComponent*> StaticMeshObjs;
+    TArray<UStaticMeshComponent*> StaticMeshComponents;
 
     ID3D11VertexShader* VertexShader;
     

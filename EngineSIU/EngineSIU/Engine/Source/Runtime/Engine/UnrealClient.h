@@ -17,19 +17,24 @@ enum class EViewScreenLocation : uint8
 
 enum class EResourceType : uint8
 {
-    ERT_Final,
+    ERT_Compositing,
     ERT_Scene,
-    ERT_Depth,
-    ERT_WorldNormal,
     ERT_PP_Fog,
+    ERT_Editor,
+    ERT_Overlay,
     ERT_MAX,
 };
 
 struct FViewportResources
 {
-    ID3D11Texture2D* Texture2D;
-    ID3D11RenderTargetView* RTV;
-    ID3D11ShaderResourceView* SRV;
+    ~FViewportResources()
+    {
+        Release();
+    }
+    
+    ID3D11Texture2D* Texture2D = nullptr;
+    ID3D11RenderTargetView* RTV = nullptr;
+    ID3D11ShaderResourceView* SRV = nullptr;
 
     void Release()
     {
@@ -70,11 +75,16 @@ public:
     ID3D11DepthStencilView*& GetDepthStencilView() { return DepthStencilView; }
     ID3D11ShaderResourceView*& GetDepthStencilSRV() { return DepthStencilSRV; }
 
+    ID3D11Texture2D*& GetGizmoDepthStencilTexture() { return GizmoDepthStencilTexture; }
+    ID3D11DepthStencilView*& GetGizmoDepthStencilView() { return GizmoDepthStencilView; }
+
     FViewportResources* GetResource(EResourceType Type);
 
     bool HasResource(EResourceType Type) const;
     
     void ClearRenderTargets(ID3D11DeviceContext* DeviceContext);
+
+    std::array<float, 4> GetClearColor(EResourceType Type) const;
     
 private:
     // DirectX
@@ -83,6 +93,9 @@ private:
     ID3D11Texture2D* DepthStencilTexture = nullptr;
     ID3D11DepthStencilView* DepthStencilView = nullptr;
     ID3D11ShaderResourceView* DepthStencilSRV = nullptr;
+
+    ID3D11Texture2D* GizmoDepthStencilTexture = nullptr;
+    ID3D11DepthStencilView* GizmoDepthStencilView = nullptr;
 
     TMap<EResourceType, FViewportResources> Resources;
 

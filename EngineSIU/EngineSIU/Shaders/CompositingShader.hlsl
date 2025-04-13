@@ -1,14 +1,25 @@
+﻿
+Texture2D SceneTexture : register(t100);
+Texture2D PP_FogTexture : register(t101);
+Texture2D EditorTexture : register(t102);
 
+SamplerState CompositingSampler : register(s0);
 
-struct VS_OUTPUT
+cbuffer ViewMode : register(b0)
+{
+    uint ViewMode;
+    float3 Padding;
+}
+
+struct PS_Input
 {
     float4 Position : SV_POSITION;
     float2 UV : TEXCOORD;
 };
 
-VS_OUTPUT mainVS(uint VertexID : SV_VertexID)
+PS_Input mainVS(uint VertexID : SV_VertexID)
 {
-    VS_OUTPUT Output;
+    PS_Input Output;
 
     float2 QuadPositions[6] = {
         float2(-1,  1),  // Top Left
@@ -28,4 +39,11 @@ VS_OUTPUT mainVS(uint VertexID : SV_VertexID)
     Output.UV = UVs[VertexID];
 
     return Output;
+}
+
+float4 mainPS(PS_Input Input) : SV_TARGET
+{
+    float4 Scene = SceneTexture.Sample(CompositingSampler, Input.UV);
+    
+    return Scene;
 }

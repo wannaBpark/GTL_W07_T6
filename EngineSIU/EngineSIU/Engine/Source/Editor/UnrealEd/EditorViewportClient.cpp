@@ -35,11 +35,13 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 
 void FEditorViewportClient::Initialize(int32 InViewportIndex)
 {
+    ViewportIndex = InViewportIndex;
+    
     PerspectiveCamera.SetLocation(FVector(8.0f, 8.0f, 8.f));
     PerspectiveCamera.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(InViewportIndex));
+    Viewport->Initialize();
     ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
-    ViewportIndex = InViewportIndex;
 
     GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
     GizmoActor->Initialize(this);

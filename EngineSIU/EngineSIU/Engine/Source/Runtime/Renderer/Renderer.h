@@ -15,19 +15,25 @@
 #include "D3D11RHI/DXDBufferManager.h"
 
 
+enum class EResourceType : uint8;
+class FSceneRenderPass;
 class UWorld;
 class UObject;
 
 class FDXDShaderManager;
 class FEditorViewportClient;
 
+class FRenderTargetRHI;
+
 class FStaticMeshRenderPass;
 class FBillboardRenderPass;
 class FGizmoRenderPass;
 class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
+class FWorldNormalDebugPass;
 class FLineRenderPass;
 class FFogRenderPass;
+class FCompositingPass;
 class FSlateRenderPass;
 
 class FRenderer
@@ -44,6 +50,7 @@ public:
     //==========================================================================
     void PrepareRender();
     void ClearRenderArr();
+    void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI);
     void Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
     //==========================================================================
@@ -54,7 +61,7 @@ public:
     ID3D11Buffer* CreateImmutableVertexBuffer(const FString& key, const TArray<T>& Vertices);
 
     ID3D11Buffer* CreateImmutableIndexBuffer(const FString& key, const TArray<uint32>& indices);
-
+    
     // 상수 버퍼 생성/해제
     void CreateConstantBuffers();
     void ReleaseConstantBuffer();
@@ -69,11 +76,11 @@ public:
     FGizmoRenderPass* GizmoRenderPass = nullptr;
     FUpdateLightBufferPass* UpdateLightBufferPass = nullptr;
     FLineRenderPass* LineRenderPass = nullptr;
-    FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
+    
+    FCompositingPass* CompositingPass = nullptr;
+    
     FSlateRenderPass* SlateRenderPass = nullptr;
-
-    bool IsSceneDepth = false;
 };
 
 template<typename T>

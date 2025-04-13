@@ -8,6 +8,11 @@ FDXDShaderManager::FDXDShaderManager(ID3D11Device* Device)
     PixelShaders.Empty();
 }
 
+FDXDShaderManager::~FDXDShaderManager()
+{
+    ReleaseAllShader();
+}
+
 void FDXDShaderManager::ReleaseAllShader()
 {
     for (auto& [Key, Shader] : VertexShaders)

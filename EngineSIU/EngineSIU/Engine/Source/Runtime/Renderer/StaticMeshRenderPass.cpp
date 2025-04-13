@@ -55,11 +55,6 @@ void FStaticMeshRenderPass::CreateShader()
         {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
-    D3D11_INPUT_ELEMENT_DESC TextureLayoutDesc[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-
     Stride = sizeof(FStaticMeshVertex);
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
@@ -71,8 +66,8 @@ void FStaticMeshRenderPass::CreateShader()
     PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
 
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
-
 }
+
 void FStaticMeshRenderPass::ReleaseShader()
 {
     FDXDBufferManager::SafeRelease(InputLayout);
@@ -94,7 +89,6 @@ void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex) const
     }
 }
 
-
 void FStaticMeshRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
 {
     BufferManager = InBufferManager;
@@ -110,7 +104,7 @@ void FStaticMeshRenderPass::PrepareRender()
     {
         if (!Cast<UGizmoBaseComponent>(iter) && iter->GetWorld() == GEngine->ActiveWorld)
         {
-            StaticMeshObjs.Add(iter);
+            StaticMeshComponents.Add(iter);
         }
     }
 }
@@ -128,12 +122,12 @@ void FStaticMeshRenderPass::PrepareRenderState() const
     Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
 
     TArray<FString> PSBufferKeys = {
-                                  TEXT("FCameraConstantBuffer"),
-                                  TEXT("FLightBuffer"),
-                                  TEXT("FMaterialConstants"),
-                                  TEXT("FLitUnlitConstants"),
-                                  TEXT("FSubMeshConstants"),
-                                  TEXT("FTextureConstants")
+        TEXT("FCameraConstantBuffer"),
+        TEXT("FLightBuffer"),
+        TEXT("FMaterialConstants"),
+        TEXT("FLitUnlitConstants"),
+        TEXT("FSubMeshConstants"),
+        TEXT("FTextureConstants")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
@@ -153,7 +147,6 @@ void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
     Data.isLit = isLit;
     BufferManager->UpdateConstantBuffer(TEXT("FLitUnlitConstants"), Data);
 }
-
 
 void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const
 {
@@ -186,7 +179,6 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
     }
 }
 
-
 void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const
 {
     UINT offset = 0;
@@ -204,27 +196,39 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
 
 void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (!(Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
-
     PrepareRenderState();
 
-    for (UStaticMeshComponent* Comp : StaticMeshObjs) {
-        if (!Comp || !Comp->GetStaticMesh()) continue;
+    ChangeViewMode(Viewport->GetViewMode());
+
+    for (UStaticMeshComponent* Comp : StaticMeshComponents)
+    {
+        if (!Comp || !Comp->GetStaticMesh())
+        {
+            continue;
+        }
+
+        OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
+        if (RenderData == nullptr)
+        {
+            continue;
+        }
         
         FMatrix Model = Comp->GetWorldMatrix();
 
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 
         UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-        bool Selected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
-
-        UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, Selected);
-        FCameraConstantBuffer CameraData(Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), Viewport->PerspectiveCamera.GetLocation(), 0);
+        const bool bIsSelected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
+        
+        UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, bIsSelected);
+        
+        FCameraConstantBuffer CameraData = {
+            Viewport->GetViewMatrix(),
+            Viewport->GetProjectionMatrix(),
+            Viewport->PerspectiveCamera.GetLocation(),
+            0
+        };
         BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
-
-        OBJ::FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
-
-        if (RenderData == nullptr) continue;
 
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 
@@ -237,6 +241,6 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
 void FStaticMeshRenderPass::ClearRenderArr()
 {
-    StaticMeshObjs.Empty();
+    StaticMeshComponents.Empty();
 }
 

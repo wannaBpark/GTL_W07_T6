@@ -31,8 +31,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED)
         {
-            FEngineLoop::GraphicDevice.Resize(hWnd);
-
+            if (FEngineLoop::GraphicDevice.SwapChain)
+            {
+                FEngineLoop::GraphicDevice.Resize(hWnd);
+            }
+            
             RECT ResizedClientRect = {};
             GetClientRect(hWnd, &ResizedClientRect);
             

@@ -5,11 +5,11 @@
 
 FRenderTargetRHI::FRenderTargetRHI()
 {
-    ClearColors.Add(EResourceType::ERT_Final, { 0.f, 0.f, 0.f, 1.f });
+    ClearColors.Add(EResourceType::ERT_Compositing, { 0.f, 0.f, 0.f, 1.f });
     ClearColors.Add(EResourceType::ERT_Scene,  { 0.025f, 0.025f, 0.025f, 1.0f });
-    ClearColors.Add(EResourceType::ERT_Depth, { 0.f, 0.f, 0.f, 1.f });
-    ClearColors.Add(EResourceType::ERT_WorldNormal, { 0.f, 0.f, 0.f, 1.f });
     ClearColors.Add(EResourceType::ERT_PP_Fog, { 0.f, 0.f, 0.f, 0.f });
+    ClearColors.Add(EResourceType::ERT_Editor, { 0.f, 0.f, 0.f, 0.f });
+    ClearColors.Add(EResourceType::ERT_Overlay, { 0.f, 0.f, 0.f, 0.f });
 }
 
 FRenderTargetRHI::~FRenderTargetRHI()
@@ -34,7 +34,7 @@ void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)
     }
 
     // Essential resources
-    hr = CreateResource(EResourceType::ERT_Final);
+    hr = CreateResource(EResourceType::ERT_Compositing);
     if (FAILED(hr))
     {
         return;
@@ -132,8 +132,13 @@ void FRenderTargetRHI::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
 
     for (auto& [Type, Resource] : Resources)
     {
-        DeviceContext->ClearRenderTargetView(Resource.RTV, ClearColors[Type]);
+        DeviceContext->ClearRenderTargetView(Resource.RTV, ClearColors[Type].data());
     }
+}
+
+std::array<float, 4> FRenderTargetRHI::GetClearColor(EResourceType Type) const
+{
+    return ClearColors[Type];
 }
 
 HRESULT FRenderTargetRHI::CreateDepthStencilResources()
@@ -141,8 +146,8 @@ HRESULT FRenderTargetRHI::CreateDepthStencilResources()
     HRESULT hr = S_OK;
     
     D3D11_TEXTURE2D_DESC DepthStencilTextureDesc = {};
-    DepthStencilTextureDesc.Width = static_cast<uint32>(D3DViewport.Width);;
-    DepthStencilTextureDesc.Height = static_cast<uint32>(D3DViewport.Height);;
+    DepthStencilTextureDesc.Width = static_cast<uint32>(D3DViewport.Width);
+    DepthStencilTextureDesc.Height = static_cast<uint32>(D3DViewport.Height);
     DepthStencilTextureDesc.MipLevels = 1;
     DepthStencilTextureDesc.ArraySize = 1;
     DepthStencilTextureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
@@ -157,12 +162,22 @@ HRESULT FRenderTargetRHI::CreateDepthStencilResources()
     {
         return hr;
     }
+    hr = FEngineLoop::GraphicDevice.Device->CreateTexture2D(&DepthStencilTextureDesc, nullptr, &GizmoDepthStencilTexture);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
     
     D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
     DepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     DepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     DepthStencilViewDesc.Texture2D.MipSlice = 0;
     hr = FEngineLoop::GraphicDevice.Device->CreateDepthStencilView(DepthStencilTexture,  &DepthStencilViewDesc,  &DepthStencilView);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+    hr = FEngineLoop::GraphicDevice.Device->CreateDepthStencilView(GizmoDepthStencilTexture,  &DepthStencilViewDesc,  &GizmoDepthStencilView);
     if (FAILED(hr))
     {
         return hr;
@@ -236,6 +251,7 @@ FViewport::~FViewport()
 
 void FViewport::Initialize()
 {
+    RenderTargetRHI->Initialize();
 }
 
 void FViewport::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& SwapchainDesc)
