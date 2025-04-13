@@ -666,6 +666,16 @@ void FSlateAppMessageHandler::OnRawMouseInput(const RAWMOUSE& RawMouseInput)
 
 void FSlateAppMessageHandler::OnRawKeyboardInput(const RAWKEYBOARD& RawKeyboardInput)
 {
+    // 입력 이벤트 타입 설정
+    const EInputEvent InputEventType = (RawKeyboardInput.Flags & RI_KEY_BREAK) ? IE_Released : IE_Pressed;
+
+    OnRawKeyboardInputDelegate.Broadcast(FKeyEvent{
+        EKeys::Invalid,  // TODO: 나중에 FInputKeyManager구현되면 바꾸기
+        GetModifierKeys(),
+        InputEventType,
+        0, // RawInput에서 Char를 얻기 어렵기 때문에
+        RawKeyboardInput.VKey
+    });
 }
 
 void FSlateAppMessageHandler::UpdateCursorPosition(const FVector2D& NewPos)

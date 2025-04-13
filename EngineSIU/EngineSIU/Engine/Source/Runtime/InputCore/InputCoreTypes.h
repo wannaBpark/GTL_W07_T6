@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Container/Map.h"
 #include "HAL/PlatformType.h"
 
 
@@ -387,3 +388,15 @@ enum Type : uint8
     Max,
 };
 }
+
+struct FInputKeyManager // ue FInputKeyManager.cpp, 1530
+{
+public:
+    static FInputKeyManager& Get();
+
+private:
+    FInputKeyManager() = default;
+
+    TMap<uint32, EKeys::Type> KeyMapVirtualToEnum;
+    TMap<uint32, EKeys::Type> KeyMapCharToEnum;
+};
