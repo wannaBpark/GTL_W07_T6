@@ -53,8 +53,12 @@ void SLevelEditor::Initialize()
         {
         case EKeys::RightMouseButton:
         {
-            FWindowsCursor::SetShowMouseCursor(false);
-            MousePinPosition = InMouseEvent.GetScreenSpacePosition();
+            if (!bIsPressedMouseRightButton)
+            {
+                FWindowsCursor::SetShowMouseCursor(false);
+                MousePinPosition = InMouseEvent.GetScreenSpacePosition();
+                bIsPressedMouseRightButton = true;
+            }
             break;
         }
         default:
@@ -78,15 +82,8 @@ void SLevelEditor::Initialize()
     {
         if (ImGui::GetIO().WantCaptureMouse) return;
 
-        // 에디터 카메라 이동 로직
-        if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
-        {
-            ActiveViewportClient->MouseMove(InMouseEvent);
-            // TODO: 무한마우스 구현하기
-            // FWindowsCursor::SetPosition(static_cast<int32>(MousePinPosition.X), static_cast<int32>(MousePinPosition.Y));
-        }
-
-        else if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+        // Splitter 움직임 로직
+        if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
         {
             const auto& [DeltaX, DeltaY] = InMouseEvent.GetCursorDelta();
             if (VSplitter->IsPressing())
@@ -103,7 +100,6 @@ void SLevelEditor::Initialize()
                 ResizeViewports();
             }
         }
-
 
         // 멀티 뷰포트일 때, 커서 변경 로직
         if (
@@ -144,7 +140,15 @@ void SLevelEditor::Initialize()
         {
         case EKeys::RightMouseButton:
         {
-            FWindowsCursor::SetShowMouseCursor(true);
+            if (bIsPressedMouseRightButton)
+            {
+                FWindowsCursor::SetShowMouseCursor(true);
+                FWindowsCursor::SetPosition(
+                    static_cast<int32>(MousePinPosition.X),
+                    static_cast<int32>(MousePinPosition.Y)
+                );
+                bIsPressedMouseRightButton = false;
+            }
             return;
         }
 
@@ -158,6 +162,22 @@ void SLevelEditor::Initialize()
 
         default:
             return;
+        }
+    });
+
+    Handler->OnRawMouseInputDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
+    {
+        // Mouse Move 이벤트 일때만 실행
+        if (
+            InMouseEvent.GetInputEvent() == IE_Axis
+            && InMouseEvent.GetEffectingButton() == EKeys::Invalid
+        )
+        {
+            // 에디터 카메라 이동 로직
+            if (bIsPressedMouseRightButton)
+            {
+                ActiveViewportClient->MouseMove(InMouseEvent);
+            }
         }
     });
 

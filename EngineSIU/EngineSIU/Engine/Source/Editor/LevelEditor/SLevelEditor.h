@@ -38,6 +38,9 @@ private:
     /** 우클릭 시 캡처된 마우스 커서의 초기 위치 (스크린 좌표계) */
     FVector2D MousePinPosition;
 
+    /** 우클릭이 눌려있는지 여부 */
+    bool bIsPressedMouseRightButton = false;
+
     bool bMultiViewportMode;
 
     POINT lastMousePos;
