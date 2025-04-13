@@ -1,11 +1,12 @@
 #include "UnrealClient.h"
 
 #include "EngineLoop.h"
+#include <array>
 
 FRenderTargetRHI::FRenderTargetRHI()
 {
     ClearColors.Add(EResourceType::ERT_Final, { 0.f, 0.f, 0.f, 1.f });
-    ClearColors.Add(EResourceType::ERT_Scene, { 0.025f, 0.025f, 0.025f, 1.0f });
+    ClearColors.Add(EResourceType::ERT_Scene,  { 0.025f, 0.025f, 0.025f, 1.0f });
     ClearColors.Add(EResourceType::ERT_Depth, { 0.f, 0.f, 0.f, 1.f });
     ClearColors.Add(EResourceType::ERT_WorldNormal, { 0.f, 0.f, 0.f, 1.f });
     ClearColors.Add(EResourceType::ERT_PP_Fog, { 0.f, 0.f, 0.f, 0.f });
@@ -15,10 +16,7 @@ FRenderTargetRHI::~FRenderTargetRHI()
 {
     Release();
 
-    for (auto& [Type, Color] : ClearColors)
-    {
-        delete[] Color;
-    }
+    ClearColors.Empty();
 }
 
 void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)

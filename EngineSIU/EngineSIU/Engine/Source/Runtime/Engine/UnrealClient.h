@@ -92,7 +92,7 @@ private:
     void ReleaseResources();
     void ReleaseResource(EResourceType Type);
 
-    TMap<EResourceType, float[4]> ClearColors;
+    TMap<EResourceType, std::array<float, 4>> ClearColors;
 };
 
 
