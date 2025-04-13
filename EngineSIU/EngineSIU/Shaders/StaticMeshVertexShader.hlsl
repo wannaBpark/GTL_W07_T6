@@ -61,7 +61,6 @@ struct VS_OUTPUT
 #ifdef LIGHTING_MODEL_GOURAUD
 #include "Light.hlsl"
 #endif
-    
 
 VS_OUTPUT mainVS(VS_INPUT input)
 {
@@ -72,21 +71,20 @@ VS_OUTPUT mainVS(VS_INPUT input)
     output.worldPos = worldPosition.xyz;
     float4 viewPosition = mul(worldPosition, View);
     output.position = mul(viewPosition, Projection);
-    
+    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
+    output.normal = worldNormal;
+    output.texcoord = input.texcoord;
     
 #ifdef LIGHTING_MODEL_GOURAUD
-    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
     float4 litColor = Lighting(worldPosition.xyz, worldNormal);
-    output.color = input.color * litColor;
-    output.normal = worldNormal;
-    output.texcoord = input.texcoord;
+    //output.color = input.color * litColor;
+    //output.color = float4(input.color.rgb + litColor.rgb, 1.0);
+    // 이게 맞나 왜이러지 인풋 컬러는 쓸 필요가 없는건가?
+    // 이러면 문제가 텍스쳐가 안나옴.
+    output.color = float4(litColor.rgb, 1.0);
 #else
     output.color = input.color;
-    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
-    output.normal = worldNormal;
-    output.texcoord = input.texcoord;
 #endif
-    //output.normal = input.normal;
     
     return output;
 }

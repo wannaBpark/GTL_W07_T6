@@ -56,9 +56,7 @@ cbuffer TextureConstants : register(b6)
     float2 TexturePad0;
 }
 
-#ifndef LIGHTING_MODEL_GOURAUD
 #include "Light.hlsl"
-#endif
 
 struct PS_INPUT
 {
@@ -93,7 +91,9 @@ PS_OUTPUT mainPS(PS_INPUT input)
 #ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)
     {
-        float3 finalColor = input.color.rgb * baseColor;
+        //float3 finalColor = input.color.rgb * baseColor;
+        //float3 finalColor = input.color.rgb;
+        float3 finalColor = input.color.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }
     else
