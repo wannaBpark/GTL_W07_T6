@@ -47,8 +47,7 @@ void SLevelEditor::Initialize()
 
     Handler->OnMouseDownDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
     {
-        const ImGuiIO& IO = ImGui::GetIO();
-        if (IO.WantCaptureMouse) return;
+        if (ImGui::GetIO().WantCaptureMouse) return;
 
         switch (InMouseEvent.GetEffectingButton())  // NOLINT(clang-diagnostic-switch-enum)
         {
@@ -105,13 +104,18 @@ void SLevelEditor::Initialize()
             }
         }
 
+
         // 멀티 뷰포트일 때, 커서 변경 로직
         if (
             bMultiViewportMode
             && !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)
             && !InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)
         ) {
+            // TODO: 나중에 커서가 Viewport 위에 있을때만 ECursorType::Crosshairs로 바꾸게끔 하기
+            // ECursorType CursorType = ECursorType::Crosshairs;
+            ECursorType CursorType = ECursorType::Arrow;
             POINT Point;
+
             GetCursorPos(&Point);
             ScreenToClient(GEngineLoop.AppWnd, &Point);
             FVector2D ClientPos = FVector2D{static_cast<float>(Point.x), static_cast<float>(Point.y)};
@@ -120,20 +124,17 @@ void SLevelEditor::Initialize()
 
             if (bIsHorizontalHovered && bIsVerticalHovered)
             {
-                FWindowsCursor::SetMouseCursor(ECursorType::ResizeAll);
+                CursorType = ECursorType::ResizeAll;
             }
             else if (bIsHorizontalHovered)
             {
-                FWindowsCursor::SetMouseCursor(ECursorType::ResizeLeftRight);
+                CursorType = ECursorType::ResizeLeftRight;
             }
             else if (bIsVerticalHovered)
             {
-                FWindowsCursor::SetMouseCursor(ECursorType::ResizeUpDown);
+                CursorType = ECursorType::ResizeUpDown;
             }
-            else
-            {
-                FWindowsCursor::SetMouseCursor(ECursorType::Arrow);
-            }
+            FWindowsCursor::SetMouseCursor(CursorType);
         }
     });
 
@@ -160,6 +161,12 @@ void SLevelEditor::Initialize()
         }
     });
 
+    Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
+    {
+        // 우클 + 휠
+        // 걍 휠
+    });
+
     Handler->OnKeyDownDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
     {
         ActiveViewportClient->InputKey(InKeyEvent);
@@ -168,12 +175,6 @@ void SLevelEditor::Initialize()
     Handler->OnKeyUpDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
     {
         ActiveViewportClient->InputKey(InKeyEvent);
-    });
-
-    Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
-    {
-        // 우클 + 휠
-        // 걍 휠
     });
 }
 
