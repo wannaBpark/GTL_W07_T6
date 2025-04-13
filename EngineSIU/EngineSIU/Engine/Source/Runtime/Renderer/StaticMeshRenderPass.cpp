@@ -64,19 +64,17 @@ void FStaticMeshRenderPass::CreateShader()
 
     HRESULT hr;
     //HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
-
     //hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS");
 
 #pragma region UberShader
 
-    D3D_SHADER_MACRO definesGouraud[] =
-    {
-        { GOURAUD, "1" },
-        { nullptr, nullptr }
-    };
-
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc),definesGouraud);
-    hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesGouraud);
+    //D3D_SHADER_MACRO definesGouraud[] =
+    //{
+    //    { "LIGHTING_MODEL_GOURAUD", "1" },
+    //    { nullptr, nullptr }
+    //};
+    //hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc),definesGouraud);
+    //hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesGouraud);
     
     D3D_SHADER_MACRO definesLambert[] =
     {
@@ -95,14 +93,12 @@ void FStaticMeshRenderPass::CreateShader()
     hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesBlinnPhong);
 
 #pragma endregion UberShader
-
     VertexShader = ShaderManager->GetVertexShaderByKey(L"PHONG_StaticMeshVertexShader");
-
-    // auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
     PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
-
     InputLayout = ShaderManager->GetInputLayoutByKey(L"PHONG_StaticMeshVertexShader");
-
+    //VertexShader = ShaderManager->GetVertexShaderByKey(L"LAMBERT_StaticMeshVertexShader");
+    //PixelShader = ShaderManager->GetPixelShaderByKey(L"LAMBERT_StaticMeshPixelShader");
+    //InputLayout = ShaderManager->GetInputLayoutByKey(L"LAMBERT_StaticMeshVertexShader");
 }
 void FStaticMeshRenderPass::ReleaseShader()
 {
@@ -111,6 +107,7 @@ void FStaticMeshRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
+// 여기서 InputLayoutByKey는 하지 않아도 괜찮나?
 void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi)
 {
     switch (evi)

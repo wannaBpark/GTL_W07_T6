@@ -74,9 +74,25 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::ws
 		return S_FALSE;
 
 	ID3DBlob* PsBlob = nullptr;
-	hr = D3DCompileFromFile(FileName.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
-	if (FAILED(hr))
-		return hr;
+
+    // Begin Test
+    ID3DBlob* errorBlob = nullptr;
+	//hr = D3DCompileFromFile(FileName.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, nullptr);
+	//if (FAILED(hr))
+	//	return hr;
+    hr = D3DCompileFromFile(FileName.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, EntryPoint.c_str(), "ps_5_0", shaderFlags, 0, &PsBlob, &errorBlob);
+
+    if (FAILED(hr)) {
+        if (errorBlob) {
+            // 에러 메시지를 문자열로 변환하여 출력
+            const char* errorMsg = static_cast<const char*>(errorBlob->GetBufferPointer());
+            OutputDebugStringA(errorMsg); // 디버그 창에 출력
+            MessageBoxA(NULL, errorMsg, "Shader Compilation Error", MB_OK); // 팝업 창으로 표시
+            errorBlob->Release();
+        }
+        return hr;
+    }
+    // End Test
 
 	ID3D11PixelShader* NewPixelShader;
 	hr = DXDDevice->CreatePixelShader(PsBlob->GetBufferPointer(), PsBlob->GetBufferSize(), nullptr, &NewPixelShader);

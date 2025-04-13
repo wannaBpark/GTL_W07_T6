@@ -56,7 +56,9 @@ cbuffer TextureConstants : register(b6)
     float2 TexturePad0;
 }
 
+#ifndef LIGHTING_MODEL_GOURAUD
 #include "Light.hlsl"
+#endif
 
 struct PS_INPUT
 {
@@ -99,7 +101,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
         // Unlit 모드
         output.color = float4(baseColor, 1.0);
     }
-#elif LIGHTING_MODEL_LAMBERT
+#elif defined(LIGHTING_MODEL_LAMBERT)
     // Lambert: 픽셀 셰이더에서 간단한 조명 모델 계산
     if (IsLit && input.normalFlag > 0.5)
     {
@@ -158,7 +160,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
         // Unlit 모드 또는 노말이 없는 경우
         output.color = float4(baseColor, 1.0);
     }
-#else //#elif LIGHTING_MODEL_BLINN_PHONG
+#else
     if (IsLit && input.normalFlag > 0.5)
     {
         // 기존 Light.hlsl의 Lighting 함수 활용

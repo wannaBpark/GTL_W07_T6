@@ -46,7 +46,8 @@ struct VS_INPUT
     int materialIndex : MATERIAL_INDEX;
 };
 
-struct PS_INPUT
+// struct VS_OUTPUT
+struct VS_OUTPUT
 {
     float4 position : SV_POSITION; // 클립 공간으로 변환된 화면 좌표
     float3 worldPos : TEXCOORD0; // 월드 공간 위치 (조명용)
@@ -57,11 +58,14 @@ struct PS_INPUT
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
 };
 
-//#include "Light.hlsl"
+#ifdef LIGHTING_MODEL_GOURAUD
+#include "Light.hlsl"
+#endif
+    
 
-PS_INPUT mainVS(VS_INPUT input)
+VS_OUTPUT mainVS(VS_INPUT input)
 {
-    PS_INPUT output;
+    VS_OUTPUT output;
     
     output.materialIndex = input.materialIndex;
     float4 worldPosition = mul(float4(input.position, 1), Model);
@@ -71,10 +75,9 @@ PS_INPUT mainVS(VS_INPUT input)
     
     
 #ifdef LIGHTING_MODEL_GOURAUD
-#include "Light.hlsl"
+    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
     float4 litColor = Lighting(worldPosition.xyz, worldNormal);
     output.color = input.color * litColor;
-    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
     output.normal = worldNormal;
     output.texcoord = input.texcoord;
 #else
