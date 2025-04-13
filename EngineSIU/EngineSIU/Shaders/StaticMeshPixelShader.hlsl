@@ -101,65 +101,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
         // Unlit 모드
         output.color = float4(baseColor, 1.0);
     }
-#elif defined(LIGHTING_MODEL_LAMBERT)
-    // Lambert: 픽셀 셰이더에서 간단한 조명 모델 계산
-    if (IsLit && input.normalFlag > 0.5)
-    {
-        float3 N = normalize(input.normal);
-        float3 litColor = float3(0, 0, 0);
-        
-        // 모든 활성화된 광원에 대해 Lambert 조명 계산
-        for (int i = 0; i < gnLights; i++)
-        {
-            if (gLights[i].m_bEnable)
-            {
-                // 광원 위치에서 표면까지의 벡터 (정규화)
-                float3 lightDir;
-                float attenuation = 1.0;
-                
-                if (gLights[i].m_nType == POINT_LIGHT || gLights[i].m_nType == SPOT_LIGHT)
-                {
-                    float3 lightVec = gLights[i].m_vPosition - input.worldPos;
-                    float distance = length(lightVec);
-                    
-                    // 감쇠 반경 체크
-                    if (distance > gLights[i].m_fAttRadius)
-                        continue;
-                        
-                    lightDir = normalize(lightVec);
-                    attenuation = 1.0 / (1.0 + gLights[i].m_fAttenuation * distance * distance);
-                    
-                    // 스팟라이트인 경우 추가 감쇠 계산
-                    if (gLights[i].m_nType == SPOT_LIGHT)
-                    {
-                        float spotFactor = pow(max(dot(-lightDir, gLights[i].m_vDirection), 0.0), gLights[i].m_fFalloff);
-                        attenuation *= spotFactor;
-                    }
-                }
-                else // Directional light
-                {
-                    lightDir = normalize(-gLights[i].m_vDirection);
-                }
-                
-                // Lambert 조명 모델: N·L
-                float NdotL = max(dot(N, lightDir), 0.0);
-                float3 diffuse = gLights[i].m_cDiffuse * baseColor * NdotL;
-                
-                // 최종 조명 색상에 기여도 추가
-                litColor += diffuse * attenuation * gLights[i].m_fIntensity;
-            }
-        }
-        
-        // 환경광 추가
-        litColor += gcGlobalAmbientLight.rgb * Material.AmbientColor;
-        
-        output.color = float4(litColor, 1.0);
-    }
-    else
-    {
-        // Unlit 모드 또는 노말이 없는 경우
-        output.color = float4(baseColor, 1.0);
-    }
 #else
     if (IsLit && input.normalFlag > 0.5)
     {

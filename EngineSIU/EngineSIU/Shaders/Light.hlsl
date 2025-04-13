@@ -125,7 +125,7 @@ float CalculateSpecular(float3 normal, float3 lightDir, float3 viewDir, float sp
         return 0.0;
         
     float3 halfVector = normalize(lightDir + viewDir);
-    return pow(max(dot(normal, halfVector), 0.0), max(specularPower, 1.0) * 20.0);
+    return pow(max(dot(normal, halfVector), 0.0), max(specularPower, 1.0) * 5.0);
 }
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
@@ -154,7 +154,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     }
     
     float3 lit = (light.m_cDiffuse.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (light.m_cSpecular.rgb * specularFactor * Material.SpecularColor);
+                 (specularFactor * Material.SpecularColor);
                  
     return float4(lit * attenuation * light.m_fIntensity, 1.0);
 #elif defined(LIGHTING_MODEL_LAMBERT)
@@ -198,7 +198,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     
     float3 lit = (light.m_cDiffuse.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (light.m_cSpecular.rgb * specularFactor * Material.SpecularColor);
+                 (/*light.m_cSpecular.rgb * */specularFactor * Material.SpecularColor);
                  
     return float4(lit * fAttenuation * light.m_fIntensity, 1.0);
     
