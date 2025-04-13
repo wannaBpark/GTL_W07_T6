@@ -684,14 +684,15 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     //RenderAABBInstanced(World);
     RenderPointlightInstanced(World);
     RenderSpotlightInstanced(World);
+    RenderArrows(World);    // Directional Light Arrow : Depth Test Enabled
+    
     //RenderAxis();
     //RenderGrid(ActiveViewport); // 기존 동적 LOD 월드 그리드 렌더 X
 	
     // 기즈모는 depth 무시
     ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-    RenderIcons(World, ActiveViewport);
-    RenderArrows(World);
+    //RenderIcons(World, ActiveViewport); // 기존 렌더패스에서 아이콘 렌더하고 있으므로 제거
     //RenderGizmos(World);
 }
 
@@ -1097,7 +1098,7 @@ void FEditorRenderPass::LazyLoad()
     Resources.Primitives.Arrow.Index = Mesh->GetRenderData()->IndexBuffer;
     Resources.Primitives.Arrow.NumVertices = Mesh->GetRenderData()->Vertices.Num();
     Resources.Primitives.Arrow.NumIndices = Mesh->GetRenderData()->Indices.Num();
-    //Resources.Primitives.Arrow.VertexStride = Mesh->GetRenderData()->Stride;
+    Resources.Primitives.Arrow.VertexStride = sizeof(FStaticMeshVertex); // Directional Light의 Arrow에 해당됨
 
 }
 
@@ -1178,7 +1179,7 @@ void FEditorRenderPass::UpdateTextureIcon(IconType type)
 void FEditorRenderPass::RenderArrows(const UWorld* World)
 {
     // XYZ한번. Z는 중복으로 적용
-    const float ArrowScale = 5;
+    const float ArrowScale = 1;
 
     PrepareShader(Resources.Shaders.Arrow);
     UINT offset = 0;
