@@ -690,7 +690,7 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     // 기즈모는 depth 무시
     ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-    RenderIcons(World, ActiveViewport);
+    //RenderIcons(World, ActiveViewport);
     RenderArrows(World);
     //RenderGizmos(World);
 }
@@ -1097,7 +1097,7 @@ void FEditorRenderPass::LazyLoad()
     Resources.Primitives.Arrow.Index = Mesh->GetRenderData()->IndexBuffer;
     Resources.Primitives.Arrow.NumVertices = Mesh->GetRenderData()->Vertices.Num();
     Resources.Primitives.Arrow.NumIndices = Mesh->GetRenderData()->Indices.Num();
-    //Resources.Primitives.Arrow.VertexStride = Mesh->GetRenderData()->Stride;
+    Resources.Primitives.Arrow.VertexStride = sizeof(FStaticMeshVertex);
 
 }
 
@@ -1178,7 +1178,7 @@ void FEditorRenderPass::UpdateTextureIcon(IconType type)
 void FEditorRenderPass::RenderArrows(const UWorld* World)
 {
     // XYZ한번. Z는 중복으로 적용
-    const float ArrowScale = 5;
+    const float ArrowScale = 1;
 
     PrepareShader(Resources.Shaders.Arrow);
     UINT offset = 0;

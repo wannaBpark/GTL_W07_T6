@@ -31,7 +31,7 @@ void AEditorPlayer::Input()
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
         if (!bLeftMouseDown)
-        {
+        {   
             bLeftMouseDown = true;
 
             POINT mousePos;
