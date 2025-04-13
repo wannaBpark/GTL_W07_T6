@@ -19,8 +19,8 @@ void SWindow::OnResize(float InWidth, float InHeight)
 
 bool SWindow::IsHover(FPoint InPoint) 
 {
-    return bIsHovered = InPoint.x >= Rect.LeftTopX && InPoint.x < Rect.LeftTopX + Rect.Width &&
-        InPoint.y >= Rect.LeftTopY && InPoint.y < Rect.LeftTopY + Rect.Height;
+    return bIsHovered = InPoint.x >= Rect.TopLeftX && InPoint.x < Rect.TopLeftX + Rect.Width &&
+        InPoint.y >= Rect.TopLeftY && InPoint.y < Rect.TopLeftY + Rect.Height;
 }
 
 bool SWindow::OnPressed(FPoint InPoint)

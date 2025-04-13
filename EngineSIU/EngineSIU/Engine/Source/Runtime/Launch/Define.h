@@ -153,9 +153,9 @@ struct FOBB {
 };
 struct FRect
 {
-    FRect() : LeftTopX(0), LeftTopY(0), Width(0), Height(0) {}
-    FRect(float x, float y, float w, float h) : LeftTopX(x), LeftTopY(y), Width(w), Height(h) {}
-    float LeftTopX, LeftTopY, Width, Height;
+    FRect() : TopLeftX(0), TopLeftY(0), Width(0), Height(0) {}
+    FRect(float x, float y, float w, float h) : TopLeftX(x), TopLeftY(y), Width(w), Height(h) {}
+    float TopLeftX, TopLeftY, Width, Height;
 };
 struct FPoint
 {

@@ -116,10 +116,9 @@ public:
     FViewport(EViewScreenLocation InViewLocation);
     ~FViewport();
 
-    void Initialize();
-    void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& SwapchainDesc);
+    void Initialize(const FRect& InRect);
+    void ResizeViewport(const FRect& InRect);
     void ResizeViewport(const FRect& Top, const FRect& Bottom, const FRect& Left, const FRect& Right);
-    void ResizeViewport(const FRect& NewRect);
 
     D3D11_VIEWPORT& GetD3DViewport() const { return RenderTargetRHI->GetD3DViewport(); }
 
@@ -131,4 +130,6 @@ private:
     FRenderTargetRHI* RenderTargetRHI;
 
     EViewScreenLocation ViewLocation;   // 뷰포트 위치
+
+    FRect Rect;
 };

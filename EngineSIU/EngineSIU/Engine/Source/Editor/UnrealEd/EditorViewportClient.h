@@ -86,12 +86,11 @@ public:
 
     virtual void Draw(FViewport* Viewport) override;
     virtual UWorld* GetWorld() const override { return nullptr; }
-    void Initialize(int32 InViewportIndex);
+    void Initialize(int32 InViewportIndex, const FRect& InRect);
     void Tick(float DeltaTime);
     void Release() const;
 
     void Input();
-    void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
     bool IsSelected(POINT InPoint) const;

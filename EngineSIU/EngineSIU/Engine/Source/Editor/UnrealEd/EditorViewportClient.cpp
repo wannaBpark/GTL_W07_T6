@@ -33,15 +33,14 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 {
 }
 
-void FEditorViewportClient::Initialize(int32 InViewportIndex)
+void FEditorViewportClient::Initialize(int32 InViewportIndex, const FRect& InRect)
 {
     ViewportIndex = InViewportIndex;
     
     PerspectiveCamera.SetLocation(FVector(8.0f, 8.0f, 8.f));
     PerspectiveCamera.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(InViewportIndex));
-    Viewport->Initialize();
-    ResizeViewport(FEngineLoop::GraphicDevice.SwapchainDesc);
+    Viewport->Initialize(InRect);
 
     GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
     GizmoActor->Initialize(this);
@@ -144,20 +143,6 @@ void FEditorViewportClient::Input()
             );
         }
     }
-}
-
-void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
-{
-    if (Viewport)
-    { 
-        Viewport->ResizeViewport(swapchaindesc);    
-    }
-    else
-    {
-        UE_LOG(LogLevel::Error, "Viewport is nullptr");
-    }
-    UpdateProjectionMatrix();
-    UpdateViewMatrix();
 }
 
 void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)

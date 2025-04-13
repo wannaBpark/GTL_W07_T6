@@ -21,6 +21,8 @@ FRenderTargetRHI::~FRenderTargetRHI()
 
 void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)
 {
+    D3DViewport.TopLeftX = 0.f;
+    D3DViewport.TopLeftY = 0.f;
     D3DViewport.Height = static_cast<float>(InHeight);
     D3DViewport.Width = static_cast<float>(InWidth);
     D3DViewport.MaxDepth = 1.0f;
@@ -249,48 +251,22 @@ FViewport::~FViewport()
     delete RenderTargetRHI;
 }
 
-void FViewport::Initialize()
+void FViewport::Initialize(const FRect& InRect)
 {
-    RenderTargetRHI->Initialize();
+    Rect = InRect;
+    const uint32 Width = static_cast<uint32>(Rect.Width);
+    const uint32 Height = static_cast<uint32>(Rect.Height);
+
+    RenderTargetRHI->Initialize(Width, Height);
 }
 
-void FViewport::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& SwapchainDesc)
+void FViewport::ResizeViewport(const FRect& InRect)
 {
-    float width = (float)SwapchainDesc.BufferDesc.Width;
-    float height = (float)SwapchainDesc.BufferDesc.Height;
-    float halfWidth = width * 0.5f;
-    float halfHeight = height * 0.5f;
-    switch (ViewLocation)
-    {
-    case EViewScreenLocation::EVL_TopLeft:
-        GetD3DViewport().TopLeftX = 0.0f;
-        GetD3DViewport().TopLeftY = 0.0f;
-        GetD3DViewport().Width = halfWidth;
-        GetD3DViewport().Height = halfHeight;
-        break;
-    case EViewScreenLocation::EVL_TopRight:
-        GetD3DViewport().TopLeftX = halfWidth;
-        GetD3DViewport().TopLeftY = 0.0f;
-        GetD3DViewport().Width = halfWidth;
-        GetD3DViewport().Height = halfHeight;
-        break;
-    case EViewScreenLocation::EVL_BottomLeft:
-        GetD3DViewport().TopLeftX = 0.0f;
-        GetD3DViewport().TopLeftY = halfHeight;
-        GetD3DViewport().Width = halfWidth;
-        GetD3DViewport().Height = halfHeight;
-        break;
-    case EViewScreenLocation::EVL_BottomRight:
-        GetD3DViewport().TopLeftX = halfWidth;
-        GetD3DViewport().TopLeftY = halfHeight;
-        GetD3DViewport().Width = halfWidth;
-        GetD3DViewport().Height = halfHeight;
-        break;
-    default:
-        break;
-    }
-    GetD3DViewport().MinDepth = 0.0f;
-    GetD3DViewport().MaxDepth = 1.0f;
+    Rect = InRect;
+    const uint32 Width = static_cast<uint32>(Rect.Width);
+    const uint32 Height = static_cast<uint32>(Rect.Height);
+
+    RenderTargetRHI->Resize(Width, Height);
 }
 
 void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRect& Left, const FRect& Right)
@@ -298,40 +274,34 @@ void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRec
     switch (ViewLocation)
     {
     case EViewScreenLocation::EVL_TopLeft:
-        GetD3DViewport().TopLeftX = Left.LeftTopX;
-        GetD3DViewport().TopLeftY = Top.LeftTopY;
-        GetD3DViewport().Width = Left.Width;
-        GetD3DViewport().Height = Top.Height;
+        Rect.TopLeftX = Left.TopLeftX;
+        Rect.TopLeftY = Top.TopLeftY;
+        Rect.Width = Left.Width;
+        Rect.Height = Top.Height;
         break;
     case EViewScreenLocation::EVL_TopRight:
-        GetD3DViewport().TopLeftX = Right.LeftTopX;
-        GetD3DViewport().TopLeftY = Top.LeftTopY;
-        GetD3DViewport().Width = Right.Width;
-        GetD3DViewport().Height = Top.Height;
+        Rect.TopLeftX = Right.TopLeftX;
+        Rect.TopLeftY = Top.TopLeftY;
+        Rect.Width = Right.Width;
+        Rect.Height = Top.Height;
         break;
     case EViewScreenLocation::EVL_BottomLeft:
-        GetD3DViewport().TopLeftX = Left.LeftTopX;
-        GetD3DViewport().TopLeftY = Bottom.LeftTopY;
-        GetD3DViewport().Width = Left.Width;
-        GetD3DViewport().Height = Bottom.Height;
+        Rect.TopLeftX = Left.TopLeftX;
+        Rect.TopLeftY = Bottom.TopLeftY;
+        Rect.Width = Left.Width;
+        Rect.Height = Bottom.Height;
         break;
     case EViewScreenLocation::EVL_BottomRight:
-        GetD3DViewport().TopLeftX = Right.LeftTopX;
-        GetD3DViewport().TopLeftY = Bottom.LeftTopY;
-        GetD3DViewport().Width = Right.Width;
-        GetD3DViewport().Height = Bottom.Height;
+        Rect.TopLeftX = Right.TopLeftX;
+        Rect.TopLeftY = Bottom.TopLeftY;
+        Rect.Width = Right.Width;
+        Rect.Height = Bottom.Height;
         break;
     default:
-        break;
+        return;
     }
-}
-
-void FViewport::ResizeViewport(const FRect& NewRect)
-{
-    GetD3DViewport().TopLeftX = NewRect.LeftTopX;
-    GetD3DViewport().TopLeftY = NewRect.LeftTopY;
-    GetD3DViewport().Width = NewRect.Width;
-    GetD3DViewport().Height = NewRect.Height;
-
-    RenderTargetRHI->Resize(static_cast<uint32>(NewRect.Width), static_cast<uint32>(NewRect.Height));
+    
+    const uint32 Width = static_cast<uint32>(Rect.Width);
+    const uint32 Height = static_cast<uint32>(Rect.Height);
+    RenderTargetRHI->Resize(Width, Height);
 }
