@@ -5,8 +5,11 @@
 #include <windowsx.h>
 
 #include "Define.h"
+#include "EngineLoop.h"
 #include "WindowsCursor.h"
 #include "Math/Vector.h"
+
+extern FEngineLoop GEngineLoop;
 
 
 FSlateAppMessageHandler::FSlateAppMessageHandler()
@@ -17,12 +20,36 @@ FSlateAppMessageHandler::FSlateAppMessageHandler()
     {
         KeyState = false;
     }
+
+    RawInputHandler = std::make_unique<FRawInput>(GEngineLoop.AppWnd, [this](const RAWINPUT& RawInput)
+    {
+        HandleRawInput(RawInput);
+    });
+}
+
+void FSlateAppMessageHandler::HandleRawInput(const RAWINPUT& RawInput)
+{
+    if (RawInput.header.dwType == RIM_TYPEMOUSE)
+    {
+        OnRawMouseInput(RawInput.data.mouse);
+    }
+    else if (RawInput.header.dwType == RIM_TYPEKEYBOARD)
+    {
+        OnRawKeyboardInput(RawInput.data.keyboard);
+    }
 }
 
 void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wParam, LPARAM lParam)
 {
     switch (Msg)
     {
+    // 입력 장치에 변경이 생겼을 때
+    case WM_INPUT_DEVICE_CHANGE:
+    {
+        // RawInputHandler->ReRegisterDevices();
+        return;
+    }
+
     case WM_CHAR:
     {
         // WPARAM으로부터 문자 가져오기
@@ -290,7 +317,6 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
     }
 
     // Mouse Movement
-    case WM_INPUT:
     case WM_NCMOUSEMOVE: // 비클라이언트 영역(창 제목 표시줄 등)에서 마우스가 움직였을 때 발생하는 메시지
     case WM_MOUSEMOVE:   // 클라이언트 영역에서 마우스가 움직였을 때 발생하는 메시지
     {
@@ -316,6 +342,14 @@ void FSlateAppMessageHandler::ProcessMessage(HWND hWnd, uint32 Msg, WPARAM wPara
         OnMouseWheel(static_cast<float>(WheelDelta) * SpinFactor, CursorPos);
         return;
     }
+
+    case WM_INPUT:
+    {
+        // RawInput을 처리하는 부분
+        RawInputHandler->ProcessRawInput(lParam);
+        return;
+    }
+
     default:
     {
         // 추후에 추가 Message가 필요하면 다음 파일을 참조
@@ -490,6 +524,148 @@ void FSlateAppMessageHandler::OnMouseMove()
         GetModifierKeys(),
         IE_Axis,
     });
+}
+
+void FSlateAppMessageHandler::OnRawMouseInput(const RAWMOUSE& RawMouseInput)
+{
+    // 눌린 버튼 상태 (PressedMouseButtons) 업데이트 및 EffectingButton 결정
+    const USHORT ButtonFlags = LOWORD(RawMouseInput.ulButtons); // 하위 워드: 버튼 변경 플래그
+    EKeys::Type EffectingButton = EKeys::Invalid;
+    EInputEvent InputEventType = IE_None;
+    float WheelDelta = 0.0f;
+
+    // 눌린 버튼이 있는경우
+    if (ButtonFlags)
+    {
+        // 마우스 왼쪽 버튼
+        if (ButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+        {
+            PressedMouseButtons.Add(EKeys::LeftMouseButton);
+            EffectingButton = EKeys::LeftMouseButton;
+            InputEventType = IE_Pressed;
+        }
+        else if (ButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+        {
+            PressedMouseButtons.Remove(EKeys::LeftMouseButton);
+            EffectingButton = EKeys::LeftMouseButton;
+            InputEventType = IE_Released;
+        }
+
+        // 마우스 오른쪽 버튼
+        else if (ButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+        {
+            PressedMouseButtons.Add(EKeys::RightMouseButton);
+            EffectingButton = EKeys::RightMouseButton;
+            InputEventType = IE_Pressed;
+        }
+        else if (ButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+        {
+            PressedMouseButtons.Remove(EKeys::RightMouseButton);
+            EffectingButton = EKeys::RightMouseButton;
+            InputEventType = IE_Released;
+        }
+
+        // 마우스 가운데 버튼
+        else if (ButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
+        {
+            PressedMouseButtons.Add(EKeys::MiddleMouseButton);
+            EffectingButton = EKeys::MiddleMouseButton;
+            InputEventType = IE_Pressed;
+        }
+        else if (ButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
+        {
+            PressedMouseButtons.Remove(EKeys::MiddleMouseButton);
+            EffectingButton = EKeys::MiddleMouseButton;
+            InputEventType = IE_Released;
+        }
+
+        // 마우스 엄지버튼 1
+        else if (ButtonFlags & RI_MOUSE_BUTTON_4_DOWN)
+        {
+            PressedMouseButtons.Add(EKeys::ThumbMouseButton);
+            EffectingButton = EKeys::ThumbMouseButton;
+            InputEventType = IE_Pressed;
+        }
+        else if (ButtonFlags & RI_MOUSE_BUTTON_4_UP)
+        {
+            PressedMouseButtons.Remove(EKeys::ThumbMouseButton);
+            EffectingButton = EKeys::ThumbMouseButton;
+            InputEventType = IE_Released;
+        }
+
+        // 마우스 엄지버튼 2
+        else if (ButtonFlags & RI_MOUSE_BUTTON_5_DOWN)
+        {
+            PressedMouseButtons.Add(EKeys::ThumbMouseButton2);
+            EffectingButton = EKeys::ThumbMouseButton2;
+            InputEventType = IE_Pressed;
+        }
+        else if (ButtonFlags & RI_MOUSE_BUTTON_5_UP)
+        {
+            PressedMouseButtons.Remove(EKeys::ThumbMouseButton2);
+            EffectingButton = EKeys::ThumbMouseButton2;
+            InputEventType = IE_Released;
+        }
+
+        // 마우스 휠
+        else if (ButtonFlags & RI_MOUSE_WHEEL)
+        {
+            const SHORT WheelData = static_cast<SHORT>(HIWORD(RawMouseInput.ulButtons));
+            WheelDelta = static_cast<float>(WheelData) / static_cast<float>(WHEEL_DELTA);
+            EffectingButton = EKeys::MouseWheelAxis;
+            InputEventType = IE_Axis;
+        }
+        else if (ButtonFlags & RI_MOUSE_WHEEL)
+        {
+            // TODO: 추후에 수평 휠 처리 (RI_MOUSE_HWHEEL) 가 필요하면 추가
+        }
+
+        OnRawMouseInputDelegate.Broadcast(FPointerEvent{
+            GetCursorPos(),
+            GetLastCursorPos(),
+            FVector2D::ZeroVector,
+            WheelDelta,
+            EffectingButton,
+            PressedMouseButtons,
+            GetModifierKeys(),
+            InputEventType,
+        });
+    }
+
+    // 버튼과 관련없는 이벤트
+    else [[likely]]
+    {
+        // 그냥 마우스를 움직일 때 발생
+        if (RawMouseInput.usFlags == MOUSE_MOVE_RELATIVE) [[likely]]
+        {
+            EffectingButton = EKeys::Invalid;
+            InputEventType = IE_Axis;
+        }
+        else if (RawMouseInput.usFlags & MOUSE_MOVE_ABSOLUTE)
+        {
+            // 태블릿, 터치스크린, 고급 트랙패드 같은 장치들에서 이벤트 발생
+            // TODO: 언젠가 구?현 하기
+            UE_LOG(LogLevel::Warning, "Absolute mouse movement detected (currently not fully supported).");
+        }
+
+        OnRawMouseInputDelegate.Broadcast(FPointerEvent{
+            GetCursorPos(),
+            GetLastCursorPos(),
+            FVector2D{
+                static_cast<float>(RawMouseInput.lLastX),
+                static_cast<float>(RawMouseInput.lLastY)
+            },
+            WheelDelta,
+            EffectingButton,
+            PressedMouseButtons,
+            GetModifierKeys(),
+            InputEventType,
+        });
+    }
+}
+
+void FSlateAppMessageHandler::OnRawKeyboardInput(const RAWKEYBOARD& RawKeyboardInput)
+{
 }
 
 void FSlateAppMessageHandler::UpdateCursorPosition(const FVector2D& NewPos)
