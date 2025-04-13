@@ -4,7 +4,6 @@
 #include "Core/Container/String.h"
 #include "Core/Container/Array.h"
 #include "UObject/NameTypes.h"
-
 // 수학 관련
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
@@ -18,6 +17,7 @@
 
 #include "UserInterface/Console.h"
 #include <Math/Color.h>
+#include "LightDefine.h"
 
 #define GOURAUD "LIGHTING_MODEL_GOURAUD"
 #define LAMBERT "LIGHTING_MODEL_LAMBERT"
@@ -280,7 +280,9 @@ struct FPrimitiveCounts
 enum ELightType {
     POINT_LIGHT = 1,
     SPOT_LIGHT = 2,
-    DIRECTIONAL_LIGHT = 3
+    DIRECTIONAL_LIGHT = 3,
+    AMBIENT_LIGHT = 4,
+    NUM_LIGHT_TYPES = 5
 };
 
 struct FLight
@@ -303,6 +305,11 @@ struct FLight
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
+
+    float InnerCos; // cos(inner angle)
+    float OuterCos; // cos(outer angle)
+    float pad4;
+    float pad5;
 };
 
 struct FLightBuffer
@@ -312,6 +319,7 @@ struct FLightBuffer
     int nLights;
     float    pad0, pad1, pad2;
 };
+
 
 
 struct FMaterialConstants {

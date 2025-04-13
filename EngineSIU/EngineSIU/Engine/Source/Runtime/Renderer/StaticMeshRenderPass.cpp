@@ -172,7 +172,8 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                                   TEXT("FMaterialConstants"),
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
-                                  TEXT("FTextureConstants")
+                                  TEXT("FTextureConstants"),
+                                  TEXT("FLightInfoBuffer"),
     };
 
 

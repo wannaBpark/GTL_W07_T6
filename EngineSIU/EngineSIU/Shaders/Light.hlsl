@@ -25,6 +25,10 @@ struct LIGHT
     
     float m_fAttRadius; // 감쇠 반경 (Attenuation Radius)
     float3 LightPad;
+    
+    float m_fInnerCos; // cos(inner angle)
+    float m_fOuterCos; // cos(outer angle)
+    float2 Padding; // 정렬용
 };
 
 cbuffer cbLights : register(b2)
@@ -35,9 +39,68 @@ cbuffer cbLights : register(b2)
     float3 padCB;
 };
 
+#define MAX_DIRECTIONAL_LIGHT 16
+#define MAX_POINT_LIGHT 16
+#define MAX_SPOT_LIGHT 16
+
+struct FAmbientLightInfo
+{
+    float4 AmbientColor;
+};
+
+struct FDirectionalLightInfo
+{
+    float3 Direction;
+    float Intensity;
+
+    float4 DiffuseColor;
+    float4 SpecularColor;
+};
+
+struct FPointLightInfo
+{
+    float3 Position;
+    float Radius;
+
+    float4 DiffuseColor;
+    float4 SpecularColor;
+
+    float Intensity;
+    int Type;
+    float2 Padding; // float[2]
+};
+
+struct FSpotLightInfo
+{
+    float3 Position;
+    float Radius;
+
+    float3 Direction;
+    float pad3;
+
+    float4 DiffuseColor;
+    float4 SpecularColor;
+
+    float Intensity;
+    int Type;
+    float InnerCos;
+    float OuterCos;
+};
+
+cbuffer Lighting : register(b7)
+{
+    FAmbientLightInfo Ambient;
+    FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];
+    FPointLightInfo PointLights[MAX_POINT_LIGHT];
+    FSpotLightInfo SpotLights[MAX_SPOT_LIGHT];
+    int DirectionalLightsCount;
+    int PointLightsCount;
+    int SpotLightsCount;
+    float pad0;
+};
 
 float CalculateAttenuation(float distance, float attenuationFactor, float radius)
-{
+
     if (distance > radius)
         return 0.0;
         
