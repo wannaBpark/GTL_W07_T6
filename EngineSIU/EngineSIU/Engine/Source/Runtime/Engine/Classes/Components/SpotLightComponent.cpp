@@ -13,8 +13,8 @@ USpotLightComponent::USpotLightComponent()
     SpotLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
     SpotLightInfo.Intensity = 10.0f;
     SpotLightInfo.Type = ELightType::SPOT_LIGHT;
-    SpotLightInfo.InnerRad = 0.9659;
-    SpotLightInfo.OuterRad = 0.8660;
+    SpotLightInfo.InnerRad = 0.8660;
+    SpotLightInfo.OuterRad = 0.9659;
     SpotLightInfo.Attenuation = 20.0f;
 }
 
