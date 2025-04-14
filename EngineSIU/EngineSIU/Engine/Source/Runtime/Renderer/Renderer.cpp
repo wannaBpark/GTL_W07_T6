@@ -42,7 +42,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-    EditorRenderPass->Initialize(Graphics);
+    EditorRenderPass->Initialize(Graphics,ShaderManager);
 
     CreateConstantBuffers();
 }

@@ -4,6 +4,7 @@
 #include "Engine/Source/Runtime/Engine/Classes/Engine/Engine.h" // GEngine
 #include "Engine/Source/Runtime/CoreUObject/UObject/Casts.h"
 #include "Engine/Source/Runtime/Engine/Classes/Engine/EditorEngine.h"
+#include <D3D11RHI/DXDShaderManager.h>
 
 #include <d3dcompiler.h>
 #include "Engine/Source/Runtime/Engine/World/World.h"
@@ -22,9 +23,10 @@
 
 
 
-void FEditorRenderPass::Initialize(FGraphicsDevice* InGraphics)
+void FEditorRenderPass::Initialize(FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
 {
     Graphics = InGraphics;
+    ShaderManager = InShaderManager;
     CreateShaders();
     CreateBuffers();
     CreateConstantBuffers();
@@ -37,25 +39,7 @@ void FEditorRenderPass::Release()
 
 void FEditorRenderPass::CreateShaders()
 {
-    ID3DBlob* errorBlob = nullptr;
-    ID3DBlob* VertexShaderCSO;
-    ID3DBlob* PixelShaderCSO;
-
-    /////////////////////////////
-    // 기즈모
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "gizmoVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Gizmo.Vertex);
-
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "gizmoPS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Gizmo.Pixel);
-
-    D3D11_INPUT_ELEMENT_DESC layout[] = {
+    D3D11_INPUT_ELEMENT_DESC layoutGizmo[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -63,205 +47,58 @@ void FEditorRenderPass::CreateShaders()
         {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
-    Graphics->Device->CreateInputLayout(
-        layout, ARRAYSIZE(layout), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &Resources.Shaders.Gizmo.Layout
-    );
-    Resources.Shaders.Gizmo.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
-
-    /////////////////////////////
-    // axisline
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "axisVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.AxisLine.Vertex);
-
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "axisPS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.AxisLine.Pixel);
-
-    // AxisLine은 layout을 받지 않고, SV_VertexID를 사용합니다.
-    Resources.Shaders.AxisLine.Layout = nullptr;
-    Resources.Shaders.AxisLine.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
-
-    /////////////////////////////
-    // AABB
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "aabbVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.AABB.Vertex);
-
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "aabbPS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.AABB.Pixel);
-
-    // Box의 vertex
-    D3D11_INPUT_ELEMENT_DESC layout1[] = {
+    D3D11_INPUT_ELEMENT_DESC layoutPosOnly[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
-    Graphics->Device->CreateInputLayout(
-        layout1, ARRAYSIZE(layout1), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &Resources.Shaders.AABB.Layout
-    );
-    Resources.Shaders.AABB.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+    auto AddShaderSet = [&](const std::wstring& keyPrefix, const std::string& vsEntry, const std::string& psEntry,
+        D3D11_INPUT_ELEMENT_DESC* layout, uint32_t layoutSize,
+        D3D11_PRIMITIVE_TOPOLOGY topology, FShaderResource& target)
+        {
+            ShaderManager->AddVertexShaderAndInputLayout(keyPrefix + L"VS", L"Shaders/EditorShader.hlsl", vsEntry, layout, layoutSize);
+            ShaderManager->AddPixelShader(keyPrefix + L"PS", L"Shaders/EditorShader.hlsl", psEntry);
+            target.Vertex = ShaderManager->GetVertexShaderByKey(keyPrefix + L"VS");
+            target.Pixel = ShaderManager->GetPixelShaderByKey(keyPrefix + L"PS");
+            target.Layout = ShaderManager->GetInputLayoutByKey(keyPrefix + L"VS");
+            target.Topology = topology;
+        };
 
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
+    // 기즈모
+    AddShaderSet(L"Gizmo", "gizmoVS", "gizmoPS", layoutGizmo, ARRAYSIZE(layoutGizmo),
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Gizmo);
 
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
+    // axisline (layout 없음)
+    AddShaderSet(L"Axis", "axisVS", "axisPS", nullptr, 0,
+        D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AxisLine);
 
-    /////////////////////////////
+    // AABB
+    AddShaderSet(L"AABB", "aabbVS", "aabbPS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
+        D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AABB);
+
     // Sphere
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "sphereVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Sphere.Vertex);
+    AddShaderSet(L"Sphere", "sphereVS", "spherePS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
+        D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.Sphere);
 
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "spherePS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Sphere.Pixel);
-
-    Graphics->Device->CreateInputLayout(
-        layout1, ARRAYSIZE(layout1), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &Resources.Shaders.Sphere.Layout
-    );
-    Resources.Shaders.Sphere.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
-
-    /////////////////////////////
     // Cone
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "coneVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Cone.Vertex);
+    AddShaderSet(L"Cone", "coneVS", "conePS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
+        D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP, Resources.Shaders.Cone);
 
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "conePS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
+    // Grid (layout 없음)
+    AddShaderSet(L"Grid", "gridVS", "gridPS", nullptr, 0,
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Grid);
 
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Cone.Pixel);
+    // Icons (layout 없음)
+    AddShaderSet(L"Icon", "iconVS", "iconPS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
+        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Icon);
+    Resources.Shaders.Icon.Layout = nullptr;
 
-    Graphics->Device->CreateInputLayout(
-        layout1, ARRAYSIZE(layout1), VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), &Resources.Shaders.Cone.Layout
-    );
-    Resources.Shaders.Cone.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
-
-    ///////////////////////////////
-    //// Grid
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "gridVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Grid.Vertex);
-
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "gridPS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Grid.Pixel);
-
-    Resources.Shaders.Grid.Layout = nullptr; // Grid은 layout을 받지 않고, SV_VertexID를 사용합니다.
-
-    Resources.Shaders.Grid.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
-
-    /////////////////////////////
-    // Icons
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "iconVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Icon.Vertex);
-
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "iconPS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Icon.Pixel);
-
-    Resources.Shaders.Icon.Layout = nullptr; // Grid은 layout을 받지 않고, SV_VertexID를 사용합니다.
-
-    Resources.Shaders.Icon.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
-
-    /////////////////////////////
-    // Arrow
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "arrowVS", "vs_5_0", 0, 0, &VertexShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreateVertexShader(VertexShaderCSO->GetBufferPointer(), VertexShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Arrow.Vertex);
-
-    D3DCompileFromFile(L"Shaders/EditorShader.hlsl", defines, D3D_COMPILE_STANDARD_FILE_INCLUDE, "arrowPS", "ps_5_0", 0, 0, &PixelShaderCSO, &errorBlob);
-    if (errorBlob)
-    {
-        OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-        errorBlob->Release();
-    }
-    Graphics->Device->CreatePixelShader(PixelShaderCSO->GetBufferPointer(), PixelShaderCSO->GetBufferSize(), nullptr, &Resources.Shaders.Arrow.Pixel);
-
-    // gizmo의 layout을 이용
+    // Arrow (기즈모 layout 재사용)
+    ShaderManager->AddVertexShaderAndInputLayout(L"ArrowVS", L"Shaders/EditorShader.hlsl", "arrowVS", layoutGizmo, ARRAYSIZE(layoutGizmo));
+    ShaderManager->AddPixelShader(L"ArrowPS", L"Shaders/EditorShader.hlsl", "arrowPS");
+    Resources.Shaders.Arrow.Vertex = ShaderManager->GetVertexShaderByKey(L"ArrowVS");
+    Resources.Shaders.Arrow.Pixel = ShaderManager->GetPixelShaderByKey(L"ArrowPS");
     Resources.Shaders.Arrow.Layout = Resources.Shaders.Gizmo.Layout;
-
     Resources.Shaders.Arrow.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-    VertexShaderCSO->Release();
-    PixelShaderCSO->Release();
-
-    VertexShaderCSO = nullptr;
-    PixelShaderCSO = nullptr;
 }
 
 void FEditorRenderPass::PrepareShader(FShaderResource ShaderResource) const
@@ -681,116 +518,21 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     ID3D11DepthStencilState* DepthStateEnable = Graphics->DepthStencilState;
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateEnable, 0);
 
+    // TODO : 월드 그리드 춤추는 현상 원인 파악
     //RenderAABBInstanced(World);
     RenderPointlightInstanced(World);
     RenderSpotlightInstanced(World);
     RenderArrows(World);    // Directional Light Arrow : Depth Test Enabled
+    //RenderIcons(World, ActiveViewport); // 기존 렌더패스에서 아이콘 렌더하고 있으므로 제거
     
+
     //RenderAxis();
     //RenderGrid(ActiveViewport); // 기존 동적 LOD 월드 그리드 렌더 X
 	
     // 기즈모는 depth 무시
     ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
     Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-    //RenderIcons(World, ActiveViewport); // 기존 렌더패스에서 아이콘 렌더하고 있으므로 제거
     //RenderGizmos(World);
-}
-
-
-void FEditorRenderPass::RenderGizmos(const UWorld* World)
-{
-//    PrepareShader(Resources.Shaders.Gizmo);
-//
-//    //Renderer->PrepareShader(Renderer->RenderResources.Shaders.StaticMesh);
-//    //Renderer->PrepareShader(Resources.Shaders.Gizmo);
-//
-//    if (Cast<UEditorEngine>(GEngine)->GetSelectedActor() == nullptr)
-//    {
-//        return;
-//    }
-//
-//    TArray<UGizmoBaseComponent*> GizmoObjs;
-//
-//    for (const auto iter : TObjectRange<UGizmoBaseComponent>())
-//    {
-//        GizmoObjs.Add(iter);
-//    }
-//
-//    //  fill solid,  Wirframe 에서도 제대로 렌더링되기 위함
-//    Graphics->DeviceContext->RSSetState(Graphics->RasterizerStateSOLID);
-//    for (UGizmoBaseComponent* GizmoComp : GizmoObjs)
-//    {
-//        if (AActor* PickedActor = Cast<UEditorEngine>(GEngine)->GetSelectedActor())
-//        {
-//            std::shared_ptr<FEditorViewportClient> activeViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-//            if (activeViewport->IsPerspective())
-//            {
-//                float scalar = abs(
-//                    (activeViewport->ViewTransformPerspective.GetLocation() - PickedActor->GetRootComponent()->GetLocalLocation()).Magnitude()
-//                );
-//                scalar *= 0.1f;
-//                GizmoComp->SetRelativeScale(FVector(scalar, scalar, scalar));
-//            }
-//            else
-//            {
-//                float scalar = activeViewport->orthoSize * 0.1f;
-//                GizmoComp->SetRelativeScale(FVector(scalar, scalar, scalar));
-//            }
-//        }
-//        
-//        if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowX ||
-//            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowY ||
-//            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
-//            && Cast<UEditorEngine>(GEngine)->GetEditorPlayer()->GetControlMode() != CM_TRANSLATION)
-//            continue;
-//        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleX ||
-//            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleY ||
-//            GizmoComp->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
-//            && Cast<UEditorEngine>(GEngine)->GetEditorPlayer()->GetControlMode() != CM_SCALE)
-//            continue;
-//        else if ((GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleX ||
-//            GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleY ||
-//            GizmoComp->GetGizmoType() == UGizmoBaseComponent::CircleZ)
-//            && Cast<UEditorEngine>(GEngine)->GetEditorPlayer()->GetControlMode() != CM_ROTATION)
-//            continue;
-//        FMatrix Model = GizmoComp->GetWorldMatrix();
-//        {
-//            FConstantBufferActor buf;
-//            buf.IsSelectedActor = 0;
-//            buf.UUID = GizmoComp->EncodeUUID() / 255.0f;
-//            UpdateConstantbufferActor(buf);
-//        }
-//        {
-//            FConstantBufferMesh buf;
-//            buf.ModelMatrix = Model;
-//            if (GizmoComp == World->GetPickingGizmo())
-//            {
-//                buf.IsSelectedMesh = 1;
-//            }
-//            else
-//            {
-//                buf.IsSelectedMesh = 0;
-//            }
-//            UpdateConstantbufferMesh(buf);
-//        }
-//        // TODO: 기즈모 선택효과 안보임
-//        // 현재 RenderPrimitive()에서 다시 SelectedMesh를 갱신하는데, 안에서 기즈모를 인식시킬 수 없음.
-//
-//        if (!GizmoComp->GetStaticMesh()) continue;
-//
-//        OBJ::FStaticMeshRenderData* renderData = GizmoComp->GetStaticMesh()->GetRenderData();
-//        if (renderData == nullptr) continue;
-//
-//        RenderPrimitive(Model, renderData, GizmoComp->GetStaticMesh()->GetMaterials(), GizmoComp->GetOverrideMaterials(), -1);
-//
-//    }
-//
-//    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
-//
-//#pragma region GizmoDepth
-//    ID3D11DepthStencilState* originalDepthState = Graphics->DepthStencilState;
-//    Graphics->DeviceContext->OMSetDepthStencilState(originalDepthState, 0);
-//#pragma endregion GizmoDepth
 }
 
 
@@ -810,50 +552,6 @@ void FEditorRenderPass::RenderAxis()
     Graphics->DeviceContext->Draw(6, 0);
 }
 
-void FEditorRenderPass::RenderAABBInstanced(const UWorld* World)
-{
-    //PrepareShader(Resources.Shaders.AABB);
-    //UINT offset = 0;
-    //Graphics->DeviceContext->IASetVertexBuffers(0, 1, &Resources.Primitives.Box.Vertex, &Resources.Primitives.Box.VertexStride, &offset);
-    //Graphics->DeviceContext->IASetIndexBuffer(Resources.Primitives.Box.Index, DXGI_FORMAT_R32_UINT, 0);
-
-    //// 위치랑 bounding box 크기 정보 가져오기
-    //TArray<FConstantBufferDebugAABB> BufferAll;
-    //for (UStaticMeshComponent* SMComp : Resources.Components.StaticMesh)
-    //{
-    //    // 현재 bounding box를 갱신안해주고있음 : 여기서 직접 갱신
-    //    SMComp->UpdateWorldAABB();
-    //    FConstantBufferDebugAABB b;
-    //    b.Position = SMComp->GetBoundingBoxWorld().GetPosition();
-    //    b.Extent = SMComp->GetBoundingBoxWorld().GetExtent();
-    //    BufferAll.Add(b);
-    //}
-
-    //PrepareConstantbufferAABB();
-    //int BufferIndex = 0;
-    //for (int i = 0; i < (1 + BufferAll.Num() / ConstantBufferSizeAABB) * ConstantBufferSizeAABB; ++i)
-    //{
-    //    TArray<FConstantBufferDebugAABB> SubBuffer;
-    //    for (int j = 0; j < ConstantBufferSizeAABB; ++j)
-    //    {
-    //        if (BufferIndex < BufferAll.Num())
-    //        {
-    //            SubBuffer.Add(BufferAll[BufferIndex]);
-    //            ++BufferIndex;
-    //        }
-    //        else
-    //        {
-    //            break;
-    //        }
-    //    }
-
-    //    if (SubBuffer.Num() > 0)
-    //    {
-    //        UdpateConstantbufferAABBInstanced(SubBuffer);
-    //        Graphics->DeviceContext->DrawIndexedInstanced(Resources.Primitives.Box.NumIndices, SubBuffer.Num(), 0, 0, 0);
-    //    }
-    //}
-}
 
 void FEditorRenderPass::PrepareConstantbufferAABB()
 {
@@ -1034,51 +732,6 @@ void FEditorRenderPass::UdpateConstantbufferSpotlightInstanced(TArray<FConstantB
     }
 }
 
-//void FEditorRenderPass::RenderGrid(std::shared_ptr<FEditorViewportClient> ActiveViewport)
-//{
-//    PrepareShader(Resources.Shaders.Grid);
-//    PrepareConstantbufferGlobal();
-//    PrepareConstantbufferGrid();
-//    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//
-//    FMatrix view = ActiveViewport->GetViewMatrix();
-//    FMatrix proj = ActiveViewport->GetProjectionMatrix();
-//    FConstantBufferDebugGrid buf;
-//    buf.InverseViewProj = FMatrix::Inverse(view * proj);
-//
-//    FConstantBufferCamera cameraBuf;
-//    cameraBuf.ViewMatrix = view;
-//    cameraBuf.ProjMatrix = proj;
-//    cameraBuf.CameraPos = ActiveViewport->ViewTransformPerspective.GetLocation();
-//    cameraBuf.CameraLookAt = {
-//        ActiveViewport->GetD3DViewport().Width,
-//        ActiveViewport->GetD3DViewport().Height,
-//        static_cast<float>(ActiveViewport->GetViewportType())
-//    };
-//    UpdateConstantbufferGlobal(cameraBuf);
-//    UpdateConstantbufferGrid(buf);
-//    Graphics->DeviceContext->Draw(12, 0); // 내부에서 버텍스 사용중
-//}
-//
-//void FEditorRenderPass::PrepareConstantbufferGrid()
-//{
-//    if (Resources.ConstantBuffers.Grid13)
-//    {
-//        Graphics->DeviceContext->VSSetConstantBuffers(13, 1, &Resources.ConstantBuffers.Grid13);
-//    }
-//}
-//
-//void FEditorRenderPass::UpdateConstantbufferGrid(FConstantBufferDebugGrid Buffer)
-//{
-//    if (Resources.ConstantBuffers.Grid13)
-//    {
-//        D3D11_MAPPED_SUBRESOURCE ConstantBufferMSR; // GPU�� �޸� �ּ� ����
-//
-//        Graphics->DeviceContext->Map(Resources.ConstantBuffers.Grid13, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
-//        memcpy(ConstantBufferMSR.pData, &Buffer, sizeof(FConstantBufferDebugGrid)); // TArray이니까 실제 값을 받아와야함
-//        Graphics->DeviceContext->Unmap(Resources.ConstantBuffers.Grid13, 0); // GPU�� �ٽ� ��밡���ϰ� �����
-//    }
-//}
 
 // 꼼수로 이미 로드된 리소스를 사용
 // GUObjectArray에 안올라가게 우회
@@ -1195,6 +848,16 @@ void FEditorRenderPass::RenderArrows(const UWorld* World)
             buf.Position = DLightComp->GetWorldLocation();
             buf.ArrowScaleXYZ = ArrowScale;
             buf.Direction = DLightComp->GetDirection();
+            buf.ArrowScaleZ = ArrowScale;
+            UdpateConstantbufferArrow(buf);
+            Graphics->DeviceContext->DrawIndexed(Resources.Primitives.Arrow.NumIndices, 0, 0);
+        }
+        if (USpotLightComponent* SpotComp = Cast<USpotLightComponent>(LightComp))
+        {
+            FConstantBufferDebugArrow buf;
+            buf.Position = SpotComp->GetWorldLocation();
+            buf.ArrowScaleXYZ = ArrowScale;
+            buf.Direction = SpotComp->GetDirection();
             buf.ArrowScaleZ = ArrowScale;
             UdpateConstantbufferArrow(buf);
             Graphics->DeviceContext->DrawIndexed(Resources.Primitives.Arrow.NumIndices, 0, 0);
