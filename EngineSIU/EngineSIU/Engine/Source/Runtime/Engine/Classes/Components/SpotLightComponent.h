@@ -9,7 +9,6 @@ public:
     USpotLightComponent();
     virtual ~USpotLightComponent();
     FVector GetDirection();
-    void SetDirection(const FVector& dir);
 
     const FSpotLightInfo& GetSpotLightInfo() const;
     void SetSpotLightInfo(const FSpotLightInfo& InSpotLightInfo);

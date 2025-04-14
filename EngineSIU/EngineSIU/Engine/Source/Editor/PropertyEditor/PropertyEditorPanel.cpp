@@ -164,7 +164,7 @@ void PropertyEditorPanel::Render()
                     pointlightObj->SetIntensity(Intensity);
 
                 float Radius = pointlightObj->GetRadius();
-                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 1000.f, "%.1f")) {
+                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 200.f, "%.1f")) {
                     pointlightObj->SetRadius(Radius);
                 }
 

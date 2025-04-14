@@ -2,14 +2,12 @@
 
 UPointLightComponent::UPointLightComponent()
 {
-    Light.Type = ELightType::POINT_LIGHT;
-
     PointLightInfo.Position = GetWorldLocation();
     PointLightInfo.Radius = 30;
 
     PointLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-    PointLightInfo.Intensity = 10;
+    PointLightInfo.Intensity = 1000;
     PointLightInfo.Type = ELightType::POINT_LIGHT;
     PointLightInfo.Attenuation = 20.0f;
 }

@@ -84,7 +84,7 @@ struct FSpotLightInfo
 };
 
 
-cbuffer Lighting : register(b7)
+cbuffer Lighting : register(b2)
 {
     FAmbientLightInfo Ambient;
     FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];

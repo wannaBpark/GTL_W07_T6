@@ -168,12 +168,11 @@ void FStaticMeshRenderPass::PrepareRenderState() const
 
     TArray<FString> PSBufferKeys = {
                                   TEXT("FCameraConstantBuffer"),
-                                  TEXT("FLightBuffer"),
+                                  TEXT("FLightInfoBuffer"),
                                   TEXT("FMaterialConstants"),
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
                                   TEXT("FTextureConstants"),
-                                  TEXT("FLightInfoBuffer"),
     };
 
 
@@ -181,12 +180,11 @@ void FStaticMeshRenderPass::PrepareRenderState() const
 
     // Begin Test
     TArray<FString> VSBufferKeys = {
-                                  TEXT("FLightBuffer"),
+                                  TEXT("FLightInfoBuffer"),
                                   TEXT("FMaterialConstants"),
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
                                   TEXT("FTextureConstants"),
-                                  TEXT("FLightInfoBuffer"),
     };
     BufferManager->BindConstantBuffers(VSBufferKeys, 2, EShaderStage::Vertex);
     // End Test    

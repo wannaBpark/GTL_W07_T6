@@ -3,15 +3,11 @@
 #include "Math/Quat.h"
 USpotLightComponent::USpotLightComponent()
 {
-    Light.Type = ELightType::SPOT_LIGHT;
-    Light.InnerCos = 0.9659;
-    Light.OuterCos = 0.8660;
-
     SpotLightInfo.Position = GetWorldLocation();
     SpotLightInfo.Radius = 30.0f;
     SpotLightInfo.Direction = GetForwardVector();
     SpotLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    SpotLightInfo.Intensity = 10.0f;
+    SpotLightInfo.Intensity = 1000.0f;
     SpotLightInfo.Type = ELightType::SPOT_LIGHT;
     SpotLightInfo.InnerRad = 0.2618;
     SpotLightInfo.OuterRad = 0.5236;
@@ -22,17 +18,11 @@ USpotLightComponent::~USpotLightComponent()
 {
 }
 
-
 FVector USpotLightComponent::GetDirection()
 {
     FRotator rotator = GetWorldRotation();
     FVector WorldForward = rotator.ToQuaternion().RotateVector(GetForwardVector());
     return WorldForward;
-}
-
-void USpotLightComponent::SetDirection(const FVector& dir)
-{
-    Light.Direction = dir;
 }
 
 const FSpotLightInfo& USpotLightComponent::GetSpotLightInfo() const

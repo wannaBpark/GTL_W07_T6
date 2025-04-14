@@ -9,7 +9,6 @@ public:
     UDirectionalLightComponent();
     virtual ~UDirectionalLightComponent() override;
     FVector GetDirection();
-    void SetDirection(const FVector& dir);
 
     const FDirectionalLightInfo& GetDirectionalLightInfo() const;
     void SetDirectionalLightInfo(const FDirectionalLightInfo& InDirectionalLightInfo);

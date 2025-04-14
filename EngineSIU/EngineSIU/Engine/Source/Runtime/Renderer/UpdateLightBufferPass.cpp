@@ -61,55 +61,6 @@ void FUpdateLightBufferPass::PrepareRender()
 
 void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    FLightBuffer LightBufferData = {};
-    int LightCount = 0;
-
-    LightBufferData.GlobalAmbientLight = FVector4(0.1f, 0.1f, 0.1f, 1.f);
-    for (auto Light : PointLights)
-    {
-        if (LightCount < MAX_LIGHTS)
-        {
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Type = ELightType::POINT_LIGHT;
-            LightCount++;
-        }
-    }
-
-    for (auto Light : SpotLights)
-    {
-        if (LightCount < MAX_LIGHTS)
-        {
-            //// 월드 변환 행렬 계산 (스케일 1로 가정)
-            //FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
-
-            //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), 100, Light->GetRange(), 140, {1,1,1,1}, Model);
-
-            //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Direction = Light->GetDirection();
-            LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
-            LightBufferData.gLights[LightCount].InnerCos = Light->GetInnerRad();
-            LightBufferData.gLights[LightCount].OuterCos = Light->GetOuterRad();
-            LightCount++;
-        }
-    }
-
-    for (auto Light : DirectionalLights)
-    {
-        if (LightCount < MAX_LIGHTS)
-        {
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Direction = Light->GetDirection();
-            LightBufferData.gLights[LightCount].Type = ELightType::DIRECTIONAL_LIGHT;
-            LightCount++;
-        }
-    }
-    LightBufferData.nLights = LightCount;
-
-    BufferManager->UpdateConstantBuffer(TEXT("FLightBuffer"), LightBufferData);
-
     UpdateLightBuffer();
 }
 

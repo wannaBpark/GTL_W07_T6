@@ -4,9 +4,8 @@
 
 ULightComponentBase::ULightComponentBase()
 {
-    // FString name = "SpotLight";
-    // SetName(name);
-    InitializeLight();
+    AABB.max = { 1.f,1.f,0.1f };
+    AABB.min = { -1.f,-1.f,-0.1f };
 }
 
 ULightComponentBase::~ULightComponentBase()
@@ -18,63 +17,9 @@ UObject* ULightComponentBase::Duplicate(UObject* InOuter)
 {
     ThisClass* NewComponent = Cast<ThisClass>(Super::Duplicate(InOuter));
 
-    NewComponent->Light = Light;
+    NewComponent->AABB = AABB;
 
     return NewComponent;
-}
-
-void ULightComponentBase::SetDiffuseColor(FLinearColor NewColor)
-{
-    Light.DiffuseColor = FVector(NewColor.R, NewColor.G, NewColor.B);
-}
-
-void ULightComponentBase::SetAttenuation(float Attenuation)
-{
-    Light.Attenuation = Attenuation;
-}
-
-void ULightComponentBase::SetAttenuationRadius(float AttenuationRadius)
-{
-    Light.AttRadius = AttenuationRadius;
-}
-
-void ULightComponentBase::SetIntensity(float Intensity)
-{
-    Light.Intensity = Intensity;
-}
-
-void ULightComponentBase::SetFalloff(float fallOff)
-{
-    Light.Falloff = fallOff;
-}
-
-FLinearColor ULightComponentBase::GetDiffuseColor()
-{
-    return FLinearColor(Light.DiffuseColor.X, Light.DiffuseColor.Y, Light.DiffuseColor.Z, 1);
-}
-
-float ULightComponentBase::GetAttenuation()
-{
-    return Light.Attenuation;
-}
-
-float ULightComponentBase::GetAttenuationRadius()
-{
-    return Light.AttRadius;
-}
-
-float ULightComponentBase::GetFalloff()
-{
-    return Light.Falloff;
-}
-
-void ULightComponentBase::InitializeLight()
-{  
-    AABB.max = { 1.f,1.f,0.1f };
-    AABB.min = { -1.f,-1.f,-0.1f };
-    
-    Light = FLight();
-    Light.Enabled = 1;
 }
 
 void ULightComponentBase::TickComponent(float DeltaTime)
