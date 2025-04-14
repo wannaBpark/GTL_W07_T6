@@ -54,7 +54,7 @@ void SLevelEditor::Initialize()
         {
             if (!bIsPressedMouseRightButton)
             {
-                FWindowsCursor::SetShowMouseCursor(false);
+                // FWindowsCursor::SetShowMouseCursor(false);
                 MousePinPosition = InMouseEvent.GetScreenSpacePosition();
                 bIsPressedMouseRightButton = true;
             }
