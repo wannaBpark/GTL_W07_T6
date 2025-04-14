@@ -136,13 +136,6 @@ void FDXDShaderManager::ReloadAllShaders()
            ShaderTimeStamps[Shader.Key] = std::filesystem::last_write_time(Shader.FilePath);
        }
        bAnyUpdated = true;
-       /*for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
-       {
-           if (shaderKeys.Contains(Shader.Key) && std::filesystem::exists(L"Shaders/"+includeFile))
-           {
-               ShaderTimeStamps[includeFile] = std::filesystem::last_write_time(L"Shaders/" + includeFile);
-           }           
-       }*/
    }
 
    // 하나라도 업데이트 된 경우, 의존성 그래프에 있는 모든 include 파일들의 타임스탬프를 갱신
@@ -184,32 +177,6 @@ void FDXDShaderManager::BuildDependency(const FShaderReloadInfo& Info)
 
 bool FDXDShaderManager::IsOutdatedWithDependency(const FShaderReloadInfo& Info)
 {
-    //// 존재하지 않을 경우 0 반환
-    //if (!std::filesystem::exists(Info.FilePath)) { return false; }
-    //auto currentTime = std::filesystem::last_write_time(Info.FilePath);
-    //auto* FoundTime = ShaderTimeStamps.Find(Info.Key);
-    //// Key 값에 대한 value 없을 시 새로 만들어 줌
-    //if (!FoundTime || (*FoundTime != currentTime)) { return true; }
-
-    //// 의존성 include 셰이더 파일 수정 시각 확인
-    //for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
-    //{
-    //    // 이 shader가 포함하는 include File 검사
-    //    if (shaderKeys.Contains(Info.Key))
-    //    {
-    //        if (std::filesystem::exists(includeFile))
-    //        {
-    //            // 만약 include 파일이 메인 셰이더 파일보다 최신이라면 OutDated.
-    //            auto depTime = std::filesystem::last_write_time(includeFile);
-    //            auto* storedDepTime = ShaderTimeStamps.Find(includeFile);
-    //            if (!storedDepTime || *storedDepTime != depTime)
-    //            {
-    //                return true;
-    //            }
-    //        }
-    //    }
-    //}
-    //return false;
     // 의존성 include 파일들의 수정 시각 검사
     for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
     {

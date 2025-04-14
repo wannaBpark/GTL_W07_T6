@@ -63,17 +63,23 @@ void FEditorRenderPass::CreateShaders()
             target.Topology = topology;
         };
 
-    // 기즈모
-    AddShaderSet(L"Gizmo", "gizmoVS", "gizmoPS", layoutGizmo, ARRAYSIZE(layoutGizmo),
-        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Gizmo);
+    //// 기즈모
+    //AddShaderSet(L"Gizmo", "gizmoVS", "gizmoPS", layoutGizmo, ARRAYSIZE(layoutGizmo),
+    //    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Gizmo);
 
-    // axisline (layout 없음)
-    AddShaderSet(L"Axis", "axisVS", "axisPS", nullptr, 0,
-        D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AxisLine);
+    //// axisline (layout 없음)
+    //AddShaderSet(L"Axis", "axisVS", "axisPS", nullptr, 0,
+    //    D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AxisLine);
+    //Resources.Shaders.AxisLine.Layout = nullptr;
 
-    // AABB
-    AddShaderSet(L"AABB", "aabbVS", "aabbPS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
-        D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AABB);
+    //// AABB
+    //AddShaderSet(L"AABB", "aabbVS", "aabbPS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
+    //    D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AABB);
+
+    //// Grid (layout 없음)
+    //AddShaderSet(L"Grid", "gridVS", "gridPS", nullptr, 0,
+    //    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Grid);
+    //Resources.Shaders.Grid.Layout = nullptr;
 
     // Sphere
     AddShaderSet(L"Sphere", "sphereVS", "spherePS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
@@ -82,10 +88,6 @@ void FEditorRenderPass::CreateShaders()
     // Cone
     AddShaderSet(L"Cone", "coneVS", "conePS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
         D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP, Resources.Shaders.Cone);
-
-    // Grid (layout 없음)
-    AddShaderSet(L"Grid", "gridVS", "gridPS", nullptr, 0,
-        D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Grid);
 
     // Icons (layout 없음)
     AddShaderSet(L"Icon", "iconVS", "iconPS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
@@ -390,14 +392,14 @@ void FEditorRenderPass::CreateBuffers()
 void FEditorRenderPass::CreateConstantBuffers()
 {
     auto CreateCB = [this](UINT size, ID3D11Buffer** outBuffer)
-        {
-            D3D11_BUFFER_DESC desc = {};
-            desc.Usage = D3D11_USAGE_DYNAMIC;
-            desc.ByteWidth = size;
-            desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-            desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-            Graphics->Device->CreateBuffer(&desc, nullptr, outBuffer);
-        };
+    {
+        D3D11_BUFFER_DESC desc = {};
+        desc.Usage = D3D11_USAGE_DYNAMIC;
+        desc.ByteWidth = size;
+        desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        Graphics->Device->CreateBuffer(&desc, nullptr, outBuffer);
+    };
 
     CreateCB(sizeof(FConstantBufferCamera), &Resources.ConstantBuffers.Camera00);
     CreateCB(sizeof(FConstantBufferDebugAABB) * ConstantBufferSizeAABB, &Resources.ConstantBuffers.AABB13);
