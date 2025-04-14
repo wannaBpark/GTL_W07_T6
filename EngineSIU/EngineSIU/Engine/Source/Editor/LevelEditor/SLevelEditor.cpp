@@ -195,12 +195,15 @@ void SLevelEditor::Initialize()
 
     Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
     {
-        if (bIsPressedMouseRightButton) return;
+        if (ImGui::GetIO().WantCaptureMouse) return;
 
         // 뷰포트에서 앞뒤 방향으로 화면 이동
         if (ActiveViewportClient->IsPerspective())
         {
-            ActiveViewportClient->CameraMoveForward(InMouseEvent.GetWheelDelta() * 50.0f);
+            if (!bIsPressedMouseRightButton)
+            {
+                ActiveViewportClient->CameraMoveForward(InMouseEvent.GetWheelDelta() * 50.0f);
+            }
         }
         else
         {
