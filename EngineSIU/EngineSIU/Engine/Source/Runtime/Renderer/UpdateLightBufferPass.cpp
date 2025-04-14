@@ -163,7 +163,7 @@ void FUpdateLightBufferPass::UpdateLightBuffer() const
     
     //LightBufferData.Ambient = AmbientLights->GetAmbientLightInfo();
     FAmbientLightInfo ambient;
-    ambient.AmbientColor = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    ambient.AmbientColor = FLinearColor(0.5f, 0.5f, 0.5f, 1.0f);
     LightBufferData.Ambient = ambient;
     LightBufferData.DirectionalLightsCount = DirectionalLightsCount;
     LightBufferData.PointLightsCount = PointLightsCount;

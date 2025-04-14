@@ -11,6 +11,7 @@ UPointLightComponent::UPointLightComponent()
 
     PointLightInfo.Intensity = 10;
     PointLightInfo.Type = ELightType::POINT_LIGHT;
+    PointLightInfo.Attenuation = 20.0f;
 }
 
 UPointLightComponent::~UPointLightComponent()

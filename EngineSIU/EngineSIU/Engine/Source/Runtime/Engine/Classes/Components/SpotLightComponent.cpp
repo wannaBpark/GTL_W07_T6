@@ -15,6 +15,7 @@ USpotLightComponent::USpotLightComponent()
     SpotLightInfo.Type = ELightType::SPOT_LIGHT;
     SpotLightInfo.InnerRad = 0.9659;
     SpotLightInfo.OuterRad = 0.8660;
+    SpotLightInfo.Attenuation = 20.0f;
 }
 
 USpotLightComponent::~USpotLightComponent()

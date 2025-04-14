@@ -28,7 +28,8 @@ struct FPointLightInfo
 
     int     Type;        // 라이트 타입 구분용 (예: 1 = Point)
     float   Intensity;   // 밝기
-    float   Padding[2];  // 16바이트 정렬
+    float   Attenuation;
+    float   Padding;  // 16바이트 정렬
 };
 
 struct FSpotLightInfo
@@ -44,7 +45,7 @@ struct FSpotLightInfo
     int     Type;           // 라이트 타입 구분용 (예: 2 = Spot)
     float   InnerRad; // cos(inner angle)
     float   OuterRad; // cos(outer angle)
-    float   Padding;
+    float   Attenuation;
 };
 
 struct FLightInfoBuffer
