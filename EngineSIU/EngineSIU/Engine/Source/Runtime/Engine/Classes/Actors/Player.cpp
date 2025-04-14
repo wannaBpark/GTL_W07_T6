@@ -67,62 +67,6 @@ void AEditorPlayer::Input()
             ActiveViewport->SetPickedGizmoComponent(nullptr);
         }
     }
-    if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-    {
-        if (!bSpaceDown)
-        {
-            AddControlMode();
-            bSpaceDown = true;
-        }
-    }
-    else
-    {
-        if (bSpaceDown)
-        {
-            bSpaceDown = false;
-        }
-    }
-    if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
-    {
-        if (!bRightMouseDown)
-        {
-            bRightMouseDown = true;
-        }
-    }
-    else
-    {
-        bRightMouseDown = false;
-
-        if (GetAsyncKeyState('Q') & 0x8000)
-        {
-            //GetWorld()->SetPickingObj(nullptr);
-        }
-        if (GetAsyncKeyState('W') & 0x8000)
-        {
-            cMode = CM_TRANSLATION;
-        }
-        if (GetAsyncKeyState('E') & 0x8000)
-        {
-            cMode = CM_ROTATION;
-        }
-        if (GetAsyncKeyState('R') & 0x8000)
-        {
-            cMode = CM_SCALE;
-        }
-    }
-
-    if (GetAsyncKeyState(VK_DELETE) & 0x8000)
-    {
-        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-        if (Engine)
-        {
-            if (AActor* SelectedActor = Engine->GetSelectedActor())
-            {
-                Engine->DeselectActor(SelectedActor);
-                GEngine->ActiveWorld->DestroyActor(SelectedActor);
-            }
-        }
-    }
 }
 
 void AEditorPlayer::ProcessGizmoIntersection(UStaticMeshComponent* iter, const FVector& pickPosition, FEditorViewportClient* InActiveViewport, bool& isPickedGizmo)

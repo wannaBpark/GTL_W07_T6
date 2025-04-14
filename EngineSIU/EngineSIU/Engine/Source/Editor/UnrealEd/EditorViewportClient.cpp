@@ -179,6 +179,27 @@ void FEditorViewportClient::InputKey(const FKeyEvent& InKeyEvent)
     }
     else
     {
+        AEditorPlayer* EdPlayer = CastChecked<UEditorEngine>(GEngine)->GetEditorPlayer();
+        switch (InKeyEvent.GetCharacter())
+        {
+        case 'W':
+        {
+            EdPlayer->SetMode(CM_TRANSLATION);
+            break;
+        }
+        case 'E':
+        {
+            EdPlayer->SetMode(CM_ROTATION);
+            break;
+        }
+        case 'R':
+        {
+            EdPlayer->SetMode(CM_SCALE);
+            break;
+        }
+        default:
+            break;
+        }
         PressedKeys.Empty();
     }
 
@@ -206,6 +227,28 @@ void FEditorViewportClient::InputKey(const FKeyEvent& InKeyEvent)
             FEngineLoop::GraphicDevice.OnResize(GEngineLoop.AppWnd);
             SLevelEditor* LevelEd = GEngineLoop.GetLevelEditor();
             LevelEd->SetEnableMultiViewport(!LevelEd->IsMultiViewport());
+            break;
+        }
+        default:
+            break;
+        }
+
+        // Virtual Key
+        UEditorEngine* EdEngine = CastChecked<UEditorEngine>(GEngine);
+        switch (InKeyEvent.GetKeyCode())
+        {
+        case VK_DELETE:
+        {
+            if (AActor* SelectedActor = EdEngine->GetSelectedActor())
+            {
+                EdEngine->DeselectActor(SelectedActor);
+                GEngine->ActiveWorld->DestroyActor(SelectedActor);
+            }
+            break;
+        }
+        case VK_SPACE:
+        {
+            EdEngine->GetEditorPlayer()->AddControlMode();
             break;
         }
         default:
