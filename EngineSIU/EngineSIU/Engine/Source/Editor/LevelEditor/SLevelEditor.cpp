@@ -179,19 +179,12 @@ void SLevelEditor::Initialize()
                 ActiveViewportClient->MouseMove(InMouseEvent);
             }
         }
-    });
 
-    Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
-    {
-        if (ImGui::GetIO().WantCaptureMouse) return;
-
-        // 카메라 속도 조절
-        if (
-            InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)
-            || InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)
-        )
+        // 마우스 휠 이벤트
+        else if (InMouseEvent.GetEffectingButton() == EKeys::MouseWheelAxis)
         {
-            if (ActiveViewportClient->IsPerspective())
+            // 카메라 속도 조절
+            if (bIsPressedMouseRightButton && ActiveViewportClient->IsPerspective())
             {
                 const float CurrentSpeed = ActiveViewportClient->GetCameraSpeedScalar();
                 const float Adjustment = FMath::Sign(InMouseEvent.GetWheelDelta()) * FMath::Loge(CurrentSpeed + 1.0f) * 0.5f;
@@ -199,18 +192,20 @@ void SLevelEditor::Initialize()
                 ActiveViewportClient->SetCameraSpeedScalar(CurrentSpeed + Adjustment);
             }
         }
+    });
 
-        // Forward 방향으로 앞뒤로 이동
+    Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
+    {
+        if (bIsPressedMouseRightButton) return;
+
+        // 뷰포트에서 앞뒤 방향으로 화면 이동
+        if (ActiveViewportClient->IsPerspective())
+        {
+            ActiveViewportClient->CameraMoveForward(InMouseEvent.GetWheelDelta() * 50.0f);
+        }
         else
         {
-            if (ActiveViewportClient->IsPerspective())
-            {
-                ActiveViewportClient->CameraMoveForward(InMouseEvent.GetWheelDelta() * 50.0f);
-            }
-            else
-            {
-                FEditorViewportClient::SetOthoSize(-InMouseEvent.GetWheelDelta());
-            }
+            FEditorViewportClient::SetOthoSize(-InMouseEvent.GetWheelDelta());
         }
     });
 
