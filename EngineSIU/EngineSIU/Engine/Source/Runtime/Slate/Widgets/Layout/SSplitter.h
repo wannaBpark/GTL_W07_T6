@@ -16,6 +16,8 @@ public:
 
     float SplitterHalfThickness = 5.f; // Pixel Value
 
+    bool bIsSplitterPressed = false;
+
     virtual void Initialize(FRect initRect) override;
 
     virtual void ClampSplitRatio() {}
@@ -25,8 +27,12 @@ public:
     virtual void OnDragStart(const FPoint& mousePos) { /* 초기화 */ }
     virtual void OnDrag(const FPoint& delta) = 0; // 가로/세로에 따라 구현 다름.
     virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
-    virtual bool OnPressed(FPoint InPoint) override;
+    virtual bool OnPressed(const FPoint& InPoint) override;
     virtual bool OnReleased() override;
+
+    virtual bool IsSplitterHovered(const FPoint& InPoint) const;
+
+    virtual bool IsSplitterPressed() const { return bIsSplitterPressed; }
 
     virtual void OnDragEnd() {}
 

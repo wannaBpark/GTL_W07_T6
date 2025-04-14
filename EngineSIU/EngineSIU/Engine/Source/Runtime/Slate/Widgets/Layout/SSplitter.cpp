@@ -23,12 +23,14 @@ void SSplitter::OnResize(uint32 InWidth, uint32 InHeight)
     Rect.Height = static_cast<float>(InHeight);
 }
 
-bool SSplitter::OnPressed(FPoint InPoint)
+bool SSplitter::OnPressed(const FPoint& InPoint)
 {
     if (!IsHover(InPoint))
     {
         return false;
     }
+
+    bIsSplitterPressed = IsSplitterHovered(InPoint);
     
     return bIsPressed = true;
 }
@@ -36,8 +38,22 @@ bool SSplitter::OnPressed(FPoint InPoint)
 bool SSplitter::OnReleased()
 {
     bIsPressed = false;
+    bIsSplitterPressed = false;
     
     return false;
+}
+
+bool SSplitter::IsSplitterHovered(const FPoint& InPoint) const
+{
+    if (SideLT && SideLT->IsHover(InPoint))
+    {
+        return false;
+    }
+    if (SideRB && SideRB->IsHover(InPoint))
+    {
+        return false;
+    }
+    return true;
 }
 
 void SSplitter::LoadConfig(const TMap<FString, FString>& Config)

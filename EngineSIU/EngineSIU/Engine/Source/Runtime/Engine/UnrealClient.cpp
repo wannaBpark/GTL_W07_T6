@@ -316,3 +316,9 @@ void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRec
     const uint32 Height = static_cast<uint32>(Rect.Height);
     RenderTargetRHI->Resize(Width, Height);
 }
+
+bool FViewport::bIsHovered(const POINT& InPoint) const
+{
+    return (Rect.TopLeftX <= static_cast<float>(InPoint.x) && static_cast<float>(InPoint.x) <= Rect.TopLeftX + Rect.Width) &&
+           (Rect.TopLeftY <= static_cast<float>(InPoint.y) && static_cast<float>(InPoint.y) <= Rect.TopLeftY + Rect.Height);
+}

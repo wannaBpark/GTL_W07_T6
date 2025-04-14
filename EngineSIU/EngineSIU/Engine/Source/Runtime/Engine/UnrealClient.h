@@ -123,6 +123,8 @@ public:
 
     FRect GetRect() const { return Rect; }
 
+    bool bIsHovered(const POINT& InPoint) const;
+
 private:
     FRenderTargetRHI* RenderTargetRHI;
 

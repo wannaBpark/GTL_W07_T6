@@ -161,17 +161,7 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
 
 bool FEditorViewportClient::IsSelected(POINT InPoint) const
 {
-    float TopLeftX = Viewport->GetD3DViewport().TopLeftX;
-    float TopLeftY = Viewport->GetD3DViewport().TopLeftY;
-    float Width = Viewport->GetD3DViewport().Width;
-    float Height = Viewport->GetD3DViewport().Height;
-
-    if (InPoint.x >= TopLeftX && InPoint.x <= TopLeftX + Width &&
-        InPoint.y >= TopLeftY && InPoint.y <= TopLeftY + Height)
-    {
-        return true;
-    }
-    return false;
+    return GetViewport()->bIsHovered(InPoint);
 }
 
 D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const

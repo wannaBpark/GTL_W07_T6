@@ -103,41 +103,41 @@ void SLevelEditor::Tick(float DeltaTime)
 void SLevelEditor::Input()
 {
     ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse) return;
+    if (io.WantCaptureMouse)
+    {
+        return;
+    }
+    
+    POINT CurrentMousePos;
+    GetCursorPos(&CurrentMousePos);
+    ScreenToClient(GEngineLoop.hWnd, &CurrentMousePos);
+    
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
         if (bLButtonDown == false)
         {
             bLButtonDown = true;
-            POINT pt;
-            GetCursorPos(&pt);
-            GetCursorPos(&PrevCursorLocation);
-            ScreenToClient(GEngineLoop.hWnd, &pt);
 
-            SelectViewport(pt);
+            SelectViewport(CurrentMousePos);
 
-            VSplitter->OnPressed(FPoint(pt.x, pt.y));
-            HSplitter->OnPressed(FPoint(pt.x, pt.y));
+            VSplitter->OnPressed(FPoint(CurrentMousePos.x, CurrentMousePos.y));
+            HSplitter->OnPressed(FPoint(CurrentMousePos.x, CurrentMousePos.y));
         }
         else
         {
-            POINT currentMousePos;
-            GetCursorPos(&currentMousePos);
-
             // 마우스 이동 차이 계산
-            int32 DeltaX = currentMousePos.x - PrevCursorLocation.x;
-            int32 DeltaY = currentMousePos.y - PrevCursorLocation.y;
+            int32 DeltaX = CurrentMousePos.x - PrevCursorLocation.x;
+            int32 DeltaY = CurrentMousePos.y - PrevCursorLocation.y;
 
-            if (VSplitter->IsPressed())
+            if (VSplitter->IsSplitterPressed())
             {
                 VSplitter->OnDrag(FPoint(DeltaX, DeltaY));
             }
-            if (HSplitter->IsPressed())
+            if (HSplitter->IsSplitterPressed())
             {
                 HSplitter->OnDrag(FPoint(DeltaX, DeltaY));
             }
             ResizeViewports();
-            PrevCursorLocation = currentMousePos;
         }
     }
     else
@@ -146,23 +146,21 @@ void SLevelEditor::Input()
         VSplitter->OnReleased();
         HSplitter->OnReleased();
     }
+    
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
     {
         if (!bRButtonDown)
         {
             bRButtonDown = true;
-            POINT pt;
-            GetCursorPos(&pt);
-            GetCursorPos(&PrevCursorLocation);
-            ScreenToClient(GEngineLoop.hWnd, &pt);
-
-            SelectViewport(pt);
+            SelectViewport(CurrentMousePos);
         }
     }
     else
     {
         bRButtonDown = false;
     }
+
+    PrevCursorLocation = CurrentMousePos;
 }
 
 void SLevelEditor::Release()
