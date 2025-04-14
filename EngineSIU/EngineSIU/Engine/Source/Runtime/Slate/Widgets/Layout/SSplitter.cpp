@@ -85,22 +85,14 @@ float SSplitterH::GetSplitterLTCenter()
 
 void SSplitterH::LoadConfig(const TMap<FString, FString>& config)
 {
-    // 각 키에 대해 기본값을 지정 (예: 기본 위치 및 크기)
-    Rect.TopLeftX = GetValueFromConfig(config, "SplitterH.X", FEngineLoop::GraphicDevice.ScreenWidth * 0.5f);
-    Rect.TopLeftY = GetValueFromConfig(config, "SplitterH.Y", 0.0f);
+    SplitRatio = GetValueFromConfig(config, "SplitterH.SplitRatio", 0.5f);
 
-    Rect.Width = GetValueFromConfig(config, "SplitterH.Width", 20.0f);
-    Rect.Height = GetValueFromConfig(config, "SplitterH.Height", 10.0f); // 수평 스플리터는 높이 고정
-    
-    // Rect.TopLeftX *= FEngineLoop::GraphicDevice.ScreenWidth / GetValueFromConfig(config, "SplitterV.Width", 1000.0f);
+    UpdateChildRects();
 }
 
 void SSplitterH::SaveConfig(TMap<FString, FString>& config) const
 {
-    config["SplitterH.X"] = std::to_string(Rect.TopLeftX);
-    config["SplitterH.Y"] = std::to_string(Rect.TopLeftY);
-    config["SplitterH.Width"] = std::to_string(Rect.Width);
-    config["SplitterH.Height"] = std::to_string(Rect.Height);
+    config["SplitterH.SplitRatio"] = std::to_string(SplitRatio);
 }
 
 void SSplitterH::OnResize(uint32 InWidth, uint32 InHeight)
@@ -164,20 +156,14 @@ float SSplitterV::GetSplitterLTCenter()
 
 void SSplitterV::LoadConfig(const TMap<FString, FString>& config)
 {
-    Rect.TopLeftX = GetValueFromConfig(config, "SplitterV.X", 0.0f);
-    Rect.TopLeftY = GetValueFromConfig(config, "SplitterV.Y", FEngineLoop::GraphicDevice.ScreenHeight * 0.5f);
-    Rect.Width = GetValueFromConfig(config, "SplitterV.Width", 10.f); // 수직 스플리터는 너비 고정
-    Rect.Height = GetValueFromConfig(config, "SplitterV.Height", 20.f);
+    SplitRatio = GetValueFromConfig(config, "SplitterV.SplitRatio", 0.5f);
 
-    // Rect.TopLeftY *= FEngineLoop::GraphicDevice.ScreenHeight / GetValueFromConfig(config, "SplitterH.Height", 1000.0f);
+    UpdateChildRects();
 }
 
 void SSplitterV::SaveConfig(TMap<FString, FString>& config) const
 {
-    config["SplitterV.X"] = std::to_string(Rect.TopLeftX);
-    config["SplitterV.Y"] = std::to_string(Rect.TopLeftY);
-    config["SplitterV.Width"] = std::to_string(Rect.Width);
-    config["SplitterV.Height"] = std::to_string(Rect.Height);
+    config["SplitterV.SplitRatio"] = std::to_string(SplitRatio);
 }
 
 void SSplitterV::OnResize(uint32 InWidth, uint32 InHeight)
