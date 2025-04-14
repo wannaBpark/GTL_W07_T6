@@ -107,8 +107,8 @@ void SLevelEditor::Initialize()
             && !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)
             && !InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)
         ) {
-            // TODO: 나중에 커서가 Viewport 위에 있을때만 ECursorType::Crosshairs로 바꾸게끔 하기
-            // ECursorType CursorType = ECursorType::Crosshairs;
+            // TODO: 나중에 커서가 Viewport 위에 있을때만 ECursorType::Crosshair로 바꾸게끔 하기
+            // ECursorType CursorType = ECursorType::Crosshair;
             ECursorType CursorType = ECursorType::Arrow;
             POINT Point;
 

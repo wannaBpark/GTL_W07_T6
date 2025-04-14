@@ -40,7 +40,7 @@ ECursorType FWindowsCursor::GetMouseCursor()
     }
     else if (Cursor == LoadCursor(nullptr, IDC_CROSS))
     {
-        return ECursorType::Crosshairs;
+        return ECursorType::Crosshair;
     }
     else if (Cursor == LoadCursor(nullptr, IDC_HAND))
     {
@@ -84,7 +84,7 @@ void FWindowsCursor::SetMouseCursor(const ECursorType CursorType)
     case ECursorType::TextEditBeam:
         NewCursor = LoadCursor(nullptr, IDC_IBEAM);
         break;
-    case ECursorType::Crosshairs:
+    case ECursorType::Crosshair:
         NewCursor = LoadCursor(nullptr, IDC_CROSS);
         break;
     case ECursorType::Hand:
