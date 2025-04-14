@@ -621,7 +621,7 @@ void FSlateAppMessageHandler::OnRawMouseInput(const RAWMOUSE& RawMouseInput)
         }
 
         // 마우스 휠
-        /*else*/ if (ButtonFlags & RI_MOUSE_WHEEL)
+        if (ButtonFlags & RI_MOUSE_WHEEL)
         {
             const SHORT WheelData = static_cast<SHORT>(HIWORD(RawMouseInput.ulButtons));
             WheelDelta = static_cast<float>(WheelData) / static_cast<float>(WHEEL_DELTA);
