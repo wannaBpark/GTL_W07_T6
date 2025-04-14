@@ -185,7 +185,8 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                                   TEXT("FMaterialConstants"),
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
-                                  TEXT("FTextureConstants")
+                                  TEXT("FTextureConstants"),
+                                  TEXT("FLightInfoBuffer"),
     };
     BufferManager->BindConstantBuffers(VSBufferKeys, 2, EShaderStage::Vertex);
     // End Test    

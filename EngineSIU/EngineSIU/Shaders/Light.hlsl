@@ -110,12 +110,13 @@ float CalculateAttenuation(float distance, float attenuationFactor, float radius
 //    return pow(max(cosAngle, 0.0), spotFalloff);
 //}
 
-float CalculateSpotEffect(float3 lightDir, float3 spotDir, float innerCos, float outerCos, float spotFalloff)
+float CalculateSpotEffect(float3 lightDir, float3 spotDir, float innerRad, float outerRad, float spotFalloff)
 {
-    float cosAngle = dot(-lightDir, spotDir);
-    float spotEffect = smoothstep(outerCos, innerCos, cosAngle);
+    float dotProduct = dot(-lightDir, spotDir); //[-1,1]이고
     
-    return spotEffect * pow(max(cosAngle, 0.0), spotFalloff);
+    float spotEffect = smoothstep(cos(outerRad/2), cos(innerRad/2), dotProduct);
+    
+    return spotEffect * pow(max(dotProduct, 0.0), 1);
 }
 
 float CalculateDiffuse(float3 normal, float3 lightDir)
@@ -264,7 +265,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         return float4(0.0, 0.0, 0.0, 0.0);
     
     float3 lightDir = normalize(vToLight);
-    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.InnerRad, light.OuterRad, light.Attenuation);
+    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.InnerRad, light.OuterRad, 1);
     
     if (spotFactor <= 0.0)
         return float4(0.0, 0.0, 0.0, 0.0);
