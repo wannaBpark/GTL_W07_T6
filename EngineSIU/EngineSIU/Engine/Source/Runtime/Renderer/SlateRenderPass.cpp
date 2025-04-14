@@ -58,6 +58,7 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     Transform.Offset = FVector2D(0.f, 0.f);
     
     BufferManager->UpdateConstantBuffer<FSlateTransform>("FSlateTransform", Transform);
+    BufferManager->BindConstantBuffer("FSlateTransform", 12, EShaderStage::Vertex);
 
     // 렌더 타겟을 백버퍼로 지정
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, nullptr);

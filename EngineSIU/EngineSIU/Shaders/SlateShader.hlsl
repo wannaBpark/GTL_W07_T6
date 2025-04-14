@@ -34,7 +34,7 @@ PS_Input mainVS(uint VertexID : SV_VertexID)
     };
 
     float2 SlatePosition = ScreenPositions[VertexID];
-    // SlatePosition = SlatePosition * SlateScale + SlateOffset;
+    SlatePosition = SlatePosition * SlateScale + SlateOffset;
 
     Output.Position = float4(SlatePosition, 0, 1);
     Output.UV = UVs[VertexID];

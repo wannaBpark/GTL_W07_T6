@@ -127,7 +127,7 @@ void FRenderer::ClearRenderArr()
     FogRenderPass->ClearRenderArr();
 }
 
-void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bIncludeDSV)
+void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClear, bool bIncludeDSV)
 {
     FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(Type);
     if (!ResourceRHI)
@@ -136,10 +136,14 @@ void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTa
     }
     
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, bIncludeDSV ? RenderTargetRHI->DepthStencilView : nullptr);
-    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
-    if (bIncludeDSV)
+
+    if (bClear)
     {
-        Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
+        if (bIncludeDSV)
+        {
+            Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        }
     }
 }
 
@@ -176,9 +180,9 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     }
     
     // Render Billboard
-    if (ShowFlag & EEngineShowFlags::SF_BillboardText && false)
+    if (ShowFlag & EEngineShowFlags::SF_BillboardText)
     {
-        SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI);
+        SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI, false);
         BillboardRenderPass->Render(ActiveViewport);
     }
 
