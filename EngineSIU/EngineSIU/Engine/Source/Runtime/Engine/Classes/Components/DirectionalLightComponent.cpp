@@ -49,24 +49,13 @@ void UDirectionalLightComponent::SetIntensity(float InIntensity)
 {
     DirectionalLightInfo.Intensity = InIntensity;
 }
-/*
-FVector4 UDirectionalLightComponent::GetDiffuseColor() const
+
+FLinearColor UDirectionalLightComponent::GetLightColor() const
 {
-    return DirectionalLightInfo.DiffuseColor;
+    return DirectionalLightInfo.LightColor;
 }
 
-void UDirectionalLightComponent::SetDiffuseColor(const FVector4& InColor)
+void UDirectionalLightComponent::SetLightColor(const FLinearColor& InColor)
 {
-    DirectionalLightInfo.DiffuseColor = InColor;
+    DirectionalLightInfo.LightColor = InColor;
 }
-
-FVector4 UDirectionalLightComponent::GetSpecularColor() const
-{
-    return DirectionalLightInfo.SpecularColor;
-}
-
-void UDirectionalLightComponent::SetSpecularColor(const FVector4& InColor)
-{
-    DirectionalLightInfo.SpecularColor = InColor;
-}
-*/

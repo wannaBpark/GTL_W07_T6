@@ -5,6 +5,7 @@
 #include "Components/LightComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/DirectionalLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
@@ -166,11 +167,12 @@ void PropertyEditorPanel::Render()
                 if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
                     pointlightObj->SetIntensity(Intensity);
 
-                float attenuation = pointlightObj->GetRadius();
-                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
-                    pointlightObj->SetRadius(attenuation);
+                float Radius = pointlightObj->GetRadius();
+                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 10000.f, "%.1f")) {
+                    pointlightObj->SetRadius(Radius);
                 }
-                
+
+
                 ImGui::TreePop();
             }
 
@@ -183,6 +185,47 @@ void PropertyEditorPanel::Render()
             ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
             if (ImGui::TreeNodeEx("SpotLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return spotlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { spotlightObj->SetLightColor(c); });
+
+                float Intensity = spotlightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                    spotlightObj->SetIntensity(Intensity);
+
+                float Radius = spotlightObj->GetRadius();
+                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 10000.f, "%.1f")) {
+                    spotlightObj->SetRadius(Radius);
+                }
+
+                LightDirection = spotlightObj->GetDirection();
+                FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
+                spotlightObj->SetDirection(LightDirection);
+
+                float InnerRad = spotlightObj->GetInnerDegree();
+                if (ImGui::SliderFloat("InnerRad", &InnerRad, 0.01f, 10000.f, "%.1f")) {
+                    spotlightObj->SetInnerDegree(InnerRad);
+                }
+
+                float OuterRad = spotlightObj->GetOuterDegree();
+                if (ImGui::SliderFloat("OuterRad", &OuterRad, 0.01f, 10000.f, "%.1f")) {
+                    spotlightObj->SetOuterDegree(OuterRad);
+                }
+
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
+
+    if (PickedActor)
+        if (UDirectionalLightComponent* spotlightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("DirectionalLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
                 DrawColorProperty("Light Color",
                     [&]() { return spotlightObj->GetLightColor(); },

@@ -105,3 +105,23 @@ void USpotLightComponent::SetOuterRad(float InOuterCos)
 {
     SpotLightInfo.OuterRad = InOuterCos;
 }
+
+float USpotLightComponent::GetInnerDegree() const
+{
+    return SpotLightInfo.InnerRad * (180.0f / PI);
+}
+
+void USpotLightComponent::SetInnerDegree(float InInnerDegree)
+{
+    SpotLightInfo.InnerRad = InInnerDegree * (PI / 180.0f);
+}
+
+float USpotLightComponent::GetOuterDegree() const
+{
+    return SpotLightInfo.OuterRad * (180 / PI);
+}
+
+void USpotLightComponent::SetOuterDegree(float InOuterDegree)
+{
+    SpotLightInfo.OuterRad = InOuterDegree * (PI / 180.0f);
+}

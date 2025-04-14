@@ -17,13 +17,8 @@ public:
     float GetIntensity() const;
     void SetIntensity(float InIntensity);
 
-    /*
-    FVector4 GetDiffuseColor() const;
-    void SetDiffuseColor(const FVector4& InColor);
-
-    FVector4 GetSpecularColor() const;
-    void SetSpecularColor(const FVector4& InColor);
-    */
+    FLinearColor GetLightColor() const;
+    void SetLightColor(const FLinearColor& InColor);
 
 private:
     FDirectionalLightInfo DirectionalLightInfo;

@@ -20,8 +20,6 @@ public:
     FLinearColor GetLightColor() const;
     void SetLightColor(const FLinearColor& InColor);
 
-
-
     float GetIntensity() const;
     void SetIntensity(float InIntensity);
 
@@ -33,6 +31,13 @@ public:
 
     float GetOuterRad() const;
     void SetOuterRad(float InOuterCos);
+
+    float GetInnerDegree() const;
+    void SetInnerDegree(float InInnerDegree);
+
+    float GetOuterDegree() const;
+    void SetOuterDegree(float InOuterDegree);
+
 private:
     FSpotLightInfo SpotLightInfo;
 };
