@@ -36,6 +36,8 @@ public:
     
     UINT ScreenWidth = 0;
     UINT ScreenHeight = 0;
+
+    D3D11_VIEWPORT Viewport;
     
     FLOAT ClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 화면을 초기화(clear) 할 때 사용할 색상(RGBA)
 

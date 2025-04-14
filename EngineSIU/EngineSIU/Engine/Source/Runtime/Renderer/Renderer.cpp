@@ -127,13 +127,20 @@ void FRenderer::ClearRenderArr()
     FogRenderPass->ClearRenderArr();
 }
 
-void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI)
+void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bIncludeDSV)
 {
     FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(Type);
+    if (!ResourceRHI)
+    {
+        return;
+    }
     
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->DepthStencilView);
-    Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, bIncludeDSV ? RenderTargetRHI->DepthStencilView : nullptr);
     Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
+    if (bIncludeDSV)
+    {
+        Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    }
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
@@ -159,19 +166,25 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     }
 
     // Render Postprocess
-    if (ActiveViewport->GetViewMode() == VMI_Lit)
+    if (ActiveViewport->GetViewMode() == VMI_Lit && false)
     {
         if (ShowFlag & EEngineShowFlags::SF_Fog)
         {
-            // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달해야 함
+            SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
+            // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
         }
     }
     
     // Render Billboard
-    if (ShowFlag & EEngineShowFlags::SF_BillboardText)
+    if (ShowFlag & EEngineShowFlags::SF_BillboardText && false)
     {
+        SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI);
         BillboardRenderPass->Render(ActiveViewport);
     }
+
+    // 일단 수동으로 렌더타겟 해제하고 쉐이더 리소스 뷰에 씬 텍스처 전달
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+    Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
 
     // Render for Editor
     if (GEngine->ActiveWorld->WorldType != EWorldType::PIE && false)  // TODO: false 제거
@@ -181,7 +194,17 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     }
 
     // Compositing
+    
+    // SetRenderResource(EResourceType::ERT_Compositing, RenderTargetRHI, false);
     CompositingPass->Render(ActiveViewport);
 
+    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
+
     ClearRenderArr();
+}
+
+void FRenderer::RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    SlateRenderPass->Render(Viewport);
 }

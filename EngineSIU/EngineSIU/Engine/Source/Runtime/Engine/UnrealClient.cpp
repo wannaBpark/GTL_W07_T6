@@ -89,7 +89,7 @@ HRESULT FRenderTargetRHI::CreateResource(EResourceType Type)
     D3D11_RENDER_TARGET_VIEW_DESC RTVDesc = {};
     RTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // TODO: srgb 옵션 고려해보기
     RTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-    hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(NewResource.Texture2D, nullptr, &NewResource.RTV);
+    hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(NewResource.Texture2D, &RTVDesc, &NewResource.RTV);
     if (FAILED(hr))
     {
         return hr;

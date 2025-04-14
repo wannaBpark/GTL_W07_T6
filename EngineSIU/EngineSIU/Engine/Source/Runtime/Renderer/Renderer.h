@@ -50,8 +50,9 @@ public:
     //==========================================================================
     void PrepareRender();
     void ClearRenderArr();
-    void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI);
+    void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bIncludeDSV = true);
     void Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    void RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport); // TODO: 추후 RenderSlate로 변경해야함
 
     //==========================================================================
     // 버퍼 생성/해제 함수 (템플릿 포함)

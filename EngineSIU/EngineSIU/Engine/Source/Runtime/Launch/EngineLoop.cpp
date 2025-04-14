@@ -152,13 +152,22 @@ void FEngineLoop::Render() const
             Renderer.PrepareRender();
             Renderer.Render(LevelEditor->GetActiveViewportClient());
         }
+        
+        for (int i = 0; i < 4; ++i)
+        {
+            LevelEditor->SetActiveViewportClient(i);
+            Renderer.RenderViewport(LevelEditor->GetActiveViewportClient());
+        }
         GetLevelEditor()->SetActiveViewportClient(ActiveViewportCache);
     }
     else
     {
         Renderer.PrepareRender();
         Renderer.Render(LevelEditor->GetActiveViewportClient());
+        
+        Renderer.RenderViewport(LevelEditor->GetActiveViewportClient());
     }
+    
 }
 
 void FEngineLoop::Tick()
@@ -226,7 +235,9 @@ void FEngineLoop::Input()
                 LevelEditor->DisableMultiViewport();
             }
             else
+            {
                 LevelEditor->EnableMultiViewport();
+            }
         }
     }
     else

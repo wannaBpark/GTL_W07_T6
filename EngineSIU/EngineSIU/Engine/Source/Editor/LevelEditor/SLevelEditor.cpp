@@ -210,12 +210,18 @@ void SLevelEditor::SelectViewport(POINT point)
 
 void SLevelEditor::ResizeViewports()
 {
-    if (bMultiViewportMode) {
-        if (GetViewports()[0]) {
+    if (bMultiViewportMode)
+    {
+        if (GetViewports()[0])
+        {
             for (int i = 0;i < 4;++i)
             {
-                GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
-                    HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
+                GetViewports()[i]->ResizeViewport(
+                    VSplitter->SideLT->Rect,
+                    VSplitter->SideRB->Rect,
+                    HSplitter->SideLT->Rect,
+                    HSplitter->SideRB->Rect
+                );
             }
         }
     }
@@ -234,6 +240,7 @@ void SLevelEditor::EnableMultiViewport()
 void SLevelEditor::DisableMultiViewport()
 {
     bMultiViewportMode = false;
+    ResizeViewports();
 }
 
 bool SLevelEditor::IsMultiViewport() const
@@ -271,9 +278,13 @@ void SLevelEditor::SaveConfig()
 {
     TMap<FString, FString> config;
     if (HSplitter)
+    {
         HSplitter->SaveConfig(config);
+    }
     if (VSplitter)
+    {
         VSplitter->SaveConfig(config);
+    }
     for (size_t i = 0; i < 4; i++)
     {
         ViewportClients[i]->SaveConfig(config);
@@ -296,11 +307,16 @@ TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& filePath)
     std::ifstream file(*filePath);
     std::string line;
 
-    while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '[' || line[0] == ';') continue;
+    while (std::getline(file, line))
+    {
+        if (line.empty() || line[0] == '[' || line[0] == ';')
+        {
+            continue;
+        }
         std::istringstream ss(line);
         std::string key, value;
-        if (std::getline(ss, key, '=') && std::getline(ss, value)) {
+        if (std::getline(ss, key, '=') && std::getline(ss, value))
+        {
             config[key] = value;
         }
     }
@@ -310,7 +326,8 @@ TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& filePath)
 void SLevelEditor::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
 {
     std::ofstream file(*filePath);
-    for (const auto& pair : config) {
+    for (const auto& pair : config)
+    {
         file << *pair.Key << "=" << *pair.Value << "\n";
     }
 }

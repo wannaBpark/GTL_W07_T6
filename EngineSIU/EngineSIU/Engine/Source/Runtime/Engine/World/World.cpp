@@ -1,5 +1,6 @@
 #include "World.h"
 
+#include "Actors/Cube.h"
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"

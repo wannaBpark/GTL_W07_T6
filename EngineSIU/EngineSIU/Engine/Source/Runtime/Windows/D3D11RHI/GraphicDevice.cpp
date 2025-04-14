@@ -49,6 +49,13 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow)
     SwapChain->GetDesc(&SwapchainDesc);
     ScreenWidth = SwapchainDesc.BufferDesc.Width;
     ScreenHeight = SwapchainDesc.BufferDesc.Height;
+
+    Viewport.Width = ScreenWidth;
+    Viewport.Height = ScreenHeight;
+    Viewport.MinDepth = 0.0f;
+    Viewport.MaxDepth = 1.0f;
+    Viewport.TopLeftX = 0;
+    Viewport.TopLeftY = 0;
 }
 
 ID3D11Texture2D* FGraphicsDevice::CreateTexture2D(const D3D11_TEXTURE2D_DESC& Description, const void* InitialData)
@@ -245,6 +252,13 @@ void FGraphicsDevice::Resize(HWND hWindow)
     ScreenWidth = SwapchainDesc.BufferDesc.Width;
     ScreenHeight = SwapchainDesc.BufferDesc.Height;
 
+    Viewport.Width = ScreenWidth;
+    Viewport.Height = ScreenHeight;
+    Viewport.MinDepth = 0.0f;
+    Viewport.MaxDepth = 1.0f;
+    Viewport.TopLeftX = 0;
+    Viewport.TopLeftY = 0;
+
     CreateBackBuffer();
 }
 
@@ -311,7 +325,7 @@ void FGraphicsDevice::CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTarget
 
 void FGraphicsDevice::Prepare()
 {
-    DeviceContext->OMSetRenderTargets(1, &BackBufferRTV, nullptr);
+    DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
     DeviceContext->ClearRenderTargetView(BackBufferRTV, ClearColor);
 }
 

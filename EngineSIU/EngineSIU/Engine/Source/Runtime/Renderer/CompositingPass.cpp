@@ -73,6 +73,7 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     ID3D11PixelShader* PixelShader = ShaderManager->GetPixelShaderByKey(L"Compositing");
     Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
+    Graphics->DeviceContext->IASetInputLayout(nullptr);
     Graphics->DeviceContext->Draw(6, 0);
 
     // Finish

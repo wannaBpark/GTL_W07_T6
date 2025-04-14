@@ -121,6 +121,8 @@ public:
 
     FRenderTargetRHI* GetRenderTargetRHI() const { return RenderTargetRHI; }
 
+    FRect GetRect() const { return Rect; }
+
 private:
     FRenderTargetRHI* RenderTargetRHI;
 
