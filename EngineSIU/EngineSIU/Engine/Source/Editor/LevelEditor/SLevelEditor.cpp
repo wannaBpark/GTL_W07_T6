@@ -197,7 +197,7 @@ void SLevelEditor::SelectViewport(POINT point)
         if (ViewportClients[i]->IsSelected(point))
         {
             SetActiveViewportClient(i);
-            break;
+            return;
         }
     }
 }
@@ -252,6 +252,14 @@ void SLevelEditor::LoadConfig()
 
     SetActiveViewportClient(GetValueFromConfig(Config, "ActiveViewportIndex", 0));
     bMultiViewportMode = GetValueFromConfig(Config, "bMultiView", false);
+    if (bMultiViewportMode)
+    {
+        EnableMultiViewport();
+    }
+    else
+    {
+        DisableMultiViewport();
+    }
     
     for (size_t i = 0; i < 4; i++)
     {
@@ -286,7 +294,7 @@ void SLevelEditor::SaveConfig()
         ViewportClients[i]->SaveConfig(config);
     }
     ActiveViewportClient->SaveConfig(config);
-    config["bMutiView"] = std::to_string(bMultiViewportMode);
+    config["bMultiView"] = std::to_string(bMultiViewportMode);
     config["ActiveViewportIndex"] = std::to_string(ActiveViewportClient->ViewportIndex);
     config["ScreenWidth"] = std::to_string(ActiveViewportClient->ViewportIndex);
     config["ScreenHeight"] = std::to_string(ActiveViewportClient->ViewportIndex);
