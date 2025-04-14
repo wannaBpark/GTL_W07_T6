@@ -11,6 +11,7 @@
 #define MIN_ORTHOZOOM (1.0)  /* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
 #define MAX_ORTHOZOOM (1e25)
 
+enum class EViewScreenLocation : uint8;
 class FRenderTargetRHI;
 class ATransformGizmo;
 class USceneComponent;
@@ -86,7 +87,7 @@ public:
 
     virtual void Draw(FViewport* Viewport) override;
     virtual UWorld* GetWorld() const override { return nullptr; }
-    void Initialize(int32 InViewportIndex, const FRect& InRect);
+    void Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect);
     void Tick(float DeltaTime);
     void Release() const;
 

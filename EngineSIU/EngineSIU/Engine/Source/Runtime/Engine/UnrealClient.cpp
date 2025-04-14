@@ -89,7 +89,7 @@ HRESULT FRenderTargetRHI::CreateResource(EResourceType Type)
     D3D11_RENDER_TARGET_VIEW_DESC RTVDesc = {};
     RTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // TODO: srgb 옵션 고려해보기
     RTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-    hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(NewResource.Texture2D, &RTVDesc, &NewResource.RTV);
+    hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(NewResource.Texture2D, nullptr, &NewResource.RTV);
     if (FAILED(hr))
     {
         return hr;
@@ -116,16 +116,9 @@ bool FRenderTargetRHI::HasResource(EResourceType Type) const
     return Resources.Contains(Type);
 }
 
-FViewportResources* FRenderTargetRHI::GetResource(EResourceType Type)
+TMap<EResourceType, FViewportResources>& FRenderTargetRHI::GetResources()
 {
-    if (!Resources.Contains(Type))
-    {
-        if (FAILED(CreateResource(Type)))
-        {
-            return nullptr;
-        }
-    }
-    return Resources.Find(Type);
+    return Resources;
 }
 
 void FRenderTargetRHI::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
@@ -140,7 +133,11 @@ void FRenderTargetRHI::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
 
 std::array<float, 4> FRenderTargetRHI::GetClearColor(EResourceType Type) const
 {
-    return ClearColors[Type];
+    if (const std::array<float, 4>* Found = ClearColors.Find(Type))
+    {
+        return *Found;
+    }
+    return { 0.0f, 0.0f, 0.0f, 1.0f };
 }
 
 HRESULT FRenderTargetRHI::CreateDepthStencilResources()

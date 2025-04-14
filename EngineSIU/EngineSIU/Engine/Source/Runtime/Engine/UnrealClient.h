@@ -27,11 +27,6 @@ enum class EResourceType : uint8
 
 struct FViewportResources
 {
-    ~FViewportResources()
-    {
-        Release();
-    }
-    
     ID3D11Texture2D* Texture2D = nullptr;
     ID3D11RenderTargetView* RTV = nullptr;
     ID3D11ShaderResourceView* SRV = nullptr;
@@ -78,7 +73,7 @@ public:
     ID3D11Texture2D*& GetGizmoDepthStencilTexture() { return GizmoDepthStencilTexture; }
     ID3D11DepthStencilView*& GetGizmoDepthStencilView() { return GizmoDepthStencilView; }
 
-    FViewportResources* GetResource(EResourceType Type);
+    TMap<EResourceType, FViewportResources>& GetResources();
 
     bool HasResource(EResourceType Type) const;
     
@@ -86,7 +81,7 @@ public:
 
     std::array<float, 4> GetClearColor(EResourceType Type) const;
     
-private:
+public: // TODO: 나중에 private로
     // DirectX
     D3D11_VIEWPORT D3DViewport = {};
 

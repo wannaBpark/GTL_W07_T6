@@ -20,13 +20,6 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
 {
     ResizeEditor(InEditorWidth, InEditorHeight);
     
-    for (size_t i = 0; i < 4; i++)
-    {
-        ViewportClients[i] = std::make_shared<FEditorViewportClient>();
-        ViewportClients[i]->Initialize(i);
-    }
-    ActiveViewportClient = ViewportClients[0];
-    
     VSplitter = new SSplitterV();
     VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
     VSplitter->OnDrag(FPoint(0, 0));
@@ -34,6 +27,50 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
     HSplitter = new SSplitterH();
     HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
     HSplitter->OnDrag(FPoint(0, 0));
+    
+    FRect Top = VSplitter->SideLT->Rect;
+    FRect Bottom = VSplitter->SideRB->Rect;
+    FRect Left = HSplitter->SideLT->Rect;
+    FRect Right = HSplitter->SideRB->Rect;
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        EViewScreenLocation Location = static_cast<EViewScreenLocation>(i);
+        FRect Rect;
+        switch (Location)
+        {
+        case EViewScreenLocation::EVL_TopLeft:
+            Rect.TopLeftX = Left.TopLeftX;
+            Rect.TopLeftY = Top.TopLeftY;
+            Rect.Width = Left.Width;
+            Rect.Height = Top.Height;
+            break;
+        case EViewScreenLocation::EVL_TopRight:
+            Rect.TopLeftX = Right.TopLeftX;
+            Rect.TopLeftY = Top.TopLeftY;
+            Rect.Width = Right.Width;
+            Rect.Height = Top.Height;
+            break;
+        case EViewScreenLocation::EVL_BottomLeft:
+            Rect.TopLeftX = Left.TopLeftX;
+            Rect.TopLeftY = Bottom.TopLeftY;
+            Rect.Width = Left.Width;
+            Rect.Height = Bottom.Height;
+            break;
+        case EViewScreenLocation::EVL_BottomRight:
+            Rect.TopLeftX = Right.TopLeftX;
+            Rect.TopLeftY = Bottom.TopLeftY;
+            Rect.Width = Right.Width;
+            Rect.Height = Bottom.Height;
+            break;
+        default:
+            return;
+        }
+        ViewportClients[i] = std::make_shared<FEditorViewportClient>();
+        ViewportClients[i]->Initialize(Location, Rect);
+    }
+    
+    ActiveViewportClient = ViewportClients[0];
     
     LoadConfig();
     

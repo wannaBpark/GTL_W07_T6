@@ -1,4 +1,4 @@
-﻿#include "CompositingPass.h"
+#include "CompositingPass.h"
 
 #include <array>
 
@@ -54,14 +54,9 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     }
 
     const EResourceType ResourceType = EResourceType::ERT_Compositing; 
-    FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResource(ResourceType);
-    if (!ResourceRHI)
-    {
-        return;
-    }
+    FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources().Find(ResourceType);
 
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, nullptr);
-    Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
 
     Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
@@ -74,8 +69,10 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     BufferManager->UpdateConstantBuffer<FViewModeConstants>("FViewModeConstants", ViewModeConstantData);
 
     // Render
-    Graphics->DeviceContext->VSSetShader(ShaderManager->GetVertexShaderByKey(L"Compositing"), nullptr, 1);
-    Graphics->DeviceContext->PSSetShader(ShaderManager->GetPixelShaderByKey(L"Compositing"), nullptr, 1);
+    ID3D11VertexShader* VertexShader = ShaderManager->GetVertexShaderByKey(L"Compositing");
+    ID3D11PixelShader* PixelShader = ShaderManager->GetPixelShaderByKey(L"Compositing");
+    Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
+    Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->Draw(6, 0);
 
     // Finish

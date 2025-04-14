@@ -135,17 +135,13 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     }
 
     const EResourceType ResourceType = EResourceType::ERT_Editor;
-    FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResource(ResourceType);
-    if (!ResourceRHI)
-    {
-        return;
-    }
+    FViewportResources ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources()[ResourceType];
     
     PrepareRenderState();
 
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetGizmoDepthStencilView());
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI.RTV, RenderTargetRHI->GetGizmoDepthStencilView());
     Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetGizmoDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
+    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI.RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
 
     // TODO: DSS는 전역으로 하나만 설정하기
     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);

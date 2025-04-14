@@ -177,8 +177,8 @@ void SSplitterV::UpdateChildRects()
     }
     if (SideRB)
     {
-        float prevleftTopY = SideRB->Rect.TopLeftY;
+        float PrevLeftTopY = SideRB->Rect.TopLeftY;
         SideRB->Rect.TopLeftY = Rect.TopLeftY + Rect.Height;
-        SideRB->Rect.Height = SideRB->Rect.Height + prevleftTopY - SideRB->Rect.TopLeftY;
+        SideRB->Rect.Height = SideRB->Rect.Height + PrevLeftTopY - SideRB->Rect.TopLeftY;
     }
 }

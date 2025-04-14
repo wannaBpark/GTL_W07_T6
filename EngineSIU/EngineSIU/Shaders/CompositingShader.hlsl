@@ -1,4 +1,4 @@
-﻿
+
 Texture2D SceneTexture : register(t100);
 Texture2D PP_FogTexture : register(t101);
 Texture2D EditorTexture : register(t102);
@@ -23,10 +23,10 @@ PS_Input mainVS(uint VertexID : SV_VertexID)
 
     float2 QuadPositions[6] = {
         float2(-1,  1),  // Top Left
-        float2( 1,  1),  // Top Right
+        float2(1,  1),  // Top Right
         float2(-1, -1),  // Bottom Left
-        float2( 1,  1),  // Top Right
-        float2( 1, -1),  // Bottom Right
+        float2(1,  1),  // Top Right
+        float2(1, -1),  // Bottom Right
         float2(-1, -1)   // Bottom Left
     };
 
@@ -34,7 +34,7 @@ PS_Input mainVS(uint VertexID : SV_VertexID)
         float2(0, 0), float2(1, 0), float2(0, 1),
         float2(1, 0), float2(1, 1), float2(0, 1)
     };
-    
+
     Output.Position = float4(QuadPositions[VertexID], 0, 1);
     Output.UV = UVs[VertexID];
 
@@ -44,6 +44,6 @@ PS_Input mainVS(uint VertexID : SV_VertexID)
 float4 mainPS(PS_Input Input) : SV_TARGET
 {
     float4 Scene = SceneTexture.Sample(CompositingSampler, Input.UV);
-    
+
     return Scene;
 }

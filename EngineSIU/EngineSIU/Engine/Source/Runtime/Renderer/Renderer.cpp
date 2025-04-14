@@ -13,17 +13,14 @@
 #include "GizmoRenderPass.h"
 #include "UpdateLightBufferPass.h"
 #include "LineRenderPass.h"
-#include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
 #include "SlateRenderPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 
 #include "CompositingPass.h"
-#include "SceneRenderPass.h"
 #include "SlateRenderPass.h"
 #include "UnrealClient.h"
-#include "WorldNormalDebugPass.h"
 #include "GameFrameWork/Actor.h"
 
 #include "PropertyEditor/ShowFlags.h"
@@ -132,13 +129,9 @@ void FRenderer::ClearRenderArr()
 
 void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI)
 {
-    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(Type);
-    if (!ResourceRHI)
-    {
-        return;
-    }
-
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+    FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(Type);
+    
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->DepthStencilView);
     Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
 }
