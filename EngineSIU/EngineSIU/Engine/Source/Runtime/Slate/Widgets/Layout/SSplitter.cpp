@@ -49,29 +49,19 @@ void SSplitterH::Initialize(FRect InRect)
 {
     __super::Initialize(InRect);
 
-    const float SplitterCenterX = GetSplitterLTCenter();
-    
-    if (SideLT)
-    {
-        SideLT->Initialize(FRect(
-            0.0f, 0.0f,
-            SplitterCenterX - SplitterHalfThickness, InRect.Height
-        ));
-    }
-    if (SideRB)
-    {
-        const float Offset = SplitterCenterX + SplitterHalfThickness;
-        
-        SideRB->Initialize(FRect(
-            Offset, 0.0f,
-            InRect.Width - Offset, InRect.Height
-        ));
-    }
+    UpdateChildRects();
 }
 
-float SSplitterH::GetSplitterLTCenter() const
+void SSplitterH::ClampSplitRatio()
 {
-    return FMath::Max(Rect.Width * SplitRatio, static_cast<float>(SplitterLimitLT));
+    SplitRatio = FMath::Max(SplitRatio, static_cast<float>(SplitterLimitLT) / Rect.Width);
+    SplitRatio = FMath::Min(SplitRatio, (Rect.Width - static_cast<float>(SplitterLimitLT)) / Rect.Width);
+}
+
+float SSplitterH::GetSplitterLTCenter()
+{
+    ClampSplitRatio();
+    return Rect.Width * SplitRatio;
 }
 
 void SSplitterH::LoadConfig(const TMap<FString, FString>& config)
@@ -98,39 +88,39 @@ void SSplitterH::OnResize(uint32 InWidth, uint32 InHeight)
 {
     __super::OnResize(InWidth, InHeight);
     
-    const float SplitterCenterX = GetSplitterLTCenter();
-    
-    if (SideLT)
-    {
-        SideLT->Rect.Height = InHeight;
-    }
-    if (SideRB)
-    {
-        SideRB->Rect.TopLeftX *= InWidth;
-        SideRB->Rect.Width *= InWidth;
-        SideRB->Rect.Height = InHeight;
-    }
+    UpdateChildRects();
 }
 
-void SSplitterH::OnDrag(const FPoint& delta)
+void SSplitterH::OnDrag(const FPoint& Delta)
 {
     // 수평 스플리터의 경우, 좌우로 이동
-    Rect.TopLeftX += delta.x;
+    float CenterX = GetSplitterLTCenter();
+    CenterX += Delta.x;
 
+    SplitRatio = CenterX / Rect.Width;
+    
     UpdateChildRects();
 }
 
 void SSplitterH::UpdateChildRects()
 {
+    const float SplitterCenterX = GetSplitterLTCenter();
+    
     if (SideLT)
     {
-        SideLT->Rect.Width = Rect.TopLeftX - SideLT->Rect.TopLeftX;
+        SideLT->Initialize(FRect(
+            0.0f, 0.0f,
+            SplitterCenterX - SplitterHalfThickness, Rect.Height
+        ));
     }
     if (SideRB)
     {
-        float PrevLeftTopX = SideRB->Rect.TopLeftX;
-        SideRB->Rect.TopLeftX = Rect.TopLeftX + Rect.Width;
-        SideRB->Rect.Width =  SideRB->Rect.Width + PrevLeftTopX  - SideRB->Rect.TopLeftX;
+        const float Offset = SplitterCenterX + SplitterHalfThickness;
+        
+        SideRB->Initialize(FRect(
+            Offset, 0.0f,
+            Rect.Width - Offset, Rect.Height
+        ));
     }
 }
 
@@ -138,29 +128,19 @@ void SSplitterV::Initialize(FRect InRect)
 {
     __super::Initialize(InRect);
 
-    const float SplitterCenterY = GetSplitterLTCenter();
-    
-    if (SideLT)
-    {
-        SideLT->Initialize(FRect(
-            0.0f, 0.0f,
-            InRect.Width, SplitterCenterY - SplitterHalfThickness
-        ));
-    }
-    if (SideRB)
-    {
-        const float Offset = SplitterCenterY + SplitterHalfThickness;
-        
-        SideRB->Initialize(FRect(
-            0.0f, Offset,
-            InRect.Width, InRect.Height - Offset
-        ));
-    }
+    UpdateChildRects();
 }
 
-float SSplitterV::GetSplitterLTCenter() const
+void SSplitterV::ClampSplitRatio()
 {
-    return FMath::Max(Rect.Height * SplitRatio, static_cast<float>(SplitterLimitLT));
+    SplitRatio = FMath::Max(SplitRatio, static_cast<float>(SplitterLimitLT) / Rect.Height);
+    SplitRatio = FMath::Min(SplitRatio, (Rect.Height - static_cast<float>(SplitterLimitLT)) / Rect.Height);
+}
+
+float SSplitterV::GetSplitterLTCenter()
+{
+    ClampSplitRatio();
+    return Rect.Height * SplitRatio;
 }
 
 void SSplitterV::LoadConfig(const TMap<FString, FString>& config)
@@ -185,37 +165,37 @@ void SSplitterV::OnResize(uint32 InWidth, uint32 InHeight)
 {
     __super::OnResize(InWidth, InHeight);
     
-    Rect.Width = InWidth;
-    Rect.TopLeftY *= InHeight;
-    if (SideLT)
-    {
-        SideLT->Rect.Width = InWidth;
-    }
-    if (SideRB)
-    {
-        SideRB->Rect.TopLeftY *= InHeight;
-        SideRB->Rect.Height *= InHeight;
-        SideRB->Rect.Width = InWidth;
-    }
     UpdateChildRects();
 }
 
-void SSplitterV::OnDrag(const FPoint& delta)
+void SSplitterV::OnDrag(const FPoint& Delta)
 {
-    Rect.TopLeftY += delta.y;
+    float CenterY = GetSplitterLTCenter();
+    CenterY += Delta.y;
+
+    SplitRatio = CenterY / Rect.Height;
+    
     UpdateChildRects();
 }
 
 void SSplitterV::UpdateChildRects()
 {
+    const float SplitterCenterY = GetSplitterLTCenter();
+    
     if (SideLT)
     {
-        SideLT->Rect.Height = Rect.TopLeftY - SideLT->Rect.TopLeftY;
+        SideLT->Initialize(FRect(
+            0.0f, 0.0f,
+            Rect.Width, SplitterCenterY - SplitterHalfThickness
+        ));
     }
     if (SideRB)
     {
-        float PrevLeftTopY = SideRB->Rect.TopLeftY;
-        SideRB->Rect.TopLeftY = Rect.TopLeftY + Rect.Height;
-        SideRB->Rect.Height = SideRB->Rect.Height + PrevLeftTopY - SideRB->Rect.TopLeftY;
+        const float Offset = SplitterCenterY + SplitterHalfThickness;
+        
+        SideRB->Initialize(FRect(
+            0.0f, Offset,
+            Rect.Width, Rect.Height - Offset
+        ));
     }
 }
