@@ -897,7 +897,7 @@ void FEditorRenderPass::RenderPointlightInstanced(const UWorld* World)
         {
             FConstantBufferDebugSphere b;
             b.Position = PointLightComp->GetWorldLocation();
-            b.Radius = PointLightComp->GetAttenuation(); // TOFIX!
+            b.Radius = PointLightComp->GetRadius();
             BufferAll.Add(b);
         }
 
