@@ -24,7 +24,7 @@ struct FMaterial
     float3 DiffuseColor;
     float TransparencyScalar;
     
-    float3 AmbientColor;
+    float3 AmbientColor;    //do not use
     float DensityScalar;
     
     float3 SpecularColor;
@@ -37,6 +37,7 @@ cbuffer MaterialConstants : register(b3)
 {
     FMaterial Material;
 }
+
 cbuffer FlagConstants : register(b4)
 {
     bool IsLit;
@@ -57,7 +58,6 @@ cbuffer TextureConstants : register(b6)
 
 #include "Light.hlsl"
 
-
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // 클립 공간 화면 좌표
@@ -75,37 +75,46 @@ struct PS_OUTPUT
     float4 UUID : SV_Target1;
 };
 
-
 PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
     output.UUID = UUID;
-
+    
     // 1) 알베도 샘플링
     float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
-    // 3) 라이트 계산
-
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
     float3 baseColor = hasTexture ? albedo : matDiffuse;
-
+    
+#ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)
     {
-        float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
-        float3 litColor = baseColor * lightRgb;
-        output.color = float4(litColor, 1);
+        float3 finalColor = input.color.rgb * baseColor.rgb;
+        output.color = float4(finalColor, 1.0);
     }
     else
     {
-        output.color = float4(baseColor, 1);
-        
+        output.color = float4(baseColor, 1.0);
     }
-    if (isSelected)
+#else
+    if (IsLit && input.normalFlag > 0.5)
     {
-        output.color += float4(0.02, 0.02, 0.02, 1);
-
+        float4 litColor = Lighting(input.worldPos, normalize(input.normal));
+        float3 finalColor = litColor.rgb * baseColor.rgb;
+        output.color = float4(finalColor, 1.0);
     }
+    else
+    {
+        output.color = float4(baseColor, 1.0);
+    }
+#endif
+    
+    if (IsSelectedSubMesh)
+    {
+        output.color += float4(0.02, 0.02, 0.02, 0);
+    }
+
     return output;
 }

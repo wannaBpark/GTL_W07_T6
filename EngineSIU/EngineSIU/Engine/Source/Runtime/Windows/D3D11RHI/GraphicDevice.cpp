@@ -472,7 +472,7 @@ void FGraphicsDevice::ChangeRasterizer(EViewModeIndex evi)
         break;
     case EViewModeIndex::VMI_Lit_Gouraud:
     case EViewModeIndex::VMI_Lit_Lambert:
-    case EViewModeIndex::VMI_Lit_Phong:
+    case EViewModeIndex::VMI_Lit_BlinnPhong:
     case EViewModeIndex::VMI_Unlit:
     case EViewModeIndex::VMI_SceneDepth:
     case EViewModeIndex::VMI_WorldNormal:

@@ -28,6 +28,7 @@ class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
 class FLineRenderPass;
 class FFogRenderPass;
+class FEditorRenderPass;
 
 class FRenderer
 {
@@ -72,6 +73,7 @@ public:
     FLineRenderPass* LineRenderPass = nullptr;
     FDepthBufferDebugPass* DepthBufferDebugPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
+    FEditorRenderPass* EditorRenderPass = nullptr;
 
     bool IsSceneDepth = false;
 };

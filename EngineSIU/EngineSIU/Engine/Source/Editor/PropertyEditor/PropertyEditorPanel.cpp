@@ -5,6 +5,7 @@
 #include "Components/LightComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/DirectionalLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
@@ -102,48 +103,135 @@ void PropertyEditorPanel::Render()
         }
     }
 
-    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
-    if (PickedActor)
-        if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
+    //// TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    //if (PickedActor)
+    //    if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
+    //    {
+    //        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+    //        if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+    //        {
+    //            /*  DrawColorProperty("Ambient Color",
+    //                  [&]() { return lightObj->GetAmbientColor(); },
+    //                  [&](FVector4 c) { lightObj->SetAmbientColor(c); });
+    //              */
+    //            DrawColorProperty("Base Color",
+    //                [&]() { return lightObj->GetDiffuseColor(); },
+    //                [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
+
+    //            float Intensity = lightObj->GetIntensity();
+    //            if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 100.0f, "%1.f"))
+    //                lightObj->SetIntensity(Intensity);
+
+    //             /*  
+    //            float falloff = lightObj->GetFalloff();
+    //            if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
+    //                lightObj->SetFalloff(falloff);
+    //            }
+
+    //            TODO : For SpotLight
+    //            */
+
+    //            float attenuation = lightObj->GetAttenuation();
+    //            if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+    //                lightObj->SetAttenuation(attenuation);
+    //            }
+
+    //            float AttenuationRadius = lightObj->GetAttenuationRadius();
+    //            if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
+    //                lightObj->SetAttenuationRadius(AttenuationRadius);
+    //            }
+
+    //            ImGui::TreePop();
+    //        }
+
+    //        ImGui::PopStyleColor();
+    //    }
+
+    if(PickedActor)
+        if (UPointLightComponent* pointlightObj = PickedActor->GetComponentByClass<UPointLightComponent>())
         {
             ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
-            if (ImGui::TreeNodeEx("Light Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::TreeNodeEx("PointLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
-                /*  DrawColorProperty("Ambient Color",
-                      [&]() { return lightObj->GetAmbientColor(); },
-                      [&](FVector4 c) { lightObj->SetAmbientColor(c); });
-                  */
-                DrawColorProperty("Base Color",
-                    [&]() { return lightObj->GetDiffuseColor(); },
-                    [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
+                DrawColorProperty("Light Color",
+                    [&]() { return pointlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { pointlightObj->SetLightColor(c); });
 
-                DrawColorProperty("Specular Color",
-                    [&]() { return lightObj->GetSpecularColor(); },
-                    [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
+                float Intensity = pointlightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                    pointlightObj->SetIntensity(Intensity);
 
-                float Intensity = lightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 10000.0f, "%1.f"))
-                    lightObj->SetIntensity(Intensity);
-
-                 /*  
-                float falloff = lightObj->GetFalloff();
-                if (ImGui::SliderFloat("Falloff", &falloff, 0.1f, 10.0f, "%.2f")) {
-                    lightObj->SetFalloff(falloff);
+                float Radius = pointlightObj->GetRadius();
+                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 200.f, "%.1f")) {
+                    pointlightObj->SetRadius(Radius);
                 }
 
-                TODO : For SpotLight
-                */
 
-                float attenuation = lightObj->GetAttenuation();
-                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
-                    lightObj->SetAttenuation(attenuation);
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
+    if(PickedActor)
+        if (USpotLightComponent* spotlightObj = PickedActor->GetComponentByClass<USpotLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("SpotLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return spotlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { spotlightObj->SetLightColor(c); });
+
+                float Intensity = spotlightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                    spotlightObj->SetIntensity(Intensity);
+
+                float Radius = spotlightObj->GetRadius();
+                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 200.f, "%.1f")) {
+                    spotlightObj->SetRadius(Radius);
                 }
 
-                float AttenuationRadius = lightObj->GetAttenuationRadius();
-                if (ImGui::SliderFloat("Attenuation Radius", &AttenuationRadius, 0.01f, 10000.f, "%.1f")) {
-                    lightObj->SetAttenuationRadius(AttenuationRadius);
+                LightDirection = spotlightObj->GetDirection();
+                FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
+                
+                float InnerDegree = spotlightObj->GetInnerDegree();
+                if (ImGui::SliderFloat("InnerDegree", &InnerDegree, 0.01f, 180.f, "%.1f")) {
+                    spotlightObj->SetInnerDegree(InnerDegree);
                 }
+
+                float OuterDegree = spotlightObj->GetOuterDegree();
+                if (ImGui::SliderFloat("OuterDegree", &OuterDegree, 0.01f, 180.f, "%.1f")) {
+                    spotlightObj->SetOuterDegree(OuterDegree);
+                }
+
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
+
+    if (PickedActor)
+        if (UDirectionalLightComponent* dirlightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("DirectionalLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return dirlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { dirlightObj->SetLightColor(c); });
+
+                float Intensity = dirlightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                    dirlightObj->SetIntensity(Intensity);
+
+                LightDirection = dirlightObj->GetDirection();
+                FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
 
                 ImGui::TreePop();
             }

@@ -6,7 +6,7 @@ enum EViewModeIndex : uint8
 {
     VMI_Lit_Gouraud,
     VMI_Lit_Lambert,
-    VMI_Lit_Phong,
+    VMI_Lit_BlinnPhong,
     VMI_Unlit,
     VMI_Wireframe,
     VMI_SceneDepth,

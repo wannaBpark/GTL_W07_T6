@@ -64,11 +64,9 @@ void FStaticMeshRenderPass::CreateShader()
 
     HRESULT hr;
     //HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
-
     //hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS");
 
 #pragma region UberShader
-
     D3D_SHADER_MACRO definesGouraud[] =
     {
         { GOURAUD, "1" },
@@ -85,23 +83,18 @@ void FStaticMeshRenderPass::CreateShader()
     hr = ShaderManager->AddVertexShaderAndInputLayout(L"LAMBERT_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), definesLambert);
     hr = ShaderManager->AddPixelShader(L"LAMBERT_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesLambert);
 
-    D3D_SHADER_MACRO definesPhong[] =
+    D3D_SHADER_MACRO definesBlinnPhong[] =
     {
         { PHONG, "1" },
         { nullptr, nullptr }
     };
-    hr = ShaderManager->AddVertexShaderAndInputLayout(L"PHONG_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), definesPhong);
-    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesPhong);
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"PHONG_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), definesBlinnPhong);
+    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", definesBlinnPhong);
 
 #pragma endregion UberShader
-
     VertexShader = ShaderManager->GetVertexShaderByKey(L"PHONG_StaticMeshVertexShader");
-
-    // auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
     PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
-
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
-
+    InputLayout = ShaderManager->GetInputLayoutByKey(L"PHONG_StaticMeshVertexShader");
 }
 void FStaticMeshRenderPass::ReleaseShader()
 {
@@ -110,6 +103,7 @@ void FStaticMeshRenderPass::ReleaseShader()
     FDXDBufferManager::SafeRelease(VertexShader);
 }
 
+// 여기서 InputLayoutByKey는 하지 않아도 괜찮나?
 void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi)
 {
     switch (evi)
@@ -117,16 +111,19 @@ void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi)
     case EViewModeIndex::VMI_Lit_Gouraud:
         VertexShader = ShaderManager->GetVertexShaderByKey(L"GOURAUD_StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"GOURAUD_StaticMeshPixelShader");
+        InputLayout = ShaderManager->GetInputLayoutByKey(L"GOURAUD_StaticMeshVertexShader");
         UpdateLitUnlitConstant(1);
         break;
     case EViewModeIndex::VMI_Lit_Lambert:
         VertexShader = ShaderManager->GetVertexShaderByKey(L"LAMBERT_StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"LAMBERT_StaticMeshPixelShader");
+        InputLayout = ShaderManager->GetInputLayoutByKey(L"LAMBERT_StaticMeshVertexShader");
         UpdateLitUnlitConstant(1);
         break;
-    case EViewModeIndex::VMI_Lit_Phong:
+    case EViewModeIndex::VMI_Lit_BlinnPhong:
         VertexShader = ShaderManager->GetVertexShaderByKey(L"PHONG_StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
+        InputLayout = ShaderManager->GetInputLayoutByKey(L"PHONG_StaticMeshVertexShader");
         UpdateLitUnlitConstant(1);
         break;
     case EViewModeIndex::VMI_Wireframe:
@@ -171,14 +168,26 @@ void FStaticMeshRenderPass::PrepareRenderState() const
 
     TArray<FString> PSBufferKeys = {
                                   TEXT("FCameraConstantBuffer"),
-                                  TEXT("FLightBuffer"),
+                                  TEXT("FLightInfoBuffer"),
                                   TEXT("FMaterialConstants"),
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
-                                  TEXT("FTextureConstants")
+                                  TEXT("FTextureConstants"),
     };
 
+
     BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
+
+    // Begin Test
+    TArray<FString> VSBufferKeys = {
+                                  TEXT("FLightInfoBuffer"),
+                                  TEXT("FMaterialConstants"),
+                                  TEXT("FLitUnlitConstants"),
+                                  TEXT("FSubMeshConstants"),
+                                  TEXT("FTextureConstants"),
+    };
+    BufferManager->BindConstantBuffers(VSBufferKeys, 2, EShaderStage::Vertex);
+    // End Test    
 }
 
 void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const

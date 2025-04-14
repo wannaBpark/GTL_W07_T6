@@ -26,10 +26,12 @@ void AEditorPlayer::Input()
 {
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
+    if (io.WantCaptureKeyboard) return;
+
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
         if (!bLeftMouseDown)
-        {
+        {   
             bLeftMouseDown = true;
 
             POINT mousePos;

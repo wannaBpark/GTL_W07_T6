@@ -12,6 +12,7 @@
 #include "LineRenderPass.h"
 #include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
+#include "EditorRenderPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 #include "GameFrameWork/Actor.h"
@@ -32,6 +33,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass = new FLineRenderPass();
     DepthBufferDebugPass = new FDepthBufferDebugPass();
     FogRenderPass = new FFogRenderPass();
+    EditorRenderPass = new FEditorRenderPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -40,6 +42,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    EditorRenderPass->Initialize(Graphics);
 
     CreateConstantBuffers();
 }
@@ -92,6 +95,10 @@ void FRenderer::CreateConstantBuffers()
 
     UINT FogConstantBufferSize = sizeof(FFogConstants);
     BufferManager->CreateBufferGeneric<FFogConstants>("FFogConstants", nullptr, FogConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT LightInfoBufferSize = sizeof(FLightInfoBuffer);
+    BufferManager->CreateBufferGeneric<FLightInfoBuffer>("FLightInfoBuffer", nullptr, LightInfoBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
 }
 
 void FRenderer::ReleaseConstantBuffer()
@@ -115,6 +122,7 @@ void FRenderer::ClearRenderArr()
     GizmoRenderPass->ClearRenderArr();
     UpdateLightBufferPass->ClearRenderArr();
     FogRenderPass->ClearRenderArr();
+    //EditorRenderPass->ClearRenderArr();
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
@@ -128,6 +136,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
+    EditorRenderPass->Render(GEngine->ActiveWorld, ActiveViewport);
     
 
     if (IsSceneDepth)
