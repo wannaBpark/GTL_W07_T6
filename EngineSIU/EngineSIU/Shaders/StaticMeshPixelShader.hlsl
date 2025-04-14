@@ -24,7 +24,7 @@ struct FMaterial
     float3 DiffuseColor;
     float TransparencyScalar;
     
-    float3 AmbientColor;
+    float3 AmbientColor;    //do not use
     float DensityScalar;
     
     float3 SpecularColor;

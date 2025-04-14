@@ -331,7 +331,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     }
 
     // Add global ambient light
-    cColor += float4(Ambient.AmbientColor.rgb * Material.AmbientColor, 0.0);
+    cColor += float4(Ambient.AmbientColor.rgb, 0.0);
     cColor.a = 1.0;
     
     return cColor;
