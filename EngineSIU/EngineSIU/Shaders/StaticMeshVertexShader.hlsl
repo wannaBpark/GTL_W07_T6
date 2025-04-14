@@ -77,10 +77,6 @@ VS_OUTPUT mainVS(VS_INPUT input)
     
 #ifdef LIGHTING_MODEL_GOURAUD
     float4 litColor = Lighting(worldPosition.xyz, worldNormal);
-    //output.color = input.color * litColor;
-    //output.color = float4(input.color.rgb + litColor.rgb, 1.0);
-    // 이게 맞나 왜이러지 인풋 컬러는 쓸 필요가 없는건가?
-    // 이러면 문제가 텍스쳐가 안나옴.
     output.color = float4(litColor.rgb, 1.0);
 #else
     output.color = input.color;

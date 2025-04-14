@@ -91,27 +91,22 @@ PS_OUTPUT mainPS(PS_INPUT input)
 #ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)
     {
-        //float3 finalColor = input.color.rgb * baseColor;
-        //float3 finalColor = input.color.rgb;
         float3 finalColor = input.color.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }
     else
     {
-        // Unlit 모드
         output.color = float4(baseColor, 1.0);
     }
 #else
     if (IsLit && input.normalFlag > 0.5)
     {
-        // 기존 Light.hlsl의 Lighting 함수 활용
         float4 litColor = Lighting(input.worldPos, normalize(input.normal));
-        float3 finalColor = baseColor * litColor.rgb;
+        float3 finalColor = litColor.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }
     else
     {
-        // Unlit 모드 또는 노말이 없는 경우
         output.color = float4(baseColor, 1.0);
     }
 #endif
@@ -120,8 +115,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     {
         output.color += float4(0.02, 0.02, 0.02, 0);
     }
-    
-    //output.color = float4(input.normal, 1);
 
     return output;
 }

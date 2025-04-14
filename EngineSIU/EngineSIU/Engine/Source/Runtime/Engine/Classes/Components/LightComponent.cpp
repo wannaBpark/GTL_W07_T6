@@ -28,11 +28,6 @@ void ULightComponentBase::SetDiffuseColor(FLinearColor NewColor)
     Light.DiffuseColor = FVector(NewColor.R, NewColor.G, NewColor.B);
 }
 
-void ULightComponentBase::SetSpecularColor(FLinearColor NewColor)
-{
-   Light.SpecularColor = FVector(NewColor.R, NewColor.G, NewColor.B);
-}
-
 void ULightComponentBase::SetAttenuation(float Attenuation)
 {
     Light.Attenuation = Attenuation;
@@ -56,11 +51,6 @@ void ULightComponentBase::SetFalloff(float fallOff)
 FLinearColor ULightComponentBase::GetDiffuseColor()
 {
     return FLinearColor(Light.DiffuseColor.X, Light.DiffuseColor.Y, Light.DiffuseColor.Z, 1);
-}
-
-FLinearColor ULightComponentBase::GetSpecularColor()
-{
-    return FLinearColor(Light.SpecularColor.X, Light.SpecularColor.Y, Light.SpecularColor.Z, 1);
 }
 
 float ULightComponentBase::GetAttenuation()

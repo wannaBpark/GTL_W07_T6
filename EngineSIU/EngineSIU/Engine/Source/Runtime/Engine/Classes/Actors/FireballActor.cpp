@@ -21,8 +21,6 @@ AFireballActor::AFireballActor()
 
     PointLightComponent->SetAttenuation(0.5f);
     
-    PointLightComponent->SetSpecularColor(FLinearColor::Red);
-    
     PointLightComponent->SetDiffuseColor(FLinearColor::Red);
     
     ProjectileMovementComponent = AddComponent<UProjectileMovementComponent>();

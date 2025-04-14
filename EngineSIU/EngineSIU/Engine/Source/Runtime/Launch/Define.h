@@ -290,8 +290,6 @@ struct FLight
     FVector DiffuseColor;
     float pad1;
 
-    FVector SpecularColor;
-    float pad2;
 
     FVector Position;
     float Falloff;

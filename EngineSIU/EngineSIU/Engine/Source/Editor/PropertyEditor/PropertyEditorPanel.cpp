@@ -119,10 +119,6 @@ void PropertyEditorPanel::Render()
                     [&]() { return lightObj->GetDiffuseColor(); },
                     [&](FLinearColor c) { lightObj->SetDiffuseColor(c); });
 
-                DrawColorProperty("Specular Color",
-                    [&]() { return lightObj->GetSpecularColor(); },
-                    [&](FLinearColor c) { lightObj->SetSpecularColor(c); });
-
                 float Intensity = lightObj->GetIntensity();
                 if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 100.0f, "%1.f"))
                     lightObj->SetIntensity(Intensity);
