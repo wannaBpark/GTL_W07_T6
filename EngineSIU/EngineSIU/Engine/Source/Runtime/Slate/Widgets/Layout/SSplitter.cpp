@@ -81,7 +81,7 @@ void SSplitterH::LoadConfig(const TMap<FString, FString>& config)
     Rect.Width = GetValueFromConfig(config, "SplitterH.Width", 20.0f);
     Rect.Height = GetValueFromConfig(config, "SplitterH.Height", 10.0f); // 수평 스플리터는 높이 고정
     
-    Rect.TopLeftX *= FEngineLoop::GraphicDevice.ScreenWidth /GetValueFromConfig(config, "SplitterV.Width", 1000.0f);
+    Rect.TopLeftX *= FEngineLoop::GraphicDevice.ScreenWidth / GetValueFromConfig(config, "SplitterV.Width", 1000.0f);
 }
 
 void SSplitterH::SaveConfig(TMap<FString, FString>& config) const

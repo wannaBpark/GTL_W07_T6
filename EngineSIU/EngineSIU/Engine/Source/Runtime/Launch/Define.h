@@ -136,6 +136,7 @@ struct FVertexTexture
     float x, y, z;    // Position
     float u, v; // Texture
 };
+
 struct FGridParameters
 {
     float GridSpacing;
@@ -143,20 +144,24 @@ struct FGridParameters
     FVector GridOrigin;
     float pad;
 };
+
 struct FSimpleVertex
 {
     float dummy; // 내용은 사용되지 않음
     float padding[11];
 };
+
 struct FOBB {
     FVector corners[8];
 };
+
 struct FRect
 {
     FRect() : TopLeftX(0), TopLeftY(0), Width(0), Height(0) {}
     FRect(float x, float y, float w, float h) : TopLeftX(x), TopLeftY(y), Width(w), Height(h) {}
     float TopLeftX, TopLeftY, Width, Height;
 };
+
 struct FPoint
 {
     FPoint() : x(0), y(0) {}
@@ -166,6 +171,7 @@ struct FPoint
 
     float x, y;
 };
+
 struct FBoundingBox
 {
     FBoundingBox() = default;
@@ -251,6 +257,7 @@ struct FBoundingBox
     }
 
 };
+
 struct FCone
 {
     FVector ConeApex; // 원뿔의 꼭짓점
@@ -264,6 +271,7 @@ struct FCone
     float pad[3];
 
 };
+
 struct FPrimitiveCounts
 {
     int BoundingBoxCount;
@@ -307,7 +315,6 @@ struct FLightBuffer
     int nLights;
     float    pad0, pad1, pad2;
 };
-
 
 struct FMaterialConstants {
     FVector DiffuseColor;
@@ -405,7 +412,6 @@ struct FScreenConstants
     FVector2D UVScale;      // 뷰포트 크기 비율 (w/sw, h/sh)
     FVector2D Padding;      // 정렬용 (사용 안 해도 무방)
 };
-
 
 struct FFogConstants
 {

@@ -49,13 +49,26 @@ void FSlateRenderPass::PrepareRender()
 
 void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    FRect Rect = Viewport->GetViewport()->GetRect();
+    const FRect Rect = Viewport->GetViewport()->GetRect();
+
+    uint32 ClientWidth = 0;
+    uint32 ClientHeight = 0;
+    GEngineLoop.GetClientSize(ClientWidth, ClientHeight);
+
+    const float ClientWidthFloat = static_cast<float>(ClientWidth);
+    const float ClientHeightFloat = static_cast<float>(ClientHeight);
 
     // 버퍼 업데이트
     FSlateTransform Transform;
 
-    Transform.Scale = FVector2D(1.f, 1.f);
-    Transform.Offset = FVector2D(0.f, 0.f);
+    Transform.Scale = FVector2D(
+        Rect.Width / ClientWidthFloat,
+        Rect.Height / ClientHeightFloat
+    );
+    Transform.Offset = FVector2D(
+        (Rect.TopLeftX + Rect.Width * 0.5f) / ClientWidthFloat * 2.0f - 1.0f,
+        1.0f - (Rect.TopLeftY + Rect.Height * 0.5f) / ClientHeightFloat * 2.0f
+    );
     
     BufferManager->UpdateConstantBuffer<FSlateTransform>("FSlateTransform", Transform);
     BufferManager->BindConstantBuffer("FSlateTransform", 12, EShaderStage::Vertex);

@@ -21,11 +21,11 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
     ResizeEditor(InEditorWidth, InEditorHeight);
     
     VSplitter = new SSplitterV();
-    VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
+    VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorWidth, 20));
     VSplitter->OnDrag(FPoint(0, 0));
     
     HSplitter = new SSplitterH();
-    HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
+    HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorHeight));
     HSplitter->OnDrag(FPoint(0, 0));
     
     FRect Top = VSplitter->SideLT->Rect;
@@ -214,7 +214,7 @@ void SLevelEditor::ResizeViewports()
     {
         if (GetViewports()[0])
         {
-            for (int i = 0;i < 4;++i)
+            for (int i = 0; i < 4; ++i)
             {
                 GetViewports()[i]->ResizeViewport(
                     VSplitter->SideLT->Rect,
@@ -272,6 +272,8 @@ void SLevelEditor::LoadConfig()
     {
         VSplitter->LoadConfig(Config);
     }
+
+    ResizeViewports();
 }
 
 void SLevelEditor::SaveConfig()
