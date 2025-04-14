@@ -151,9 +151,11 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float specularFactor = 0.0;
     if (diffuseFactor > 0.0)
     {
+// Begin Test
         float3 viewDir = normalize(CameraPosition - vPosition);
         float3 halfVector = normalize(lightDir + viewDir);
         specularFactor = pow(max(dot(vNormal, halfVector), 0.0), 4.0);
+// End Test
     }
     
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
@@ -207,19 +209,19 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
 float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
 {
 #ifdef LIGHTING_MODEL_GOURAUD
-    FSpotLightInfo light = gLights[nIndex];
+    FSpotLightInfo light = SpotLights[nIndex];
     
-    float3 vToLight = light.m_vPosition - vPosition;
+    float3 vToLight = light.Position - vPosition;
     float fDistance = length(vToLight);
     
-    if (fDistance > light.m_fAttRadius)
+    if (fDistance > light.Radius)
         return float4(0.0, 0.0, 0.0, 0.0);
     
     float3 lightDir = normalize(vToLight);
     float diffuseFactor =CalculateDiffuse(vNormal, lightDir);
-    float attenuationDistance = CalculateAttenuation(fDistance, light.m_fAttenuation, light.m_fAttRadius);
-    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.Intensity, light.InnerRad, light.OuterRad, light.Attenuation);
-    // 간소화된 specular 계산
+    float attenuationDistance = CalculateAttenuation(fDistance, light.Attenuation, light.Radius);
+    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.InnerRad, light.OuterRad, light.Attenuation);
+    
     float specularFactor = 0.0;
     if (diffuseFactor > 0.0)
     {
@@ -228,31 +230,28 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         specularFactor = pow(max(dot(vNormal, halfVector), 0.0), 4.0);
     }
     
-    float3 lit = (light.m_cDiffuse.rgb * diffuseFactor * Material.DiffuseColor) +
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
                  (specularFactor * Material.SpecularColor);
                  
-    return float4(lit * attenuationDistance * spotFactor * light.m_fIntensity, 1.0);
+    return float4(lit * attenuationDistance * spotFactor * light.Intensity, 1.0);
 #elif defined(LIGHTING_MODEL_LAMBERT)
-    LIGHT light = gLights[nIndex];
-    if (light.m_bEnable == 0)
-        return float4(0.0, 0.0, 0.0, 0.0);
+    FSpotLightInfo light = SpotLights[nIndex];
     
-    float3 vToLight = light.m_vPosition - vPosition;
+    float3 vToLight = light.Position - vPosition;
     float fDistance = length(vToLight);
     
-    float attenuation = CalculateAttenuation(fDistance, light.m_fAttenuation, light.m_fAttRadius);
+    float attenuation = CalculateAttenuation(fDistance, light.Attenuation, light.Radius);
     if (attenuation <= 0.0)
         return float4(0.0, 0.0, 0.0, 0.0);
     
     float3 lightDir = normalize(vToLight);
     float diffuseFactor =CalculateDiffuse(vNormal, lightDir);
-    //float spotFactor = CalculateSpotEffect(lightDir, normalize(light.m_vDirection), light.m_fFalloff);
-    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.Intensity, light.InnerRad, light.OuterRad, light.Attenuation);
+    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.InnerRad, light.OuterRad, light.Attenuation);
     
     // Lambert에서는 specular 계산 없음
-    float3 lit = light.m_cDiffuse.rgb * diffuseFactor * Material.DiffuseColor;
+    float3 lit = light.LightColor.rgb * diffuseFactor * Material.DiffuseColor;
                  
-    return float4(lit * attenuation* spotFactor * light.m_fIntensity, 1.0);
+    return float4(lit * attenuation* spotFactor * light.Intensity, 1.0);
     // End test
 #else
     FSpotLightInfo light = SpotLights[nIndex];
@@ -265,7 +264,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         return float4(0.0, 0.0, 0.0, 0.0);
     
     float3 lightDir = normalize(vToLight);
-    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.Intensity, light.InnerRad, light.OuterRad, light.Attenuation);
+    float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.InnerRad, light.OuterRad, light.Attenuation);
     
     if (spotFactor <= 0.0)
         return float4(0.0, 0.0, 0.0, 0.0);
@@ -275,18 +274,16 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
     float diffuseFactor = CalculateDiffuse(vNormal, lightDir);
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     
-    float3 lit = (light.m_cDiffuse.rgb * diffuseFactor * Material.DiffuseColor) +
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
                  (specularFactor * Material.SpecularColor);
                  
-    return float4(lit * attenuation * spotFactor * light.m_fIntensity, 1.0);
-    
-    
+    return float4(lit * attenuation * spotFactor * light.Intensity, 1.0);    
 #endif
 }
 
 float4 DirectionalLight(int nIndex, float3 vPosition, float3 vNormal)
 {
-    FDirectionalLightInfo light = DirectionalLight[nIndex];
+    FDirectionalLightInfo light = Directional[nIndex];
     
     float3 lightDir = normalize(-light.Direction);
     float3 viewDir = normalize(CameraPosition - vPosition);

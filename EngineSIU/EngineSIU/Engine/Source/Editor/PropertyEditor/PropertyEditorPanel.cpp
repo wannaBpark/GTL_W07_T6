@@ -191,7 +191,7 @@ void PropertyEditorPanel::Render()
                     spotlightObj->SetIntensity(Intensity);
 
                 float Radius = spotlightObj->GetRadius();
-                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::SliderFloat("Radius", &Radius, 0.01f, 200.f, "%.1f")) {
                     spotlightObj->SetRadius(Radius);
                 }
 
@@ -200,12 +200,12 @@ void PropertyEditorPanel::Render()
                 spotlightObj->SetDirection(LightDirection);
 
                 float InnerRad = spotlightObj->GetInnerDegree();
-                if (ImGui::SliderFloat("InnerRad", &InnerRad, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::SliderFloat("InnerRad", &InnerRad, 0.01f, 200.f, "%.1f")) {
                     spotlightObj->SetInnerDegree(InnerRad);
                 }
 
                 float OuterRad = spotlightObj->GetOuterDegree();
-                if (ImGui::SliderFloat("OuterRad", &OuterRad, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::SliderFloat("OuterRad", &OuterRad, 0.01f, 200.f, "%.1f")) {
                     spotlightObj->SetOuterDegree(OuterRad);
                 }
 
