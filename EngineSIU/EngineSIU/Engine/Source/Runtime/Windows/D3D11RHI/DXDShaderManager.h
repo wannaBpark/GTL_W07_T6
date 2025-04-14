@@ -2,12 +2,30 @@
 #define _TCHAR_DEFINED
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <filesystem>
+#include <chrono>
 #include "Container/Map.h"
+#include "Container/Array.h"
+#include <vector>
 
 struct FVertexShaderData
 {
 	ID3DBlob* VertexShaderCSO;
 	ID3D11VertexShader* VertexShader;
+};
+
+struct FShaderReloadInfo {
+    std::wstring Key;
+    std::wstring FilePath;
+    std::string EntryPoint;
+    bool IsVertexShader;
+    std::vector<D3D_SHADER_MACRO> Defines;
+    std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
+
+    FShaderReloadInfo(const std::wstring& InKey, const std::wstring& InFilePath,
+        const std::string& InEntryPoint, bool bIsVS)
+        : Key(InKey), FilePath(InFilePath), EntryPoint(InEntryPoint), IsVertexShader(bIsVS) {
+    }
 };
 
 class FDXDShaderManager
@@ -17,7 +35,9 @@ public:
 	FDXDShaderManager(ID3D11Device* Device);
 
 	void ReleaseAllShader();
-
+    void UpdateShaderIfOutdated(const std::wstring Key, const std::wstring FilePath, const std::string EntryPoint, bool IsVertexShader, const D3D_SHADER_MACRO * Defines = nullptr, const D3D11_INPUT_ELEMENT_DESC * Layout = nullptr, uint32 LayoutSize = 0);
+    void RegisterShaderForReload(std::wstring Key, std::wstring FilePath, std::string EntryPoint, bool IsVertexShader, D3D_SHADER_MACRO* Defines = nullptr, D3D11_INPUT_ELEMENT_DESC* Layout = nullptr, uint32 LayoutSize = 0);
+    void ReloadAllShaders();
 private:
 	ID3D11Device* DXDDevice;
 
@@ -39,6 +59,7 @@ private:
 	TMap<std::wstring, ID3D11InputLayout*> InputLayouts;
 	TMap<std::wstring, ID3D11VertexShader*> VertexShaders;
 	TMap<std::wstring, ID3D11PixelShader*> PixelShaders;
-
+    TMap<std::wstring, std::filesystem::file_time_type> ShaderTimeStamps;
+    std::vector<FShaderReloadInfo> RegisteredShaders;
 };
 

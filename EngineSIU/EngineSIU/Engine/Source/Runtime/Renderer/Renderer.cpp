@@ -154,4 +154,5 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     GizmoRenderPass->Render(ActiveViewport);
 
     ClearRenderArr();
+    ShaderManager->ReloadAllShaders(); // 
 }
