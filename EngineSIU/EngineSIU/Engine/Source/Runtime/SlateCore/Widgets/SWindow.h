@@ -15,7 +15,7 @@ public:
     FRect Rect;
     void SetRect(FRect newRect) { Rect = newRect; }
     
-    bool IsHover(FPoint InPoint);
+    virtual bool IsHover(FPoint InPoint);
     
     virtual bool OnPressed(FPoint InPoint);
     

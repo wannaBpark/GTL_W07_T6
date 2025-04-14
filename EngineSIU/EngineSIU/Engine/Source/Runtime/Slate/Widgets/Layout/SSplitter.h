@@ -12,9 +12,9 @@ public:
 
     float SplitRatio = 0.5f; // 값 범위: [0, 1]
 
-    uint32 SplitterLimitLT = 50; // Pixel Value
+    uint32 SplitterLimitLT = 100; // Pixel Value
 
-    float SplitterHalfThickness = 10.f; // Pixel Value
+    float SplitterHalfThickness = 5.f; // Pixel Value
 
     virtual void Initialize(FRect initRect) override;
 

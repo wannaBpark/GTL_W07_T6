@@ -26,7 +26,9 @@ void SSplitter::OnResize(uint32 InWidth, uint32 InHeight)
 bool SSplitter::OnPressed(FPoint InPoint)
 {
     if (!IsHover(InPoint))
+    {
         return false;
+    }
     
     return bIsPressed = true;
 }
@@ -34,6 +36,7 @@ bool SSplitter::OnPressed(FPoint InPoint)
 bool SSplitter::OnReleased()
 {
     bIsPressed = false;
+    
     return false;
 }
 
