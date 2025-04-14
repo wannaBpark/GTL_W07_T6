@@ -1,5 +1,8 @@
 #include "DXDShaderManager.h"
-
+#include "Define.h"
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 FDXDShaderManager::FDXDShaderManager(ID3D11Device* Device)
     : DXDDevice(Device)
@@ -95,14 +98,25 @@ void FDXDShaderManager::RegisterShaderForReload(std::wstring Key, std::wstring F
     }
 
     RegisteredShaders.push_back(Info);
+
+    // 메인 셰이더 파일의 타임스탬프를
+    if (std::filesystem::exists(FilePath))
+    {
+        ShaderTimeStamps.Add(Key, std::filesystem::last_write_time(FilePath));
+    }
+    
+    BuildDependency(Info); // 해당 셰이더 파일이 포함하는 셰이더(헤더) 파일을 모두 찾아 graph, date 기록
 }
 
 // 모든 리로드 대상 Shader에 대해 업데이트 시도
 void FDXDShaderManager::ReloadAllShaders()  
 {  
    auto Copied = RegisteredShaders;
+   bool bAnyUpdated = false;
    for (const auto& Shader : Copied)
    {  
+       if (!IsOutdatedWithDependency(Shader)) { continue; } // 갱신 필요없으면 skip
+
        const D3D_SHADER_MACRO* definesPtr = Shader.Defines.empty() ? nullptr : Shader.Defines.data();
        const D3D11_INPUT_ELEMENT_DESC* layoutPtr = Shader.Layout.empty() ? nullptr : Shader.Layout.data();
        UpdateShaderIfOutdated(
@@ -112,8 +126,130 @@ void FDXDShaderManager::ReloadAllShaders()
            Shader.IsVertexShader,
            definesPtr,
            layoutPtr,
-           static_cast<uint32>(Shader.Layout.size()));
+           static_cast<uint32>(Shader.Layout.size())
+       );
+       UE_LOG(LogLevel::Display, TEXT("%ls Updated"), Shader.Key.c_str());
+
+       // 업데이트 후, 해당 셰이더 자신과 인클루드하는 모든 파일 타임스탬프 갱신
+       if (std::filesystem::exists(Shader.FilePath))
+       {
+           ShaderTimeStamps[Shader.Key] = std::filesystem::last_write_time(Shader.FilePath);
+       }
+       bAnyUpdated = true;
+       /*for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
+       {
+           if (shaderKeys.Contains(Shader.Key) && std::filesystem::exists(L"Shaders/"+includeFile))
+           {
+               ShaderTimeStamps[includeFile] = std::filesystem::last_write_time(L"Shaders/" + includeFile);
+           }           
+       }*/
    }
+
+   // 하나라도 업데이트 된 경우, 의존성 그래프에 있는 모든 include 파일들의 타임스탬프를 갱신
+   if (bAnyUpdated) { UpdateDependencyTimestamps(); }
+}
+
+void FDXDShaderManager::BuildDependency(const FShaderReloadInfo& Info)
+{
+    std::wifstream wfile(Info.FilePath);
+    if (!wfile.is_open())
+        return;
+
+    std::wstring line;
+    const std::wstring includeToken = L"#include";
+    while (std::getline(wfile, line))
+    {
+        size_t pos = line.find(includeToken);
+        if (pos != std::wstring::npos)
+        {
+            // 예를 들어, #include "Common.hlsl" 형태를 찾음
+            size_t start = line.find(L"\"", pos);
+            size_t end = line.find(L"\"", start + 1);
+            if (start != std::wstring::npos && end != std::wstring::npos)
+            {
+                std::wstring includeFile = line.substr(start + 1, end - start - 1);
+                // include 파일 경로가 상대경로라면 처리하는 코드 추가 가능
+                // 1. 의존성 그래프에 추가
+                // 2. Shader 타임 스탬프에 수정시각 추가
+                ShaderDependencyGraph[includeFile].Add(Info.Key);
+                if (std::filesystem::exists(L"Shaders/"+includeFile))
+                {
+                    auto currentTime = std::filesystem::last_write_time(L"Shaders/"+includeFile);
+                    ShaderTimeStamps.Add(includeFile, currentTime);
+                }
+            }
+        }
+    }
+}
+
+bool FDXDShaderManager::IsOutdatedWithDependency(const FShaderReloadInfo& Info)
+{
+    //// 존재하지 않을 경우 0 반환
+    //if (!std::filesystem::exists(Info.FilePath)) { return false; }
+    //auto currentTime = std::filesystem::last_write_time(Info.FilePath);
+    //auto* FoundTime = ShaderTimeStamps.Find(Info.Key);
+    //// Key 값에 대한 value 없을 시 새로 만들어 줌
+    //if (!FoundTime || (*FoundTime != currentTime)) { return true; }
+
+    //// 의존성 include 셰이더 파일 수정 시각 확인
+    //for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
+    //{
+    //    // 이 shader가 포함하는 include File 검사
+    //    if (shaderKeys.Contains(Info.Key))
+    //    {
+    //        if (std::filesystem::exists(includeFile))
+    //        {
+    //            // 만약 include 파일이 메인 셰이더 파일보다 최신이라면 OutDated.
+    //            auto depTime = std::filesystem::last_write_time(includeFile);
+    //            auto* storedDepTime = ShaderTimeStamps.Find(includeFile);
+    //            if (!storedDepTime || *storedDepTime != depTime)
+    //            {
+    //                return true;
+    //            }
+    //        }
+    //    }
+    //}
+    //return false;
+    // 의존성 include 파일들의 수정 시각 검사
+    for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
+    {
+        // 이 셰이더가 include하는 파일이라면 검사
+        if (shaderKeys.Contains(Info.Key))
+        {
+            if (std::filesystem::exists(L"Shaders/"+includeFile))
+            {
+                auto depTime = std::filesystem::last_write_time(L"Shaders/" + includeFile);
+                auto* storedDepTime = ShaderTimeStamps.Find(includeFile);
+                // 저장된 타임스탬프가 없거나, 현재 수정 시각과 다르면 => 변경됨
+                if (!storedDepTime || *storedDepTime != depTime)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // 2. 그 후, 메인 셰이더 파일의 수정 시각 검사
+    if (!std::filesystem::exists(Info.FilePath)) { return false; }
+    auto currentTime = std::filesystem::last_write_time(Info.FilePath);
+    auto* FoundTime = ShaderTimeStamps.Find(Info.Key);
+    // 만약 메인 파일의 저장된 타임스탬프가 없거나 현재와 다르면 변경된 것으로 처리
+    if (!FoundTime || (*FoundTime != currentTime)) { return true; }
+
+    return false;
+}
+
+void FDXDShaderManager::UpdateDependencyTimestamps()
+{
+    // 모든 의존(Include) 파일의 타임스탬프를 갱신
+    for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
+    {
+        std::wstring fullPath = L"Shaders/" + includeFile;
+        if (std::filesystem::exists(fullPath))
+        {
+            ShaderTimeStamps[includeFile] = std::filesystem::last_write_time(fullPath);
+        }
+    }
 }
 
 HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint)
