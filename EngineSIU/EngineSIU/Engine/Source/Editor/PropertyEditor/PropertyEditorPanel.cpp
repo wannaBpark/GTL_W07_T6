@@ -151,6 +151,49 @@ void PropertyEditorPanel::Render()
             ImGui::PopStyleColor();
         }
 
+    if(PickedActor)
+        if (UPointLightComponent* pointlightObj = PickedActor->GetComponentByClass<UPointLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("PointLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return pointlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { pointlightObj->SetLightColor(c); });
+
+                float Intensity = pointlightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                    pointlightObj->SetIntensity(Intensity);
+
+                float attenuation = pointlightObj->GetRadius();
+                if (ImGui::SliderFloat("Attenuation", &attenuation, 0.01f, 10000.f, "%.1f")) {
+                    pointlightObj->SetRadius(attenuation);
+                }
+                
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
+    if(PickedActor)
+        if (USpotLightComponent* spotlightObj = PickedActor->GetComponentByClass<USpotLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("SpotLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return spotlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { spotlightObj->SetLightColor(c); });
+
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
     if (PickedActor)
         if (UProjectileMovementComponent* ProjectileComp = (PickedActor->GetComponentByClass<UProjectileMovementComponent>()))
         {

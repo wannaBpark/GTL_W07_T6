@@ -7,11 +7,10 @@ UDirectionalLightComponent::UDirectionalLightComponent()
 {
     Light.Type = ELightType::DIRECTIONAL_LIGHT;
 
-    DirectionalLightInfo.DiffuseColor = -GetUpVector();
+    DirectionalLightInfo.Direction = -GetUpVector();
     DirectionalLightInfo.Intensity = 10.0f;
 
-    DirectionalLightInfo.DiffuseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
-    DirectionalLightInfo.SpecularColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+    DirectionalLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 UDirectionalLightComponent::~UDirectionalLightComponent()

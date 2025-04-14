@@ -10,8 +10,7 @@ USpotLightComponent::USpotLightComponent()
     SpotLightInfo.Position = GetWorldLocation();
     SpotLightInfo.Radius = 30.0f;
     SpotLightInfo.Direction = GetForwardVector();
-    SpotLightInfo.DiffuseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
-    SpotLightInfo.SpecularColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+    SpotLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
     SpotLightInfo.Intensity = 10.0f;
     SpotLightInfo.Type = ELightType::SPOT_LIGHT;
     SpotLightInfo.InnerRad = 0.9659;
@@ -54,27 +53,18 @@ void USpotLightComponent::SetRadius(float InRadius)
 {
     SpotLightInfo.Radius = InRadius;
 }
-/*
-FVector4 USpotLightComponent::GetDiffuseColor() const
+
+FLinearColor USpotLightComponent::GetLightColor() const
 {
-    return SpotLightInfo.DiffuseColor;
+    return SpotLightInfo.LightColor;
 }
 
-void USpotLightComponent::SetDiffuseColor(const FVector4& InColor)
+void USpotLightComponent::SetLightColor(const FLinearColor& InColor)
 {
-    SpotLightInfo.DiffuseColor = InColor;
+    SpotLightInfo.LightColor = InColor;
 }
 
-FVector4 USpotLightComponent::GetSpecularColor() const
-{
-    return SpotLightInfo.SpecularColor;
-}
 
-void USpotLightComponent::SetSpecularColor(const FVector4& InColor)
-{
-    SpotLightInfo.SpecularColor = InColor;
-}
-*/
 
 float USpotLightComponent::GetIntensity() const
 {

@@ -50,42 +50,40 @@ struct FAmbientLightInfo
 
 struct FDirectionalLightInfo
 {
+    float4 LightColor;
+
     float3 Direction;
     float Intensity;
-
-    float4 DiffuseColor;
-    float4 SpecularColor;
 };
 
 struct FPointLightInfo
 {
+    float4 LightColor;
+
     float3 Position;
     float Radius;
 
-    float4 DiffuseColor;
-    float4 SpecularColor;
-
-    float Intensity;
     int Type;
-    float2 Padding; // float[2]
+    float Intensity;
+    float2 Padding;
 };
 
 struct FSpotLightInfo
 {
+    float4 LightColor;
+
     float3 Position;
     float Radius;
 
     float3 Direction;
-    float pad3;
-
-    float4 DiffuseColor;
-    float4 SpecularColor;
-
     float Intensity;
+
     int Type;
-    float InnerCos;
-    float OuterCos;
+    float InnerRad;
+    float OuterRad;
+    float Padding;
 };
+
 
 cbuffer Lighting : register(b7)
 {

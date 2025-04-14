@@ -8,46 +8,43 @@
 
 struct FAmbientLightInfo
 {
-    FVector4 AmbientColor;         // RGB + alpha
+    FLinearColor AmbientColor;         // RGB + alpha
 };
 
 struct FDirectionalLightInfo
 {
+    FLinearColor LightColor;         // RGB + alpha
+
     FVector Direction;   // 정규화된 광선 방향 (월드 공간 기준)
     float   Intensity;   // 밝기
-
-    FVector4 DiffuseColor;         // RGB + alpha
-    FVector4 SpecularColor;         // RGB + alpha
 };
 
 struct FPointLightInfo
 {
+    FLinearColor LightColor;         // RGB + alpha
+
     FVector Position;    // 월드 공간 위치
     float   Radius;      // 감쇠가 0이 되는 거리
 
-    FVector4 DiffuseColor;         // RGB + alpha
-    FVector4 SpecularColor;         // RGB + alpha
-
-    float   Intensity;   // 밝기
     int     Type;        // 라이트 타입 구분용 (예: 1 = Point)
+    float   Intensity;   // 밝기
     float   Padding[2];  // 16바이트 정렬
 };
 
 struct FSpotLightInfo
 {
+    FLinearColor LightColor;         // RGB + alpha
+
     FVector Position;       // 월드 공간 위치
     float   Radius;         // 감쇠 거리
 
     FVector Direction;      // 빛이 향하는 방향 (normalize)
-    float   pad3;
-
-    FVector4 DiffuseColor;         // RGB + alpha
-    FVector4 SpecularColor;         // RGB + alpha
-
     float   Intensity;      // 밝기
+
     int     Type;           // 라이트 타입 구분용 (예: 2 = Spot)
     float   InnerRad; // cos(inner angle)
     float   OuterRad; // cos(outer angle)
+    float   Padding;
 };
 
 struct FLightInfoBuffer

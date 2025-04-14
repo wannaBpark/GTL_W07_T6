@@ -15,13 +15,9 @@ public:
     float GetRadius() const;
     void SetRadius(float InRadius);
 
-    /*
-    FVector4 GetDiffuseColor() const;
-    void SetDiffuseColor(const FVector4& InColor);
+    FLinearColor GetLightColor() const;
+    void SetLightColor(const FLinearColor& InColor);
 
-    FVector4 GetSpecularColor() const;
-    void SetSpecularColor(const FVector4& InColor);
-    */
 
     float GetIntensity() const;
     void SetIntensity(float InIntensity);

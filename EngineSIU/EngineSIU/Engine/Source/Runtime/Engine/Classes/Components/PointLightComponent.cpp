@@ -7,8 +7,7 @@ UPointLightComponent::UPointLightComponent()
     PointLightInfo.Position = GetWorldLocation();
     PointLightInfo.Radius = 30;
 
-    PointLightInfo.DiffuseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
-    PointLightInfo.SpecularColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+    PointLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     PointLightInfo.Intensity = 10;
     PointLightInfo.Type = ELightType::POINT_LIGHT;
@@ -38,27 +37,17 @@ void UPointLightComponent::SetRadius(float InRadius)
 {
     PointLightInfo.Radius = InRadius;
 }
-/*
-FVector4 UPointLightComponent::GetDiffuseColor() const
+
+FLinearColor UPointLightComponent::GetLightColor() const
 {
-    return PointLightInfo.DiffuseColor;
+    return PointLightInfo.LightColor;
 }
 
-void UPointLightComponent::SetDiffuseColor(const FVector4& InColor)
+void UPointLightComponent::SetLightColor(const FLinearColor& InColor)
 {
-    PointLightInfo.DiffuseColor = InColor;
+    PointLightInfo.LightColor = InColor;
 }
 
-FVector4 UPointLightComponent::GetSpecularColor() const
-{
-    return PointLightInfo.SpecularColor;
-}
-
-void UPointLightComponent::SetSpecularColor(const FVector4& InColor)
-{
-    PointLightInfo.SpecularColor = InColor;
-}
-*/
 
 float UPointLightComponent::GetIntensity() const
 {
