@@ -231,35 +231,6 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         }
         ViewportTypePanel::GetInstance().OnResize(hWnd);
         break;
-    case WM_MOUSEWHEEL:
-    {
-        if (ImGui::GetIO().WantCaptureMouse)
-            return 0;
-
-        int zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
-        auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-
-        if (GEngineLoop.GetLevelEditor())
-        {
-            if (ActiveViewport->IsPerspective())
-            {
-                if (ActiveViewport->GetIsOnRBMouseClick())
-                {
-                    ActiveViewport->SetCameraSpeedScalar(
-                        static_cast<float>(ActiveViewport->GetCameraSpeedScalar() + zDelta * 0.01)
-                    );
-                }
-                else
-                {
-                    ActiveViewport->CameraMoveForward(zDelta * 0.1f);
-                }
-            }
-            else
-            {
-                FEditorViewportClient::SetOthoSize(-zDelta * 0.01f);
-            }
-        }
-    }
     default:
         GEngineLoop.AppMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
         return DefWindowProc(hWnd, Msg, wParam, lParam);

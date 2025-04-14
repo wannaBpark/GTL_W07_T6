@@ -183,8 +183,35 @@ void SLevelEditor::Initialize()
 
     Handler->OnMouseWheelDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
     {
-        // 우클 + 휠
-        // 걍 휠
+        if (ImGui::GetIO().WantCaptureMouse) return;
+
+        // 카메라 속도 조절
+        if (
+            InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)
+            || InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)
+        )
+        {
+            if (ActiveViewportClient->IsPerspective())
+            {
+                const float CurrentSpeed = ActiveViewportClient->GetCameraSpeedScalar();
+                const float Adjustment = FMath::Sign(InMouseEvent.GetWheelDelta()) * FMath::Loge(CurrentSpeed + 1.0f) * 0.5f;
+
+                ActiveViewportClient->SetCameraSpeedScalar(CurrentSpeed + Adjustment);
+            }
+        }
+
+        // Forward 방향으로 앞뒤로 이동
+        else
+        {
+            if (ActiveViewportClient->IsPerspective())
+            {
+                ActiveViewportClient->CameraMoveForward(InMouseEvent.GetWheelDelta() * 50.0f);
+            }
+            else
+            {
+                FEditorViewportClient::SetOthoSize(-InMouseEvent.GetWheelDelta());
+            }
+        }
     });
 
     Handler->OnKeyDownDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
