@@ -9,6 +9,7 @@
 #include "Container/Set.h"
 #include <vector>
 
+//#define Multi_Shader_Include // 중첩 헤더 파일 지원 플래그 (주석 해제시 재귀적으로 include 검사/갱신)
 struct FVertexShaderData
 {
 	ID3DBlob* VertexShaderCSO;
@@ -23,6 +24,7 @@ struct FShaderReloadInfo {
     std::vector<D3D_SHADER_MACRO> Defines;
     std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
 
+    FShaderReloadInfo() = default;
     FShaderReloadInfo(const std::wstring& InKey, const std::wstring& InFilePath,
         const std::string& InEntryPoint, bool bIsVS)
         : Key(InKey), FilePath(InFilePath), EntryPoint(InEntryPoint), IsVertexShader(bIsVS) {

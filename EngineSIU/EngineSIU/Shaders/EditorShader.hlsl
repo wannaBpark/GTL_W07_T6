@@ -137,7 +137,7 @@ PS_INPUT sphereVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
 
 float4 spherePS(PS_INPUT input) : SV_Target
 {
-    return float4(0.777f, 1.0f, 1.0f, 1.0f); // 하늘색
+    return float4(0.777f, 0.0f, 1.0f, 1.0f); // 하늘색
 }
 
 /////////////////////////////////////////////

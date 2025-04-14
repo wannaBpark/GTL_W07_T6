@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <unordered_set>
+#include <functional>
 
 FDXDShaderManager::FDXDShaderManager(ID3D11Device* Device)
     : DXDDevice(Device)
@@ -142,6 +144,136 @@ void FDXDShaderManager::ReloadAllShaders()
    if (bAnyUpdated) { UpdateDependencyTimestamps(); }
 }
 
+
+
+#ifdef Multi_Shader_Include
+void FDXDShaderManager::BuildDependency(const FShaderReloadInfo& Info)
+{
+    std::wifstream wfile(Info.FilePath);
+    if (!wfile.is_open()) return;
+
+    std::wstring line;
+    const std::wstring includeToken = L"#include";
+    std::unordered_set<std::wstring> uniqueIncludes;
+
+    while (std::getline(wfile, line))
+    {
+        size_t pos = line.find(includeToken);
+        if (pos != std::wstring::npos)
+        {
+            size_t start = line.find(L"\"", pos);
+            size_t end = line.find(L"\"", start + 1);
+            if (start != std::wstring::npos && end != std::wstring::npos)
+            {
+                std::wstring includeFile = line.substr(start + 1, end - start - 1);
+
+                // 중복 방지
+                if (!uniqueIncludes.insert(includeFile).second) continue;
+
+                ShaderDependencyGraph[includeFile].Add(Info.Key);
+
+                std::wstring fullPath = L"Shaders/" + includeFile;
+                if (std::filesystem::exists(fullPath))
+                {
+                    auto currentTime = std::filesystem::last_write_time(fullPath);
+                    ShaderTimeStamps.Add(includeFile, currentTime);
+
+                    // 중첩 include 탐색 재귀 호출
+                    FShaderReloadInfo DummyInfo;
+                    DummyInfo.FilePath = fullPath;
+                    DummyInfo.Key = Info.Key;
+                    BuildDependency(DummyInfo);
+                }
+            }
+        }
+    }
+}
+
+bool FDXDShaderManager::IsOutdatedWithDependency(const FShaderReloadInfo& Info)
+{
+    std::unordered_set<std::wstring> Visited;
+    std::function<bool(const std::wstring&)> CheckDependency = [&](const std::wstring& includeFile) -> bool
+        {
+            if (Visited.contains(includeFile)) return false;
+            Visited.insert(includeFile);
+
+            std::wstring fullPath = L"Shaders/" + includeFile;
+            if (std::filesystem::exists(fullPath))
+            {
+                auto depTime = std::filesystem::last_write_time(fullPath);
+                auto* storedDepTime = ShaderTimeStamps.Find(includeFile);
+                if (!storedDepTime || *storedDepTime != depTime)
+                {
+                    return true;
+                }
+            }
+
+            // 중첩 의존성 확인
+            if (ShaderDependencyGraph.Contains(includeFile))
+            {
+                for (const auto& key : ShaderDependencyGraph[includeFile])
+                {
+                    if (key == Info.Key && CheckDependency(includeFile))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        };
+
+    for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
+    {
+        if (shaderKeys.Contains(Info.Key))
+        {
+            if (CheckDependency(includeFile))
+            {
+                return true;
+            }
+        }
+    }
+
+    // 메인 셰이더 파일 검사
+    if (!std::filesystem::exists(Info.FilePath)) { return false; }
+    auto currentTime = std::filesystem::last_write_time(Info.FilePath);
+    auto* FoundTime = ShaderTimeStamps.Find(Info.Key);
+    if (!FoundTime || (*FoundTime != currentTime)) { return true; }
+
+    return false;
+}
+
+void FDXDShaderManager::UpdateDependencyTimestamps()
+{
+    std::unordered_set<std::wstring> Visited;
+
+    std::function<void(const std::wstring&)> UpdateRecursive = [&](const std::wstring& includeFile)
+        {
+            if (Visited.contains(includeFile)) return;
+            Visited.insert(includeFile);
+
+            std::wstring fullPath = L"Shaders/" + includeFile;
+            if (std::filesystem::exists(fullPath))
+            {
+                ShaderTimeStamps[includeFile] = std::filesystem::last_write_time(fullPath);
+            }
+
+            // 중첩 include도 재귀적으로 갱신
+            if (ShaderDependencyGraph.Contains(includeFile))
+            {
+                for (const auto& nestedKey : ShaderDependencyGraph[includeFile])
+                {
+                    UpdateRecursive(includeFile);
+                }
+            }
+        };
+
+    for (const auto& [includeFile, shaderKeys] : ShaderDependencyGraph)
+    {
+        UpdateRecursive(includeFile);
+    }
+}
+#else
 void FDXDShaderManager::BuildDependency(const FShaderReloadInfo& Info)
 {
     std::wifstream wfile(Info.FilePath);
@@ -174,7 +306,6 @@ void FDXDShaderManager::BuildDependency(const FShaderReloadInfo& Info)
         }
     }
 }
-
 bool FDXDShaderManager::IsOutdatedWithDependency(const FShaderReloadInfo& Info)
 {
     // 의존성 include 파일들의 수정 시각 검사
@@ -218,6 +349,7 @@ void FDXDShaderManager::UpdateDependencyTimestamps()
         }
     }
 }
+#endif
 
 HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint)
 {
