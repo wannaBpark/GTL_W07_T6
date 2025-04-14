@@ -99,6 +99,8 @@ void FGizmoRenderPass::ClearRenderArr()
 
 void FGizmoRenderPass::PrepareRenderState() const
 {
+    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    
     Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
@@ -128,24 +130,6 @@ void FGizmoRenderPass::PrepareRender()
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
-    if (!RenderTargetRHI)
-    {
-        return;
-    }
-
-    const EResourceType ResourceType = EResourceType::ERT_Editor;
-    FViewportResources ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources()[ResourceType];
-    
-    PrepareRenderState();
-
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI.RTV, RenderTargetRHI->GetGizmoDepthStencilView());
-    Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetGizmoDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI.RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
-
-    // TODO: DSS는 전역으로 하나만 설정하기
-    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
-
     Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerSolidBack);
     
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
@@ -195,7 +179,21 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (Engine && !Engine->GetSelectedActor())
+    {
         return;
+    }
+    if (!GizmoComp->GetStaticMesh())
+    {
+        return;
+    }
+    OBJ::FStaticMeshRenderData* RenderData = GizmoComp->GetStaticMesh()->GetRenderData();
+    if (!RenderData)
+    {
+        return;
+    }
+
+    PrepareRenderState();
+    
     // 모델 행렬.
     FMatrix Model = GizmoComp->GetWorldMatrix();
 
@@ -212,20 +210,9 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
-    // Gizmo가 렌더링할 StaticMesh가 없으면 렌더링하지 않음
-    if (!GizmoComp->GetStaticMesh())
-        return;
-
-    OBJ::FStaticMeshRenderData* RenderData = GizmoComp->GetStaticMesh()->GetRenderData();
-
-    if (!RenderData)
-        return;
-
-    UINT stride = sizeof(FStaticMeshVertex);
-
-    UINT offset = 0;
-
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &stride, &offset);
+    UINT Stride = sizeof(FStaticMeshVertex);
+    UINT Offset = 0;
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &Stride, &Offset);
 
     if (RenderData->IndexBuffer)
         Graphics->DeviceContext->IASetIndexBuffer(RenderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);

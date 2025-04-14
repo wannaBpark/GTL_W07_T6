@@ -1,5 +1,7 @@
 // GizmoPixelShader.hlsl
 
+Texture2D SceneDepthTexture : register(t99);
+
 cbuffer MatrixConstants : register(b0)
 {
     row_major float4x4 Model;

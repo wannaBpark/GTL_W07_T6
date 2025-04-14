@@ -52,7 +52,21 @@ void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)
 void FRenderTargetRHI::Resize(uint32 NewWidth, uint32 NewHeight)
 {
     Release();
-    Initialize(NewWidth, NewHeight);
+
+    D3DViewport.Height = static_cast<float>(NewHeight);
+    D3DViewport.Width = static_cast<float>(NewWidth);
+
+    HRESULT hr = S_OK;
+    hr = CreateDepthStencilResources();
+    if (FAILED(hr))
+    {
+        return;
+    }
+
+    for (auto& [Type, Resource] : Resources)
+    {
+        CreateResource(Type);
+    }
 }
 
 void FRenderTargetRHI::Release()

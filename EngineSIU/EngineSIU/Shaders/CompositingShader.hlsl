@@ -44,6 +44,9 @@ PS_Input mainVS(uint VertexID : SV_VertexID)
 float4 mainPS(PS_Input Input) : SV_TARGET
 {
     float4 Scene = SceneTexture.Sample(CompositingSampler, Input.UV);
+    float4 Editor = EditorTexture.Sample(CompositingSampler, Input.UV);
 
-    return Scene;
+    float4 FinalColor = lerp(Scene, Editor, Editor.a);
+
+    return FinalColor;
 }

@@ -109,7 +109,4 @@ void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewport
 void FLineRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     ProcessLineRendering(Viewport);
-
-
-  
 }

@@ -127,20 +127,24 @@ void FRenderer::ClearRenderArr()
     FogRenderPass->ClearRenderArr();
 }
 
-void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClear, bool bIncludeDSV)
+void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClearRTV, bool bIncludeDSV, bool bClearDSV)
 {
     FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(Type);
     if (!ResourceRHI)
     {
-        return;
+        if (FAILED(RenderTargetRHI->CreateResource(Type)))
+        {
+            return;
+        }
+        ResourceRHI = RenderTargetRHI->Resources.Find(Type);
     }
     
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, bIncludeDSV ? RenderTargetRHI->DepthStencilView : nullptr);
 
-    if (bClear)
+    if (bClearRTV)
     {
         Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
-        if (bIncludeDSV)
+        if (bIncludeDSV && bClearDSV)
         {
             Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
         }
@@ -191,15 +195,21 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
 
     // Render for Editor
-    if (GEngine->ActiveWorld->WorldType != EWorldType::PIE && false)  // TODO: false 제거
+    if (GEngine->ActiveWorld->WorldType != EWorldType::PIE)  // TODO: false 제거
     {
-        LineRenderPass->Render(ActiveViewport); // TODO: 여기에서는 기존 뎁스를 그대로 사용하고
-        GizmoRenderPass->Render(ActiveViewport); // TODO: 여기에서는 기존 뎁스를 SRV로 전달해서 샘플 후 비교해야 함
+        SetRenderResource(EResourceType::ERT_Editor, RenderTargetRHI, true, true, false);
+        LineRenderPass->Render(ActiveViewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
+
+        FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(EResourceType::ERT_Editor);
+        Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GizmoDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GizmoDepthStencilView);
+        GizmoRenderPass->Render(ActiveViewport); // 기존 뎁스를 SRV로 전달해서 샘플 후 비교하기 위해 기즈모 전용 DSV 사용
+
+        Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+        Graphics->DeviceContext->PSSetShaderResources(102, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Editor)->SRV);
     }
 
     // Compositing
-    
-    // SetRenderResource(EResourceType::ERT_Compositing, RenderTargetRHI, false);
     CompositingPass->Render(ActiveViewport);
 
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
