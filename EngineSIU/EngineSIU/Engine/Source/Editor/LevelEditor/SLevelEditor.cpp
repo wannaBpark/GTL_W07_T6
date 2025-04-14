@@ -52,7 +52,7 @@ void SLevelEditor::Initialize()
         {
         case EKeys::RightMouseButton:
         {
-            if (!bIsPressedMouseRightButton)
+            if (!bIsPressedMouseRightButton && !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
             {
                 FWindowsCursor::SetShowMouseCursor(false);
                 MousePinPosition = InMouseEvent.GetScreenSpacePosition();
@@ -202,7 +202,11 @@ void SLevelEditor::Initialize()
         {
             if (!bIsPressedMouseRightButton)
             {
-                ActiveViewportClient->CameraMoveForward(InMouseEvent.GetWheelDelta() * 50.0f);
+                const FVector CameraLoc = ActiveViewportClient->ViewTransformPerspective.GetLocation();
+                const FVector CameraForward = ActiveViewportClient->ViewTransformPerspective.GetForwardVector();
+                ActiveViewportClient->ViewTransformPerspective.SetLocation(
+                    CameraLoc + CameraForward * InMouseEvent.GetWheelDelta() * 50.0f
+                );
             }
         }
         else
