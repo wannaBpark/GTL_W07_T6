@@ -201,15 +201,14 @@ void PropertyEditorPanel::Render()
 
                 LightDirection = spotlightObj->GetDirection();
                 FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
-                spotlightObj->SetDirection(LightDirection);
-
+                
                 float InnerRad = spotlightObj->GetInnerDegree();
-                if (ImGui::SliderFloat("InnerRad", &InnerRad, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::SliderFloat("InnerRad", &InnerRad, 0.0f, 180.f, "%.1f")) {
                     spotlightObj->SetInnerDegree(InnerRad);
                 }
 
                 float OuterRad = spotlightObj->GetOuterDegree();
-                if (ImGui::SliderFloat("OuterRad", &OuterRad, 0.01f, 10000.f, "%.1f")) {
+                if (ImGui::SliderFloat("OuterRad", &OuterRad, 0.0f, 180.f, "%.1f")) {
                     spotlightObj->SetOuterDegree(OuterRad);
                 }
 
@@ -221,15 +220,22 @@ void PropertyEditorPanel::Render()
 
 
     if (PickedActor)
-        if (UDirectionalLightComponent* spotlightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>())
+        if (UDirectionalLightComponent* dirlightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>())
         {
             ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
             if (ImGui::TreeNodeEx("DirectionalLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
             {
                 DrawColorProperty("Light Color",
-                    [&]() { return spotlightObj->GetLightColor(); },
-                    [&](FLinearColor c) { spotlightObj->SetLightColor(c); });
+                    [&]() { return dirlightObj->GetLightColor(); },
+                    [&](FLinearColor c) { dirlightObj->SetLightColor(c); });
+
+                float Intensity = dirlightObj->GetIntensity();
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                    dirlightObj->SetIntensity(Intensity);
+
+                LightDirection = dirlightObj->GetDirection();
+                FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
 
                 ImGui::TreePop();
             }
