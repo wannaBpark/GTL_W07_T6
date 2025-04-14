@@ -15,7 +15,6 @@ extern FEngineLoop GEngineLoop;
 SLevelEditor::SLevelEditor()
     : HSplitter(nullptr)
     , VSplitter(nullptr)
-    , World(nullptr)
     , bMultiViewportMode(false)
 {
 }

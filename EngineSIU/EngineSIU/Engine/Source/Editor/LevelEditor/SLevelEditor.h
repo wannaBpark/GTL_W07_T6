@@ -28,12 +28,8 @@ public:
 private:
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
-    UWorld* World;
     std::shared_ptr<FEditorViewportClient> ViewportClients[4];
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
-
-    bool bLButtonDown = false;
-    bool bRButtonDown = false;
 
     /** 우클릭 시 캡처된 마우스 커서의 초기 위치 (스크린 좌표계) */
     FVector2D MousePinPosition;
@@ -43,7 +39,6 @@ private:
 
     bool bMultiViewportMode;
 
-    POINT lastMousePos;
     float EditorWidth;
     float EditorHeight;
 
