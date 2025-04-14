@@ -537,78 +537,78 @@ void FSlateAppMessageHandler::OnRawMouseInput(const RAWMOUSE& RawMouseInput)
     // 눌린 버튼이 있는경우
     if (ButtonFlags)
     {
-        // 마우스 왼쪽 버튼
-        if (ButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
-        {
-            PressedMouseButtons.Add(EKeys::LeftMouseButton);
-            EffectingButton = EKeys::LeftMouseButton;
-            InputEventType = IE_Pressed;
-        }
-        else if (ButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
-        {
-            PressedMouseButtons.Remove(EKeys::LeftMouseButton);
-            EffectingButton = EKeys::LeftMouseButton;
-            InputEventType = IE_Released;
-        }
-
-        // 마우스 오른쪽 버튼
-        else if (ButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
-        {
-            PressedMouseButtons.Add(EKeys::RightMouseButton);
-            EffectingButton = EKeys::RightMouseButton;
-            InputEventType = IE_Pressed;
-        }
-        else if (ButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
-        {
-            PressedMouseButtons.Remove(EKeys::RightMouseButton);
-            EffectingButton = EKeys::RightMouseButton;
-            InputEventType = IE_Released;
-        }
-
-        // 마우스 가운데 버튼
-        else if (ButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
-        {
-            PressedMouseButtons.Add(EKeys::MiddleMouseButton);
-            EffectingButton = EKeys::MiddleMouseButton;
-            InputEventType = IE_Pressed;
-        }
-        else if (ButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
-        {
-            PressedMouseButtons.Remove(EKeys::MiddleMouseButton);
-            EffectingButton = EKeys::MiddleMouseButton;
-            InputEventType = IE_Released;
-        }
-
-        // 마우스 엄지버튼 1
-        else if (ButtonFlags & RI_MOUSE_BUTTON_4_DOWN)
-        {
-            PressedMouseButtons.Add(EKeys::ThumbMouseButton);
-            EffectingButton = EKeys::ThumbMouseButton;
-            InputEventType = IE_Pressed;
-        }
-        else if (ButtonFlags & RI_MOUSE_BUTTON_4_UP)
-        {
-            PressedMouseButtons.Remove(EKeys::ThumbMouseButton);
-            EffectingButton = EKeys::ThumbMouseButton;
-            InputEventType = IE_Released;
-        }
-
-        // 마우스 엄지버튼 2
-        else if (ButtonFlags & RI_MOUSE_BUTTON_5_DOWN)
-        {
-            PressedMouseButtons.Add(EKeys::ThumbMouseButton2);
-            EffectingButton = EKeys::ThumbMouseButton2;
-            InputEventType = IE_Pressed;
-        }
-        else if (ButtonFlags & RI_MOUSE_BUTTON_5_UP)
-        {
-            PressedMouseButtons.Remove(EKeys::ThumbMouseButton2);
-            EffectingButton = EKeys::ThumbMouseButton2;
-            InputEventType = IE_Released;
-        }
+        // // 마우스 왼쪽 버튼
+        // if (ButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+        // {
+        //     PressedMouseButtons.Add(EKeys::LeftMouseButton);
+        //     EffectingButton = EKeys::LeftMouseButton;
+        //     InputEventType = IE_Pressed;
+        // }
+        // else if (ButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+        // {
+        //     PressedMouseButtons.Remove(EKeys::LeftMouseButton);
+        //     EffectingButton = EKeys::LeftMouseButton;
+        //     InputEventType = IE_Released;
+        // }
+        //
+        // // 마우스 오른쪽 버튼
+        // else if (ButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+        // {
+        //     PressedMouseButtons.Add(EKeys::RightMouseButton);
+        //     EffectingButton = EKeys::RightMouseButton;
+        //     InputEventType = IE_Pressed;
+        // }
+        // else if (ButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+        // {
+        //     PressedMouseButtons.Remove(EKeys::RightMouseButton);
+        //     EffectingButton = EKeys::RightMouseButton;
+        //     InputEventType = IE_Released;
+        // }
+        //
+        // // 마우스 가운데 버튼
+        // else if (ButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
+        // {
+        //     PressedMouseButtons.Add(EKeys::MiddleMouseButton);
+        //     EffectingButton = EKeys::MiddleMouseButton;
+        //     InputEventType = IE_Pressed;
+        // }
+        // else if (ButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
+        // {
+        //     PressedMouseButtons.Remove(EKeys::MiddleMouseButton);
+        //     EffectingButton = EKeys::MiddleMouseButton;
+        //     InputEventType = IE_Released;
+        // }
+        //
+        // // 마우스 엄지버튼 1
+        // else if (ButtonFlags & RI_MOUSE_BUTTON_4_DOWN)
+        // {
+        //     PressedMouseButtons.Add(EKeys::ThumbMouseButton);
+        //     EffectingButton = EKeys::ThumbMouseButton;
+        //     InputEventType = IE_Pressed;
+        // }
+        // else if (ButtonFlags & RI_MOUSE_BUTTON_4_UP)
+        // {
+        //     PressedMouseButtons.Remove(EKeys::ThumbMouseButton);
+        //     EffectingButton = EKeys::ThumbMouseButton;
+        //     InputEventType = IE_Released;
+        // }
+        //
+        // // 마우스 엄지버튼 2
+        // else if (ButtonFlags & RI_MOUSE_BUTTON_5_DOWN)
+        // {
+        //     PressedMouseButtons.Add(EKeys::ThumbMouseButton2);
+        //     EffectingButton = EKeys::ThumbMouseButton2;
+        //     InputEventType = IE_Pressed;
+        // }
+        // else if (ButtonFlags & RI_MOUSE_BUTTON_5_UP)
+        // {
+        //     PressedMouseButtons.Remove(EKeys::ThumbMouseButton2);
+        //     EffectingButton = EKeys::ThumbMouseButton2;
+        //     InputEventType = IE_Released;
+        // }
 
         // 마우스 휠
-        else if (ButtonFlags & RI_MOUSE_WHEEL)
+        /*else*/ if (ButtonFlags & RI_MOUSE_WHEEL)
         {
             const SHORT WheelData = static_cast<SHORT>(HIWORD(RawMouseInput.ulButtons));
             WheelDelta = static_cast<float>(WheelData) / static_cast<float>(WHEEL_DELTA);
