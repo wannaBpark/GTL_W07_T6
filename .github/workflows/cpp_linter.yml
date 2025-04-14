@@ -39,7 +39,7 @@ jobs:
           files-changed-only: true
           lines-changed-only: 'diff'
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
-          step-summary: true
+          step-summary: false
 
       - name: Fail fast?!
         if: steps.linter.outputs.checks-failed != 0
