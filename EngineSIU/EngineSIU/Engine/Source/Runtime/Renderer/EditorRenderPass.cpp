@@ -389,40 +389,23 @@ void FEditorRenderPass::CreateBuffers()
 }
 void FEditorRenderPass::CreateConstantBuffers()
 {
-    D3D11_BUFFER_DESC ConstantBufferDesc = {};
-    ConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    auto CreateCB = [this](UINT size, ID3D11Buffer** outBuffer)
+        {
+            D3D11_BUFFER_DESC desc = {};
+            desc.Usage = D3D11_USAGE_DYNAMIC;
+            desc.ByteWidth = size;
+            desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+            desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            Graphics->Device->CreateBuffer(&desc, nullptr, outBuffer);
+        };
 
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferCamera);
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.Camera00);
-
-    // 16개 고정
-    // 그려야할 대상이 더 많을 경우 16개씩 쪼개서 사용
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferDebugAABB) * ConstantBufferSizeAABB;
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.AABB13);
-
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferDebugSphere) * ConstantBufferSizeSphere;
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.Sphere13);
-
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferDebugCone) * ConstantBufferSizeCone;
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.Cone13);
-
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferDebugGrid);
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.Grid13);
-
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferDebugIcon);
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.Icon13);
-
-    ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-    ConstantBufferDesc.ByteWidth = sizeof(FConstantBufferDebugArrow);
-    Graphics->Device->CreateBuffer(&ConstantBufferDesc, nullptr, &Resources.ConstantBuffers.Arrow13);
-
+    CreateCB(sizeof(FConstantBufferCamera), &Resources.ConstantBuffers.Camera00);
+    CreateCB(sizeof(FConstantBufferDebugAABB) * ConstantBufferSizeAABB, &Resources.ConstantBuffers.AABB13);
+    CreateCB(sizeof(FConstantBufferDebugSphere) * ConstantBufferSizeSphere, &Resources.ConstantBuffers.Sphere13);
+    CreateCB(sizeof(FConstantBufferDebugCone) * ConstantBufferSizeCone, &Resources.ConstantBuffers.Cone13);
+    CreateCB(sizeof(FConstantBufferDebugGrid), &Resources.ConstantBuffers.Grid13);
+    CreateCB(sizeof(FConstantBufferDebugIcon), &Resources.ConstantBuffers.Icon13);
+    CreateCB(sizeof(FConstantBufferDebugArrow), &Resources.ConstantBuffers.Arrow13);
 }
 
 void FEditorRenderPass::PrepareRendertarget()
@@ -582,7 +565,7 @@ void FEditorRenderPass::UdpateConstantbufferAABBInstanced(TArray<FConstantBuffer
 
 void FEditorRenderPass::RenderPointlightInstanced(const UWorld* World)
 {
-    PrepareShader(Resources.Shaders.Sphere);
+    SetShaderAndPrepare(L"SphereVS", L"SpherePS", Resources.Shaders.Sphere);
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &Resources.Primitives.Sphere.Vertex, &Resources.Primitives.Sphere.VertexStride, &offset);
     Graphics->DeviceContext->IASetIndexBuffer(Resources.Primitives.Sphere.Index, DXGI_FORMAT_R32_UINT, 0);
@@ -656,7 +639,7 @@ void FEditorRenderPass::UdpateConstantbufferPointlightInstanced(TArray<FConstant
 
 void FEditorRenderPass::RenderSpotlightInstanced(const UWorld* World)
 {
-    PrepareShader(Resources.Shaders.Cone);
+    SetShaderAndPrepare(L"ConeVS", L"ConePS", Resources.Shaders.Cone);
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &Resources.Primitives.Cone.Vertex, &Resources.Primitives.Cone.VertexStride, &offset);
     Graphics->DeviceContext->IASetIndexBuffer(Resources.Primitives.Cone.Index, DXGI_FORMAT_R32_UINT, 0);
@@ -834,7 +817,7 @@ void FEditorRenderPass::RenderArrows(const UWorld* World)
     // XYZ한번. Z는 중복으로 적용
     const float ArrowScale = 1;
 
-    PrepareShader(Resources.Shaders.Arrow);
+    SetShaderAndPrepare(L"ArrowVS", L"ArrowPS", Resources.Shaders.Arrow);
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &Resources.Primitives.Arrow.Vertex, &Resources.Primitives.Arrow.VertexStride, &offset);
     Graphics->DeviceContext->IASetIndexBuffer(Resources.Primitives.Arrow.Index, DXGI_FORMAT_R32_UINT, 0);
@@ -883,4 +866,12 @@ void FEditorRenderPass::UdpateConstantbufferArrow(FConstantBufferDebugArrow Buff
         memcpy(ConstantBufferMSR.pData, &Buffer, sizeof(FConstantBufferDebugArrow)); // TArray이니까 실제 값을 받아와야함
         Graphics->DeviceContext->Unmap(Resources.ConstantBuffers.Arrow13, 0); // GPU�� �ٽ� ��밡���ϰ� �����
     }
+}
+
+void FEditorRenderPass::SetShaderAndPrepare(const std::wstring& VertexKey, const std::wstring& PixelKey, FShaderResource& ShaderSlot)
+{
+    ShaderSlot.Vertex = ShaderManager->GetVertexShaderByKey(VertexKey);
+    ShaderSlot.Pixel = ShaderManager->GetPixelShaderByKey(PixelKey);
+    ShaderSlot.Layout = ShaderManager->GetInputLayoutByKey(VertexKey);
+    PrepareShader(ShaderSlot);
 }

@@ -76,7 +76,8 @@ private:
     void PrepareConstantbufferArrow();
     void UdpateConstantbufferArrow(FConstantBufferDebugArrow Buffer);
 
-
+    // ShaderManager의 Hot Reload에 대응하기 위한 함수
+    void SetShaderAndPrepare(const std::wstring& VertexKey, const std::wstring& PixelKey, FShaderResource& ShaderSlot);
 
     const UINT32 ConstantBufferSizeAABB = 8;
     const UINT32 ConstantBufferSizeSphere = 8;

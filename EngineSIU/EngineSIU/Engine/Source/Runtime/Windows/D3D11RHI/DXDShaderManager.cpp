@@ -277,7 +277,12 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::ws
     if (FAILED(hr))
         return hr;
 
+    if (SUCCEEDED(hr) && !PixelShaders.Contains(Key))
+    {
+        RegisterShaderForReload(Key, FileName, EntryPoint, false, nullptr, nullptr, 0);
+    }
     PixelShaders[Key] = NewPixelShader;
+    
 
     return S_OK;
 }
@@ -415,10 +420,15 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
         return hr;
     }
 
+    VertexShaderCSO->Release();
+    if (SUCCEEDED(hr) && !VertexShaders.Contains(Key))
+    {
+        RegisterShaderForReload(Key, FileName, EntryPoint, true, nullptr, const_cast<D3D11_INPUT_ELEMENT_DESC*>(Layout), LayoutSize);
+    }
+
     VertexShaders[Key] = NewVertexShader;
     InputLayouts[Key] = NewInputLayout;
 
-    VertexShaderCSO->Release();
 
     return S_OK;
 }
