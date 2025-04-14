@@ -36,9 +36,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 FEngineLoop::GraphicDevice.Resize(hWnd);
             }
             
-            RECT ResizedClientRect = {};
-            GetClientRect(hWnd, &ResizedClientRect);
-            
             uint32 ClientWidth = 0;
             uint32 ClientHeight = 0;
             GEngineLoop.GetClientSize(ClientWidth, ClientHeight);

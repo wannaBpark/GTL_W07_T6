@@ -21,12 +21,10 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
     ResizeEditor(InEditorWidth, InEditorHeight);
     
     VSplitter = new SSplitterV();
-    VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorWidth, 20));
-    VSplitter->OnDrag(FPoint(0, 0));
+    VSplitter->Initialize(FRect(0.0f, 0.f, InEditorWidth, InEditorHeight));
     
     HSplitter = new SSplitterH();
-    HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorHeight));
-    HSplitter->OnDrag(FPoint(0, 0));
+    HSplitter->Initialize(FRect(0.f, 0.0f, InEditorWidth, InEditorHeight));
     
     FRect Top = VSplitter->SideLT->Rect;
     FRect Bottom = VSplitter->SideRB->Rect;
@@ -181,17 +179,15 @@ void SLevelEditor::ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight)
         return;
     }
     
-    const uint32 PrevEditorWidth = EditorWidth;
-    const uint32 PrevEditorHeight = EditorHeight;
+    const float PrevEditorWidth = static_cast<float>(EditorWidth);
+    const float PrevEditorHeight = static_cast<float>(EditorHeight);
     EditorWidth = InEditorWidth;
     EditorHeight = InEditorHeight;
 
     if (bInitialized)
     {
-        //HSplitter 에는 바뀐 width 비율이 들어감 
-        HSplitter->OnResize(EditorWidth / PrevEditorWidth, EditorHeight);
-        //HSplitter 에는 바뀐 Height 비율이 들어감 
-        VSplitter->OnResize(EditorWidth, EditorHeight / PrevEditorHeight);
+        HSplitter->OnResize(EditorWidth, EditorHeight);
+        VSplitter->OnResize(EditorWidth, EditorHeight);
         ResizeViewports();
     }
 }

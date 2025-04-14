@@ -10,12 +10,11 @@ void SWindow::Initialize(FRect InitRect)
     Rect = InitRect;
 }
 
-void SWindow::OnResize(float InWidth, float InHeight)
+void SWindow::OnResize(uint32 InWidth, uint32 InHeight)
 {
     Rect.Width = InWidth;
     Rect.Height = InHeight;
 }
-
 
 bool SWindow::IsHover(FPoint InPoint) 
 {

@@ -128,5 +128,6 @@ private:
 
     EViewScreenLocation ViewLocation;   // 뷰포트 위치
 
+    // 이 값은 화면의 크기 뿐만 아니라 위치 정보도 가지고 있음.
     FRect Rect;
 };

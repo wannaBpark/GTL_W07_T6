@@ -9,12 +9,20 @@ class SSplitter : public SWindow
 public:
     SWindow* SideLT; // Left or Top
     SWindow* SideRB; // Right or Bottom
-    
+
+    float SplitRatio = 0.5f; // 값 범위: [0, 1]
+
+    uint32 SplitterLimitLT = 50; 
+
+    float SplitterHalfThickness = 10.f;
+
     virtual void Initialize(FRect initRect) override;
+
+    virtual float GetSplitterLTCenter() const = 0;
 
     virtual void OnDragStart(const FPoint& mousePos) { /* 초기화 */ }
     virtual void OnDrag(const FPoint& delta) = 0; // 가로/세로에 따라 구현 다름.
-    virtual void OnResize(float Width, float Height) override;
+    virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
     virtual bool OnPressed(FPoint InPoint) override;
     virtual bool OnReleased() override;
 
@@ -45,7 +53,10 @@ class SSplitterH : public SSplitter
 {
 public:
     virtual void Initialize(FRect InRect) override;
-    virtual void OnResize(float InWidth, float InHeight) override;
+
+    virtual float GetSplitterLTCenter() const override;
+    
+    virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
 
     virtual void LoadConfig(const TMap<FString, FString>& config) override;
     virtual void SaveConfig(TMap<FString, FString>& config) const override;
@@ -58,8 +69,11 @@ public:
 class SSplitterV : public SSplitter
 {
 public:
-    virtual void Initialize(FRect initRect) override;
-    virtual void OnResize(float width, float height) override;
+    virtual void Initialize(FRect InRect) override;
+
+    virtual float GetSplitterLTCenter() const override;
+    
+    virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
 
     virtual void LoadConfig(const TMap<FString, FString>& config) override;
     virtual void SaveConfig(TMap<FString, FString>& config) const override;

@@ -10,7 +10,7 @@ public:
     virtual ~SWindow() = default;
 
     virtual void Initialize(FRect InitRect);
-    virtual void OnResize(float InWidth, float InHeight);
+    virtual void OnResize(uint32 InWidth, uint32 InHeight);
 
     FRect Rect;
     void SetRect(FRect newRect) { Rect = newRect; }
