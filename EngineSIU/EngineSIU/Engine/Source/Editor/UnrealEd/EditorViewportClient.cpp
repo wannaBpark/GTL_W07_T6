@@ -318,7 +318,7 @@ void FEditorViewportClient::CameraMoveForward(float InValue)
     if (IsPerspective())
     {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * InValue;
+        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetForwardVector() * InValue;
         ViewTransformPerspective.SetLocation(curCameraLoc);
     }
     else
