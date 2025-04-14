@@ -195,6 +195,11 @@ PS_INPUT coneVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
     if (instanceID % 2 == 1)
     {
         radius = DataCone[instanceID].OuterRadius;
+        output.color = float4(0.776, 1.0, 1.0, 1.0); // 하늘색
+    }
+    else
+    {
+        output.color = float4(0.4157, 0.5765, 0.7765, 1.0); // 짙은 하늘색
     }
     float3 scale = float3(radius.xx, DataCone[instanceID%2].Height);
     float3x3 rot = CreateRotationMatrixFromZ(DataCone[instanceID%2].Direction);
@@ -215,7 +220,7 @@ PS_INPUT coneVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
 
 float4 conePS(PS_INPUT input) : SV_Target
 {
-    return float4(0.777f, 1.0f, 1.0f, 1.0f); // 하늘색
+    return input.color;
 }
 
 /////////////////////////////////////////////
