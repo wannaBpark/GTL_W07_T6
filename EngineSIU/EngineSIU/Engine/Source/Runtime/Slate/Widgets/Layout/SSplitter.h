@@ -14,7 +14,7 @@ public:
 
     uint32 SplitterLimitLT = 100; // Pixel Value
 
-    float SplitterHalfThickness = 5.f; // Pixel Value
+    uint32 SplitterHalfThickness = 5; // Pixel Value
 
     bool bIsSplitterPressed = false;
 

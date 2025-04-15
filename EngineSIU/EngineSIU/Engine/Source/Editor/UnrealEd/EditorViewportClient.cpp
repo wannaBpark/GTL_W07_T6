@@ -39,6 +39,7 @@ void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, cons
     
     PerspectiveCamera.SetLocation(FVector(8.0f, 8.0f, 8.f));
     PerspectiveCamera.SetRotation(FVector(0.0f, 45.0f, -135.0f));
+    
     Viewport = new FViewport(InViewportIndex);
     Viewport->Initialize(InRect);
 
@@ -182,9 +183,9 @@ void FEditorViewportClient::CameraMoveForward(float InValue)
 {
     if (IsPerspective())
     {
-        FVector curCameraLoc = PerspectiveCamera.GetLocation();
-        curCameraLoc = curCameraLoc + PerspectiveCamera.GetForwardVector() * GetCameraSpeedScalar() * InValue;
-        PerspectiveCamera.SetLocation(curCameraLoc);
+        FVector CurCameraLoc = PerspectiveCamera.GetLocation();
+        CurCameraLoc = CurCameraLoc + PerspectiveCamera.GetForwardVector() * GetCameraSpeedScalar() * InValue;
+        PerspectiveCamera.SetLocation(CurCameraLoc);
     }
     else
     {
@@ -196,9 +197,9 @@ void FEditorViewportClient::CameraMoveRight(float InValue)
 {
     if (IsPerspective())
     {
-        FVector curCameraLoc = PerspectiveCamera.GetLocation();
-        curCameraLoc = curCameraLoc + PerspectiveCamera.GetRightVector() * GetCameraSpeedScalar() * InValue;
-        PerspectiveCamera.SetLocation(curCameraLoc);
+        FVector CurCameraLoc = PerspectiveCamera.GetLocation();
+        CurCameraLoc = CurCameraLoc + PerspectiveCamera.GetRightVector() * GetCameraSpeedScalar() * InValue;
+        PerspectiveCamera.SetLocation(CurCameraLoc);
     }
     else
     {
@@ -210,9 +211,9 @@ void FEditorViewportClient::CameraMoveUp(float InValue)
 {
     if (IsPerspective())
     {
-        FVector curCameraLoc = PerspectiveCamera.GetLocation();
-        curCameraLoc.Z = curCameraLoc.Z + GetCameraSpeedScalar() * InValue;
-        PerspectiveCamera.SetLocation(curCameraLoc);
+        FVector CurCameraLoc = PerspectiveCamera.GetLocation();
+        CurCameraLoc.Z = CurCameraLoc.Z + GetCameraSpeedScalar() * InValue;
+        PerspectiveCamera.SetLocation(CurCameraLoc);
     }
     else
     {
@@ -222,16 +223,16 @@ void FEditorViewportClient::CameraMoveUp(float InValue)
 
 void FEditorViewportClient::CameraRotateYaw(float InValue)
 {
-    FVector curCameraRot = PerspectiveCamera.GetRotation();
-    curCameraRot.Z += InValue ;
-    PerspectiveCamera.SetRotation(curCameraRot);
+    FVector CurCameraRot = PerspectiveCamera.GetRotation();
+    CurCameraRot.Z += InValue ;
+    PerspectiveCamera.SetRotation(CurCameraRot);
 }
 
 void FEditorViewportClient::CameraRotatePitch(float InValue)
 {
-    FVector curCameraRot = PerspectiveCamera.GetRotation();
-    curCameraRot.Y = FMath::Clamp(curCameraRot.Y + InValue, -89.f, 89.f);
-    PerspectiveCamera.SetRotation(curCameraRot);
+    FVector CurCameraRot = PerspectiveCamera.GetRotation();
+    CurCameraRot.Y = FMath::Clamp(CurCameraRot.Y + InValue, -89.f, 89.f);
+    PerspectiveCamera.SetRotation(CurCameraRot);
 }
 
 void FEditorViewportClient::PivotMoveRight(float InValue)
@@ -316,22 +317,12 @@ ELevelViewportType FEditorViewportClient::GetViewportType() const
     {
         EffectiveViewportType = LVT_Perspective;
     }
-    //if (bUseControllingActorViewInfo)
-    //{
-    //    EffectiveViewportType = (ControllingActorViewInfo.ProjectionMode == ECameraProjectionMode::Perspective) ? LVT_Perspective : LVT_OrthoFreelook;
-    //}
     return EffectiveViewportType;
 }
 
 void FEditorViewportClient::SetViewportType(ELevelViewportType InViewportType)
 {
     ViewportType = InViewportType;
-    //ApplyViewMode(GetViewMode(), IsPerspective(), EngineShowFlags);
-
-    //// We might have changed to an orthographic viewport; if so, update any viewport links
-    //UpdateLinkedOrthoViewports(true);
-
-    //Invalidate();
 }
 
 void FEditorViewportClient::UpdateOrthoCameraLoc()
@@ -438,9 +429,13 @@ void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FSt
 void FEditorViewportClient::SetCameraSpeed(float InValue)
 {
     if (InValue < 0.198f)
+    {
         InValue = 0.198f;
+    }
     else if (InValue > 176.0f)
+    {
         InValue = 176.0f;
+    }
     CameraSpeed = InValue;
 }
 

@@ -55,8 +55,11 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
+
     if (!GetOwner())
+    {
         return;
+    }
     
     if (FEditorViewportClient* ViewportClient = Cast<ATransformGizmo>(GetOwner())->GetAttachedViewport())
     {
@@ -64,12 +67,12 @@ void UGizmoBaseComponent::TickComponent(float DeltaTime)
         {
             float Scaler = (ViewportClient->PerspectiveCamera.GetLocation() - GetOwner()->GetActorLocation()).Length();
             
-            Scaler *= 0.1f;
+            Scaler *= GizmoScale;
             RelativeScale3D = FVector(Scaler);
         }
         else
         {
-            float Scaler = FEditorViewportClient::OrthoSize * 0.1f;
+            float Scaler = FEditorViewportClient::OrthoSize * GizmoScale;
             RelativeScale3D = FVector(Scaler);
         }
     }

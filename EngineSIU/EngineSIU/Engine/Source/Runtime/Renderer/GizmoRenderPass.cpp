@@ -71,16 +71,12 @@ void FGizmoRenderPass::CreateShader()
         {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
-    Stride = sizeof(FStaticMeshVertex);
-
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"GizmoVertexShader", L"Shaders/GizmoVertexShader.hlsl", "mainVS", GizmoInputLayout, ARRAYSIZE(GizmoInputLayout));
 
     hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
 
     VertexShader = ShaderManager->GetVertexShaderByKey(L"GizmoVertexShader");
-
     PixelShader = ShaderManager->GetPixelShaderByKey(L"GizmoPixelShader");
-
     InputLayout = ShaderManager->GetInputLayoutByKey(L"GizmoVertexShader");
 
 }
@@ -94,7 +90,6 @@ void FGizmoRenderPass::ReleaseShader()
 
 void FGizmoRenderPass::ClearRenderArr()
 {
-    //GizmoObjs.Empty();
 }
 
 void FGizmoRenderPass::PrepareRenderState() const
@@ -122,10 +117,6 @@ void FGizmoRenderPass::PrepareRenderState() const
 
 void FGizmoRenderPass::PrepareRender()
 {
-    /*for (const auto iter : TObjectRange<UGizmoBaseComponent>())
-    {
-        GizmoObjs.Add(iter);
-    }*/
 }
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
@@ -196,52 +187,55 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     
     // 모델 행렬.
     FMatrix Model = GizmoComp->GetWorldMatrix();
-
     FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
-
-    bool Selected = (GizmoComp == Viewport->GetPickedGizmoComponent());
-
+    bool bSelected = (GizmoComp == Viewport->GetPickedGizmoComponent());
     FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
 
-    FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
+    FPerObjectConstantBuffer ObjectData(Model, NormalMatrix, UUIDColor, bSelected);
 
     FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection);
 
-    BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
+    BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), ObjectData);
     BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
 
     UINT Stride = sizeof(FStaticMeshVertex);
     UINT Offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &Stride, &Offset);
 
-    if (RenderData->IndexBuffer)
-        Graphics->DeviceContext->IASetIndexBuffer(RenderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
+    if (!RenderData->IndexBuffer)
+    {
+        // TODO: 인덱스 버퍼가 없는 경우를 따로 고려해야 함.
+    }
+    Graphics->DeviceContext->IASetIndexBuffer(RenderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    
     if (RenderData->MaterialSubsets.Num() == 0)
     {
         Graphics->DeviceContext->DrawIndexed(RenderData->Indices.Num(), 0, 0);
     }
     else
     {
-        for (int subMeshIndex = 0; subMeshIndex < RenderData->MaterialSubsets.Num(); subMeshIndex++)
+        for (int SubMeshIndex = 0; SubMeshIndex < RenderData->MaterialSubsets.Num(); SubMeshIndex++)
         {
-            int materialIndex = RenderData->MaterialSubsets[subMeshIndex].MaterialIndex;
+            int32 MaterialIndex = RenderData->MaterialSubsets[SubMeshIndex].MaterialIndex;
 
             FSubMeshConstants SubMeshData = FSubMeshConstants(false);
             BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), SubMeshData);
 
-            TArray<FStaticMaterial*>Materials = GizmoComp->GetStaticMesh()->GetMaterials();
-            TArray<UMaterial*>OverrideMaterials = GizmoComp->GetOverrideMaterials();
-
-            if (OverrideMaterials[materialIndex] != nullptr)
-                MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[materialIndex]->GetMaterialInfo());
+            TArray<UMaterial*> OverrideMaterials = GizmoComp->GetOverrideMaterials();
+            if (OverrideMaterials[MaterialIndex] != nullptr)
+            {
+                MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[MaterialIndex]->GetMaterialInfo());
+            }
             else
-                MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[materialIndex]->Material->GetMaterialInfo());
+            {
+                TArray<FStaticMaterial*> Materials = GizmoComp->GetStaticMesh()->GetMaterials();
+                MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[MaterialIndex]->Material->GetMaterialInfo());
+            }
 
-            uint64 startIndex = RenderData->MaterialSubsets[subMeshIndex].IndexStart;
-            uint64 indexCount = RenderData->MaterialSubsets[subMeshIndex].IndexCount;
+            uint32 StartIndex = RenderData->MaterialSubsets[SubMeshIndex].IndexStart;
+            uint32 IndexCount = RenderData->MaterialSubsets[SubMeshIndex].IndexCount;
 
-            Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
+            Graphics->DeviceContext->DrawIndexed(IndexCount, StartIndex, 0);
         }
     }
 }

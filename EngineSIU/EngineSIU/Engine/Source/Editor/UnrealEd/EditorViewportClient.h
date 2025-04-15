@@ -206,7 +206,7 @@ private:
 
 public:
     // Gizmo
-    void SetGizmoActor(ATransformGizmo* gizmo) { GizmoActor = gizmo; }
+    // void SetGizmoActor(ATransformGizmo* gizmo) { GizmoActor = gizmo; }
     ATransformGizmo* GetGizmoActor() const { return GizmoActor; }
 
     void SetPickedGizmoComponent(USceneComponent* component) { PickedGizmoComponent = component; }
