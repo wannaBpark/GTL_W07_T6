@@ -33,8 +33,17 @@ struct FSpotLightGPU {
 struct TileLightCullSettings
 {
     UINT ScreenSize[2];
+    UINT TileSize[2];
+
+    float NearZ;
+    float FarZ;
+
+    FMatrix ViewMatrix;
+    FMatrix ProjectionMatrix;
+    FMatrix InvProjectionMatrix;
+
+    UINT NumLights;
     UINT Enable25DCulling;
-    float Padding; // 패딩 맞춤용
 };
 
 class FTileLightCullingPass : public IRenderPass
@@ -44,6 +53,7 @@ public:
     ~FTileLightCullingPass();
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
     virtual void PrepareRender() override;
+    void Render(const std::shared_ptr<FEditorViewportClient>& Viewport, ID3D11ShaderResourceView* DepthSRV);
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     virtual void ClearRenderArr() override;
 
@@ -52,9 +62,11 @@ public:
     void CreateViews();
     void CreateBuffers();
     void Release();
-    void Dispatch();
+    void Dispatch(ID3D11ShaderResourceView* depthSRV);
     void ClearUAVs();
-    void UpdateTileLightConstantBuffer();
+    void UpdateTileLightConstantBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
+
+    ID3D11ShaderResourceView* GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
 
 private:
     TArray<USpotLightComponent*> SpotLights;
@@ -71,6 +83,7 @@ private:
 
     ID3D11Texture2D* DebugHeatmapTexture;       // 디버그용 히트맵 텍스처
     ID3D11UnorderedAccessView* DebugHeatmapUAV; // 디버그용 히트맵 UAV
+    ID3D11ShaderResourceView* DebugHeatmapSRV; // 디버그용 히트맵 SRV
 
     ID3D11Buffer* LightBufferGPU;               // GPU에서 사용할 라이트 버퍼    
     ID3D11ShaderResourceView* LightSRV;         // 라이트 버퍼 SRV (StructruredBuffer)

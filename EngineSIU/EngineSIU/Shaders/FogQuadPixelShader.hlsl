@@ -1,5 +1,8 @@
 Texture2D SceneColor : register(t0);
 Texture2D Fog : register(t1);
+
+Texture2D HeatMap : register(t2); // Added : To use heatmap texture
+
 SamplerState Sampler : register(s0);
 
 cbuffer ScreenConstants : register(b0)
@@ -18,6 +21,7 @@ struct PS_INPUT
 
 float4 mainPS(PS_INPUT input) : SV_Target
 {
+    return HeatMap.Sample(Sampler, input.UV);
     float2 UV = input.UV * UVScale + UVOffset;
     float4 Scene = SceneColor.Sample(Sampler, UV);
     float4 FogColor = Fog.Sample(Sampler, UV);

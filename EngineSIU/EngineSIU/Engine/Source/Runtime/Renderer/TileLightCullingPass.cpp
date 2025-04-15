@@ -11,6 +11,8 @@
 #include "Components/SpotLightComponent.h"
 #include "UObject/UObjectIterator.h"
 
+#include "UnrealEd/EditorViewportClient.h"
+
 #define SAFE_RELEASE(p) if (p) { p->Release(); p = nullptr; }
 
 FTileLightCullingPass::FTileLightCullingPass()
@@ -55,31 +57,39 @@ void FTileLightCullingPass::PrepareRender()
         }
     }
     CreateLightBufferGPU();
+    
 }
 
+void FTileLightCullingPass::Render(
+    const std::shared_ptr<FEditorViewportClient>& Viewport,
+    ID3D11ShaderResourceView* DepthSRV
+)
+{
+    UpdateTileLightConstantBuffer(Viewport);
+    Dispatch(DepthSRV);
+}
+
+// Not In Use
 void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
 }
 
-void FTileLightCullingPass::Dispatch()
+void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView* DepthSRV)
 {
     // 스레드 그룹 수 계산
     const UINT groupSizeX = (Graphics->screenWidth + TILE_SIZE - 1) / TILE_SIZE;
     const UINT groupSizeY = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE;
 
-    // 1. Constant Buffer 업데이트
-    TileLightCullSettings settings = {};
-    settings.ScreenSize[0] = Graphics->screenWidth;
-    settings.ScreenSize[1] = Graphics->screenHeight;
-    settings.Enable25DCulling = 1;                      // TODO : IMGUI 연결!
-
-    Graphics->DeviceContext->UpdateSubresource(TileLightConstantBuffer, 0, nullptr, &settings, 0, 0);
     Graphics->DeviceContext->CSSetConstantBuffers(0, 1, &TileLightConstantBuffer);
 
     // 1. SRV (전역 Light 정보) 바인딩
     if (LightSRV)
     {
         Graphics->DeviceContext->CSSetShaderResources(0, 1, &LightSRV);                  // register(t0)
+    }
+    if (DepthSRV)
+    {
+        Graphics->DeviceContext->CSSetShaderResources(1, 1, &DepthSRV);                  // register(t1)
     }
 
     // 2. UAV 바인딩
@@ -212,7 +222,7 @@ void FTileLightCullingPass::CreateBuffers()
     heatMapDesc.Height = Graphics->screenHeight;
     heatMapDesc.MipLevels = 1;
     heatMapDesc.ArraySize = 1;
-    heatMapDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    heatMapDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; // R32G32B32A32_FLOAT
     heatMapDesc.SampleDesc.Count = 1;
     heatMapDesc.Usage = D3D11_USAGE_DEFAULT;
     heatMapDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
@@ -234,6 +244,14 @@ void FTileLightCullingPass::CreateBuffers()
         UE_LOG(LogLevel::Error, TEXT("Failed to create Heatmap UAV!"));
     }
 
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = heatMapDesc.Format;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    Graphics->Device->CreateShaderResourceView(DebugHeatmapTexture, &srvDesc, &DebugHeatmapSRV);
+
     //// 4. TileLight Culling 설정용 ConstantBuffer (2.5D 켜기/끄기 등)
     D3D11_BUFFER_DESC cbDesc = {};
     cbDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -254,9 +272,13 @@ void FTileLightCullingPass::Release()
 {
     SAFE_RELEASE(TileUAVBuffer);
     SAFE_RELEASE(TileUAV);
+    
     SAFE_RELEASE(DebugHeatmapTexture);
     SAFE_RELEASE(DebugHeatmapUAV);
+    SAFE_RELEASE(DebugHeatmapSRV);
+
     SAFE_RELEASE(TileLightConstantBuffer);
+    
     SAFE_RELEASE(LightBufferGPU);
     SAFE_RELEASE(LightSRV);
 }
@@ -272,4 +294,31 @@ void FTileLightCullingPass::ClearUAVs()
     // 2. 히트맵 초기화
     float clearColorF[4] = { 0, 0, 0, 0 };
     Graphics->DeviceContext->ClearUnorderedAccessViewFloat(DebugHeatmapUAV, clearColorF);
+}
+
+void FTileLightCullingPass::UpdateTileLightConstantBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    // 1. Constant Buffer 업데이트
+    TileLightCullSettings settings;
+    settings.ScreenSize[0] = Graphics->screenWidth;
+    settings.ScreenSize[1] = Graphics->screenHeight;
+    settings.TileSize[0] = TILE_SIZE;
+    settings.TileSize[1] = TILE_SIZE;
+    settings.NearZ = Viewport->nearPlane;
+    settings.FarZ = Viewport->farPlane;
+    settings.ViewMatrix = Viewport->GetViewMatrix();
+    settings.ProjectionMatrix = Viewport->GetProjectionMatrix();
+    settings.InvProjectionMatrix = FMatrix::Inverse(Viewport->GetProjectionMatrix());
+    settings.NumLights = PointLights.Num();
+    settings.Enable25DCulling = 1;                      // TODO : IMGUI 연결!
+
+    D3D11_MAPPED_SUBRESOURCE msr;
+    HRESULT hr = Graphics->DeviceContext->Map(TileLightConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+    if (FAILED(hr)) {
+        UE_LOG(LogLevel::Error, TEXT("Failed to map TileLightConstantBuffer"));
+        return;
+    }
+    memcpy(msr.pData, &settings, sizeof(TileLightCullSettings));
+    
+    Graphics->DeviceContext->Unmap(TileLightConstantBuffer, 0);
 }

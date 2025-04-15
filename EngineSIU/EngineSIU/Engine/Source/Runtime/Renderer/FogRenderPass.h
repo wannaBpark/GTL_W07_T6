@@ -47,6 +47,9 @@ public:
 
     void CreateRTV();
 
+    void SetDebugHeatmapSRV(ID3D11ShaderResourceView* InDebugHeatmapSRV);
+    
+
 private:
     ID3D11SamplerState* Sampler = nullptr;
 
@@ -63,6 +66,7 @@ private:
     // Scene SRV (외부에서 등록)
     ID3D11ShaderResourceView* SceneSRV;
     ID3D11ShaderResourceView* FogSRV;
+    ID3D11ShaderResourceView* DebugHeatmapSRV; // 외부에서 등록
 
     ID3D11Texture2D* FogBuffer = nullptr;
     ID3D11RenderTargetView* FogRTV = nullptr;

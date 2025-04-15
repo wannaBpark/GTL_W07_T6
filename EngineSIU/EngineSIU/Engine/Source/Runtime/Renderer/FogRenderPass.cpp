@@ -318,6 +318,7 @@ void FFogRenderPass::PrepareFinalRender()
     // SRV & Sampler 바인딩
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &SceneSRV);
     Graphics->DeviceContext->PSSetShaderResources(1, 1, &FogSRV);
+    Graphics->DeviceContext->PSSetShaderResources(2, 1, &DebugHeatmapSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
 
@@ -340,4 +341,9 @@ void FFogRenderPass::FinalRender()
 void FFogRenderPass::CreateRTV()
 {
     Graphics->CreateRTV(FogBuffer, FogRTV);
+}
+
+void FFogRenderPass::SetDebugHeatmapSRV(ID3D11ShaderResourceView* InDebugHeatmapSRV)
+{
+    DebugHeatmapSRV = InDebugHeatmapSRV;
 }

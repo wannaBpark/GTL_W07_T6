@@ -149,6 +149,13 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
         DepthPrePass->ClearRenderArr();
     }
 
+    // Added Compute Shader Pass
+    if (TileLightCullingPass)
+    {
+        TileLightCullingPass->Render(ActiveViewport, DepthPrePass->GetDepthSRV());
+        FogRenderPass->SetDebugHeatmapSRV(TileLightCullingPass->GetDebugHeatmapSRV());
+    }
+
     StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
