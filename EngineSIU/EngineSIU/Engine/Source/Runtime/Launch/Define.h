@@ -402,6 +402,12 @@ struct FLinePrimitiveBatchArgs
     int OBBCount;
 };
 
+struct FViewportSize
+{
+    FVector2D ViewportSize;
+    FVector2D Padding;
+};
+
 struct FVertexInfo
 {
     uint32_t NumVertices;

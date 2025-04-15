@@ -34,6 +34,8 @@ public:
 
     void CreateShader();
     void ReleaseShader();
+
+    void CreateBuffer();
     
 private:
     FDXDBufferManager* BufferManager;
@@ -44,4 +46,5 @@ private:
     ID3D11PixelShader* PixelShader;
     ID3D11InputLayout* InputLayout;
 
+    ID3D11SamplerState* Sampler;
 };

@@ -55,8 +55,20 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
-    
+
+    CreateBuffer();
     CreateShader();
+
+    D3D11_SAMPLER_DESC SamplerDesc = {};
+    SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    SamplerDesc.MinLOD = 0;
+    SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    
+    Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
 }
 
 void FGizmoRenderPass::CreateShader()
@@ -76,6 +88,11 @@ void FGizmoRenderPass::ReleaseShader()
 {
 }
 
+void FGizmoRenderPass::CreateBuffer()
+{
+    BufferManager->CreateBufferGeneric<FViewportSize>("FViewportSize", nullptr, sizeof(FViewportSize), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+}
+
 void FGizmoRenderPass::ClearRenderArr()
 {
 }
@@ -88,9 +105,11 @@ void FGizmoRenderPass::PrepareRenderState() const
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
-    ID3D11Buffer* MaterialConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FMaterialConstants"));
-    Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
-    // TODO: 뷰포트 크기 버퍼 생성 및 바인딩
+    BufferManager->BindConstantBuffer(TEXT("FMaterialConstants"), 1, EShaderStage::Pixel);
+
+    BufferManager->BindConstantBuffer(TEXT("FViewportSize"), 2, EShaderStage::Pixel);
+    
+    Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
 
 void FGizmoRenderPass::PrepareRender()
@@ -106,6 +125,11 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     Graphics->DeviceContext->PSSetShaderResources(99, 1, &RenderTargetRHI->GetDepthStencilSRV());
     
     Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerSolidBack);
+
+    FViewportSize ViewportSize;
+    ViewportSize.ViewportSize.X = Viewport->GetViewport()->GetRect().Width;
+    ViewportSize.ViewportSize.Y = Viewport->GetViewport()->GetRect().Height;
+    BufferManager->UpdateConstantBuffer(TEXT("FViewportSize"), ViewportSize);
     
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
