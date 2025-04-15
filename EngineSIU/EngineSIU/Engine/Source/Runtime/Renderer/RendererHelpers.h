@@ -1,6 +1,18 @@
 #pragma once
 #include "Launch/EngineLoop.h"
 
+enum class EShaderSRVSlot : int8
+{
+    SRV_SceneDepth = 99,
+    SRV_Scene = 100,
+    SRV_PostProcess = 101,
+    SRV_EditorOverlay = 102,
+    
+    SRV_Viewport = 120,
+
+    SRV_MAX = 127,
+};
+
 namespace MaterialUtils
 {
     inline void UpdateMaterial(FDXDBufferManager* BufferManager, FGraphicsDevice* Graphics, const FObjMaterialInfo& MaterialInfo)

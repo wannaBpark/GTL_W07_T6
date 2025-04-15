@@ -52,12 +52,15 @@ public:
     void RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport); // TODO: 추후 RenderSlate로 변경해야함
 
 protected:
+    void BeginRender(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void PrepareRender(FRenderTargetRHI* RenderTargetRHI);
     void PrepareRenderPass();
     void RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>& Viewport);
+
+    void EndRender();
     void ClearRenderArr();
     
     //==========================================================================

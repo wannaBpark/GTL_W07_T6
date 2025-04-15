@@ -1,5 +1,6 @@
 ﻿#include "SlateRenderPass.h"
 
+#include "RendererHelpers.h"
 #include "UnrealClient.h"
 #include "D3D11RHI/DXDBufferManager.h"
 #include "D3D11RHI/DXDShaderManager.h"
@@ -66,7 +67,7 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
     FViewportResources* Resource = RenderTargetRHI->GetResources().Find(EResourceType::ERT_Compositing);
 
-    Graphics->DeviceContext->PSSetShaderResources(120, 1, &Resource->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Viewport), 1, &Resource->SRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 
     ID3D11VertexShader* VertexShader = ShaderManager->GetVertexShaderByKey(L"SlateShader");
@@ -80,7 +81,7 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
 
     // Clear: 사용한 리소스 해제
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
-    Graphics->DeviceContext->PSSetShaderResources(120, 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Viewport), 1, NullSRV);
 }
 
 void FSlateRenderPass::ClearRenderArr()

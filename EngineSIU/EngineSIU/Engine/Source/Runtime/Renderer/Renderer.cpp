@@ -172,7 +172,7 @@ void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>&
     BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
 }
 
-void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FRenderer::BeginRender(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
     if (!RenderTargetRHI)
@@ -183,22 +183,38 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     UpdateCommonBuffer(Viewport);
     
     PrepareRender(RenderTargetRHI);
-    
-    RenderWorldScene(Viewport);
+}
 
+
+void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    BeginRender(Viewport);
+
+    /**
+     * 각 렌더 패스의 시작과 끝은 필요한 리소스를 바인딩하고 해제하는 것까지입니다.
+     * 다음에 작동할 렌더 패스에서는 이전에 사용했던 리소스들을 충돌 없이 바인딩 할 수 있어야 한다는 의미입니다.
+     * e.g.
+     *   1번 렌더 패스: 여기에서 사용했던 RTV를 마지막에 해제함으로써, 해당 RTV와 연결된 텍스처를 쉐이더 리소스로 사용할 수 있습니다.
+     *   2번 렌더 패스: 1번 렌더 패스에서 렌더한 결과 텍스처를 쉐이더 리소스로 사용할 수 있습니다.
+     *
+     * 경우에 따라(연속적인 렌더 패스에서 동일한 리소스를 사용하는 경우) 바인딩 및 해제 작업을 생략하는 것도 가능하지만,
+     * 다음 전제 조건을 지켜주어야 합니다.
+     *   1. 렌더 패스는 엄격하게 순차적으로 실행됨
+     *   2. 렌더 타겟의 생명주기와 용도가 명확함
+     *   3. RTV -> SRV 전환 타이밍이 정확히 지켜짐
+     */
+    RenderWorldScene(Viewport);
     // RenderPostProcess(Viewport);
-    
     RenderEditorOverlay(Viewport);
 
     // Compositing
     CompositingPass->Render(Viewport);
 
-    // Clear
-    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
-    Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
-    Graphics->DeviceContext->PSSetShaderResources(101, 1, NullSRV);
-    Graphics->DeviceContext->PSSetShaderResources(102, 1, NullSRV);
+    EndRender();
+}
 
+void FRenderer::EndRender()
+{
     ClearRenderArr();
 }
 

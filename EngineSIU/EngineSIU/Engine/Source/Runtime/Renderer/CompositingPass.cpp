@@ -3,6 +3,7 @@
 #include <array>
 
 #include "Define.h"
+#include "RendererHelpers.h"
 #include "UnrealClient.h"
 #include "UnrealEd/EditorViewportClient.h"
 
@@ -55,8 +56,9 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     const EResourceType ResourceType = EResourceType::ERT_Compositing; 
     FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources().Find(ResourceType);
 
-    Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
-    Graphics->DeviceContext->PSSetShaderResources(102, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Editor)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Scene), 1, &RenderTargetRHI->GetResource(EResourceType::ERT_Scene)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_PostProcess), 1, &RenderTargetRHI->GetResource(EResourceType::ERT_PP_Fog)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_EditorOverlay), 1, &RenderTargetRHI->GetResource(EResourceType::ERT_Editor)->SRV);
 
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, nullptr);
     Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
@@ -80,6 +82,13 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
 
     // Finish
     Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+
+    // Clear
+    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Scene), 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_PostProcess), 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_EditorOverlay), 1, NullSRV);
+
 }
 
 void FCompositingPass::ClearRenderArr()

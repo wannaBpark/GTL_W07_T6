@@ -42,7 +42,6 @@ struct FStaticMaterial
 {
     class UMaterial* Material;
     FName MaterialSlotName;
-    //FMeshUVChannelInfo UVChannelData;
 };
 
 // OBJ File Raw Data
