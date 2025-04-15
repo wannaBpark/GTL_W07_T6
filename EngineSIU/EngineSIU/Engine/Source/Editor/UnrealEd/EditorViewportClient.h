@@ -3,14 +3,14 @@
 
 #include "Define.h"
 #include "Container/Map.h"
-#include "UObject/ObjectMacros.h"
 #include "ViewportClient.h"
 #include "EngineLoop.h"
 #include "EngineBaseTypes.h"
 
-#define MIN_ORTHOZOOM (1.0)  /* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
+#define MIN_ORTHOZOOM (1.0)  // 2D ortho viewport zoom >= MIN_ORTHOZOOM
 #define MAX_ORTHOZOOM (1e25)
 
+struct FPointerEvent;
 enum class EViewScreenLocation : uint8;
 class FViewportResource;
 class ATransformGizmo;
@@ -92,9 +92,12 @@ public:
     void Release() const;
 
     void Input();
+    void UpdateEditorCameraMovement(float DeltaTime);
+    void InputKey(const FKeyEvent& InKeyEvent);
+    void MouseMove(const FPointerEvent& InMouseEvent);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
-    bool IsSelected(POINT InPoint) const;
+    bool IsSelected(const FVector2D& InPoint) const;
 
 protected:
     /** Camera speed setting */
@@ -176,6 +179,9 @@ public:
 private: // Input
     POINT PrevMousePos;
     bool bRightMouseDown = false;
+
+    // 카메라 움직임에 사용될 키를 임시로 저장해서 사용할 예정
+    TSet<EKeys::Type> PressedKeys;
 
 public:
     void LoadConfig(const TMap<FString, FString>& config);

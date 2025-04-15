@@ -134,7 +134,7 @@ public:
 
     FRect GetRect() const { return Rect; }
 
-    bool bIsHovered(const POINT& InPoint) const;
+    bool bIsHovered(const FVector2D& InPoint) const;
 
 private:
     FViewportResource* ViewportResource;

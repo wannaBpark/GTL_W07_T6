@@ -337,8 +337,8 @@ void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRec
     ViewportResource->Resize(Width, Height);
 }
 
-bool FViewport::bIsHovered(const POINT& InPoint) const
+bool FViewport::bIsHovered(const FVector2D& InPoint) const
 {
-    return (Rect.TopLeftX <= static_cast<float>(InPoint.x) && static_cast<float>(InPoint.x) <= Rect.TopLeftX + Rect.Width) &&
-           (Rect.TopLeftY <= static_cast<float>(InPoint.y) && static_cast<float>(InPoint.y) <= Rect.TopLeftY + Rect.Height);
+    return (Rect.TopLeftX <= static_cast<float>(InPoint.X) && static_cast<float>(InPoint.X) <= Rect.TopLeftX + Rect.Width) &&
+           (Rect.TopLeftY <= static_cast<float>(InPoint.Y) && static_cast<float>(InPoint.Y) <= Rect.TopLeftY + Rect.Height);
 }

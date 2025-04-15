@@ -16,14 +16,14 @@ public:
 
     void Initialize(uint32 InEditorWidth, uint32 InEditorHeight);
     void Tick(float DeltaTime);
-    void Input();
     void Release();
 
     void ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight);
-    void SelectViewport(POINT Point);
+    void SelectViewport(const FVector2D& Point);
+
+    void ResizeLevelEditor();
     void ResizeViewports();
-    void EnableMultiViewport();
-    void DisableMultiViewport();
+    void SetEnableMultiViewport(bool bIsEnable);
     bool IsMultiViewport() const;
 
 private:
@@ -34,12 +34,13 @@ private:
     std::shared_ptr<FEditorViewportClient> ViewportClients[4];
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
 
-    bool bLButtonDown = false;
-    bool bRButtonDown = false;
-    
-    bool bMultiViewportMode;
+    /** 우클릭 시 캡처된 마우스 커서의 초기 위치 (스크린 좌표계) */
+    FVector2D MousePinPosition;
 
-    POINT PrevCursorLocation;
+    /** 우클릭이 눌려있는지 여부 */
+    bool bIsPressedMouseRightButton = false;
+
+    bool bMultiViewportMode;
     
     uint32 EditorWidth;
     uint32 EditorHeight;
