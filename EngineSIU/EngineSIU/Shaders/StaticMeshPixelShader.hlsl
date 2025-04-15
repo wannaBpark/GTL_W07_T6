@@ -1,6 +1,7 @@
 // staticMeshPixelShader.hlsl
 
 Texture2D Textures : register(t0);
+Texture2D NormalMap : register(t1);
 SamplerState Sampler : register(s0);
 
 cbuffer MatrixConstants : register(b0)
@@ -66,6 +67,9 @@ struct PS_INPUT
     float3 normal : NORMAL; // 월드 공간 노멀
     float normalFlag : TEXCOORD1; // 노멀 유효 플래그
     float2 texcoord : TEXCOORD2; // UV 좌표
+    float3 tangentWS : TEXCOORD3;       //T
+    float3 bitangentWS : TEXCOORD4;     //B
+    float3 normalWS : TEXCOORD5;        //N
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
 };
 
@@ -82,6 +86,12 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     // 1) 알베도 샘플링
     float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
+    
+    float3 normalTS = NormalMap.Sample(Sampler, input.texcoord).rgb;
+    normalTS = normalize(normalTS * 2.0f - 1.0f);
+    float3x3 TBN = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
+    float3 normalWS = normalize(mul(normalTS, TBN));
+    
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
     bool hasTexture = any(albedo != float3(0, 0, 0));
@@ -115,6 +125,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     {
         output.color += float4(0.02, 0.02, 0.02, 0);
     }
-
+    
     return output;
 }

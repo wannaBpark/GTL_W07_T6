@@ -313,9 +313,50 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 
             CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
         }
+
+        if (Token == "map_Bump")
+        {
+            std::string opt;
+            while (LineStream >> opt)
+            {
+                if (opt == "-bm")
+                {
+                    float bmValue;
+                    LineStream >> bmValue;
+                    OutFStaticMesh.Materials[MaterialIndex].BumpMultiplier = bmValue;
+                }
+                else
+                {
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTextureName = opt;
+                    FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].BumpTextureName.ToWideString();
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath = TexturePath;
+                    OutFStaticMesh.Materials[MaterialIndex].bHasNormalMap = true;
+
+                    CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath);
+                }
+            }
+        }
     }
 
     return true;
+}
+
+FVector CalculateTangentResult(const FStaticMeshVertex& V0, const FStaticMeshVertex& V1, const FStaticMeshVertex& V2)
+{
+    FVector E1 = FVector(V1.X - V0.X, V1.Y - V0.Y, V1.Z - V0.Z);
+    FVector E2 = FVector(V2.X - V0.X, V2.Y - V0.Y, V2.Z - V0.Z);
+
+    float UV1_X = V1.U - V0.U;
+    float UV1_Y = V1.V - V0.V;
+    float UV2_X = V2.U - V0.U;
+    float UV2_Y = V2.V - V0.V;
+
+    float f = 1.0f / (UV1_X * UV2_Y - UV2_X * UV1_Y);
+    float Tx = f * (UV2_Y * E1.X - UV1_Y * E2.X);
+    float Ty = f * (UV2_Y * E1.Y - UV1_Y * E2.Y);
+    float Tz = f * (UV2_Y * E1.Z - UV1_Y * E2.Z);
+
+    return FVector(Tx, Ty, Tz).GetSafeNormal();
 }
 
 bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
@@ -394,6 +435,52 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
         OutStaticMesh.Indices.Add(FinalIndex);
     }
 
+    struct FTangentAccumulator
+    {
+        FVector TangentSum = FVector(0, 0, 0);
+        int32 Count = 0;
+
+        void Add(const FVector& Tangent)
+        {
+            TangentSum += Tangent;
+            Count++;
+        }
+
+        FVector GetNormalized() const
+        {
+            return Count > 0 ? TangentSum.GetSafeNormal() : FVector(1, 0, 0); // fallback
+        }
+    };
+
+
+    //TArray<FTangentAccumulator> TangentAccumulators;
+    //TangentAccumulators.SetNum(OutStaticMesh.Vertices.Num());
+
+    //for (int32 i = 0; i < OutStaticMesh.Indices.Num(); i += 3)
+    //{
+    //    int32 i0 = OutStaticMesh.Indices[i + 0];
+    //    int32 i1 = OutStaticMesh.Indices[i + 1];
+    //    int32 i2 = OutStaticMesh.Indices[i + 2];
+
+    //    const FStaticMeshVertex& V0 = OutStaticMesh.Vertices[i0];
+    //    const FStaticMeshVertex& V1 = OutStaticMesh.Vertices[i1];
+    //    const FStaticMeshVertex& V2 = OutStaticMesh.Vertices[i2];
+
+    //    FVector Tangent = CalculateTangentResult(V0, V1, V2); // FVector 반환 함수
+
+    //    TangentAccumulators[i0].Add(Tangent);
+    //    TangentAccumulators[i1].Add(Tangent);
+    //    TangentAccumulators[i2].Add(Tangent);
+    //}
+
+    //// 💡 3. 평균화 후 적용
+    //for (int32 i = 0; i < OutStaticMesh.Vertices.Num(); i++)
+    //{
+    //    FVector FinalTangent = TangentAccumulators[i].GetNormalized();
+    //    OutStaticMesh.Vertices[i].TangentX = FinalTangent.X;
+    //    OutStaticMesh.Vertices[i].TangentY = FinalTangent.Y;
+    //    OutStaticMesh.Vertices[i].TangentZ = FinalTangent.Z;
+    //}
     // Calculate StaticMesh BoundingBox
     ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
 

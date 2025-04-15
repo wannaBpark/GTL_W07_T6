@@ -25,6 +25,11 @@ namespace MaterialUtils {
 
         BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), data);
 
+        if (MaterialInfo.bHasNormalMap)
+        {
+            std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.BumpTexturePath);
+            Graphics->DeviceContext->PSSetShaderResources(1, 1, &texture->TextureSRV);
+        }
         if (MaterialInfo.bHasTexture) {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
