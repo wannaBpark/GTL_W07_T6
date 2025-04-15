@@ -63,26 +63,6 @@ cbuffer Lighting : register(b2)
     float pad0;
 };
 
-#if HAS_NORMAL_MAP
-float3 GetNormalFromMap(input.normal, input.texcoord)
-{
-    // 이거 샘플러 같이 쓰는 것 맞나?
-    float3 normalMap = BumpTexture.Sample(Sampler, texcoord).rgb;
-    
-    normalMap = normalMap * 2.0f - 1.0f;
-    
-    float3 bitangent = normalize(cross(normal, tangent));
-    
-    float3x3 TBN = float3x3(
-        normalize(tangent),
-        normalize(bitangent),
-        normalize(normal)
-    );
-    
-    return normalize(mul(normalMap, TBN));
-}
-#endif
-
 float CalculateAttenuation(float distance, float attenuationFactor, float radius)
 {
     if (distance > radius)

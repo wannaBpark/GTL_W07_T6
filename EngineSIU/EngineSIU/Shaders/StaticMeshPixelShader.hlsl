@@ -111,7 +111,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
 #else
     if (IsLit && input.normalFlag > 0.5)
     {
-        float4 litColor = Lighting(input.worldPos, normalize(input.normal));
+        float4 litColor = Lighting(input.worldPos, normalize((normalWS + 1) / 2));
         float3 finalColor = litColor.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }
