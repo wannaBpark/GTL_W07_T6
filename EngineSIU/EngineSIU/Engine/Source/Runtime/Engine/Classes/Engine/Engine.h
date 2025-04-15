@@ -35,8 +35,8 @@ public:
     FWorldContext& CreateNewWorldContext(EWorldType InWorldType);
 
     
-    void LoadWorld(const FString& FileName);
-    void SaveWorld(const FString& FileName);
+    void LoadWorld(const FString& FileName) const;
+    void SaveWorld(const FString& FileName) const;
 };
 
 extern class UEngine* GEngine;
