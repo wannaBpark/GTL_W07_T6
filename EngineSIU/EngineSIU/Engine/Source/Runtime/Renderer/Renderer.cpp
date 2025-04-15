@@ -256,7 +256,7 @@ void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& 
     if (ShowFlag & EEngineShowFlags::SF_Fog)
     {
         // SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
-        // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
+        // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
     }
 }
 
@@ -274,6 +274,12 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
     }
     
     // Render Editor Billboard
+    /**
+     * TODO: 에디터 전용 빌보드는 이런 방식 처럼 빌보드의 bool값을 바꿔서 렌더하기 보다는
+     *       빌보드가 나와야 하는 컴포넌트는 텍스처만 가지고있고, 쉐이더를 통해 쿼드를 생성하고
+     *       텍스처를 전달해서 렌더하는 방식이 더 좋음.
+     *       이렇게 하는 경우 필요없는 빌보드 컴포넌트가 아웃라이너에 나오지 않음.
+     */
     if (ShowFlag & EEngineShowFlags::SF_BillboardText)
     {
         EditorBillboardRenderPass->Render(Viewport);
