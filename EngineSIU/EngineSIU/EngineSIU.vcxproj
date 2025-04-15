@@ -281,7 +281,6 @@
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Property.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\CoreMiscDefines.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Rotator.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Misc\AssertionMacros.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Misc\Char.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Misc\Parse.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Serialization\Archive.h" />
