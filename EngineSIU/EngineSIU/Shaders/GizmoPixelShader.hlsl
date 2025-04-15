@@ -14,7 +14,7 @@ cbuffer ViewportSizeBuffer : register(b2)
     float2 Padding;
 }
 
-float4 mainPS(PS_INPUT_StaticMesh input)
+float4 mainPS(PS_INPUT_StaticMesh input) : SV_Target
 {
     float4 FinalColor = float4(Material.DiffuseColor, 1);
     if (bIsSelected)

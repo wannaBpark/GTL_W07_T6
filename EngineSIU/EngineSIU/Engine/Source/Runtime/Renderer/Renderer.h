@@ -56,8 +56,9 @@ protected:
     void PrepareRender(FRenderTargetRHI* RenderTargetRHI);
     void PrepareRenderPass();
     void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClearRTV = true, bool bIncludeDSV = true, bool bClearDSV = true);
-    void RenderWorldScene(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode);
-    void RenderPostProcess(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode);
+    void RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& Viewport);
+    void RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& Viewport);
+    void RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void ClearRenderArr();
     
     //==========================================================================

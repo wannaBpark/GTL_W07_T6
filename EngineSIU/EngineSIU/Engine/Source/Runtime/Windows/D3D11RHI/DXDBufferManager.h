@@ -249,6 +249,11 @@ HRESULT FDXDBufferManager::CreateDynamicVertexBuffer(const FString& KeyName, con
 template<typename T>
 HRESULT FDXDBufferManager::CreateBufferGeneric(const FString& KeyName, T* data, UINT byteWidth, UINT bindFlags, D3D11_USAGE usage, UINT cpuAccessFlags)
 {
+    if (ConstantBufferPool.Contains(KeyName))
+    {
+        return S_OK;
+    }
+    
     byteWidth = Align16(byteWidth);
 
     D3D11_BUFFER_DESC desc = {};

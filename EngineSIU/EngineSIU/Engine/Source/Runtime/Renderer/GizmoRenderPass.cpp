@@ -110,20 +110,13 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         return;
     }
     
-    UWorld* ActiveWorld = GEngine->ActiveWorld;
-    if (!ActiveWorld)
-    {
-        UE_LOG(LogLevel::Error, TEXT("Gizmo RenderPass : Render : ActiveWorld is not valid."));
-        return;
-    }
-    
     ControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
     if (Mode == CM_TRANSLATION)
     {
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetArrowArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
-            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
+            RenderGizmoComponent(GizmoComp, Viewport);
         }
     }
     else if (Mode == CM_SCALE)
@@ -131,7 +124,7 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetScaleArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
-            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
+            RenderGizmoComponent(GizmoComp, Viewport);
         }
     }
     else if (Mode == CM_ROTATION)
@@ -139,7 +132,7 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetDiscArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
-            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
+            RenderGizmoComponent(GizmoComp, Viewport);
         }
     }
     
@@ -157,7 +150,7 @@ void FGizmoRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FV
     BufferManager->UpdateConstantBuffer(TEXT("FObjectConstantBuffer"), ObjectData);
 }
 
-void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World)
+void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (Engine && !Engine->GetSelectedActor())
@@ -180,8 +173,8 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     // 오브젝트 버퍼 업데이트
     FMatrix WorldMatrix = GizmoComp->GetWorldMatrix();
     FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
-    bool bSelected = (GizmoComp == Viewport->GetPickedGizmoComponent());
-    UpdateObjectConstant(WorldMatrix, UUIDColor, bSelected);
+    bool bIsSelected = (GizmoComp == Viewport->GetPickedGizmoComponent());
+    UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
 
     UINT Stride = sizeof(FStaticMeshVertex);
     UINT Offset = 0;
@@ -189,7 +182,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
     if (!RenderData->IndexBuffer)
     {
-        // TODO: 인덱스 버퍼가 없는 경우를 따로 고려해야 함.
+        // TODO: 인덱스 버퍼가 없는 경우?
     }
     Graphics->DeviceContext->IASetIndexBuffer(RenderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
     

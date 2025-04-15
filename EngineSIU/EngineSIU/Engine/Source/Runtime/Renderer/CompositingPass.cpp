@@ -56,6 +56,8 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     const EResourceType ResourceType = EResourceType::ERT_Compositing; 
     FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources().Find(ResourceType);
 
+    Graphics->DeviceContext->PSSetShaderResources(100, 1, &Viewport->GetRenderTargetRHI()->GetResources().Find(EResourceType::ERT_Scene)->SRV);
+
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, nullptr);
     Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
 
@@ -66,7 +68,7 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     // Update Constant Buffer
     FViewModeConstants ViewModeConstantData = {};
     ViewModeConstantData.ViewMode = Viewport->GetViewMode();
-    BufferManager->UpdateConstantBuffer<FViewModeConstants>("FViewModeConstants", ViewModeConstantData);
+    // BufferManager->UpdateConstantBuffer<FViewModeConstants>("FViewModeConstants", ViewModeConstantData);
 
     // Render
     ID3D11VertexShader* VertexShader = ShaderManager->GetVertexShaderByKey(L"Compositing");

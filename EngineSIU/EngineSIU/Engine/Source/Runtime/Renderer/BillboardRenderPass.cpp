@@ -28,7 +28,6 @@ FBillboardRenderPass::FBillboardRenderPass()
     , VertexShader(nullptr)
     , PixelShader(nullptr)
     , InputLayout(nullptr)
-    , Stride(0)
 {
 }
 
@@ -145,19 +144,25 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
     // 각 Billboard에 대해 렌더링 처리
     for (auto BillboardComp : BillboardObjs)
     {
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        
         FMatrix Model = BillboardComp->CreateBillboardMatrix();
         FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
-
-        bool Selected = (BillboardComp == Viewport->GetPickedGizmoComponent());
-
-        UpdateObjectConstant(Model, UUIDColor, Selected);
+        bool bIsSelected = (Engine && Engine->GetSelectedActor() == BillboardComp->GetOwner());
+        UpdateObjectConstant(Model, UUIDColor, bIsSelected);
 
         if (UParticleSubUVComponent* SubUVParticle = Cast<UParticleSubUVComponent>(BillboardComp))
         {
             UpdateSubUVConstant(SubUVParticle->GetUVOffset(), SubUVParticle->GetUVScale());
 
-            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices, IndexInfo.IndexBuffer,
-                IndexInfo.NumIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
+            RenderTexturePrimitive(
+                VertexInfo.VertexBuffer,
+                VertexInfo.NumVertices,
+                IndexInfo.IndexBuffer,
+                IndexInfo.NumIndices,
+                SubUVParticle->Texture->TextureSRV,
+                SubUVParticle->Texture->SamplerState
+            );
         }
         else if (UTextComponent* TextComp = Cast<UTextComponent>(BillboardComp))
         {
@@ -168,19 +173,29 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
 
             UpdateSubUVConstant(FVector2D(), FVector2D(1, 1));
 
-            RenderTextPrimitive(Buffers.VertexInfo.VertexBuffer, Buffers.VertexInfo.NumVertices, TextComp->Texture->TextureSRV, TextComp->Texture->SamplerState);
-
+            RenderTextPrimitive(
+                Buffers.VertexInfo.VertexBuffer,
+                Buffers.VertexInfo.NumVertices,
+                TextComp->Texture->TextureSRV,
+                TextComp->Texture->SamplerState
+            );
         }
         else
         {
             UpdateSubUVConstant(FVector2D(BillboardComp->finalIndexU, BillboardComp->finalIndexV), FVector2D(1, 1));
 
-            RenderTexturePrimitive(VertexInfo.VertexBuffer, VertexInfo.NumVertices,
-                IndexInfo.IndexBuffer, IndexInfo.NumIndices, BillboardComp->Texture->TextureSRV,
-                BillboardComp->Texture->SamplerState);
+            RenderTexturePrimitive(
+                VertexInfo.VertexBuffer,
+                VertexInfo.NumVertices,
+                IndexInfo.IndexBuffer,
+                IndexInfo.NumIndices,
+                BillboardComp->Texture->TextureSRV,
+                BillboardComp->Texture->SamplerState
+            );
         }
     }
 }
+
 void FBillboardRenderPass::SetupVertexBuffer(ID3D11Buffer* pVertexBuffer, UINT numVertices) const
 {
     UINT Stride = sizeof(FVertexTexture);

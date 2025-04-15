@@ -1,9 +1,12 @@
 #include "StaticMeshRenderPass.h"
 
+#include <array>
+
 #include "EngineLoop.h"
 #include "World/World.h"
 
 #include "RendererHelpers.h"
+#include "UnrealClient.h"
 #include "Math/JungleMath.h"
 
 #include "UObject/UObjectIterator.h"
@@ -46,6 +49,10 @@ FStaticMeshRenderPass::~FStaticMeshRenderPass()
 void FStaticMeshRenderPass::CreateShader()
 {
     HRESULT hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS");
+    if (FAILED(hr))
+    {
+        return;
+    }
     
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
@@ -190,6 +197,22 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
 
 void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    const EResourceType ResourceType = EResourceType::ERT_Scene;
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(ResourceType);
+    if (!ResourceRHI)
+    {
+        if (FAILED(RenderTargetRHI->CreateResource(ResourceType)))
+        {
+            return;
+        }
+        ResourceRHI = RenderTargetRHI->Resources.Find(ResourceType);
+    }
+    
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->DepthStencilView);
+    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
+    Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    
     PrepareRenderState();
 
     ChangeViewMode(Viewport->GetViewMode());
@@ -219,7 +242,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
         if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         {
-            FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), Model);
+            FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), WorldMatrix);
         }
     }
 

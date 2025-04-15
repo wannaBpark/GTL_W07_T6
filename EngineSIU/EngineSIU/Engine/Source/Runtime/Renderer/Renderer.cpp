@@ -34,6 +34,9 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     BufferManager = InBufferManager;
 
     ShaderManager = new FDXDShaderManager(Graphics->Device);
+
+    CreateConstantBuffers();
+    CreateCommonShader();
     
     StaticMeshRenderPass = new FStaticMeshRenderPass();
     BillboardRenderPass = new FBillboardRenderPass();
@@ -54,9 +57,6 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
     
     SlateRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-
-    CreateConstantBuffers();
-    CreateCommonShader();
 }
 
 void FRenderer::Release()
@@ -108,10 +108,10 @@ void FRenderer::CreateConstantBuffers()
     // TODO: 함수로 분리
     ID3D11Buffer* ObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FObjectConstantBuffer"));
     ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
-    Graphics->DeviceContext->VSSetConstantBuffers(14, 1, &ObjectBuffer);
-    Graphics->DeviceContext->VSSetConstantBuffers(15, 1, &CameraConstantBuffer);
-    Graphics->DeviceContext->PSSetConstantBuffers(14, 1, &ObjectBuffer);
-    Graphics->DeviceContext->PSSetConstantBuffers(15, 1, &CameraConstantBuffer);
+    Graphics->DeviceContext->VSSetConstantBuffers(12, 1, &ObjectBuffer);
+    Graphics->DeviceContext->VSSetConstantBuffers(13, 1, &CameraConstantBuffer);
+    Graphics->DeviceContext->PSSetConstantBuffers(12, 1, &ObjectBuffer);
+    Graphics->DeviceContext->PSSetConstantBuffers(13, 1, &CameraConstantBuffer);
 }
 
 void FRenderer::ReleaseConstantBuffer()
@@ -194,13 +194,28 @@ void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>&
     CameraConstantBuffer.NearClip = Viewport->GetCameraLearClip();
     CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
     BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
+
+    ID3D11Buffer* CameraBuffer = BufferManager->GetConstantBuffer("FCameraConstantBuffer");
+    if (CameraBuffer)
+    {
+        D3D11_MAPPED_SUBRESOURCE MappedResource;
+        Graphics->DeviceContext->Map(CameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
+        if (FCameraConstantBuffer* Buffer = static_cast<FCameraConstantBuffer*>(MappedResource.pData))
+        {
+            Buffer->ViewMatrix = Viewport->GetViewMatrix();
+            Buffer->InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
+            Buffer->ProjectionMatrix = Viewport->GetProjectionMatrix();
+            Buffer->InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
+            Buffer->ViewLocation = Viewport->GetCameraLocation();
+            Buffer->NearClip = Viewport->GetCameraLearClip();
+            Buffer->FarClip = Viewport->GetCameraFarClip();
+        }
+        Graphics->DeviceContext->Unmap(CameraBuffer, 0);
+    }
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    const uint64 ShowFlag = Viewport->GetShowFlag();
-    const EViewModeIndex ViewMode = Viewport->GetViewMode();
-
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
     if (!RenderTargetRHI)
     {
@@ -211,9 +226,59 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     
     PrepareRender(RenderTargetRHI);
     
-    RenderWorldScene(RenderTargetRHI, ShowFlag, ViewMode);
+    RenderWorldScene(Viewport);
 
-    RenderPostProcess(RenderTargetRHI, ShowFlag, ViewMode);
+    // RenderPostProcess(Viewport);
+    
+    // RenderEditorOverlay(Viewport);
+
+    // Compositing
+    CompositingPass->Render(Viewport);
+
+    // Clear
+    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
+
+    ClearRenderArr();
+}
+
+void FRenderer::RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    const uint64 ShowFlag = Viewport->GetShowFlag();
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+
+    if (ShowFlag & EEngineShowFlags::SF_Primitives)
+    {
+        UpdateLightBufferPass->Render(Viewport);
+        StaticMeshRenderPass->Render(Viewport);
+    }
+}
+
+void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    const uint64 ShowFlag = Viewport->GetShowFlag();
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    
+    if (ViewMode != EViewModeIndex::VMI_Lit)
+    {
+        return;
+    }
+    
+    if (ShowFlag & EEngineShowFlags::SF_Fog)
+    {
+        // SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
+        // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
+    }
+}
+
+void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    const uint64 ShowFlag = Viewport->GetShowFlag();
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
     
     // Render Billboard
     if (ShowFlag & EEngineShowFlags::SF_BillboardText)
@@ -227,7 +292,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
 
     // Render for Editor
-    if (GEngine->ActiveWorld->WorldType != EWorldType::PIE)
+    if (GEngine->ActiveWorld->WorldType == EWorldType::Editor)
     {
         SetRenderResource(EResourceType::ERT_Editor, RenderTargetRHI, true, true, false);
         LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
@@ -239,40 +304,6 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 
         Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
         Graphics->DeviceContext->PSSetShaderResources(102, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Editor)->SRV);
-    }
-
-    // Compositing
-    CompositingPass->Render(Viewport);
-
-    // Clear
-    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
-    Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
-
-    ClearRenderArr();
-}
-
-void FRenderer::RenderWorldScene(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode)
-{
-    SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI);
-
-    if (ShowFlag & EEngineShowFlags::SF_Primitives)
-    {
-        UpdateLightBufferPass->Render(Viewport);
-        StaticMeshRenderPass->Render(Viewport);
-    }
-}
-
-void FRenderer::RenderPostProcess(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode)
-{
-    if (ViewMode != EViewModeIndex::VMI_Lit)
-    {
-        return;
-    }
-    
-    if (ShowFlag & EEngineShowFlags::SF_Fog)
-    {
-        SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
-        // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
     }
 }
 

@@ -16,7 +16,7 @@ cbuffer FlagConstants : register(b2)
     float3 flagPad0;
 }
 
-cbuffer SubMeshConstants : register(b23)
+cbuffer SubMeshConstants : register(b3)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
@@ -30,7 +30,7 @@ cbuffer TextureConstants : register(b4)
 
 #include "Light.hlsl"
 
-float4 mainPS(PS_INPUT_StaticMesh Input)
+float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 {
     float4 FinalColor = float4(0.f, 0.f, 0.f, 1.f);
     
@@ -43,7 +43,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input)
 
     if (IsLit)
     {
-        float3 LightRgb = Lighting(Input.WorldPosition, Input.normal).rgb;
+        float3 LightRgb = Lighting(Input.WorldPosition, Input.Normal).rgb;
         float3 LitColor = baseColor * LightRgb;
         FinalColor = float4(LitColor, 1);
     }

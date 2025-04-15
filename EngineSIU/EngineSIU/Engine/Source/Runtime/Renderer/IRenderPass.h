@@ -1,7 +1,10 @@
 #pragma once
-#pragma once
 #include <memory>
 
+#include "HAL/PlatformType.h"
+
+enum EViewModeIndex : uint8;
+class FRenderTargetRHI;
 class UWorld;
 class FDXDBufferManager;
 class FGraphicsDevice;

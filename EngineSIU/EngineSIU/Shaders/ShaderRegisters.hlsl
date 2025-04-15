@@ -21,7 +21,7 @@ struct VS_INPUT_StaticMesh
     float3 Normal : NORMAL;
     float3 Tangent : TANGENT;
     float2 UV : TEXCOORD;
-    int MaterialIndex : MATERIAL_INDEX;
+    uint MaterialIndex : MATERIAL_INDEX;
 };
 
 struct PS_INPUT_StaticMesh
@@ -35,9 +35,9 @@ struct PS_INPUT_StaticMesh
 };
 
 ////////
-/// 공용: 14 ~ 15
+/// 공용: 12 ~ 13
 ///////
-cbuffer ObjectBuffer : register(b14)
+cbuffer ObjectBuffer : register(b12)
 {
     row_major matrix WorldMatrix;
     row_major matrix InverseTransposedWorld;
@@ -55,7 +55,7 @@ cbuffer ObjectBuffer : register(b14)
  * Projection 버퍼를 업데이트해야 하므로,
  * 버퍼를 분리하는 의미가 사라졌으므로 통합.
  */
-cbuffer CameraBuffer : register(b15)
+cbuffer CameraBuffer : register(b13)
 {
     row_major matrix ViewMatrix;
     row_major matrix InvViewMatrix;
