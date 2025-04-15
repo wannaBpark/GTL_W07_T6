@@ -7,7 +7,10 @@
 
 ACube::ACube()
 {
-    StaticMeshComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/helloBlender.obj"));
+    // Begin Test
+    //StaticMeshComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/helloBlender.obj"));
+    StaticMeshComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Contents/Reference/Reference.obj"));
+    // End Test
 }
 
 void ACube::Tick(float DeltaTime)

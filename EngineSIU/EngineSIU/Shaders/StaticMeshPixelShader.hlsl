@@ -1,7 +1,12 @@
 // staticMeshPixelShader.hlsl
 
-Texture2D Textures : register(t0);
+//Texture2D Textures : register(t0);
 SamplerState Sampler : register(s0);
+
+// Begin Test
+Texture2D DiffuseTexture : register(t0);
+Texture2D BumpTexture : register(t1);
+// End Test
 
 cbuffer MatrixConstants : register(b0)
 {
@@ -67,6 +72,7 @@ struct PS_INPUT
     float normalFlag : TEXCOORD1; // 노멀 유효 플래그
     float2 texcoord : TEXCOORD2; // UV 좌표
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
+    float3x3 mTBN : TBN;
 };
 
 struct PS_OUTPUT
@@ -80,13 +86,17 @@ PS_OUTPUT mainPS(PS_INPUT input)
     PS_OUTPUT output;
     output.UUID = UUID;
     
-    // 1) 알베도 샘플링
-    float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
-    // 2) 머티리얼 디퓨즈
+    float3 albedo = DiffuseTexture.Sample(Sampler, input.texcoord).rgb;
     float3 matDiffuse = Material.DiffuseColor.rgb;
-    bool hasTexture = any(albedo != float3(0, 0, 0));
+    bool bHasTexture = any(albedo != float3(0, 0, 0));
+    float3 baseColor = bHasTexture ? albedo : matDiffuse;
     
-    float3 baseColor = hasTexture ? albedo : matDiffuse;
+    // Begin Test
+    float3 Normal = normalize(input.normal);
+    Normal = normalize(2.f * (float3) BumpTexture.Sample(Sampler, input.texcoord) - 1.f);
+    //Normal = normalize(mul(mul(Normal, input.mTBN), (float3x3) input.mWorldMatrix));
+    Normal = normalize(mul(Normal, input.mTBN));
+    // End Test
     
 #ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)
@@ -101,7 +111,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
 #else
     if (IsLit && input.normalFlag > 0.5)
     {
-        float4 litColor = Lighting(input.worldPos, normalize(input.normal));
+        float4 litColor = Lighting(input.worldPos, Normal);
         float3 finalColor = litColor.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }
@@ -115,6 +125,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     {
         output.color += float4(0.02, 0.02, 0.02, 0);
     }
-
+    
     return output;
 }

@@ -38,6 +38,12 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
     LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Editor/Icon/DirectionalLight_64x.png");
     LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Editor/Icon/ExponentialHeightFog_64.png");
     LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Editor/Icon/AtmosphericFog_64.png");
+    // Begin Test
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Contents/Reference/NRM_2K.png");
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Contents/Reference/T_UT_Diffuse.png");
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Contents/Reference/COL_2K.jpg");
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Contents/Reference/GLOSS_2K.jpg");
+    // End Test
 }
 
 void FResourceMgr::Release(FRenderer* renderer) {

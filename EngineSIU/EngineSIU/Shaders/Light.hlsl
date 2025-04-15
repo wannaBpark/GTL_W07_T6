@@ -8,39 +8,6 @@
 #define SPOT_LIGHT          2
 #define DIRECTIONAL_LIGHT   3
 
-//struct LIGHT
-//{
-//    float3 m_cDiffuse; // 광원의 확산 색상
-//    float Pad0;    
-
-//    float3 m_vPosition; // 광원의 위치 (Point, Spot)
-//    float m_fFalloff; // 스팟라이트의 감쇠 인자
-
-//    float3 m_vDirection; // 광원의 방향 (Spot, Directional)
-//    float Pad2;
-
-//    float m_fAttenuation; // 거리 기반 감쇠 계수
-//    int m_bEnable; // 광원 활성화 여부
-//    int m_nType; // 광원 유형
-//    float m_fIntensity; // 광원 강도
-    
-//    float m_fAttRadius; // 감쇠 반경 (Attenuation Radius)
-//    float3 Pad3;
-    
-//    float m_fInnerCos; // cos(inner angle)
-//    float m_fOuterCos; // cos(outer angle)
-//    float2 Pad4; // 정렬용
-//};
-
-//cbuffer cbLights : register(b2)
-//{
-//    LIGHT gLights[MAX_LIGHTS];
-//    float4 gcGlobalAmbientLight;
-//    int gnLights;
-//    float3 Pad0;
-//};
-
-
 struct FAmbientLightInfo
 {
     float4 AmbientColor;
@@ -95,6 +62,26 @@ cbuffer Lighting : register(b2)
     int SpotLightsCount;
     float pad0;
 };
+
+#if HAS_NORMAL_MAP
+float3 GetNormalFromMap(input.normal, input.texcoord)
+{
+    // 이거 샘플러 같이 쓰는 것 맞나?
+    float3 normalMap = BumpTexture.Sample(Sampler, texcoord).rgb;
+    
+    normalMap = normalMap * 2.0f - 1.0f;
+    
+    float3 bitangent = normalize(cross(normal, tangent));
+    
+    float3x3 TBN = float3x3(
+        normalize(tangent),
+        normalize(bitangent),
+        normalize(normal)
+    );
+    
+    return normalize(mul(normalMap, TBN));
+}
+#endif
 
 float CalculateAttenuation(float distance, float attenuationFactor, float radius)
 {
