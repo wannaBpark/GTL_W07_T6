@@ -31,6 +31,8 @@ public:
     std::shared_ptr<FTexture> Texture;
     FString BufferKey = TEXT("default");
 
+    bool bIsEditorBillboard = false;
+
 protected:
     USceneComponent* m_parent = nullptr;
 

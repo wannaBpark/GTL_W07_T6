@@ -9,7 +9,8 @@
 #include "D3D11RHI/DXDShaderManager.h"
 #include "RendererHelpers.h"
 #include "StaticMeshRenderPass.h"
-#include "BillboardRenderPass.h"
+#include "WorldBillboardRenderPass.h"
+#include "EditorBillboardRenderPass.h"
 #include "GizmoRenderPass.h"
 #include "UpdateLightBufferPass.h"
 #include "LineRenderPass.h"
@@ -39,7 +40,8 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     CreateCommonShader();
     
     StaticMeshRenderPass = new FStaticMeshRenderPass();
-    BillboardRenderPass = new FBillboardRenderPass();
+    WorldBillboardRenderPass = new FWorldBillboardRenderPass();
+    EditorBillboardRenderPass = new FEditorBillboardRenderPass();
     GizmoRenderPass = new FGizmoRenderPass();
     UpdateLightBufferPass = new FUpdateLightBufferPass();
     LineRenderPass = new FLineRenderPass();
@@ -48,7 +50,8 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     SlateRenderPass = new FSlateRenderPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-    BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    WorldBillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    EditorBillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     GizmoRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -145,7 +148,8 @@ void FRenderer::PrepareRenderPass()
 {
     StaticMeshRenderPass->PrepareRender();
     GizmoRenderPass->PrepareRender();
-    BillboardRenderPass->PrepareRender();
+    WorldBillboardRenderPass->PrepareRender();
+    EditorBillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
 }
@@ -153,7 +157,8 @@ void FRenderer::PrepareRenderPass()
 void FRenderer::ClearRenderArr()
 {
     StaticMeshRenderPass->ClearRenderArr();
-    BillboardRenderPass->ClearRenderArr();
+    WorldBillboardRenderPass->ClearRenderArr();
+    EditorBillboardRenderPass->ClearRenderArr();
     GizmoRenderPass->ClearRenderArr();
     UpdateLightBufferPass->ClearRenderArr();
     FogRenderPass->ClearRenderArr();
@@ -228,6 +233,12 @@ void FRenderer::RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& V
         UpdateLightBufferPass->Render(Viewport);
         StaticMeshRenderPass->Render(Viewport);
     }
+    
+    // Render World Billboard
+    if (ShowFlag & EEngineShowFlags::SF_BillboardText)
+    {
+        WorldBillboardRenderPass->Render(Viewport);
+    }
 }
 
 void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& Viewport)
@@ -265,7 +276,7 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
     // Render Editor Billboard
     if (ShowFlag & EEngineShowFlags::SF_BillboardText)
     {
-        BillboardRenderPass->Render(Viewport);
+        EditorBillboardRenderPass->Render(Viewport);
     }
 
     LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음

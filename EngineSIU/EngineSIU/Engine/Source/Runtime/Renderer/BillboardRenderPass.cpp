@@ -4,13 +4,10 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
 
-#include "RendererHelpers.h"
-
 #include "UObject/UObjectIterator.h"
 #include "UObject/Casts.h"
 
 #include "UnrealEd/EditorViewportClient.h"
-#include "PropertyEditor/ShowFlags.h"
 
 #include "Components/BillboardComponent.h"
 #include "Components/ParticleSubUVComponent.h"
@@ -26,6 +23,7 @@ FBillboardRenderPass::FBillboardRenderPass()
     : BufferManager(nullptr)
     , Graphics(nullptr)
     , ShaderManager(nullptr)
+    , ResourceType(EResourceType::ERT_Scene)
     , VertexShader(nullptr)
     , PixelShader(nullptr)
     , InputLayout(nullptr)
@@ -47,12 +45,12 @@ void FBillboardRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraph
 
 void FBillboardRenderPass::PrepareRender()
 {
-    BillboardObjs.Empty();
+    BillboardComps.Empty();
     for (const auto iter : TObjectRange<UBillboardComponent>())
     {
         if (iter->GetWorld() == GEngine->ActiveWorld)
         {
-            BillboardObjs.Add(iter);
+            BillboardComps.Add(iter);
         }
     }
 }
@@ -119,9 +117,17 @@ void FBillboardRenderPass::CreateShader()
     };
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"VertexBillboardShader", L"Shaders/VertexBillboardShader.hlsl", "main", TextureLayoutDesc, ARRAYSIZE(TextureLayoutDesc));
-
+    if (FAILED(hr))
+    {
+        return;
+    }
+    
     hr = ShaderManager->AddPixelShader(L"PixelBillboardShader", L"Shaders/PixelBillboardShader.hlsl", "main");
-
+    if (FAILED(hr))
+    {
+        return;
+    }
+    
     VertexShader = ShaderManager->GetVertexShaderByKey(L"VertexBillboardShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"VertexBillboardShader");
     PixelShader = ShaderManager->GetPixelShaderByKey(L"PixelBillboardShader");
@@ -135,7 +141,6 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
 {
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
 
-    const EResourceType ResourceType = EResourceType::ERT_Editor;
     FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(ResourceType);
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
 
@@ -149,7 +154,7 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
     BufferManager->GetQuadBuffer(VertexInfo, IndexInfo);
 
     // 각 Billboard에 대해 렌더링 처리
-    for (auto BillboardComp : BillboardObjs)
+    for (auto BillboardComp : BillboardComps)
     {
         UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
         
@@ -215,5 +220,5 @@ void FBillboardRenderPass::SetupVertexBuffer(ID3D11Buffer* pVertexBuffer, UINT n
 
 void FBillboardRenderPass::ClearRenderArr()
 {
-    BillboardObjs.Empty();
+    BillboardComps.Empty();
 }

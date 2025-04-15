@@ -16,6 +16,7 @@
 
 
 enum class EResourceType : uint8;
+
 class FSceneRenderPass;
 class UWorld;
 class UObject;
@@ -26,7 +27,8 @@ class FEditorViewportClient;
 class FRenderTargetRHI;
 
 class FStaticMeshRenderPass;
-class FBillboardRenderPass;
+class FWorldBillboardRenderPass;
+class FEditorBillboardRenderPass;
 class FGizmoRenderPass;
 class FUpdateLightBufferPass;
 class FDepthBufferDebugPass;
@@ -84,7 +86,8 @@ public:
     FDXDShaderManager* ShaderManager = nullptr;
 
     FStaticMeshRenderPass* StaticMeshRenderPass = nullptr;
-    FBillboardRenderPass* BillboardRenderPass = nullptr;
+    FWorldBillboardRenderPass* WorldBillboardRenderPass = nullptr;
+    FEditorBillboardRenderPass* EditorBillboardRenderPass = nullptr;
     FGizmoRenderPass* GizmoRenderPass = nullptr;
     FUpdateLightBufferPass* UpdateLightBufferPass = nullptr;
     FLineRenderPass* LineRenderPass = nullptr;

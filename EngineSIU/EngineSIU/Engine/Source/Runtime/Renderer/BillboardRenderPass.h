@@ -6,6 +6,7 @@
 
 #include "Define.h"
 
+enum class EResourceType : uint8;
 class UBillboardComponent;
 class FDXDBufferManager;
 class FGraphicsDevice;
@@ -47,9 +48,12 @@ public:
     void CreateShader();
     void ReleaseShader();
 
-private:
-    TArray<UBillboardComponent*> BillboardObjs;
+protected:
+    TArray<UBillboardComponent*> BillboardComps;
 
+    EResourceType ResourceType;
+
+private:
     ID3D11VertexShader* VertexShader;
     
     ID3D11PixelShader* PixelShader;
