@@ -130,7 +130,7 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         return;
     }
     
-    ControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
+    EControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
     if (Mode == CM_TRANSLATION)
     {
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetArrowArr())

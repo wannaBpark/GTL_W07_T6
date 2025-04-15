@@ -487,7 +487,7 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
 
-    ControlMode ControlMode = Player->GetControlMode();
+    EControlMode ControlMode = Player->GetControlMode();
 
     if (ControlMode == CM_TRANSLATION)
     {
