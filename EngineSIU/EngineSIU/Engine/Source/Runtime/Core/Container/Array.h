@@ -34,10 +34,8 @@ public:
 	void operator+(const TArray& OtherArray);
 
 public:
-    ArrayType& GetContainerPrivate()
-    {
-        return ContainerPrivate;
-    }
+    ArrayType& GetContainerPrivate() { return ContainerPrivate; }
+    const ArrayType& GetContainerPrivate() const { return ContainerPrivate; }
 
     TArray();
     ~TArray() = default;
