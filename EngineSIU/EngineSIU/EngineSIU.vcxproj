@@ -266,6 +266,8 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\LightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ProjectileMovementComponent.cpp" />
+    <None Include="Shaders\StaticMeshPixelShaderDepth.hlsl" />
+    <None Include="Shaders\StaticMeshPixelShaderWorldNormal.hlsl" />
     <None Include="Shaders\SlateShader.hlsl" />
     <None Include="Shaders\ShaderRegisters.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

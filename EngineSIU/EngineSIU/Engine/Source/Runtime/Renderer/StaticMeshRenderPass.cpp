@@ -53,10 +53,23 @@ void FStaticMeshRenderPass::CreateShader()
     {
         return;
     }
+    hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShaderDepth", L"Shaders/StaticMeshPixelShaderDepth.hlsl", "mainPS");
+    if (FAILED(hr))
+    {
+        return;
+    }
+    hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShaderWorldNormal", L"Shaders/StaticMeshPixelShaderWorldNormal.hlsl", "mainPS");
+    if (FAILED(hr))
+    {
+        return;
+    }
     
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
+    
+    PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
+    DebugDepthShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderDepth");
+    DebugWorldNormalShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderWorldNormal");
 }
 
 void FStaticMeshRenderPass::ReleaseShader()
@@ -102,8 +115,9 @@ void FStaticMeshRenderPass::PrepareRender()
 
 void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) const
 {
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+    
     Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
-    Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -118,9 +132,10 @@ void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorView
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
 
-    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+    
     ChangeViewMode(ViewMode);
 
+    // Rasterizer
     if (ViewMode == EViewModeIndex::VMI_Wireframe)
     {
         Graphics->DeviceContext->RSSetState(Graphics->RasterizerWireframeBack);
@@ -128,6 +143,20 @@ void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorView
     else
     {
         Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
+    }
+
+    // Pixel Shader
+    if (ViewMode == EViewModeIndex::VMI_SceneDepth)
+    {
+        Graphics->DeviceContext->PSSetShader(DebugDepthShader, nullptr, 0);
+    }
+    else if (ViewMode == EViewModeIndex::VMI_WorldNormal)
+    {
+        Graphics->DeviceContext->PSSetShader(DebugWorldNormalShader, nullptr, 0);
+    }
+    else
+    {
+        Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     }
 }
 
