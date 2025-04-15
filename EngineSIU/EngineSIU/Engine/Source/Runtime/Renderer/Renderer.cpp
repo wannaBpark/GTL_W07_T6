@@ -275,9 +275,6 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
 {
     const uint64 ShowFlag = Viewport->GetShowFlag();
     const EViewModeIndex ViewMode = Viewport->GetViewMode();
-
-    FViewportResource* ViewportResource = Viewport->GetViewportResource();
-    ViewportResource->ClearRenderTarget(Graphics->DeviceContext, EResourceType::ERT_Editor);
     
     if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
     {
