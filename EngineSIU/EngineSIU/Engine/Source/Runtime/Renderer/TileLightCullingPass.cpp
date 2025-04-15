@@ -3,6 +3,14 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
 
+//#include "World/World.h"
+#include "UObject/Casts.h"
+#include "Engine/EditorEngine.h"
+#include "Components/LightComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
+#include "UObject/UObjectIterator.h"
+
 #define SAFE_RELEASE(p) if (p) { p->Release(); p = nullptr; }
 
 FTileLightCullingPass::FTileLightCullingPass()
@@ -32,14 +40,72 @@ void FTileLightCullingPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
 
 void FTileLightCullingPass::PrepareRender()
 {
+    for (const auto iter : TObjectRange<ULightComponentBase>())
+    {
+        if (iter->GetWorld() == GEngine->ActiveWorld)
+        {
+            if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter))
+            {
+                PointLights.Add(PointLight);
+            }
+            /*else if (USpotLightComponent* SpotLight = Cast<USpotLightComponent>(iter))
+            {
+                SpotLights.Add(SpotLight);
+            }*/
+        }
+    }
+    CreateLightBufferGPU();
 }
 
 void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
 }
 
+void FTileLightCullingPass::Dispatch()
+{
+    // 스레드 그룹 수 계산
+    const UINT groupSizeX = (Graphics->screenWidth + TILE_SIZE - 1) / TILE_SIZE;
+    const UINT groupSizeY = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE;
+
+    // 1. Constant Buffer 업데이트
+    TileLightCullSettings settings = {};
+    settings.ScreenSize[0] = Graphics->screenWidth;
+    settings.ScreenSize[1] = Graphics->screenHeight;
+    settings.Enable25DCulling = 1;                      // TODO : IMGUI 연결!
+
+    Graphics->DeviceContext->UpdateSubresource(TileLightConstantBuffer, 0, nullptr, &settings, 0, 0);
+    Graphics->DeviceContext->CSSetConstantBuffers(0, 1, &TileLightConstantBuffer);
+
+    // 1. SRV (전역 Light 정보) 바인딩
+    if (LightSRV)
+    {
+        Graphics->DeviceContext->CSSetShaderResources(0, 1, &LightSRV);                  // register(t0)
+    }
+
+    // 2. UAV 바인딩
+    Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &TileUAV, nullptr);         // register(u0)
+    Graphics->DeviceContext->CSSetUnorderedAccessViews(3, 1, &DebugHeatmapUAV, nullptr); // register(u3)
+
+    // 3. 셰이더 바인딩
+    Graphics->DeviceContext->CSSetShader(ComputeShader, nullptr, 0);
+
+    // 4. 디스패치
+    Graphics->DeviceContext->Dispatch(groupSizeX, groupSizeY, 1);
+
+    // 5. 바인딩 해제
+    ID3D11UnorderedAccessView* nullUAV = nullptr;
+    Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+    Graphics->DeviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
+}
+
+
+
 void FTileLightCullingPass::ClearRenderArr()
 {
+    ClearUAVs();
+
+    PointLights.Empty();
+    //SpotLights.Empty();
 }
 
 void FTileLightCullingPass::CreateShader()
@@ -53,6 +119,60 @@ void FTileLightCullingPass::CreateShader()
     ComputeShader = ShaderManager->GetComputeShaderByKey(L"TileLightCullingComputeShader");
 
 }
+
+void FTileLightCullingPass::CreateLightBufferGPU()
+{
+    if (PointLights.Num() == 0)
+        return;
+
+    TArray<FLightGPU> lights;
+
+    for (UPointLightComponent* LightComp : PointLights)
+    {
+        if (!LightComp) continue;
+
+        FLightGPU LightData;
+        LightData.Position = LightComp->GetWorldLocation();
+        LightData.Radius = LightComp->GetRadius();
+        LightData.Direction = LightComp->GetUpVector(); // Linear color
+        LightData.Padding = 0.0f;
+
+        lights.Add(LightData);
+    }
+
+    D3D11_BUFFER_DESC desc = {};
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.ByteWidth = sizeof(FLightGPU) * lights.Num();
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.StructureByteStride = sizeof(FLightGPU);
+    desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+    D3D11_SUBRESOURCE_DATA initData = {};
+    initData.pSysMem = lights.GetData();
+
+    SAFE_RELEASE(LightBufferGPU);
+    SAFE_RELEASE(LightSRV);
+
+    HRESULT hr = Graphics->Device->CreateBuffer(&desc, &initData, &LightBufferGPU);
+    if (FAILED(hr))
+    {
+        UE_LOG(LogLevel::Error, TEXT("Failed to create Light Structured Buffer!"));
+        return;
+    }
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    srvDesc.Buffer.FirstElement = 0;
+    srvDesc.Buffer.NumElements = lights.Num();
+
+    hr = Graphics->Device->CreateShaderResourceView(LightBufferGPU, &srvDesc, &LightSRV);
+    if (FAILED(hr))
+    {
+        UE_LOG(LogLevel::Error, TEXT("Failed to create Light Buffer SRV!"));
+    }
+}
+
 
 void FTileLightCullingPass::CreateViews()
 {
@@ -128,6 +248,8 @@ void FTileLightCullingPass::CreateBuffers()
     }
 }
 
+
+
 void FTileLightCullingPass::Release()
 {
     SAFE_RELEASE(TileUAVBuffer);
@@ -135,38 +257,8 @@ void FTileLightCullingPass::Release()
     SAFE_RELEASE(DebugHeatmapTexture);
     SAFE_RELEASE(DebugHeatmapUAV);
     SAFE_RELEASE(TileLightConstantBuffer);
-
-}
-
-void FTileLightCullingPass::Dispatch()
-{
-    // 스레드 그룹 수 계산
-    const UINT groupSizeX = (Graphics->screenWidth + TILE_SIZE - 1) / TILE_SIZE;
-    const UINT groupSizeY = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE;
-
-    // 1. Constant Buffer 업데이트
-    TileLightCullSettings settings = {};
-    settings.ScreenSize[0] = Graphics->screenWidth;
-    settings.ScreenSize[1] = Graphics->screenHeight;
-    settings.Enable25DCulling = 1;                      // TODO : IMGUI 연결!
-
-    Graphics->DeviceContext->UpdateSubresource(TileLightConstantBuffer, 0, nullptr, &settings, 0, 0);
-    Graphics->DeviceContext->CSSetConstantBuffers(0, 1, &TileLightConstantBuffer);
-
-    // 2. UAV 바인딩
-    Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &TileUAV, nullptr);
-    Graphics->DeviceContext->CSSetUnorderedAccessViews(3, 1, &DebugHeatmapUAV, nullptr); // register(u3)
-
-    // 3. 셰이더 바인딩
-    Graphics->DeviceContext->CSSetShader(ComputeShader, nullptr, 0);
-
-    // 4. 디스패치
-    Graphics->DeviceContext->Dispatch(groupSizeX, groupSizeY, 1);
-
-    // 5. 바인딩 해제
-    ID3D11UnorderedAccessView* nullUAV = nullptr;
-    Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
-    Graphics->DeviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
+    SAFE_RELEASE(LightBufferGPU);
+    SAFE_RELEASE(LightSRV);
 }
 
 void FTileLightCullingPass::ClearUAVs()

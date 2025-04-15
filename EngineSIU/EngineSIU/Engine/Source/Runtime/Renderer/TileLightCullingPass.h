@@ -10,10 +10,13 @@ class FDXDShaderManager;
 class FGraphicsDevice;
 class FDXDBufferManager;
 
-struct FPointLightGPU {
+class USpotLightComponent;
+class UPointLightComponent;
+
+struct FLightGPU {
     FVector Position;
     float Radius;
-    FVector Color;
+    FVector Direction;
     float Padding; // 16바이트 정렬용
 };
 
@@ -45,6 +48,7 @@ public:
     virtual void ClearRenderArr() override;
 
     void CreateShader();
+    void CreateLightBufferGPU();
     void CreateViews();
     void CreateBuffers();
     void Release();
@@ -53,6 +57,9 @@ public:
     void UpdateTileLightConstantBuffer();
 
 private:
+    TArray<USpotLightComponent*> SpotLights;
+    TArray<UPointLightComponent*> PointLights;
+
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
@@ -64,6 +71,9 @@ private:
 
     ID3D11Texture2D* DebugHeatmapTexture;       // 디버그용 히트맵 텍스처
     ID3D11UnorderedAccessView* DebugHeatmapUAV; // 디버그용 히트맵 UAV
+
+    ID3D11Buffer* LightBufferGPU;               // GPU에서 사용할 라이트 버퍼    
+    ID3D11ShaderResourceView* LightSRV;         // 라이트 버퍼 SRV (StructruredBuffer)
     
     
     ID3D11Buffer* TileLightConstantBuffer;

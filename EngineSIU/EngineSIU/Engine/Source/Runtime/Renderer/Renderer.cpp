@@ -119,6 +119,7 @@ void FRenderer::PrepareRender()
     BillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
+    TileLightCullingPass->PrepareRender();
     //DepthPrePass->PrepareRender();
 }
 
@@ -130,6 +131,7 @@ void FRenderer::ClearRenderArr()
     UpdateLightBufferPass->ClearRenderArr();
     FogRenderPass->ClearRenderArr();
     DepthPrePass->ClearRenderArr();
+    TileLightCullingPass->ClearRenderArr();
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
