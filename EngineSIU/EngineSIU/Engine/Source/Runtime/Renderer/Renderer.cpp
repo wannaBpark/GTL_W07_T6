@@ -14,6 +14,7 @@
 #include "FogRenderPass.h"
 #include "EditorRenderPass.h"
 #include "DepthPrePass.h"
+#include "TileLightCullingPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 #include "GameFrameWork/Actor.h"
@@ -36,6 +37,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     FogRenderPass = new FFogRenderPass();
     EditorRenderPass = new FEditorRenderPass();
     DepthPrePass = new FDepthPrePass();
+    TileLightCullingPass = new FTileLightCullingPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -46,6 +48,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     EditorRenderPass->Initialize(Graphics,ShaderManager);
     DepthPrePass->Initialize(BufferManager, Graphics, ShaderManager);
+    TileLightCullingPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
 }
@@ -137,17 +140,17 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
-    if (DepthPrePass)
+    if (DepthPrePass) // Depth Pre Pass : 렌더타겟 nullptr 및 렌더 후 복구
     {
         DepthPrePass->PrepareRender();
         StaticMeshRenderPass->Render(ActiveViewport);
         DepthPrePass->ClearRenderArr();
     }
+
     StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
     EditorRenderPass->Render(GEngine->ActiveWorld, ActiveViewport);
-    
 
     if (IsSceneDepth)
     {

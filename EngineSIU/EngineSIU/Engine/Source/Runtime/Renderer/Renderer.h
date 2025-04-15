@@ -30,6 +30,7 @@ class FLineRenderPass;
 class FFogRenderPass;
 class FEditorRenderPass;
 class FDepthPrePass;
+class FTileLightCullingPass;
 
 class FRenderer
 {
@@ -76,6 +77,7 @@ public:
     FFogRenderPass* FogRenderPass = nullptr;
     FEditorRenderPass* EditorRenderPass = nullptr;
     FDepthPrePass* DepthPrePass = nullptr;
+    FTileLightCullingPass* TileLightCullingPass = nullptr;
 
     bool IsSceneDepth = false;
 };
