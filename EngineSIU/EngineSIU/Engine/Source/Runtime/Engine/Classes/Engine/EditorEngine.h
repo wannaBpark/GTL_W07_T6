@@ -39,6 +39,9 @@ public:
 
     void HoverActor(AActor* InActor);
 
+    
+    void NewLevel();
+
     void SelectComponent(USceneComponent* InComponent);
     void DeselectComponent(USceneComponent* InComponent);
     bool CanSelectComponent(USceneComponent* InComponent) const;

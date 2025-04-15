@@ -182,6 +182,17 @@ void UEditorEngine::HoverActor(AActor* InActor)
     }
 }
 
+void UEditorEngine::NewLevel()
+{
+    DeselectActor(GetSelectedActor());
+    DeselectComponent(GetSelectedComponent());
+
+    if (ActiveWorld->GetActiveLevel())
+    {
+        ActiveWorld->GetActiveLevel()->Release();
+    }
+}
+
 void UEditorEngine::SelectComponent(USceneComponent* InComponent)
 {
     if (InComponent && CanSelectComponent(InComponent))

@@ -104,12 +104,15 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
 
         ImGui::Begin("Menu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-        if (ImGui::MenuItem("New Scene"))
+        if (ImGui::MenuItem("New Level"))
         {
-            // TODO: New Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->NewLevel();
+            }
         }
 
-        if (ImGui::MenuItem("Load Scene"))
+        if (ImGui::MenuItem("Load Level"))
         {
             char const* lFilterPatterns[1] = { "*.scene" };
             const char* FileName = tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns, "Scene(.scene) file", 0);
@@ -120,13 +123,18 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
-
-            // TODO: Load Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->NewLevel();
+                EditorEngine->LoadLevel(FileName);
+            }
+            
+            
         }
 
         ImGui::Separator();
 
-        if (ImGui::MenuItem("Save Scene"))
+        if (ImGui::MenuItem("Save Level"))
         {
             char const* lFilterPatterns[1] = { "*.scene" };
             const char* FileName = tinyfd_saveFileDialog("Save Scene File", "", 1, lFilterPatterns, "Scene(.scene) file");
@@ -136,8 +144,11 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->SaveLevel(FileName);
+            }
 
-            // TODO: Save Scene
 
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
