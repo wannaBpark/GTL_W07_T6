@@ -1,12 +1,11 @@
 #include "Parse.h"
+#include <cassert>
 
-#include "AssertionMacros.h"
 #include "Char.h"
 #include "Container/CString.h"
 #include "Math/MathUtility.h"
 #include "Runtime/CoreUObject/UObject/NameTypes.h"
 
-#define UE_ARRAY_COUNT(Array) (sizeof(Array) / sizeof((Array)[0]))
 
 bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int32 MaxLen, bool bShouldStopOnSeparator, const TCHAR** OptStreamGotTo)
 {
@@ -14,11 +13,10 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int32 
     {
         return false;
     }
-    
+
     assert(Value && MaxLen > 0);
 
-    bool bSuccess = false;
-    int32 MatchLen = FCString::Strlen(Match);
+    const int32 MatchLen = static_cast<int32>(FCString::Strlen(Match));
 
     if (OptStreamGotTo)
     {
@@ -28,7 +26,7 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int32 
     const TCHAR* FoundInStream = FCString::Strifind(Stream, Match, true);
     if (FoundInStream == nullptr)
     {
-        Value[0] = TCHAR('\0');
+        Value[0] = static_cast<TCHAR>('\0');
         return false;
     }
 
@@ -44,7 +42,7 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int32 
     {
         // Skip quote character if only params were quoted.
         ValueStartInStream += 1;
-        ValueEndInStream = FCString::Strstr(ValueStartInStream, TEXT("\x22")); 
+        ValueEndInStream = FCString::Strstr(ValueStartInStream, TEXT("\x22"));
 
         if (ValueEndInStream == nullptr)
         {
@@ -63,11 +61,11 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int32 
         ValueEndInStream = ValueStartInStream + FCString::Strcspn(ValueStartInStream, TerminatingChars);
     }
 
-    int32 ValueLength = FMath::Min<int32>(MaxLen - 1, static_cast<int32>(ValueEndInStream - ValueStartInStream));
+    const int32 ValueLength = FMath::Min<int32>(MaxLen - 1, static_cast<int32>(ValueEndInStream - ValueStartInStream));
     // It is possible for ValueLength to be 0.
     // FCString::Strncpy asserts that its copying at least 1 char, memcpy has no such constraint.
     memcpy(Value, ValueStartInStream, sizeof(Value[0]) * ValueLength);
-    Value[ValueLength] = TCHAR('\0');
+    Value[ValueLength] = static_cast<TCHAR>('\0');
 
     if (OptStreamGotTo)
     {
@@ -90,7 +88,7 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, FName& Name)
 {
     TCHAR TempStr[NAME_SIZE];
 
-    if( !FParse::Value(Stream,Match,TempStr,NAME_SIZE) )
+    if (!FParse::Value(Stream, Match, TempStr, NAME_SIZE))
     {
         return false;
     }
@@ -103,93 +101,93 @@ bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, FName& Name)
 //
 // Get a uint32.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, uint32& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, uint32& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
-	TCHAR* End_NotUsed;
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
+    TCHAR* End_NotUsed;
 
-	Value = FCString::Strtoi(Temp, &End_NotUsed, 10 );
+    Value = FCString::Strtoi(Temp, &End_NotUsed, 10);
 
-	return true;
+    return true;
 }
 
 //
 // Get a byte.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, uint8& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, uint8& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = (uint8)FCString::Atoi( Temp );
-	return Value!=0 || FChar::IsDigit(Temp[0]);
+    Value = static_cast<uint8>(FCString::Atoi(Temp));
+    return Value != 0 || FChar::IsDigit(Temp[0]);
 }
 
 //
 // Get a signed byte.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, int8& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, int8& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = (int8)FCString::Atoi( Temp );
-	return Value!=0 || FChar::IsDigit(Temp[0]);
+    Value = static_cast<int8>(FCString::Atoi(Temp));
+    return Value != 0 || FChar::IsDigit(Temp[0]);
 }
 
 //
 // Get a word.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, uint16& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, uint16& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = (uint16)FCString::Atoi( Temp );
-	return Value!=0 || FChar::IsDigit(Temp[0]);
+    Value = static_cast<uint16>(FCString::Atoi(Temp));
+    return Value != 0 || FChar::IsDigit(Temp[0]);
 }
 
 //
 // Get a signed word.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, int16& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, int16& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = (int16)FCString::Atoi( Temp );
-	return Value!=0 || FChar::IsDigit(Temp[0]);
+    Value = static_cast<int16>(FCString::Atoi(Temp));
+    return Value != 0 || FChar::IsDigit(Temp[0]);
 }
 
 //
 // Get a floating-point number.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, float& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, float& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = FCString::Atof( Temp );
-	return true;
+    Value = FCString::Atof(Temp);
+    return true;
 }
 
 //
@@ -197,30 +195,30 @@ bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, float& Value )
 //
 bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, double& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = FCString::Atod(Temp);
-	return true;
+    Value = FCString::Atod(Temp);
+    return true;
 }
 
 
 //
 // Get a signed double word.
 //
-bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, int32& Value )
+bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, int32& Value)
 {
-	TCHAR Temp[256];
-	if (!FParse::Value(Stream, Match, Temp, UE_ARRAY_COUNT(Temp)))
-	{
-		return false;
-	}
+    TCHAR Temp[256];
+    if (!FParse::Value(Stream, Match, Temp, std::size(Temp)))
+    {
+        return false;
+    }
 
-	Value = FCString::Atoi( Temp );
-	return true;
+    Value = FCString::Atoi(Temp);
+    return true;
 }
 
 // bool FParse::Value(const TCHAR* Stream, const TCHAR* Match, FString& Value, bool bShouldStopOnSeparator, const TCHAR** OptStreamGotTo)
@@ -248,11 +246,10 @@ bool FParse::Value( const TCHAR* Stream, const TCHAR* Match, int32& Value )
 // }
 
 
-
 bool FParse::Bool(const TCHAR* Stream, const TCHAR* Match, bool& OnOff)
 {
     TCHAR TempStr[16];
-    if (FParse::Value(Stream, Match, TempStr, UE_ARRAY_COUNT(TempStr)))
+    if (FParse::Value(Stream, Match, TempStr, std::size(TempStr)))
     {
         OnOff = FCString::ToBool(TempStr);
         return true;
