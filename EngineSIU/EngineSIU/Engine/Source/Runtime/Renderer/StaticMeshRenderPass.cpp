@@ -199,18 +199,10 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 {
     const EResourceType ResourceType = EResourceType::ERT_Scene;
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
-    FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(ResourceType);
-    if (!ResourceRHI)
-    {
-        if (FAILED(RenderTargetRHI->CreateResource(ResourceType)))
-        {
-            return;
-        }
-        ResourceRHI = RenderTargetRHI->Resources.Find(ResourceType);
-    }
+    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(ResourceType);
     
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->DepthStencilView);
-    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+    RenderTargetRHI->ClearRenderTarget(Graphics->DeviceContext, ResourceType);
     Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     
     PrepareRenderState();

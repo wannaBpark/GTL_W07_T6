@@ -159,30 +159,6 @@ void FRenderer::ClearRenderArr()
     FogRenderPass->ClearRenderArr();
 }
 
-void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClearRTV, bool bIncludeDSV, bool bClearDSV)
-{
-    FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(Type);
-    if (!ResourceRHI)
-    {
-        if (FAILED(RenderTargetRHI->CreateResource(Type)))
-        {
-            return;
-        }
-        ResourceRHI = RenderTargetRHI->Resources.Find(Type);
-    }
-    
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, bIncludeDSV ? RenderTargetRHI->DepthStencilView : nullptr);
-
-    if (bClearRTV)
-    {
-        Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(Type).data());
-        if (bIncludeDSV && bClearDSV)
-        {
-            Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-        }
-    }
-}
-
 void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     FCameraConstantBuffer CameraConstantBuffer;
@@ -230,7 +206,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 
     // RenderPostProcess(Viewport);
     
-    // RenderEditorOverlay(Viewport);
+    RenderEditorOverlay(Viewport);
 
     // Compositing
     CompositingPass->Render(Viewport);
@@ -238,6 +214,8 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     // Clear
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
     Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(101, 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(102, 1, NullSRV);
 
     ClearRenderArr();
 }
@@ -279,32 +257,24 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
     const EViewModeIndex ViewMode = Viewport->GetViewMode();
 
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    RenderTargetRHI->ClearRenderTarget(Graphics->DeviceContext, EResourceType::ERT_Editor);
     
-    // Render Billboard
+    if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
+    {
+        return;
+    }
+    
+    // Render Editor Billboard
     if (ShowFlag & EEngineShowFlags::SF_BillboardText)
     {
-        SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI, false);
         BillboardRenderPass->Render(Viewport);
     }
 
-    // 일단 수동으로 렌더타겟 해제하고 쉐이더 리소스 뷰에 씬 텍스처 전달
+    LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
+    
+    GizmoRenderPass->Render(Viewport); // 기존 뎁스를 SRV로 전달해서 샘플 후 비교하기 위해 기즈모 전용 DSV 사용
+
     Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-    Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
-
-    // Render for Editor
-    if (GEngine->ActiveWorld->WorldType == EWorldType::Editor)
-    {
-        SetRenderResource(EResourceType::ERT_Editor, RenderTargetRHI, true, true, false);
-        LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
-
-        FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(EResourceType::ERT_Editor);
-        Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GizmoDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-        Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GizmoDepthStencilView);
-        GizmoRenderPass->Render(Viewport); // 기존 뎁스를 SRV로 전달해서 샘플 후 비교하기 위해 기즈모 전용 DSV 사용
-
-        Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
-        Graphics->DeviceContext->PSSetShaderResources(102, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Editor)->SRV);
-    }
 }
 
 void FRenderer::RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport)

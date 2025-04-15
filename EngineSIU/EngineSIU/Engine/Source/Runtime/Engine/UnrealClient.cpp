@@ -135,6 +135,18 @@ TMap<EResourceType, FViewportResources>& FRenderTargetRHI::GetResources()
     return Resources;
 }
 
+FViewportResources* FRenderTargetRHI::GetResource(EResourceType Type)
+{
+    if (!Resources.Contains(Type))
+    {
+        if (FAILED(CreateResource(Type)))
+        {
+            return nullptr;
+        }
+    }
+    return Resources.Find(Type);
+}
+
 void FRenderTargetRHI::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
 {
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -142,6 +154,14 @@ void FRenderTargetRHI::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
     for (auto& [Type, Resource] : Resources)
     {
         DeviceContext->ClearRenderTargetView(Resource.RTV, ClearColors[Type].data());
+    }
+}
+
+void FRenderTargetRHI::ClearRenderTarget(ID3D11DeviceContext* DeviceContext, EResourceType Type)
+{
+    if (FViewportResources* Resource = GetResource(Type))
+    {
+        DeviceContext->ClearRenderTargetView(Resource->RTV, ClearColors[Type].data());
     }
 }
 

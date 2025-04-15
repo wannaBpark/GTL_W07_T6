@@ -45,7 +45,6 @@ void FCompositingPass::PrepareRender()
 
 void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    // TODO: 최종 결과 렌더하고, 결과 텍스처를 SRV를 통해 전달
     // Setup
     FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
     if (!RenderTargetRHI)
@@ -56,7 +55,8 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     const EResourceType ResourceType = EResourceType::ERT_Compositing; 
     FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources().Find(ResourceType);
 
-    Graphics->DeviceContext->PSSetShaderResources(100, 1, &Viewport->GetRenderTargetRHI()->GetResources().Find(EResourceType::ERT_Scene)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(102, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Editor)->SRV);
 
     Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, nullptr);
     Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());

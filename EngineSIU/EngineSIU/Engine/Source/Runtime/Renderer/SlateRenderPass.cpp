@@ -80,7 +80,7 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
 
     // Clear: 사용한 리소스 해제
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
-    Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(120, 1, NullSRV);
 }
 
 void FSlateRenderPass::ClearRenderArr()

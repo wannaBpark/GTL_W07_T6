@@ -75,13 +75,20 @@ public:
 
     TMap<EResourceType, FViewportResources>& GetResources();
 
+    // 해당 타입의 리소스를 리턴. 없는 경우에는 생성해서 리턴.
+    FViewportResources* GetResource(EResourceType Type);
+
     bool HasResource(EResourceType Type) const;
-    
+
+    // 가지고있는 모든 리소스의 렌더 타겟 뷰를 clear
     void ClearRenderTargets(ID3D11DeviceContext* DeviceContext);
+
+    // 지정한 타입의 렌더 타겟 뷰를 clear. 없는 경우 생성해서 clear.
+    void ClearRenderTarget(ID3D11DeviceContext* DeviceContext, EResourceType Type);
 
     std::array<float, 4> GetClearColor(EResourceType Type) const;
     
-public: // TODO: 나중에 private로
+private:
     // DirectX
     D3D11_VIEWPORT D3DViewport = {};
 
@@ -100,6 +107,10 @@ public: // TODO: 나중에 private로
     void ReleaseResources();
     void ReleaseResource(EResourceType Type);
 
+    /**
+     * ClearColors 맵에는 모든 EResourceType에 대응하는 색상을
+     * 이 클래스의 생성자에서 반드시 추가해야 함.
+     */
     TMap<EResourceType, std::array<float, 4>> ClearColors;
 };
 

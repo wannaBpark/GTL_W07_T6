@@ -11,6 +11,7 @@
 #include "Math/JungleMath.h"
 
 #include "EngineLoop.h"
+#include "UnrealClient.h"
 
 #include "UObject/UObjectIterator.h"
 
@@ -110,5 +111,13 @@ void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewport
 
 void FLineRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    const EResourceType ResourceType = EResourceType::ERT_Editor;
+
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(ResourceType);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+
     ProcessLineRendering(Viewport);
+
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 }

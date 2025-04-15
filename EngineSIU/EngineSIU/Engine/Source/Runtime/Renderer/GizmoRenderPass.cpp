@@ -33,8 +33,6 @@
 #include "Engine/EditorEngine.h"
 
 
-struct FViewportResources;
-// 생성자/소멸자
 FGizmoRenderPass::FGizmoRenderPass()
     : BufferManager(nullptr)
     , Graphics(nullptr)
@@ -63,7 +61,7 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
 
 void FGizmoRenderPass::CreateShader()
 {
-    VertexShader = ShaderManager->GetVertexShaderByKey(L"GizmoVertexShader");
+    VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
 
     HRESULT hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
@@ -101,6 +99,12 @@ void FGizmoRenderPass::PrepareRender()
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(EResourceType::ERT_Editor);
+    Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetGizmoDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetGizmoDepthStencilView());
+    Graphics->DeviceContext->PSSetShaderResources(99, 1, &RenderTargetRHI->GetDepthStencilSRV());
+    
     Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerSolidBack);
     
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
@@ -137,6 +141,10 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     }
     
     Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(99, 1, NullSRV);
 }
 
 void FGizmoRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const

@@ -18,6 +18,7 @@
 #include "Engine/EditorEngine.h"
 
 #include "EngineLoop.h"
+#include "UnrealClient.h"
 
 #include "World/World.h"
 
@@ -132,6 +133,12 @@ void FBillboardRenderPass::ReleaseShader()
 
 void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+
+    const EResourceType ResourceType = EResourceType::ERT_Editor;
+    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(ResourceType);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+
     PrepareTextureShader();
 
     PrepareSubUVConstant();
@@ -194,6 +201,8 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
             );
         }
     }
+
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 }
 
 void FBillboardRenderPass::SetupVertexBuffer(ID3D11Buffer* pVertexBuffer, UINT numVertices) const
