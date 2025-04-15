@@ -3,7 +3,6 @@
 
 #include "HAL/PlatformType.h"
 
-enum EViewModeIndex : uint8;
 class FRenderTargetRHI;
 class UWorld;
 class FDXDBufferManager;

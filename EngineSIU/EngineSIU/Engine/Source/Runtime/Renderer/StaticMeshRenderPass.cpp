@@ -100,7 +100,7 @@ void FStaticMeshRenderPass::PrepareRender()
     }
 }
 
-void FStaticMeshRenderPass::PrepareRenderState() const
+void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) const
 {
     Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
@@ -117,6 +117,18 @@ void FStaticMeshRenderPass::PrepareRenderState() const
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+    ChangeViewMode(ViewMode);
+
+    if (ViewMode == EViewModeIndex::VMI_Wireframe)
+    {
+        Graphics->DeviceContext->RSSetState(Graphics->RasterizerWireframeBack);
+    }
+    else
+    {
+        Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
+    }
 }
 
 void FStaticMeshRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const
@@ -205,9 +217,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
     RenderTargetRHI->ClearRenderTarget(Graphics->DeviceContext, ResourceType);
     Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
     
-    PrepareRenderState();
-
-    ChangeViewMode(Viewport->GetViewMode());
+    PrepareRenderState(Viewport);
 
     for (UStaticMeshComponent* Comp : StaticMeshComponents)
     {

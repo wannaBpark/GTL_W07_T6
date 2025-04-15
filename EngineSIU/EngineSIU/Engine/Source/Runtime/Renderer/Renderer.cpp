@@ -209,10 +209,10 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
      *   3. RTV -> SRV 전환 타이밍이 정확히 지켜짐
      */
     RenderWorldScene(Viewport);
-    // RenderPostProcess(Viewport);
+    RenderPostProcess(Viewport);
     RenderEditorOverlay(Viewport);
 
-    // Compositing
+    // Compositing: 위에서 렌더한 결과들을 하나로 합쳐서 뷰포트의 최종 이미지를 만드는 작업
     CompositingPass->Render(Viewport);
 
     EndRender();
@@ -226,8 +226,7 @@ void FRenderer::EndRender()
 void FRenderer::RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     const uint64 ShowFlag = Viewport->GetShowFlag();
-    const EViewModeIndex ViewMode = Viewport->GetViewMode();
-
+    
     if (ShowFlag & EEngineShowFlags::SF_Primitives)
     {
         UpdateLightBufferPass->Render(Viewport);
@@ -255,8 +254,10 @@ void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& 
     
     if (ShowFlag & EEngineShowFlags::SF_Fog)
     {
-        // SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
-        // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
+        /**
+         * TODO: Fog 렌더 작업 해야 함.
+         * 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
+         */
     }
 }
 

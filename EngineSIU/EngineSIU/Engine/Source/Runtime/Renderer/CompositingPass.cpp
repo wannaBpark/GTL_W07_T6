@@ -67,9 +67,10 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 
+    // TODO: 아래 상수 버퍼가 필요한지 생각해보기
     // Update Constant Buffer
     FViewModeConstants ViewModeConstantData = {};
-    ViewModeConstantData.ViewMode = Viewport->GetViewMode();
+    ViewModeConstantData.ViewMode = static_cast<uint32>(Viewport->GetViewMode());
     // BufferManager->UpdateConstantBuffer<FViewModeConstants>("FViewModeConstants", ViewModeConstantData);
 
     // Render

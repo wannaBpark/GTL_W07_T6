@@ -2,7 +2,7 @@
 #include "HAL/PlatformType.h"
 
 
-enum EViewModeIndex : uint8
+enum class EViewModeIndex : uint8
 {
     VMI_Lit, // Scene + PP
     VMI_Unlit, // Scene
