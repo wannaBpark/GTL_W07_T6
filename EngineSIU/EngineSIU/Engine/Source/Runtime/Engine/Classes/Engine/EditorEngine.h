@@ -32,9 +32,8 @@ public:
     FWorldContext* GetPIEWorldContext(/*int32 WorldPIEInstance = 0*/);
 
 public:
-    void SelectActor(AActor* InActor);
-    void DeselectActor(AActor* InActor);
-    bool CanSelectActor(AActor* InActor) const;
+    void SelectActor(AActor* InActor) const;
+    bool CanSelectActor(const AActor* InActor) const;
     AActor* GetSelectedActor() const;
 
     void HoverActor(AActor* InActor);
@@ -42,15 +41,14 @@ public:
     
     void NewLevel();
 
-    void SelectComponent(USceneComponent* InComponent);
-    void DeselectComponent(USceneComponent* InComponent);
-    bool CanSelectComponent(USceneComponent* InComponent) const;
+    void SelectComponent(USceneComponent* InComponent) const;
+    bool CanSelectComponent(const USceneComponent* InComponent) const;
     USceneComponent* GetSelectedComponent() const;
 
     void HoverComponent(USceneComponent* InComponent);
 
 public:
-    AEditorPlayer* GetEditorPlayer();
+    AEditorPlayer* GetEditorPlayer() const;
     
 private:
     AEditorPlayer* EditorPlayer = nullptr;
