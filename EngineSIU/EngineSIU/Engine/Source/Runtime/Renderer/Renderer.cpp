@@ -170,24 +170,6 @@ void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>&
     CameraConstantBuffer.NearClip = Viewport->GetCameraLearClip();
     CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
     BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
-
-    ID3D11Buffer* CameraBuffer = BufferManager->GetConstantBuffer("FCameraConstantBuffer");
-    if (CameraBuffer)
-    {
-        D3D11_MAPPED_SUBRESOURCE MappedResource;
-        Graphics->DeviceContext->Map(CameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-        if (FCameraConstantBuffer* Buffer = static_cast<FCameraConstantBuffer*>(MappedResource.pData))
-        {
-            Buffer->ViewMatrix = Viewport->GetViewMatrix();
-            Buffer->InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
-            Buffer->ProjectionMatrix = Viewport->GetProjectionMatrix();
-            Buffer->InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
-            Buffer->ViewLocation = Viewport->GetCameraLocation();
-            Buffer->NearClip = Viewport->GetCameraLearClip();
-            Buffer->FarClip = Viewport->GetCameraFarClip();
-        }
-        Graphics->DeviceContext->Unmap(CameraBuffer, 0);
-    }
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
