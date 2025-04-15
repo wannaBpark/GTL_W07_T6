@@ -8,17 +8,19 @@
 class FGraphicsDevice;
 class UWorld;
 class FEditorViewportClient;
+class FDXDShaderManager;
 
 class FEditorRenderPass
 {
 public:
-    void Initialize(FGraphicsDevice* InGraphics);
+    void Initialize(FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager);
     void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void Release();
 
 private:
     FGraphicsDevice* Graphics;
     FRenderResourcesDebug Resources;
+    FDXDShaderManager* ShaderManager;
 
     void CreateShaders();
     void PrepareShader(FShaderResource ShaderResource) const;
@@ -36,7 +38,7 @@ private:
     void UpdateConstantbufferGlobal(FConstantBufferCamera Buffer);
 
     // Gizmo 관련 함수
-    void RenderGizmos(const UWorld* World);
+    //void RenderGizmos(const UWorld* World);
     void PrepareShaderGizmo();
     void PrepareConstantbufferGizmo();
 
@@ -44,7 +46,7 @@ private:
     void RenderAxis();
 
     // AABB
-    void RenderAABBInstanced(const UWorld* World);
+    //void RenderAABBInstanced(const UWorld* World);
     void PrepareConstantbufferAABB();
     void UdpateConstantbufferAABBInstanced(TArray<FConstantBufferDebugAABB> Buffer);
 
@@ -74,7 +76,8 @@ private:
     void PrepareConstantbufferArrow();
     void UdpateConstantbufferArrow(FConstantBufferDebugArrow Buffer);
 
-
+    // ShaderManager의 Hot Reload에 대응하기 위한 함수
+    void SetShaderAndPrepare(const std::wstring& VertexKey, const std::wstring& PixelKey, FShaderResource& ShaderSlot);
 
     const UINT32 ConstantBufferSizeAABB = 8;
     const UINT32 ConstantBufferSizeSphere = 8;
