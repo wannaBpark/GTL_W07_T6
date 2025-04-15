@@ -119,6 +119,20 @@ void FRenderer::ReleaseConstantBuffer()
     BufferManager->ReleaseConstantBuffer();
 }
 
+void FRenderer::CreateCommonShader()
+{
+    D3D11_INPUT_ELEMENT_DESC StaticMeshLayoutDesc[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+
+    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
+}
+
 void FRenderer::PrepareRender(FRenderTargetRHI* RenderTargetRHI)
 {
     // Setup Viewport
@@ -169,6 +183,19 @@ void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTa
     }
 }
 
+void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    FCameraConstantBuffer CameraConstantBuffer;
+    CameraConstantBuffer.ViewMatrix = Viewport->GetViewMatrix();
+    CameraConstantBuffer.InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
+    CameraConstantBuffer.ProjectionMatrix = Viewport->GetProjectionMatrix();
+    CameraConstantBuffer.InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
+    CameraConstantBuffer.ViewLocation = Viewport->GetCameraLocation();
+    CameraConstantBuffer.NearClip = Viewport->GetCameraLearClip();
+    CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
+    BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
+}
+
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     const uint64 ShowFlag = Viewport->GetShowFlag();
@@ -180,17 +207,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
         return;
     }
 
-    // Begin Update Common Buffer
-    FCameraConstantBuffer CameraConstantBuffer;
-    CameraConstantBuffer.ViewMatrix = Viewport->GetViewMatrix();
-    CameraConstantBuffer.InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
-    CameraConstantBuffer.ProjectionMatrix = Viewport->GetProjectionMatrix();
-    CameraConstantBuffer.InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
-    CameraConstantBuffer.ViewLocation = Viewport->GetCameraLocation();
-    CameraConstantBuffer.NearClip = Viewport->GetCameraLearClip();
-    CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
-    BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
-    // End
+    UpdateCommonBuffer(Viewport);
     
     PrepareRender(RenderTargetRHI);
     

@@ -52,6 +52,7 @@ public:
     void RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport); // TODO: 추후 RenderSlate로 변경해야함
 
 protected:
+    void UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void PrepareRender(FRenderTargetRHI* RenderTargetRHI);
     void PrepareRenderPass();
     void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClearRTV = true, bool bIncludeDSV = true, bool bClearDSV = true);

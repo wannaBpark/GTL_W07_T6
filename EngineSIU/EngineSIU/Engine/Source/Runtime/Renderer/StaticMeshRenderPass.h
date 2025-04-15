@@ -31,7 +31,7 @@ public:
     
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
   
-    void UpdateLitUnlitConstant(int isLit) const;
+    void UpdateLitUnlitConstant(int32 isLit) const;
 
     void RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
     
@@ -49,16 +49,10 @@ private:
     TArray<UStaticMeshComponent*> StaticMeshComponents;
 
     ID3D11VertexShader* VertexShader;
-    
     ID3D11PixelShader* PixelShader;
-    
     ID3D11InputLayout* InputLayout;
-    
-    uint32 Stride;
 
     FDXDBufferManager* BufferManager;
-    
     FGraphicsDevice* Graphics;
-    
     FDXDShaderManager* ShaderManager;
 };
