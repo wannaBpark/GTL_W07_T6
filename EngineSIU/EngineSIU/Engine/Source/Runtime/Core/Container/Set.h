@@ -19,6 +19,11 @@ public:
     using Iterator = typename SetType::iterator;
     using ConstIterator = typename SetType::const_iterator;
 
+    SetType& GetContainerPrivate()
+    {
+        return ContainerPrivate;
+    }
+
     // 기본 생성자
     TSet() = default;
 

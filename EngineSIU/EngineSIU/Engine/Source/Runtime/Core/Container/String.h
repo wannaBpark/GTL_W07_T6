@@ -62,6 +62,11 @@ private:
     friend const ElementType* GetData(const FString&);
 
 public:
+    BaseStringType& GetContainerPrivate()
+    {
+        return PrivateString;
+    }
+
     FString() = default;
     ~FString() = default;
 
