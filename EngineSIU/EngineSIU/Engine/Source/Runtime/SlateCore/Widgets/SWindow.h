@@ -13,7 +13,7 @@ public:
     virtual void OnResize(uint32 InWidth, uint32 InHeight);
 
     FRect Rect;
-    void SetRect(FRect newRect) { Rect = newRect; }
+    void SetRect(FRect NewRect) { Rect = NewRect; }
     
     virtual bool IsHover(const FPoint& InPoint);
     

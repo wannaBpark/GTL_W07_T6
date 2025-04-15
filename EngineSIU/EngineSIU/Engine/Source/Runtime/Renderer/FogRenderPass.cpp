@@ -21,14 +21,6 @@ FFogRenderPass::FFogRenderPass()
 
 FFogRenderPass::~FFogRenderPass()
 {
-    if (FogVertexShader) { FogVertexShader->Release(); FogVertexShader = nullptr; }
-    if (FogPixelShader) { FogPixelShader->Release(); FogPixelShader = nullptr; }
-    if (InputLayout) { InputLayout->Release(); InputLayout = nullptr; }
-    if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
-    if (FogBlendState) { FogBlendState->Release(); FogBlendState = nullptr; }
-    if (FogBuffer) { FogBuffer->Release(); FogBuffer = nullptr; }
-    if (FogRTV) { FogRTV->Release(); FogRTV = nullptr; }
-    if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
 }
 
 void FFogRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)

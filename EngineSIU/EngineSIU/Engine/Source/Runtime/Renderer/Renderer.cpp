@@ -66,7 +66,15 @@ void FRenderer::Release()
 {
     delete ShaderManager;
 
-    // TODO: 생성한 렌더 패스 객체 모두 해제
+    delete StaticMeshRenderPass;
+    delete WorldBillboardRenderPass;
+    delete EditorBillboardRenderPass;
+    delete GizmoRenderPass;
+    delete UpdateLightBufferPass;
+    delete LineRenderPass;
+    delete FogRenderPass;
+    delete CompositingPass;
+    delete SlateRenderPass;
 }
 
 //------------------------------------------------------------------------------

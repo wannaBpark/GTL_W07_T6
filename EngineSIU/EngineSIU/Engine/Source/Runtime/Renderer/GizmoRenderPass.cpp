@@ -40,12 +40,6 @@ FGizmoRenderPass::FGizmoRenderPass()
 
 FGizmoRenderPass::~FGizmoRenderPass()
 {
-    ReleaseShader();
-    if (ShaderManager)
-    {
-        delete ShaderManager;
-        ShaderManager = nullptr;
-    }
 }
 
 void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)

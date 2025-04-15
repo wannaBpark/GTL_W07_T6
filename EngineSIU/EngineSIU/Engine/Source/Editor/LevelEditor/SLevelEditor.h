@@ -20,7 +20,7 @@ public:
     void Release();
 
     void ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight);
-    void SelectViewport(POINT point);
+    void SelectViewport(POINT Point);
     void ResizeViewports();
     void EnableMultiViewport();
     void DisableMultiViewport();
@@ -68,20 +68,20 @@ public:
     void SaveConfig();
 
 private:
-    TMap<FString, FString> ReadIniFile(const FString& filePath);
-    void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
+    TMap<FString, FString> ReadIniFile(const FString& FilePath);
+    void WriteIniFile(const FString& FilePath, const TMap<FString, FString>& Config);
 
     template <typename T>
-    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
-        if (const FString* Value = config.Find(key))
+    T GetValueFromConfig(const TMap<FString, FString>& Config, const FString& Key, T DefaultValue) {
+        if (const FString* Value = Config.Find(Key))
         {
             std::istringstream iss(**Value);
-            T value;
-            if (iss >> value)
+            T ConfigValue;
+            if (iss >> ConfigValue)
             {
-                return value;
+                return ConfigValue;
             }
         }
-        return defaultValue;
+        return DefaultValue;
     }
 };

@@ -32,7 +32,6 @@ FBillboardRenderPass::FBillboardRenderPass()
 
 FBillboardRenderPass::~FBillboardRenderPass()
 {
-    ReleaseShader();
 }
 
 void FBillboardRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)

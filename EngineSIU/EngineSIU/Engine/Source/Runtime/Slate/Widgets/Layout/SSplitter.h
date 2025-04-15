@@ -18,14 +18,14 @@ public:
 
     bool bIsSplitterPressed = false;
 
-    virtual void Initialize(FRect initRect) override;
+    virtual void Initialize(FRect InitRect) override;
 
     virtual void ClampSplitRatio() {}
     
     virtual float GetSplitterLTCenter() = 0;
 
-    virtual void OnDragStart(const FPoint& mousePos) { /* 초기화 */ }
-    virtual void OnDrag(const FPoint& delta) = 0; // 가로/세로에 따라 구현 다름.
+    virtual void OnDragStart(const FPoint& MousePos) { /* 초기화 */ }
+    virtual void OnDrag(const FPoint& Delta) = 0; // 가로/세로에 따라 구현 다름.
     virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
     virtual bool OnPressed(const FPoint& InPoint) override;
     virtual bool OnReleased() override;
@@ -43,17 +43,17 @@ public:
     virtual void UpdateChildRects() = 0;
 
     template <typename T>
-    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
-        if (const FString* Value = config.Find(key))
+    T GetValueFromConfig(const TMap<FString, FString>& Config, const FString& Key, T DefaultValue) {
+        if (const FString* Value = Config.Find(Key))
         {
             std::istringstream iss(**Value);
-            T value;
-            if (iss >> value)
+            T ConfigValue;
+            if (iss >> ConfigValue)
             {
-                return value;
+                return ConfigValue;
             }
         }
-        return defaultValue;
+        return DefaultValue;
     }
 };
 
@@ -68,8 +68,8 @@ public:
     
     virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
 
-    virtual void LoadConfig(const TMap<FString, FString>& config) override;
-    virtual void SaveConfig(TMap<FString, FString>& config) const override;
+    virtual void LoadConfig(const TMap<FString, FString>& Config) override;
+    virtual void SaveConfig(TMap<FString, FString>& Config) const override;
 
     virtual void OnDrag(const FPoint& Delta) override;
 
@@ -87,8 +87,8 @@ public:
     
     virtual void OnResize(uint32 InWidth, uint32 InHeight) override;
 
-    virtual void LoadConfig(const TMap<FString, FString>& config) override;
-    virtual void SaveConfig(TMap<FString, FString>& config) const override;
+    virtual void LoadConfig(const TMap<FString, FString>& Config) override;
+    virtual void SaveConfig(TMap<FString, FString>& Config) const override;
 
     virtual void OnDrag(const FPoint& Delta) override;
 

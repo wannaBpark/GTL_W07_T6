@@ -254,10 +254,14 @@ void FEngineLoop::Exit()
 {
     LevelEditor->Release();
     UIMgr->Shutdown();
-    delete UIMgr;
     ResourceManager.Release(&Renderer);
     Renderer.Release();
     GraphicDevice.Release();
+
+    delete UnrealEditor;
+    delete BufferManager;
+    delete UIMgr;
+    delete LevelEditor;
 }
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)

@@ -3,9 +3,9 @@
 
 extern FEngineLoop GEngineLoop;
 
-void SSplitter::Initialize(FRect initRect)
+void SSplitter::Initialize(FRect InitRect)
 {
-    __super::Initialize(initRect);
+    __super::Initialize(InitRect);
     
     if (SideLT == nullptr)
     {
@@ -79,16 +79,16 @@ float SSplitterH::GetSplitterLTCenter()
     return Rect.Width * SplitRatio;
 }
 
-void SSplitterH::LoadConfig(const TMap<FString, FString>& config)
+void SSplitterH::LoadConfig(const TMap<FString, FString>& Config)
 {
-    SplitRatio = GetValueFromConfig(config, "SplitterH.SplitRatio", 0.5f);
+    SplitRatio = GetValueFromConfig(Config, "SplitterH.SplitRatio", 0.5f);
 
     UpdateChildRects();
 }
 
-void SSplitterH::SaveConfig(TMap<FString, FString>& config) const
+void SSplitterH::SaveConfig(TMap<FString, FString>& Config) const
 {
-    config["SplitterH.SplitRatio"] = std::to_string(SplitRatio);
+    Config["SplitterH.SplitRatio"] = std::to_string(SplitRatio);
 }
 
 void SSplitterH::OnResize(uint32 InWidth, uint32 InHeight)
@@ -156,16 +156,16 @@ float SSplitterV::GetSplitterLTCenter()
     return Rect.Height * SplitRatio;
 }
 
-void SSplitterV::LoadConfig(const TMap<FString, FString>& config)
+void SSplitterV::LoadConfig(const TMap<FString, FString>& Config)
 {
-    SplitRatio = GetValueFromConfig(config, "SplitterV.SplitRatio", 0.5f);
+    SplitRatio = GetValueFromConfig(Config, "SplitterV.SplitRatio", 0.5f);
 
     UpdateChildRects();
 }
 
-void SSplitterV::SaveConfig(TMap<FString, FString>& config) const
+void SSplitterV::SaveConfig(TMap<FString, FString>& Config) const
 {
-    config["SplitterV.SplitRatio"] = std::to_string(SplitRatio);
+    Config["SplitterV.SplitRatio"] = std::to_string(SplitRatio);
 }
 
 void SSplitterV::OnResize(uint32 InWidth, uint32 InHeight)

@@ -29,9 +29,6 @@ FLineRenderPass::FLineRenderPass()
 
 FLineRenderPass::~FLineRenderPass()
 {
-    // 셰이더 자원 해제
-    FDXDBufferManager::SafeRelease(VertexLineShader);
-    FDXDBufferManager::SafeRelease(PixelLineShader);
 }
 
 void FLineRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)

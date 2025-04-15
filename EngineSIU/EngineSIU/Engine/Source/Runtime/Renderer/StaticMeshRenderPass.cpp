@@ -39,11 +39,6 @@ FStaticMeshRenderPass::FStaticMeshRenderPass()
 FStaticMeshRenderPass::~FStaticMeshRenderPass()
 {
     ReleaseShader();
-    if (ShaderManager)
-    {
-        delete ShaderManager;
-        ShaderManager = nullptr;
-    }
 }
 
 void FStaticMeshRenderPass::CreateShader()
@@ -74,9 +69,7 @@ void FStaticMeshRenderPass::CreateShader()
 
 void FStaticMeshRenderPass::ReleaseShader()
 {
-    FDXDBufferManager::SafeRelease(InputLayout);
-    FDXDBufferManager::SafeRelease(PixelShader);
-    FDXDBufferManager::SafeRelease(VertexShader);
+    
 }
 
 void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex) const

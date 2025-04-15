@@ -190,11 +190,11 @@ void SLevelEditor::ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight)
     }
 }
 
-void SLevelEditor::SelectViewport(POINT point)
+void SLevelEditor::SelectViewport(POINT Point)
 {
     for (int i = 0; i < 4; i++)
     {
-        if (ViewportClients[i]->IsSelected(point))
+        if (ViewportClients[i]->IsSelected(Point))
         {
             SetActiveViewportClient(i);
             return;
@@ -305,10 +305,10 @@ void SLevelEditor::SaveConfig()
     WriteIniFile(IniFilePath, config);
 }
 
-TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& filePath)
+TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& FilePath)
 {
     TMap<FString, FString> config;
-    std::ifstream file(*filePath);
+    std::ifstream file(*FilePath);
     std::string line;
 
     while (std::getline(file, line))
@@ -327,10 +327,10 @@ TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& filePath)
     return config;
 }
 
-void SLevelEditor::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
+void SLevelEditor::WriteIniFile(const FString& FilePath, const TMap<FString, FString>& Config)
 {
-    std::ofstream file(*filePath);
-    for (const auto& pair : config)
+    std::ofstream file(*FilePath);
+    for (const auto& pair : Config)
     {
         file << *pair.Key << "=" << *pair.Value << "\n";
     }
