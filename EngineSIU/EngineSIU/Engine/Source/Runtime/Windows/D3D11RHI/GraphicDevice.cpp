@@ -329,7 +329,7 @@ void FGraphicsDevice::Prepare()
     DeviceContext->ClearRenderTargetView(BackBufferRTV, ClearColor);
 }
 
-/*
+/* TODO: 픽셀 피킹 관련 함수로, 임시로 주석 처리
 uint32 FGraphicsDevice::GetPixelUUID(POINT pt) const
 {
     // pt.x 값 제한하기
