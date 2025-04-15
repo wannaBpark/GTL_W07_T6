@@ -24,16 +24,20 @@ namespace MaterialUtils {
         data.EmmisiveColor = MaterialInfo.Emissive;
 
         BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), data);
-
-        if (MaterialInfo.bHasNormalMap)
+        // Begin Test
+        BufferManager->UpdateConstantBuffer(TEXT("FTextureFlagConstants"), MaterialInfo.TextureFlags);
+        // End Test
+        // bHasDiffuseTexture
+        if (MaterialInfo.TextureFlags & 1 << 1) {
+            std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
+            Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
+            Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
+        }
+        // bHasNormalTexture
+        if (MaterialInfo.TextureFlags & 1 << 2)
         {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.BumpTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(1, 1, &texture->TextureSRV);
-            Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
-        }
-        if (MaterialInfo.bHasTexture) {
-            std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
-            Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
         }
         else {

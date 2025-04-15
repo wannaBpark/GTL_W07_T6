@@ -57,6 +57,12 @@ cbuffer TextureConstants : register(b6)
     float2 TexturePad0;
 }
 
+cbuffer TextureFlagConstants : register(b7)
+{
+    uint TextureFlags;
+    float3 TextureFlagPad;
+}
+
 #include "Light.hlsl"
 
 struct PS_INPUT
@@ -64,12 +70,10 @@ struct PS_INPUT
     float4 position : SV_POSITION; // 클립 공간 화면 좌표
     float3 worldPos : TEXCOORD0; // 월드 공간 위치
     float4 color : COLOR; // 전달된 베이스 컬러
-    float3 normal : NORMAL; // 월드 공간 노멀
     float normalFlag : TEXCOORD1; // 노멀 유효 플래그
     float2 texcoord : TEXCOORD2; // UV 좌표
-    float3 tangentWS : TEXCOORD3;       //T
-    float3 bitangentWS : TEXCOORD4;     //B
-    float3 normalWS : TEXCOORD5;        //N
+    float3 normal : TEXCOORD5;        //N
+    float3x3 mTBN : TBN;
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
 };
 
@@ -86,11 +90,11 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     // 1) 알베도 샘플링
     float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
-    
     float3 normalTS = NormalMap.Sample(Sampler, input.texcoord).rgb;
     normalTS = normalize(normalTS * 2.0f - 1.0f);
-    float3x3 TBN = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
-    float3 normalWS = normalize(mul(normalTS, TBN));
+    //float3x3 TBN = float3x3(input.tangentWS, input.bitangentWS, input.normal);
+
+    float3 normal = normalize(mul(normalTS, input.mTBN));
     
     // 2) 머티리얼 디퓨즈
     float3 matDiffuse = Material.DiffuseColor.rgb;
@@ -109,9 +113,9 @@ PS_OUTPUT mainPS(PS_INPUT input)
         output.color = float4(baseColor, 1.0);
     }
 #else
-    if (IsLit && input.normalFlag > 0.5)
+    if (IsLit)
     {
-        float4 litColor = Lighting(input.worldPos, normalize((normalWS + 1) / 2));
+        float4 litColor = Lighting(input.worldPos, normalize(normal));
         float3 finalColor = litColor.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }

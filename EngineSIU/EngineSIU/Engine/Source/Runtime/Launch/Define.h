@@ -22,9 +22,6 @@
 #define GOURAUD "LIGHTING_MODEL_GOURAUD"
 #define LAMBERT "LIGHTING_MODEL_LAMBERT"
 #define PHONG "LIGHTING_MODEL_BLINN_PHONG"
-// Begin Test
-#define NORMALMAP "HAS_NORMAL_MAP"
-// End Test
 
 struct FStaticMeshVertex
 {
@@ -85,8 +82,12 @@ struct FObjMaterialInfo
 {
     FString MaterialName;  // newmtl : Material Name.
 
-    bool bHasTexture = false;  // Has Texture?
-    bool bHasNormalMap = false;// Has NormalMap?
+    // Begin Test
+    unsigned int TextureFlags=0;
+    //bool bHasTexture = false;  // Has Texture?
+    //bool bHasNormalMap = false;// Has NormalMap?
+    // End Test
+
     bool bTransparent = false; // Has alpha channel?
 
     FVector Diffuse;  // Kd : Diffuse (Vector4)
@@ -377,6 +378,12 @@ struct FTextureConstants {
     float pad1;
 };
 
+struct FTextureFlagConstants {
+    unsigned int TextureFlags;
+    float TextureFlagPad0;
+    float TextureFlagPad1;
+    float TextureFlagPad2;
+};
 struct FLinePrimitiveBatchArgs
 {
     FGridParameters GridParam;

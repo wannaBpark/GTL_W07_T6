@@ -166,9 +166,11 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float diffuseFactor = CalculateDiffuse(vNormal, lightDir);
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     
+    //float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
+    //             (specularFactor * Material.SpecularColor);
+    
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
                  (specularFactor * Material.SpecularColor);
-                 
     return float4(lit * attenuation * light.Intensity, 1.0);
 #endif
 }
