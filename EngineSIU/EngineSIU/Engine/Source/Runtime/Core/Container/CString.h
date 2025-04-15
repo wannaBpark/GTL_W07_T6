@@ -7,13 +7,6 @@
 
 #include "HAL/PlatformType.h"
 
-// TCHAR 타입에 맞는 리터럴을 생성하는 매크로
-#if USE_WIDECHAR
-#define LITERAL(CharType, L) L##L
-#else
-#define LITERAL(CharType, L) L
-#endif
-
 template <typename T>
 struct TCString
 {
@@ -225,7 +218,7 @@ public:
 		}
 
 		// 찾는 문자열이 비어있으면 시작 위치 반환 (표준 strstr 동작과 일치)
-        if (*Find == LITERAL(CharType, '\0'))
+        if (*Find == TEXT('\0'))
         {
             return Str;
         }
@@ -243,7 +236,7 @@ public:
 		if (bSkipQuotedChars)
 		{
 			bool bInQuotedStr = false;
-			while (CurrentChar != LITERAL(CharType, '\0'))
+			while (CurrentChar != TEXT('\0'))
 			{
 				CharType CurrentUpper = ToUpper(CurrentChar);
 
@@ -257,7 +250,7 @@ public:
 				bAlnumPrev = IsAlnum(CurrentChar);
 
 				// 따옴표 상태 토글
-				if (CurrentChar == LITERAL(CharType, '"'))
+				if (CurrentChar == TEXT('"'))
 				{
 					bInQuotedStr = !bInQuotedStr;
 				}
@@ -269,7 +262,7 @@ public:
 		}
 		else // 따옴표 무시 로직
 		{
-			while (CurrentChar != LITERAL(CharType, '\0'))
+			while (CurrentChar != TEXT('\0'))
 			{
 				CharType CurrentUpper = ToUpper(CurrentChar);
 
@@ -427,21 +420,21 @@ public:
     static bool ToBool(const CharType* str)
     {
         // 1. Null 또는 빈 문자열 확인 -> false
-        if (!str || *str == LITERAL(CharType, '\0'))
+        if (!str || *str == TEXT('\0'))
         {
             return false;
         }
 
         // 2. "True" 또는 "Yes" (대소문자 무시) 확인 -> true
-        if (Stricmp(str, LITERAL(CharType, "True")) == 0 ||
-            Stricmp(str, LITERAL(CharType, "Yes")) == 0)
+        if (Stricmp(str, TEXT("True")) == 0 ||
+            Stricmp(str, TEXT("Yes")) == 0)
         {
             return true;
         }
 
         // 3. "False" 또는 "No" (대소문자 무시) 확인 -> false
-        if (Stricmp(str, LITERAL(CharType, "False")) == 0 ||
-            Stricmp(str, LITERAL(CharType, "No")) == 0)
+        if (Stricmp(str, TEXT("False")) == 0 ||
+            Stricmp(str, TEXT("No")) == 0)
         {
             return false;
         }
@@ -460,7 +453,7 @@ public:
             }
 
             // 숫자와 후행 공백 이후 문자열 끝에 도달했다면 유효한 정수 문자열로 간주
-            if (*endptr == LITERAL(CharType, '\0'))
+            if (*endptr == TEXT('\0'))
             {
                 // 정수 값이 0이 아니면 true, 0이면 false 반환
                 return (intValue != 0);
