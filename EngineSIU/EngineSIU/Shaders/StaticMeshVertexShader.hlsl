@@ -36,6 +36,12 @@ cbuffer MaterialConstants : register(b3)
     FMaterial Material;
 }
 
+cbuffer FlagConstants : register(b4)
+{
+    bool IsLit;
+    float3 flagPad0;
+}
+
 struct VS_INPUT
 {
     float3 position : POSITION; // 버텍스 위치
@@ -55,8 +61,10 @@ struct VS_OUTPUT
     float3 normal : NORMAL; // 월드 공간 노멀
     float normalFlag : TEXCOORD1; // 노멀 유효 플래그 (1.0 또는 0.0)
     float2 texcoord : TEXCOORD2; // UV 좌표
+    float3 tangentWS : TEXCOORD3;
+    float3 bitangentWS : TEXCOORD4;
+    float3 normalWS : TEXCOORD5;
     int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
-    float3x3 mTBN : TBN;
 };
 
 #ifdef LIGHTING_MODEL_GOURAUD
@@ -72,19 +80,21 @@ VS_OUTPUT mainVS(VS_INPUT input)
     output.worldPos = worldPosition.xyz;
     float4 viewPosition = mul(worldPosition, View);
     output.position = mul(viewPosition, Projection);
+    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
+    output.normal = worldNormal;
     output.texcoord = input.texcoord;
     
-    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
-    
-    output.normal = worldNormal;
-     
-#ifdef HAS_NORMAL_MAP
-    float3 worldNormal = GetNormalFromMap(worldNormal, input.texcoord);
-    float3 worldTangent = normalize(mul(input.tangent, (float3x3)Model));
-    float3 worldBitangent = normalize(cross(worldNormal, worldTangent));
-    float3x3 TBN = float3x3(normalize(worldTangent),normalize(worldBitangent),normalize(worldNormal));
-    output.mTBN = TBN;
-#endif
+    //Tangent
+    float3 worldTangent = normalize(mul(input.tangent, (float3x3) 1));
+
+    // Bitangent = cross(N, T) * handedness
+    float handedness = 1.0f; // 보통 .w 성분에 들어있음 → 생략 시 1.0 가정
+    float3 worldBitangent = normalize(cross(worldTangent, worldNormal) * handedness);
+    //float3 worldBitangent = normalize(cross(worldNormal, worldTangent) * handedness);
+
+    output.normalWS = worldNormal;
+    output.tangentWS = worldTangent;
+    output.bitangentWS = worldBitangent;
     
 #ifdef LIGHTING_MODEL_GOURAUD
     float4 litColor = Lighting(worldPosition.xyz, worldNormal);
@@ -95,26 +105,3 @@ VS_OUTPUT mainVS(VS_INPUT input)
     
     return output;
 }
-
-
-//VS_OUTPUT mainVS(VS_INPUT input)
-//{
-//    VS_OUTPUT output;
-//    output.materialIndex = input.materialIndex;
-//    float4 worldPosition = mul(float4(input.position, 1), Model);
-//    output.worldPos = worldPosition.xyz;
-//    float4 viewPosition = mul(worldPosition, View);
-//    output.position = mul(viewPosition, Projection);
-//    float3 worldNormal = normalize(mul(input.normal, (float3x3) MInverseTranspose));
-//    output.normal = worldNormal;
-//    output.texcoord = input.texcoord;
-    
-//#ifdef LIGHTING_MODEL_GOURAUD
-//    float4 litColor = Lighting(worldPosition.xyz, worldNormal);
-//    output.color = float4(litColor.rgb, 1.0);
-//#else
-//    output.color = input.color;
-//#endif
-    
-//    return output;
-//}

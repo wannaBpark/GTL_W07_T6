@@ -85,8 +85,8 @@ struct FObjMaterialInfo
 {
     FString MaterialName;  // newmtl : Material Name.
 
-    bool bHasDiffuseTexture = false;  // Has Texture?
-    bool bHasBumpTexture = false;
+    bool bHasTexture = false;  // Has Texture?
+    bool bHasNormalMap = false;// Has NormalMap?
     bool bTransparent = false; // Has alpha channel?
 
     FVector Diffuse;  // Kd : Diffuse (Vector4)
@@ -97,7 +97,7 @@ struct FObjMaterialInfo
     float SpecularScalar; // Ns : Specular Power (Float)
     float DensityScalar;  // Ni : Optical Density (Float)
     float TransparencyScalar; // d or Tr  : Transparency of surface (Float)
-
+    float BumpMultiplier;     // -bm : Bump Mulitplier ex) normalMap.xy *= BumpMultiplier; 
     uint32 IlluminanceModel; // illum: illumination Model between 0 and 10. (UINT)
 
     /* Texture */
