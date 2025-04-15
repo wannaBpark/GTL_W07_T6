@@ -6,7 +6,7 @@ class FString;
 enum ENameNone : uint8 { NAME_None = 0 };
 
 /** Maximum size of name, including the null terminator. */
-enum {NAME_SIZE	= 1024};
+enum : uint16 { NAME_SIZE = 256 };
 
 class FName
 {
@@ -41,6 +41,3 @@ struct std::hash<FName>
         return hash<uint32>()(Key.GetComparisonIndex());
     }
 };
-
-
-//const FName NAME_None = FName(); 
