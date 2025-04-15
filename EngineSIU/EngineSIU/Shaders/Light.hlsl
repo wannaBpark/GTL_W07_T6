@@ -146,7 +146,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     // bHasDiffuseMap
     if (TextureFlags & 1 << 1)
     {
-        float3 lit = (light.LightColor.rgb * diffuseFactor);
+        lit = (light.LightColor.rgb * diffuseFactor);
     }
     return float4(lit * attenuation * light.Intensity, 1.0);
     
