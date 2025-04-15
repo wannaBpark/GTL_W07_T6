@@ -440,6 +440,10 @@ void FGraphicsDevice::OnResize(HWND hWindow)
 
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
+
+    // TODO : Resize에 따른 Depth Pre-Pass 리사이징 필요
+
+
 }
 void FGraphicsDevice::CreateAlphaBlendState()
 {

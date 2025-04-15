@@ -11,6 +11,7 @@
 #include "D3D11RHI/GraphicDevice.h"
 
 #include "Engine/EditorEngine.h"
+#include "Renderer/DepthPrePass.h"
 
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -34,6 +35,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             if (FEngineLoop::GraphicDevice.SwapChain)
             {
                 FEngineLoop::GraphicDevice.OnResize(hWnd);
+                FEngineLoop::Renderer.DepthPrePass->ResizeDepthStencil();
             }
             for (int i = 0; i < 4; i++)
             {

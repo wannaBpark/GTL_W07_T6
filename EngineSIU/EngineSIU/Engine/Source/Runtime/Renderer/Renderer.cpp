@@ -116,7 +116,7 @@ void FRenderer::PrepareRender()
     BillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
-    DepthPrePass->PrepareRender();
+    //DepthPrePass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -137,6 +137,12 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
 
     ChangeViewMode(ActiveViewport->GetViewMode());
 
+    if (DepthPrePass)
+    {
+        DepthPrePass->PrepareRender();
+        StaticMeshRenderPass->Render(ActiveViewport);
+        DepthPrePass->ClearRenderArr();
+    }
     StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
