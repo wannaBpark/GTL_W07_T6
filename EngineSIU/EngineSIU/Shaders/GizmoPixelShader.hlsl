@@ -45,12 +45,19 @@ bool IsShaded(float3 SceneWorldPosition, float3 GizmoWorldPosition)
 
 float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 {
-    float4 FinalColor = float4(Material.DiffuseColor, 1);
+    float3 WorldNormal = normalize(Input.WorldNormal);
+
+    float3 LightDirection = normalize(float3(1, 1, 1));
+
+    float Lambert = max(dot(WorldNormal, LightDirection), 0);
+
+    float4 FinalColor = float4(Material.DiffuseColor * Lambert, 1);
+    
     if (bIsSelected)
     {
         FinalColor += float4(0.5f, 0.5f, 0.5f, 1); // 선택된 경우 강조
     }
-    else
+    else if (false)
     {
         float2 DepthUV = Input.Position.xy / ViewportSize.xy;
         float Z = SceneDepthTexture.Sample(Sampler, DepthUV);
@@ -61,6 +68,6 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
             FinalColor.xyz *= 0.15f;
         }
     }
-      
+       
     return FinalColor;
 }

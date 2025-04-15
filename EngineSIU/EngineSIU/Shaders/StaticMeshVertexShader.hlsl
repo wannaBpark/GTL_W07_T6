@@ -12,7 +12,7 @@ PS_INPUT_StaticMesh mainVS(VS_INPUT_StaticMesh Input)
     Output.Position = mul(Output.Position, ViewMatrix);
     Output.Position = mul(Output.Position, ProjectionMatrix);
     
-    Output.Normal = mul(Input.Normal, (float3x3)InverseTransposedWorld);
+    Output.WorldNormal = mul(Input.Normal, (float3x3)InverseTransposedWorld);
     
     Output.UV = Input.UV;
     Output.Color = Input.Color;

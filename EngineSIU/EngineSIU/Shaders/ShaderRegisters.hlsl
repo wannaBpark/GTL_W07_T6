@@ -28,7 +28,7 @@ struct PS_INPUT_StaticMesh
 {
     float4 Position : SV_POSITION;
     float4 Color : COLOR;
-    float3 Normal : NORMAL;
+    float3 WorldNormal : NORMAL;
     float2 UV : TEXCOORD0;
     float3 WorldPosition : TEXCOORD1;
     int MaterialIndex : MATERIAL_INDEX;

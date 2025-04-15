@@ -43,7 +43,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 
     if (IsLit)
     {
-        float3 LightRgb = Lighting(Input.WorldPosition, Input.Normal).rgb;
+        float3 LightRgb = Lighting(Input.WorldPosition, Input.WorldNormal).rgb;
         float3 LitColor = baseColor * LightRgb;
         FinalColor = float4(LitColor, 1);
     }
