@@ -12,8 +12,9 @@ public:
     virtual void Initialize(FRect InitRect);
     virtual void OnResize(uint32 InWidth, uint32 InHeight);
 
-    FRect Rect;
     void SetRect(FRect NewRect) { Rect = NewRect; }
+
+    FRect GetRect() const { return Rect; }
     
     virtual bool IsHover(const FPoint& InPoint);
     
@@ -27,5 +28,6 @@ protected:
     bool bIsHovered = false;
     bool bIsPressed = false;
 
+    FRect Rect;
 };
 

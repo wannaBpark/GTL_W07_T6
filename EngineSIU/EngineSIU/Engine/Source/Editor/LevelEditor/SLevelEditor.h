@@ -21,13 +21,11 @@ public:
     void ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight);
     void SelectViewport(const FVector2D& Point);
 
-    void ResizeLevelEditor();
     void ResizeViewports();
     void SetEnableMultiViewport(bool bIsEnable);
     bool IsMultiViewport() const;
 
 private:
-    bool bInitialized;
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
     

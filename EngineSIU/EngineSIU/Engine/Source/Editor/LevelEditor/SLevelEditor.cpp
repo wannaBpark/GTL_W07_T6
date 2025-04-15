@@ -13,8 +13,7 @@ extern FEngineLoop GEngineLoop;
 
 
 SLevelEditor::SLevelEditor()
-    : bInitialized(false)
-    , HSplitter(nullptr)
+    : HSplitter(nullptr)
     , VSplitter(nullptr)
     , bMultiViewportMode(false)
 {
@@ -30,10 +29,10 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
     HSplitter = new SSplitterH();
     HSplitter->Initialize(FRect(0.f, 0.0f, InEditorWidth, InEditorHeight));
     
-    FRect Top = VSplitter->SideLT->Rect;
-    FRect Bottom = VSplitter->SideRB->Rect;
-    FRect Left = HSplitter->SideLT->Rect;
-    FRect Right = HSplitter->SideRB->Rect;
+    FRect Top = VSplitter->SideLT->GetRect();
+    FRect Bottom = VSplitter->SideRB->GetRect();
+    FRect Left = HSplitter->SideLT->GetRect();
+    FRect Right = HSplitter->SideRB->GetRect();
 
     for (size_t i = 0; i < 4; i++)
     {
@@ -75,8 +74,6 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
     ActiveViewportClient = ViewportClients[0];
     
     LoadConfig();
-    
-    bInitialized = true;
 
     FSlateAppMessageHandler* Handler = GEngineLoop.GetAppMessageHandler();
 
@@ -121,17 +118,21 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
         if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
         {
             const auto& [DeltaX, DeltaY] = InMouseEvent.GetCursorDelta();
-            if (VSplitter->IsPressed())
+            
+            bool bSplitterDragging = false;
+            if (VSplitter->IsSplitterPressed())
             {
                 VSplitter->OnDrag(FPoint(DeltaX, DeltaY));
+                bSplitterDragging = true;
             }
-            if (HSplitter->IsPressed())
+            if (HSplitter->IsSplitterPressed())
             {
                 HSplitter->OnDrag(FPoint(DeltaX, DeltaY));
+                bSplitterDragging = true;
             }
-            if (VSplitter->IsPressed() || HSplitter->IsPressed())
+
+            if (bSplitterDragging)
             {
-                FEngineLoop::GraphicDevice.Resize(GEngineLoop.AppWnd);
                 ResizeViewports();
             }
         }
@@ -284,12 +285,10 @@ void SLevelEditor::ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight)
         return;
     }
     
-    const float PrevEditorWidth = static_cast<float>(EditorWidth);
-    const float PrevEditorHeight = static_cast<float>(EditorHeight);
     EditorWidth = InEditorWidth;
     EditorHeight = InEditorHeight;
 
-    if (bInitialized)
+    if (HSplitter && VSplitter)
     {
         HSplitter->OnResize(EditorWidth, EditorHeight);
         VSplitter->OnResize(EditorWidth, EditorHeight);
@@ -318,10 +317,10 @@ void SLevelEditor::ResizeViewports()
             for (int i = 0; i < 4; ++i)
             {
                 GetViewports()[i]->ResizeViewport(
-                    VSplitter->SideLT->Rect,
-                    VSplitter->SideRB->Rect,
-                    HSplitter->SideLT->Rect,
-                    HSplitter->SideRB->Rect
+                    VSplitter->SideLT->GetRect(),
+                    VSplitter->SideRB->GetRect(),
+                    HSplitter->SideLT->GetRect(),
+                    HSplitter->SideRB->GetRect()
                 );
             }
         }
