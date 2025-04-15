@@ -64,6 +64,7 @@ private:
 public:
     BaseStringType& GetContainerPrivate() { return PrivateString; }
     const BaseStringType& GetContainerPrivate() const { return PrivateString; }
+    explicit operator std::string() const { return std::string(PrivateString); }
 
     FString() = default;
     ~FString() = default;
