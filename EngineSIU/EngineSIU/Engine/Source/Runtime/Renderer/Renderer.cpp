@@ -13,6 +13,7 @@
 #include "DepthBufferDebugPass.h"
 #include "FogRenderPass.h"
 #include "EditorRenderPass.h"
+#include "DepthPrePass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 #include "GameFrameWork/Actor.h"
@@ -34,6 +35,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     DepthBufferDebugPass = new FDepthBufferDebugPass();
     FogRenderPass = new FFogRenderPass();
     EditorRenderPass = new FEditorRenderPass();
+    DepthPrePass = new FDepthPrePass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     BillboardRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -43,6 +45,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     DepthBufferDebugPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     EditorRenderPass->Initialize(Graphics,ShaderManager);
+    DepthPrePass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
 }
@@ -113,6 +116,7 @@ void FRenderer::PrepareRender()
     BillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
+    DepthPrePass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -122,7 +126,7 @@ void FRenderer::ClearRenderArr()
     GizmoRenderPass->ClearRenderArr();
     UpdateLightBufferPass->ClearRenderArr();
     FogRenderPass->ClearRenderArr();
-    //EditorRenderPass->ClearRenderArr();
+    DepthPrePass->ClearRenderArr();
 }
 
 void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
