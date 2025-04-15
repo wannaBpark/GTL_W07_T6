@@ -17,9 +17,12 @@ private:
     // 문자가 영숫자인지 확인
     static constexpr bool IsAlnum(CharType C)
     {
-        if constexpr (std::is_same_v<CharType, char>) {
+        if constexpr (std::is_same_v<CharType, char>)
+        {
             return std::isalnum(static_cast<unsigned char>(C));
-        } else if constexpr (std::is_same_v<CharType, wchar_t>) {
+        }
+        else if constexpr (std::is_same_v<CharType, wchar_t>)
+        {
             return std::iswalnum(static_cast<wint_t>(C));
         }
         return false; // Unsupported type
@@ -28,9 +31,12 @@ private:
     // 문자를 대문자로 변환
     static constexpr CharType ToUpper(CharType C)
     {
-        if constexpr (std::is_same_v<CharType, char>) {
+        if constexpr (std::is_same_v<CharType, char>)
+        {
             return static_cast<CharType>(std::toupper(static_cast<unsigned char>(C)));
-        } else if constexpr (std::is_same_v<CharType, wchar_t>) {
+        }
+        else if constexpr (std::is_same_v<CharType, wchar_t>)
+        {
             return static_cast<CharType>(std::towupper(static_cast<wint_t>(C)));
         }
         return C; // Unsupported type
@@ -39,9 +45,12 @@ private:
     // 문자가 공백인지 확인 (char/wchar_t 호환)
     static bool IsSpace(CharType C)
     {
-        if constexpr (std::is_same_v<CharType, char>) {
+        if constexpr (std::is_same_v<CharType, char>)
+        {
             return std::isspace(static_cast<unsigned char>(C));
-        } else if constexpr (std::is_same_v<CharType, wchar_t>) {
+        }
+        else if constexpr (std::is_same_v<CharType, wchar_t>)
+        {
             return std::iswspace(static_cast<wint_t>(C));
         }
         return false;
@@ -50,25 +59,30 @@ private:
     // 문자를 소문자로 변환 (char/wchar_t 호환)
     static CharType ToLower(CharType C)
     {
-        if constexpr (std::is_same_v<CharType, char>) {
+        if constexpr (std::is_same_v<CharType, char>)
+        {
             return static_cast<CharType>(std::tolower(static_cast<unsigned char>(C)));
-        } else if constexpr (std::is_same_v<CharType, wchar_t>) {
+        }
+        else if constexpr (std::is_same_v<CharType, wchar_t>)
+        {
             return static_cast<CharType>(std::towlower(static_cast<wint_t>(C)));
         }
         return C;
     }
 
 public:
-    
-
-     // --- 문자열 길이 ---
+    // --- 문자열 길이 ---
     /** 문자열의 길이를 반환합니다 (널 종료 문자 제외). */
     static std::size_t Strlen(const CharType* str)
     {
         if (!str) return 0; // Null 체크 추가
         if constexpr (std::is_same_v<CharType, char>) { return std::strlen(str); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcslen(str); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     // --- 문자열 복사 ---
@@ -78,7 +92,11 @@ public:
         if (!dest || !src) return dest; // Null 체크
         if constexpr (std::is_same_v<CharType, char>) { return std::strcpy(dest, src); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcscpy(dest, src); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return nullptr; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return nullptr;
+        }
     }
 
     /** 문자열 src에서 최대 count개의 문자를 dest에 복사합니다. */
@@ -87,7 +105,11 @@ public:
         if (!dest || !src || count == 0) return dest; // Null/Zero 체크
         if constexpr (std::is_same_v<CharType, char>) { return std::strncpy(dest, src, count); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcsncpy(dest, src, count); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return nullptr; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return nullptr;
+        }
     }
 
     // --- 문자열 합치기 ---
@@ -97,7 +119,11 @@ public:
         if (!dest || !src) return dest; // Null 체크
         if constexpr (std::is_same_v<CharType, char>) { return std::strcat(dest, src); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcscat(dest, src); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return nullptr; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return nullptr;
+        }
     }
 
     // --- 문자열 비교 ---
@@ -107,7 +133,11 @@ public:
         if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1); // Null 처리
         if constexpr (std::is_same_v<CharType, char>) { return std::strcmp(str1, str2); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcscmp(str1, str2); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     /** 두 문자열 str1과 str2의 첫 count개의 문자를 비교합니다. */
@@ -117,23 +147,35 @@ public:
         if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1); // Null 처리
         if constexpr (std::is_same_v<CharType, char>) { return std::strncmp(str1, str2, count); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcsncmp(str1, str2, count); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     /** 두 문자열 str1과 str2를 대소문자 구분 없이 비교합니다. (char 버전) */
     static int Stricmp(const char* str1, const char* str2)
     {
         if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1);
-        while (*str1 && (std::tolower(static_cast<unsigned char>(*str1)) == std::tolower(static_cast<unsigned char>(*str2)))) { ++str1; ++str2; }
+        while (*str1 && (std::tolower(static_cast<unsigned char>(*str1)) == std::tolower(static_cast<unsigned char>(*str2))))
+        {
+            ++str1;
+            ++str2;
+        }
         return std::tolower(static_cast<unsigned char>(*str1)) - std::tolower(static_cast<unsigned char>(*str2));
     }
 
     /** 두 문자열 str1과 str2를 대소문자 구분 없이 비교합니다. (wchar_t 버전) */
     static int Stricmp(const wchar_t* str1, const wchar_t* str2)
     {
-         if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1);
-         while (*str1 && (std::towlower(static_cast<wint_t>(*str1)) == std::towlower(static_cast<wint_t>(*str2)))) { ++str1; ++str2; }
-         return static_cast<int>(std::towlower(static_cast<wint_t>(*str1))) - static_cast<int>(std::towlower(static_cast<wint_t>(*str2)));
+        if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1);
+        while (*str1 && (std::towlower(static_cast<wint_t>(*str1)) == std::towlower(static_cast<wint_t>(*str2))))
+        {
+            ++str1;
+            ++str2;
+        }
+        return static_cast<int>(std::towlower(static_cast<wint_t>(*str1))) - static_cast<int>(std::towlower(static_cast<wint_t>(*str2)));
     }
 
     /** 두 문자열 str1과 str2의 첫 count개의 문자를 대소문자 구분 없이 비교합니다. (char 버전) */
@@ -141,17 +183,29 @@ public:
     {
         if (count == 0) return 0;
         if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1);
-        while (count-- > 0 && *str1 && (std::tolower(static_cast<unsigned char>(*str1)) == std::tolower(static_cast<unsigned char>(*str2)))) { if (*str1 == '\0' || count == 0) break; ++str1; ++str2; }
+        while (count-- > 0 && *str1 && (std::tolower(static_cast<unsigned char>(*str1)) == std::tolower(static_cast<unsigned char>(*str2))))
+        {
+            if (*str1 == '\0' || count == 0) break;
+            ++str1;
+            ++str2;
+        }
         return count ? (std::tolower(static_cast<unsigned char>(*str1)) - std::tolower(static_cast<unsigned char>(*str2))) : 0;
     }
 
     /** 두 문자열 str1과 str2의 첫 count개의 문자를 대소문자 구분 없이 비교합니다. (wchar_t 버전) */
     static int Strnicmp(const wchar_t* str1, const wchar_t* str2, std::size_t count)
     {
-         if (count == 0) return 0;
-         if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1);
-         while (count-- > 0 && *str1 && (std::towlower(static_cast<wint_t>(*str1)) == std::towlower(static_cast<wint_t>(*str2)))) { if (*str1 == L'\0' || count == 0) break; ++str1; ++str2; }
-         return count ? (static_cast<int>(std::towlower(static_cast<wint_t>(*str1))) - static_cast<int>(std::towlower(static_cast<wint_t>(*str2)))) : 0;
+        if (count == 0) return 0;
+        if (!str1 || !str2) return (str1 == str2) ? 0 : (str1 ? 1 : -1);
+        while (count-- > 0 && *str1 && (std::towlower(static_cast<wint_t>(*str1)) == std::towlower(static_cast<wint_t>(*str2))))
+        {
+            if (*str1 == L'\0' || count == 0) break;
+            ++str1;
+            ++str2;
+        }
+        return count
+                   ? (static_cast<int>(std::towlower(static_cast<wint_t>(*str1))) - static_cast<int>(std::towlower(static_cast<wint_t>(*str2))))
+                   : 0;
     }
 
     // --- 문자 검색 ---
@@ -162,8 +216,13 @@ public:
         CharType c = static_cast<CharType>(ch); // int를 CharType으로 캐스팅
         if constexpr (std::is_same_v<CharType, char>) { return std::strchr(str, c); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcschr(str, c); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return nullptr; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return nullptr;
+        }
     }
+
     /** 쓰기 가능한 포인터 반환 버전 */
     static CharType* Strchr(CharType* str, int ch)
     {
@@ -177,12 +236,17 @@ public:
         CharType c = static_cast<CharType>(ch);
         if constexpr (std::is_same_v<CharType, char>) { return std::strrchr(str, c); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcsrchr(str, c); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return nullptr; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return nullptr;
+        }
     }
+
     /** 쓰기 가능한 포인터 반환 버전 */
     static CharType* Strrchr(CharType* str, int ch)
     {
-         return const_cast<CharType*>(Strrchr(const_cast<const CharType*>(str), ch));
+        return const_cast<CharType*>(Strrchr(const_cast<const CharType*>(str), ch));
     }
 
     // --- 부분 문자열 검색 ---
@@ -190,18 +254,23 @@ public:
     static const CharType* Strstr(const CharType* str1, const CharType* str2)
     {
         if (!str1 || !str2) return nullptr; // 하나라도 null이면 찾을 수 없음
-        if (!*str2) return str1; // 찾는 문자열이 비어있으면 시작 위치 반환
+        if (!*str2) return str1;            // 찾는 문자열이 비어있으면 시작 위치 반환
         if constexpr (std::is_same_v<CharType, char>) { return std::strstr(str1, str2); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcsstr(str1, str2); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return nullptr; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return nullptr;
+        }
     }
+
     /** 쓰기 가능한 포인터 반환 버전 */
     static CharType* Strstr(CharType* str1, const CharType* str2)
     {
         return const_cast<CharType*>(Strstr(const_cast<const CharType*>(str1), str2));
     }
 
-    
+
     /**
      * 문자열 Str 내에서 문자열 Find를 대소문자 구분 없이 찾습니다.
      * 단, 찾은 위치 바로 앞의 문자가 영숫자가 아니어야 합니다.
@@ -211,78 +280,78 @@ public:
      * @return 찾은 위치의 포인터, 찾지 못하면 nullptr.
      */
     static const CharType* Strifind(const CharType* Str, const CharType* Find, bool bSkipQuotedChars = false)
-	{
-		if (Find == nullptr || Str == nullptr)
-		{
-			return nullptr;
-		}
+    {
+        if (Find == nullptr || Str == nullptr)
+        {
+            return nullptr;
+        }
 
-		// 찾는 문자열이 비어있으면 시작 위치 반환 (표준 strstr 동작과 일치)
+        // 찾는 문자열이 비어있으면 시작 위치 반환 (표준 strstr 동작과 일치)
         if (*Find == TEXT('\0'))
         {
             return Str;
         }
 
-		// 첫 문자(대문자)와 나머지 길이 계산
-		CharType FindInitialUpper = ToUpper(*Find);
-		int32 Length = static_cast<int32>(Strlen(Find)) - 1; // 첫 문자 제외 길이
-		if (Length < 0) Length = 0; // 혹시 Find가 한 글자일 경우 대비
+        // 첫 문자(대문자)와 나머지 길이 계산
+        CharType FindInitialUpper = ToUpper(*Find);
+        int32 Length = static_cast<int32>(Strlen(Find)) - 1; // 첫 문자 제외 길이
+        if (Length < 0) Length = 0;                          // 혹시 Find가 한 글자일 경우 대비
 
-		const CharType* FindRest = Find + 1; // Find의 두 번째 문자부터 포인터
+        const CharType* FindRest = Find + 1; // Find의 두 번째 문자부터 포인터
 
-		bool bAlnumPrev = false; // 이전 문자가 영숫자였는지 여부 (시작은 true로 가정하여 첫 문자 바로 앞은 조건 만족 못하게 함)
-		CharType CurrentChar = *Str;
+        bool bAlnumPrev = false; // 이전 문자가 영숫자였는지 여부 (시작은 true로 가정하여 첫 문자 바로 앞은 조건 만족 못하게 함)
+        CharType CurrentChar = *Str;
 
-		if (bSkipQuotedChars)
-		{
-			bool bInQuotedStr = false;
-			while (CurrentChar != TEXT('\0'))
-			{
-				CharType CurrentUpper = ToUpper(CurrentChar);
+        if (bSkipQuotedChars)
+        {
+            bool bInQuotedStr = false;
+            while (CurrentChar != TEXT('\0'))
+            {
+                CharType CurrentUpper = ToUpper(CurrentChar);
 
-				// 따옴표 밖에 있고, 이전 문자가 영숫자가 아니며, 현재 문자가 Find의 첫 문자와 같고, 나머지가 일치하는지 확인
-				if (!bInQuotedStr && !bAlnumPrev && CurrentUpper == FindInitialUpper && Strnicmp(Str + 1, FindRest, Length) == 0)
-				{
-					return Str; // 찾았으면 현재 위치 반환
-				}
+                // 따옴표 밖에 있고, 이전 문자가 영숫자가 아니며, 현재 문자가 Find의 첫 문자와 같고, 나머지가 일치하는지 확인
+                if (!bInQuotedStr && !bAlnumPrev && CurrentUpper == FindInitialUpper && Strnicmp(Str + 1, FindRest, Length) == 0)
+                {
+                    return Str; // 찾았으면 현재 위치 반환
+                }
 
-				// 다음 반복을 위해 현재 문자가 영숫자인지 기록
-				bAlnumPrev = IsAlnum(CurrentChar);
+                // 다음 반복을 위해 현재 문자가 영숫자인지 기록
+                bAlnumPrev = IsAlnum(CurrentChar);
 
-				// 따옴표 상태 토글
-				if (CurrentChar == TEXT('"'))
-				{
-					bInQuotedStr = !bInQuotedStr;
-				}
+                // 따옴표 상태 토글
+                if (CurrentChar == TEXT('"'))
+                {
+                    bInQuotedStr = !bInQuotedStr;
+                }
 
-				// 다음 문자로 이동
-				Str++;
-				CurrentChar = *Str;
-			}
-		}
-		else // 따옴표 무시 로직
-		{
-			while (CurrentChar != TEXT('\0'))
-			{
-				CharType CurrentUpper = ToUpper(CurrentChar);
+                // 다음 문자로 이동
+                Str++;
+                CurrentChar = *Str;
+            }
+        }
+        else // 따옴표 무시 로직
+        {
+            while (CurrentChar != TEXT('\0'))
+            {
+                CharType CurrentUpper = ToUpper(CurrentChar);
 
-				// 이전 문자가 영숫자가 아니며, 현재 문자가 Find의 첫 문자와 같고, 나머지가 일치하는지 확인
-				if (!bAlnumPrev && CurrentUpper == FindInitialUpper && Strnicmp(Str + 1, FindRest, Length) == 0)
-				{
-					return Str; // 찾았으면 현재 위치 반환
-				}
+                // 이전 문자가 영숫자가 아니며, 현재 문자가 Find의 첫 문자와 같고, 나머지가 일치하는지 확인
+                if (!bAlnumPrev && CurrentUpper == FindInitialUpper && Strnicmp(Str + 1, FindRest, Length) == 0)
+                {
+                    return Str; // 찾았으면 현재 위치 반환
+                }
 
-				// 다음 반복을 위해 현재 문자가 영숫자인지 기록
-				bAlnumPrev = IsAlnum(CurrentChar);
+                // 다음 반복을 위해 현재 문자가 영숫자인지 기록
+                bAlnumPrev = IsAlnum(CurrentChar);
 
-				// 다음 문자로 이동
-				Str++;
-				CurrentChar = *Str;
-			}
-		}
+                // 다음 문자로 이동
+                Str++;
+                CurrentChar = *Str;
+            }
+        }
 
-		return nullptr; // 끝까지 못 찾음
-	}
+        return nullptr; // 끝까지 못 찾음
+    }
 
     /** Strifind의 비-const 오버로드 */
     static CharType* Strifind(CharType* Str, const CharType* Find, bool bSkipQuotedChars = false)
@@ -297,7 +366,11 @@ public:
         if (!str1 || !str2) return 0;
         if constexpr (std::is_same_v<CharType, char>) { return std::strspn(str1, str2); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcsspn(str1, str2); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     /** str1에서 str2에 포함된 문자가 처음 나타나는 위치까지의 초기 세그먼트 길이 */
@@ -306,7 +379,11 @@ public:
         if (!str1 || !str2) return Strlen(str1); // str2가 null이면 str1 전체 길이
         if constexpr (std::is_same_v<CharType, char>) { return std::strcspn(str1, str2); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcscspn(str1, str2); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     // --- 대소문자 변환 ---
@@ -325,17 +402,17 @@ public:
     }
 
     /** 문자열 전체를 소문자로 변환합니다. */
-	static CharType* Strlwr(CharType* str)
+    static CharType* Strlwr(CharType* str)
     {
         if (!str) return nullptr;
-	    CharType* p = str;
-    	while (*p)
-    	{
-			if constexpr (std::is_same_v<CharType, char>) { *p = static_cast<CharType>(std::tolower(static_cast<unsigned char>(*p))); }
-			else if constexpr (std::is_same_v<CharType, wchar_t>) { *p = static_cast<CharType>(std::towlower(static_cast<wint_t>(*p))); }
-			++p;
-		}
-    	return str;
+        CharType* p = str;
+        while (*p)
+        {
+            if constexpr (std::is_same_v<CharType, char>) { *p = static_cast<CharType>(std::tolower(static_cast<unsigned char>(*p))); }
+            else if constexpr (std::is_same_v<CharType, wchar_t>) { *p = static_cast<CharType>(std::towlower(static_cast<wint_t>(*p))); }
+            ++p;
+        }
+        return str;
     }
 
     // --- 숫자 변환 ---
@@ -345,7 +422,11 @@ public:
         if (!str) return 0;
         if constexpr (std::is_same_v<CharType, char>) { return std::atoi(str); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return static_cast<int>(std::wcstol(str, nullptr, 10)); } // wcstol 사용 및 캐스팅
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     /** 문자열을 long long 정수로 변환합니다. */
@@ -354,7 +435,11 @@ public:
         if (!str) return 0;
         if constexpr (std::is_same_v<CharType, char>) { return std::atoll(str); }
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcstoll(str, nullptr, 10); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0;
+        }
     }
 
     /** 문자열을 부동 소수점 수(double)로 변환합니다. */
@@ -363,16 +448,20 @@ public:
         if (!str) return 0.0;
         if constexpr (std::is_same_v<CharType, char>) { return std::atof(str); } // atof는 double 반환
         else if constexpr (std::is_same_v<CharType, wchar_t>) { return std::wcstod(str, nullptr); }
-        else { /* static_assert(false, "Unsupported character type!"); */ return 0.0; }
+        else
+        {
+            /* static_assert(false, "Unsupported character type!"); */
+            return 0.0;
+        }
     }
 
-     /** 문자열을 부동 소수점 수(float)로 변환합니다. */
+    /** 문자열을 부동 소수점 수(float)로 변환합니다. */
     static float Atof(const CharType* str)
     {
         // Atod를 호출하고 float으로 캐스팅
         return static_cast<float>(Atod(str));
     }
-    
+
     /**
      * 문자열 nptr의 초기 부분을 base 진법에 따라 long int 값으로 변환합니다.
      * @param nptr 변환할 문자열 포인터.
@@ -404,7 +493,7 @@ public:
         {
             // static_assert(false, "Unsupported character type for Strtoi!");
             if (endptr) *endptr = const_cast<CharType*>(nptr); // 변환 안 됐으므로 시작 위치 가리킴
-            return 0; // 지원되지 않는 타입
+            return 0;                                          // 지원되지 않는 타입
         }
     }
 
@@ -464,11 +553,8 @@ public:
         return false;
     }
 
-    
 
     // TODO: 필요에 따라 strtol, strtod, strtoull 등 더 상세한 숫자 변환 함수 래퍼 추가 가능
-
-
 };
 
 using FCString = TCString<TCHAR>;
