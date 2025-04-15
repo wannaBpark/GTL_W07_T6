@@ -151,6 +151,11 @@ public:
 
     bool IsOrthographic() const;
     bool IsPerspective() const;
+
+    FVector GetCameraLocation() const;
+
+    float GetCameraLearClip() const;
+    float GetCameraFarClip() const;
     
     ELevelViewportType GetViewportType() const;
     void SetViewportType(ELevelViewportType InViewportType);
@@ -169,7 +174,7 @@ public:
     static void SetOthoSize(float InValue);
 
 private: // Input
-    POINT lastMousePos;
+    POINT PrevMousePos;
     bool bRightMouseDown = false;
 
 public:

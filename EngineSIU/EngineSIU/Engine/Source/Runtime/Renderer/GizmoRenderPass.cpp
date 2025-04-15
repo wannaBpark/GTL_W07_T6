@@ -57,36 +57,26 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+    
     CreateShader();
 }
 
 void FGizmoRenderPass::CreateShader()
 {
-    D3D11_INPUT_ELEMENT_DESC GizmoInputLayout[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
-
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"GizmoVertexShader", L"Shaders/GizmoVertexShader.hlsl", "mainVS", GizmoInputLayout, ARRAYSIZE(GizmoInputLayout));
-
-    hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
-
     VertexShader = ShaderManager->GetVertexShaderByKey(L"GizmoVertexShader");
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"GizmoPixelShader");
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"GizmoVertexShader");
+    InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
 
+    HRESULT hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
+    if (FAILED(hr))
+    {
+        return;
+    }
+    PixelShader = ShaderManager->GetPixelShaderByKey(L"GizmoPixelShader");
 }
+
 void FGizmoRenderPass::ReleaseShader()
 {
-    FDXDBufferManager::SafeRelease(InputLayout);
-    FDXDBufferManager::SafeRelease(PixelShader);
-    FDXDBufferManager::SafeRelease(VertexShader);
 }
-
 
 void FGizmoRenderPass::ClearRenderArr()
 {
@@ -100,19 +90,9 @@ void FGizmoRenderPass::PrepareRenderState() const
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
-    // 상수 버퍼 바인딩 예시
-    ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
-    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
-    Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
-    Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
-
-    TArray<FString> PSBufferKeys = {
-        TEXT("FPerObjectConstantBuffer"),
-        TEXT("FMaterialConstants"),
-        TEXT("FLitUnlitConstants")
-    };
-
-    BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+    ID3D11Buffer* MaterialConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FMaterialConstants"));
+    Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
+    // TODO: 뷰포트 크기 버퍼 생성 및 바인딩
 }
 
 void FGizmoRenderPass::PrepareRender()
@@ -166,6 +146,17 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
 }
 
+void FGizmoRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const
+{
+    FObjectConstantBuffer ObjectData = {};
+    ObjectData.WorldMatrix = WorldMatrix;
+    ObjectData.InverseTransposedWorld = FMatrix::Transpose(FMatrix::Inverse(WorldMatrix));
+    ObjectData.UUIDColor = UUIDColor;
+    ObjectData.bIsSelected = bIsSelected;
+    
+    BufferManager->UpdateConstantBuffer(TEXT("FObjectConstantBuffer"), ObjectData);
+}
+
 void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World)
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
@@ -177,6 +168,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     {
         return;
     }
+    
     OBJ::FStaticMeshRenderData* RenderData = GizmoComp->GetStaticMesh()->GetRenderData();
     if (!RenderData)
     {
@@ -185,18 +177,11 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
 
     PrepareRenderState();
     
-    // 모델 행렬.
-    FMatrix Model = GizmoComp->GetWorldMatrix();
+    // 오브젝트 버퍼 업데이트
+    FMatrix WorldMatrix = GizmoComp->GetWorldMatrix();
     FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
     bool bSelected = (GizmoComp == Viewport->GetPickedGizmoComponent());
-    FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
-
-    FPerObjectConstantBuffer ObjectData(Model, NormalMatrix, UUIDColor, bSelected);
-
-    FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection);
-
-    BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), ObjectData);
-    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
+    UpdateObjectConstant(WorldMatrix, UUIDColor, bSelected);
 
     UINT Stride = sizeof(FStaticMeshVertex);
     UINT Offset = 0;
@@ -214,6 +199,7 @@ void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, cons
     }
     else
     {
+        // TODO: 현재 기즈모 메시는 머티리얼이 하나뿐이지만, 추후 여러 머티리얼을 사용하는 경우가 생길 수 있음.
         for (int SubMeshIndex = 0; SubMeshIndex < RenderData->MaterialSubsets.Num(); SubMeshIndex++)
         {
             int32 MaterialIndex = RenderData->MaterialSubsets[SubMeshIndex].MaterialIndex;

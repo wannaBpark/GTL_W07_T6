@@ -64,10 +64,6 @@ void FLineRenderPass::PrepareLineShader() const
     Graphics->DeviceContext->VSSetShader(VertexLineShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelLineShader, nullptr, 0);
 
-    BufferManager->BindConstantBuffer(TEXT("FPerObjectConstantBuffer"), 0, EShaderStage::Vertex);
-    BufferManager->BindConstantBuffer(TEXT("FPerObjectConstantBuffer"), 0, EShaderStage::Pixel);
-    BufferManager->BindConstantBuffer(TEXT("FCameraConstantBuffer"), 2, EShaderStage::Pixel);
-
     FEngineLoop::PrimitiveDrawBatch.PrepareLineResources();
 }
 
@@ -88,18 +84,24 @@ void FLineRenderPass::DrawLineBatch(const FLinePrimitiveBatchArgs& BatchArgs) co
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
+void FLineRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const
+{
+    FObjectConstantBuffer ObjectData = {};
+    ObjectData.WorldMatrix = WorldMatrix;
+    ObjectData.InverseTransposedWorld = FMatrix::Transpose(FMatrix::Inverse(WorldMatrix));
+    ObjectData.UUIDColor = UUIDColor;
+    ObjectData.bIsSelected = bIsSelected;
+    
+    BufferManager->UpdateConstantBuffer(TEXT("FObjectConstantBuffer"), ObjectData);
+}
+
 void FLineRenderPass::ProcessLineRendering(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     PrepareLineShader();
 
     // 상수 버퍼 업데이트: Identity 모델, 기본 색상 등
-    FMatrix MVP = RendererHelpers::CalculateMVP(FMatrix::Identity, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix());
-    FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(FMatrix::Identity);
-    FPerObjectConstantBuffer Data(MVP, NormalMatrix, FVector4(0, 0, 0, 0), false);
-    FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection, Viewport->PerspectiveCamera.GetLocation());
-    BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
+    UpdateObjectConstant(FMatrix::Identity, FVector4(0, 0, 0, 0), false);
 
-    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
     FLinePrimitiveBatchArgs BatchArgs;
     FEngineLoop::PrimitiveDrawBatch.PrepareBatch(BatchArgs);
     DrawLineBatch(BatchArgs);

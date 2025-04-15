@@ -56,6 +56,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     SlateRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CreateConstantBuffers();
+    CreateCommonShader();
 }
 
 void FRenderer::Release()
@@ -70,29 +71,29 @@ void FRenderer::Release()
 //------------------------------------------------------------------------------
 void FRenderer::CreateConstantBuffers()
 {
-    UINT perObjectBufferSize = sizeof(FPerObjectConstantBuffer);
-    BufferManager->CreateBufferGeneric<FPerObjectConstantBuffer>("FPerObjectConstantBuffer", nullptr, perObjectBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT ObjectBufferSize = sizeof(FObjectConstantBuffer);
+    BufferManager->CreateBufferGeneric<FObjectConstantBuffer>("FObjectConstantBuffer", nullptr, ObjectBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT cameraConstantBufferSize = sizeof(FCameraConstantBuffer);
-    BufferManager->CreateBufferGeneric<FCameraConstantBuffer>("FCameraConstantBuffer", nullptr, cameraConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT CameraConstantBufferSize = sizeof(FCameraConstantBuffer);
+    BufferManager->CreateBufferGeneric<FCameraConstantBuffer>("FCameraConstantBuffer", nullptr, CameraConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT subUVBufferSize = sizeof(FSubUVConstant);
-    BufferManager->CreateBufferGeneric<FSubUVConstant>("FSubUVConstant", nullptr, subUVBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT SubUVBufferSize = sizeof(FSubUVConstant);
+    BufferManager->CreateBufferGeneric<FSubUVConstant>("FSubUVConstant", nullptr, SubUVBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT materialBufferSize = sizeof(FMaterialConstants);
-    BufferManager->CreateBufferGeneric<FMaterialConstants>("FMaterialConstants", nullptr, materialBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT MaterialBufferSize = sizeof(FMaterialConstants);
+    BufferManager->CreateBufferGeneric<FMaterialConstants>("FMaterialConstants", nullptr, MaterialBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT subMeshBufferSize = sizeof(FSubMeshConstants);
-    BufferManager->CreateBufferGeneric<FSubMeshConstants>("FSubMeshConstants", nullptr, subMeshBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT SubMeshBufferSize = sizeof(FSubMeshConstants);
+    BufferManager->CreateBufferGeneric<FSubMeshConstants>("FSubMeshConstants", nullptr, SubMeshBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT textureBufferSize = sizeof(FTextureConstants);
-    BufferManager->CreateBufferGeneric<FTextureConstants>("FTextureConstants", nullptr, textureBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT TextureBufferSize = sizeof(FTextureConstants);
+    BufferManager->CreateBufferGeneric<FTextureConstants>("FTextureConstants", nullptr, TextureBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT lightingBufferSize = sizeof(FLightBuffer);
-    BufferManager->CreateBufferGeneric<FLightBuffer>("FLightBuffer", nullptr, lightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT LightingBufferSize = sizeof(FLightBuffer);
+    BufferManager->CreateBufferGeneric<FLightBuffer>("FLightBuffer", nullptr, LightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT litUnlitBufferSize = sizeof(FLitUnlitConstants);
-    BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, litUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    UINT LitUnlitBufferSize = sizeof(FLitUnlitConstants);
+    BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, LitUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
     UINT ViewModeBufferSize = sizeof(FViewModeConstants);
     BufferManager->CreateBufferGeneric<FViewModeConstants>("FViewModeConstants", nullptr, ViewModeBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -102,6 +103,15 @@ void FRenderer::CreateConstantBuffers()
 
     UINT FogConstantBufferSize = sizeof(FFogConstants);
     BufferManager->CreateBufferGeneric<FFogConstants>("FFogConstants", nullptr, FogConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+
+    // TODO: 함수로 분리
+    ID3D11Buffer* ObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FObjectConstantBuffer"));
+    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
+    Graphics->DeviceContext->VSSetConstantBuffers(14, 1, &ObjectBuffer);
+    Graphics->DeviceContext->VSSetConstantBuffers(15, 1, &CameraConstantBuffer);
+    Graphics->DeviceContext->PSSetConstantBuffers(14, 1, &ObjectBuffer);
+    Graphics->DeviceContext->PSSetConstantBuffers(15, 1, &CameraConstantBuffer);
 }
 
 void FRenderer::ReleaseConstantBuffer()
@@ -109,7 +119,15 @@ void FRenderer::ReleaseConstantBuffer()
     BufferManager->ReleaseConstantBuffer();
 }
 
-void FRenderer::PrepareRender()
+void FRenderer::PrepareRender(FRenderTargetRHI* RenderTargetRHI)
+{
+    // Setup Viewport
+    Graphics->DeviceContext->RSSetViewports(1, &RenderTargetRHI->GetD3DViewport());
+
+    PrepareRenderPass();
+}
+
+void FRenderer::PrepareRenderPass()
 {
     StaticMeshRenderPass->PrepareRender();
     GizmoRenderPass->PrepareRender();
@@ -151,43 +169,40 @@ void FRenderer::SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTa
     }
 }
 
-void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
+void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    // Setup
-    FRenderTargetRHI* RenderTargetRHI = ActiveViewport->GetRenderTargetRHI();
+    const uint64 ShowFlag = Viewport->GetShowFlag();
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
+
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
     if (!RenderTargetRHI)
     {
         return;
     }
 
-    Graphics->DeviceContext->RSSetViewports(1, &RenderTargetRHI->GetD3DViewport());
-
-    const uint64 ShowFlag = ActiveViewport->GetShowFlag();
+    // Begin Update Common Buffer
+    FCameraConstantBuffer CameraConstantBuffer;
+    CameraConstantBuffer.ViewMatrix = Viewport->GetViewMatrix();
+    CameraConstantBuffer.InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
+    CameraConstantBuffer.ProjectionMatrix = Viewport->GetProjectionMatrix();
+    CameraConstantBuffer.InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
+    CameraConstantBuffer.ViewLocation = Viewport->GetCameraLocation();
+    CameraConstantBuffer.NearClip = Viewport->GetCameraLearClip();
+    CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
+    BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
+    // End
     
-    // Render Scene
-    SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI);
+    PrepareRender(RenderTargetRHI);
+    
+    RenderWorldScene(RenderTargetRHI, ShowFlag, ViewMode);
 
-    if (ShowFlag & EEngineShowFlags::SF_Primitives)
-    {
-        UpdateLightBufferPass->Render(ActiveViewport);
-        StaticMeshRenderPass->Render(ActiveViewport);
-    }
-
-    // Render Postprocess
-    if (ActiveViewport->GetViewMode() == VMI_Lit && false)
-    {
-        if (ShowFlag & EEngineShowFlags::SF_Fog)
-        {
-            SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
-            // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
-        }
-    }
+    RenderPostProcess(RenderTargetRHI, ShowFlag, ViewMode);
     
     // Render Billboard
     if (ShowFlag & EEngineShowFlags::SF_BillboardText)
     {
         SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI, false);
-        BillboardRenderPass->Render(ActiveViewport);
+        BillboardRenderPass->Render(Viewport);
     }
 
     // 일단 수동으로 렌더타겟 해제하고 쉐이더 리소스 뷰에 씬 텍스처 전달
@@ -195,27 +210,53 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     Graphics->DeviceContext->PSSetShaderResources(100, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Scene)->SRV);
 
     // Render for Editor
-    if (GEngine->ActiveWorld->WorldType != EWorldType::PIE)  // TODO: false 제거
+    if (GEngine->ActiveWorld->WorldType != EWorldType::PIE)
     {
         SetRenderResource(EResourceType::ERT_Editor, RenderTargetRHI, true, true, false);
-        LineRenderPass->Render(ActiveViewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
+        LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
 
         FViewportResources* ResourceRHI = RenderTargetRHI->Resources.Find(EResourceType::ERT_Editor);
         Graphics->DeviceContext->ClearDepthStencilView(RenderTargetRHI->GizmoDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
         Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GizmoDepthStencilView);
-        GizmoRenderPass->Render(ActiveViewport); // 기존 뎁스를 SRV로 전달해서 샘플 후 비교하기 위해 기즈모 전용 DSV 사용
+        GizmoRenderPass->Render(Viewport); // 기존 뎁스를 SRV로 전달해서 샘플 후 비교하기 위해 기즈모 전용 DSV 사용
 
         Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
         Graphics->DeviceContext->PSSetShaderResources(102, 1, &RenderTargetRHI->GetResources().Find(EResourceType::ERT_Editor)->SRV);
     }
 
     // Compositing
-    CompositingPass->Render(ActiveViewport);
+    CompositingPass->Render(Viewport);
 
+    // Clear
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
     Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
 
     ClearRenderArr();
+}
+
+void FRenderer::RenderWorldScene(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode)
+{
+    SetRenderResource(EResourceType::ERT_Scene, RenderTargetRHI);
+
+    if (ShowFlag & EEngineShowFlags::SF_Primitives)
+    {
+        UpdateLightBufferPass->Render(Viewport);
+        StaticMeshRenderPass->Render(Viewport);
+    }
+}
+
+void FRenderer::RenderPostProcess(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode)
+{
+    if (ViewMode != EViewModeIndex::VMI_Lit)
+    {
+        return;
+    }
+    
+    if (ShowFlag & EEngineShowFlags::SF_Fog)
+    {
+        SetRenderResource(EResourceType::ERT_PP_Fog, RenderTargetRHI);
+        // TODO: 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 바인딩 해제해서 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
+    }
 }
 
 void FRenderer::RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport)

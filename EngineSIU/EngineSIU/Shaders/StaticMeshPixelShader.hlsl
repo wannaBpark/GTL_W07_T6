@@ -1,55 +1,28 @@
-// staticMeshPixelShader.hlsl
 
-Texture2D Textures : register(t0);
+#include "ShaderRegisters.hlsl"
+
 SamplerState Sampler : register(s0);
 
-cbuffer MatrixConstants : register(b0)
-{
-    row_major float4x4 Model;
-    row_major float4x4 MInverseTranspose;
-    float4 UUID;
-    bool isSelected;
-    float3 MatrixPad0;
-};
-cbuffer CameraConstants : register(b1)
-{
-    row_major float4x4 View;
-    row_major float4x4 Projection;
-    float3 CameraPosition;
-    float pad;
-};
+Texture2D Textures : register(t0);
 
-struct FMaterial
-{
-    float3 DiffuseColor;
-    float TransparencyScalar;
-    
-    float3 AmbientColor;
-    float DensityScalar;
-    
-    float3 SpecularColor;
-    float SpecularScalar;
-    
-    float3 EmissiveColor;
-    float MaterialPad0;
-};
-cbuffer MaterialConstants : register(b3)
+cbuffer MaterialConstants : register(b1)
 {
     FMaterial Material;
 }
-cbuffer FlagConstants : register(b4)
+
+cbuffer FlagConstants : register(b2)
 {
     bool IsLit;
     float3 flagPad0;
 }
 
-cbuffer SubMeshConstants : register(b5)
+cbuffer SubMeshConstants : register(b23)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
 }
 
-cbuffer TextureConstants : register(b6)
+cbuffer TextureConstants : register(b4)
 {
     float2 UVOffset;
     float2 TexturePad0;
@@ -57,55 +30,32 @@ cbuffer TextureConstants : register(b6)
 
 #include "Light.hlsl"
 
-
-struct PS_INPUT
+float4 mainPS(PS_INPUT_StaticMesh Input)
 {
-    float4 position : SV_POSITION; // 클립 공간 화면 좌표
-    float3 worldPos : TEXCOORD0; // 월드 공간 위치
-    float4 color : COLOR; // 전달된 베이스 컬러
-    float3 normal : NORMAL; // 월드 공간 노멀
-    float normalFlag : TEXCOORD1; // 노멀 유효 플래그
-    float2 texcoord : TEXCOORD2; // UV 좌표
-    int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
-};
-
-struct PS_OUTPUT
-{
-    float4 color : SV_Target0;
-    float4 UUID : SV_Target1;
-};
-
-
-PS_OUTPUT mainPS(PS_INPUT input)
-{
-    PS_OUTPUT output;
-    output.UUID = UUID;
-
-    // 1) 알베도 샘플링
-    float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
-    // 2) 머티리얼 디퓨즈
-    float3 matDiffuse = Material.DiffuseColor.rgb;
-    // 3) 라이트 계산
-
-    bool hasTexture = any(albedo != float3(0, 0, 0));
+    float4 FinalColor = float4(0.f, 0.f, 0.f, 1.f);
     
-    float3 baseColor = hasTexture ? albedo : matDiffuse;
+    float3 Albedo = Textures.Sample(Sampler, Input.UV).rgb;
+    float3 MatDiffuse = Material.DiffuseColor.rgb;
+
+    bool bHasTexture = any(Albedo != float3(0, 0, 0));
+    
+    float3 baseColor = bHasTexture ? Albedo : MatDiffuse;
 
     if (IsLit)
     {
-        float3 lightRgb = Lighting(input.worldPos, input.normal).rgb;
-        float3 litColor = baseColor * lightRgb;
-        output.color = float4(litColor, 1);
+        float3 LightRgb = Lighting(Input.WorldPosition, Input.normal).rgb;
+        float3 LitColor = baseColor * LightRgb;
+        FinalColor = float4(LitColor, 1);
     }
     else
     {
-        output.color = float4(baseColor, 1);
-        
+        FinalColor = float4(baseColor, 1);
     }
-    if (isSelected)
+    
+    if (bIsSelected)
     {
-        output.color += float4(0.02, 0.02, 0.02, 1);
-
+        FinalColor += float4(0.02, 0.02, 0.02, 1);
     }
-    return output;
+    
+    return FinalColor;
 }

@@ -29,7 +29,7 @@ public:
 
     void PrepareRenderState() const;
     
-    void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
+    void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
   
     void UpdateLitUnlitConstant(int isLit) const;
 

@@ -23,24 +23,8 @@ void FSlateRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     ShaderManager = InShaderManager;
 
     CreateShader();
-
-    HRESULT hr = S_OK;
-    hr = BufferManager->CreateBufferGeneric<FSlateTransform>("FSlateTransform", nullptr, sizeof(FSlateTransform), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-    if (FAILED(hr))
-    {
-        return;
-    }
-
-    D3D11_SAMPLER_DESC SamplerDesc = {};
-    SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    SamplerDesc.MinLOD = 0;
-    SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    
-    Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
+    CreateBuffer();
+    CreateSampler();
 }
 
 void FSlateRenderPass::PrepareRender()
@@ -60,7 +44,7 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
 
     // 버퍼 업데이트
     FSlateTransform Transform;
-
+    // Client에서의 FViewport 위치를 기반으로 Scale과 Offset 계산
     Transform.Scale = FVector2D(
         Rect.Width / ClientWidthFloat,
         Rect.Height / ClientHeightFloat
@@ -69,9 +53,10 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         (Rect.TopLeftX + Rect.Width * 0.5f) / ClientWidthFloat * 2.0f - 1.0f,
         1.0f - (Rect.TopLeftY + Rect.Height * 0.5f) / ClientHeightFloat * 2.0f
     );
-    
+
+    // SlateTransform 버퍼 업데이트
     BufferManager->UpdateConstantBuffer<FSlateTransform>("FSlateTransform", Transform);
-    BufferManager->BindConstantBuffer("FSlateTransform", 12, EShaderStage::Vertex);
+    BufferManager->BindConstantBuffer("FSlateTransform", 13, EShaderStage::Vertex);
 
     // 렌더 타겟을 백버퍼로 지정
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, nullptr);
@@ -90,9 +75,10 @@ void FSlateRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(nullptr);
 
-    // 렌더
+    // Quad 렌더
     Graphics->DeviceContext->Draw(6, 0);
 
+    // Clear: 사용한 리소스 해제
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
     Graphics->DeviceContext->PSSetShaderResources(100, 1, NullSRV);
 }
@@ -115,5 +101,29 @@ void FSlateRenderPass::CreateShader()
     {
         return;
     }
+}
+
+void FSlateRenderPass::CreateBuffer()
+{
+    HRESULT hr = S_OK;
+    hr = BufferManager->CreateBufferGeneric<FSlateTransform>("FSlateTransform", nullptr, sizeof(FSlateTransform), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    if (FAILED(hr))
+    {
+        return;
+    }
+}
+
+void FSlateRenderPass::CreateSampler()
+{
+    D3D11_SAMPLER_DESC SamplerDesc = {};
+    SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    SamplerDesc.MinLOD = 0;
+    SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    
+    Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
 }
 

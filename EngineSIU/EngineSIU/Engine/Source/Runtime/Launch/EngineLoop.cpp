@@ -146,7 +146,6 @@ void FEngineLoop::Render() const
         for (int i = 0; i < 4; ++i)
         {
             LevelEditor->SetActiveViewportClient(i);
-            Renderer.PrepareRender();
             Renderer.Render(LevelEditor->GetActiveViewportClient());
         }
         
@@ -159,7 +158,6 @@ void FEngineLoop::Render() const
     }
     else
     {
-        Renderer.PrepareRender();
         Renderer.Render(LevelEditor->GetActiveViewportClient());
         
         Renderer.RenderViewport(LevelEditor->GetActiveViewportClient());

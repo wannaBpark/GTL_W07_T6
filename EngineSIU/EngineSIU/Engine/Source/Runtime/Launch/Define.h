@@ -304,6 +304,7 @@ struct FLight
     int   Enabled;
     int   Type;
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
+    
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
 };
@@ -312,39 +313,51 @@ struct FLightBuffer
 {
     FLight gLights[MAX_LIGHTS]{};
     FVector4 GlobalAmbientLight;
+    
     int nLights;
     float    pad0, pad1, pad2;
 };
 
-struct FMaterialConstants {
+struct FMaterialConstants
+{
     FVector DiffuseColor;
     float TransparencyScalar;
-
-    FVector AmbientColor;
-    float DensityScalar;
 
     FVector SpecularColor;
     float SpecularScalar;
 
-    FVector EmmisiveColor;
-    float MaterialPad0;
+    FVector EmissiveColor;
+    float DensityScalar;
 
+    FVector AmbientColor;
+    float MaterialPad0;
 };
 
-struct FPerObjectConstantBuffer {
-    FMatrix Model;      // 모델
-    FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
+struct FObjectConstantBuffer
+{
+    FMatrix WorldMatrix;
+    FMatrix InverseTransposedWorld;
+    
     FVector4 UUIDColor;
-    int IsSelected;
+    
+    int bIsSelected;
     FVector pad;
 };
 
 struct FCameraConstantBuffer
 {
-    FMatrix View;
-    FMatrix Projection;
-    FVector CameraPosition;
-    float pad;
+    FMatrix ViewMatrix;
+    FMatrix InvViewMatrix;
+    
+    FMatrix ProjectionMatrix;
+    FMatrix InvProjectionMatrix;
+    
+    FVector ViewLocation;
+    float Padding1;
+
+    float NearClip;
+    float FarClip;
+    FVector2D Padding2;
 };
 
 struct FSubUVConstant
@@ -353,7 +366,8 @@ struct FSubUVConstant
     FVector2D uvScale;
 };
 
-struct FLitUnlitConstants {
+struct FLitUnlitConstants
+{
     int isLit; // 1 = Lit, 0 = Unlit 
     FVector pad;
 };
@@ -364,12 +378,14 @@ struct FViewModeConstants
     FVector pad;
 };
 
-struct FSubMeshConstants {
+struct FSubMeshConstants
+{
     float isSelectedSubMesh;
     FVector pad;
 };
 
-struct FTextureConstants {
+struct FTextureConstants
+{
     float UOffset;
     float VOffset;
     float pad0;

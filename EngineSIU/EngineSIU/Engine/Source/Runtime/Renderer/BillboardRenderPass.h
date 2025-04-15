@@ -22,7 +22,7 @@ public:
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
 
     virtual void PrepareRender() override;
-    void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
+    void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
 
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     
@@ -55,8 +55,6 @@ private:
     ID3D11PixelShader* PixelShader;
     
     ID3D11InputLayout* InputLayout;
-
-    uint32 Stride;
 
     FDXDBufferManager* BufferManager;
     

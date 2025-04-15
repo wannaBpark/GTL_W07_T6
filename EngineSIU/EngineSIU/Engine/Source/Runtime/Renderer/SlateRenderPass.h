@@ -26,7 +26,8 @@ public:
     virtual void ClearRenderArr() override;
 
     void CreateShader();
-    void ReleaseShader();
+    void CreateBuffer();
+    void CreateSampler();
 
 private:
     FDXDBufferManager* BufferManager;

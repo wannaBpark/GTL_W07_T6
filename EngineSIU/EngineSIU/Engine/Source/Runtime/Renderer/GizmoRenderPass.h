@@ -8,7 +8,6 @@
 class UGizmoBaseComponent;
 class FDXDBufferManager;
 class FGraphicsDevice;
-class FDXDShaderManager;
 class UWorld;
 class FEditorViewportClient;
 
@@ -27,6 +26,8 @@ public:
     virtual void ClearRenderArr() override;
 
     void PrepareRenderState() const;
+
+    void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
     
     // Gizmo 한 개 렌더링 함수
     void RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World);

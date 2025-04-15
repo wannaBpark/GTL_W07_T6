@@ -48,10 +48,10 @@ void FStaticMeshRenderPass::CreateShader()
 {
     D3D11_INPUT_ELEMENT_DESC StaticMeshLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
     };
 
@@ -117,14 +117,7 @@ void FStaticMeshRenderPass::PrepareRenderState() const
 
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // 상수 버퍼 바인딩 예시
-    ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
-    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
-    Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
-    Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
-
     TArray<FString> PSBufferKeys = {
-        TEXT("FCameraConstantBuffer"),
         TEXT("FLightBuffer"),
         TEXT("FMaterialConstants"),
         TEXT("FLitUnlitConstants"),
@@ -132,15 +125,18 @@ void FStaticMeshRenderPass::PrepareRenderState() const
         TEXT("FTextureConstants")
     };
 
-    BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
+    BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
 }
 
-void FStaticMeshRenderPass::UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const
+void FStaticMeshRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const
 {
-    FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
-    FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
-    BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
-   
+    FObjectConstantBuffer ObjectData = {};
+    ObjectData.WorldMatrix = WorldMatrix;
+    ObjectData.InverseTransposedWorld = FMatrix::Transpose(FMatrix::Inverse(WorldMatrix));
+    ObjectData.UUIDColor = UUIDColor;
+    ObjectData.bIsSelected = bIsSelected;
+    
+    BufferManager->UpdateConstantBuffer(TEXT("FObjectConstantBuffer"), ObjectData);
 }
 
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int isLit) const
@@ -215,23 +211,14 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
             continue;
         }
         
-        FMatrix Model = Comp->GetWorldMatrix();
-
-        FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
-
         UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+        
+        FMatrix WorldMatrix = Comp->GetWorldMatrix();
+        FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
         const bool bIsSelected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
         
-        UpdatePerObjectConstant(Model, Viewport->GetViewMatrix(), Viewport->GetProjectionMatrix(), UUIDColor, bIsSelected);
+        UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
         
-        FCameraConstantBuffer CameraData = {
-            Viewport->GetViewMatrix(),
-            Viewport->GetProjectionMatrix(),
-            Viewport->PerspectiveCamera.GetLocation(),
-            0
-        };
-        BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
-
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 
         if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))

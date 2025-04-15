@@ -73,7 +73,7 @@ void FEditorViewportClient::Input()
         if (!bRightMouseDown)
         {
             // 마우스 오른쪽 버튼을 처음 눌렀을 때, 마우스 위치 초기화
-            GetCursorPos(&lastMousePos);
+            GetCursorPos(&PrevMousePos);
             bRightMouseDown = true;
         }
         else
@@ -83,8 +83,8 @@ void FEditorViewportClient::Input()
             GetCursorPos(&currentMousePos);
 
             // 마우스 이동 차이 계산
-            int32 DeltaX = currentMousePos.x - lastMousePos.x;
-            int32 DeltaY = currentMousePos.y - lastMousePos.y;
+            int32 DeltaX = currentMousePos.x - PrevMousePos.x;
+            int32 DeltaY = currentMousePos.y - PrevMousePos.y;
 
             // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
             if (IsPerspective())
@@ -98,7 +98,7 @@ void FEditorViewportClient::Input()
                 PivotMoveUp(DeltaY);
             }
 
-            SetCursorPos(lastMousePos.x, lastMousePos.y);
+            SetCursorPos(PrevMousePos.x, PrevMousePos.y);
         }
         if (GetAsyncKeyState('A') & 0x8000)
         {
@@ -308,6 +308,25 @@ bool FEditorViewportClient::IsOrthographic() const
 bool FEditorViewportClient::IsPerspective() const
 {
     return (GetViewportType() == LVT_Perspective);
+}
+
+FVector FEditorViewportClient::GetCameraLocation() const
+{
+    if (IsPerspective())
+    {
+        return PerspectiveCamera.GetLocation();
+    }
+    return OrthogonalCamera.GetLocation();
+}
+
+float FEditorViewportClient::GetCameraLearClip() const
+{
+    return NearClip;
+}
+
+float FEditorViewportClient::GetCameraFarClip() const
+{
+    return FarClip;
 }
 
 ELevelViewportType FEditorViewportClient::GetViewportType() const

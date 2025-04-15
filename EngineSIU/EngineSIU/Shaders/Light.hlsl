@@ -28,7 +28,7 @@ struct LIGHT
     float3 LightPad;
 };
 
-cbuffer cbLights : register(b2)
+cbuffer cbLights : register(b0)
 {
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;

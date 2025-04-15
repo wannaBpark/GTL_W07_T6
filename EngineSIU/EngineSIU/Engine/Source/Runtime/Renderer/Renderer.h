@@ -48,12 +48,17 @@ public:
     //==========================================================================
     // 렌더 패스 관련 함수
     //==========================================================================
-    void PrepareRender();
-    void ClearRenderArr();
-    void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClearRTV = true, bool bIncludeDSV = true, bool bClearDSV = true);
-    void Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    void Render(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void RenderViewport(const std::shared_ptr<FEditorViewportClient>& Viewport); // TODO: 추후 RenderSlate로 변경해야함
 
+protected:
+    void PrepareRender(FRenderTargetRHI* RenderTargetRHI);
+    void PrepareRenderPass();
+    void SetRenderResource(EResourceType Type, FRenderTargetRHI* RenderTargetRHI, bool bClearRTV = true, bool bIncludeDSV = true, bool bClearDSV = true);
+    void RenderWorldScene(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode);
+    void RenderPostProcess(FRenderTargetRHI* RenderTargetRHI, uint64 ShowFlag, EViewModeIndex ViewMode);
+    void ClearRenderArr();
+    
     //==========================================================================
     // 버퍼 생성/해제 함수 (템플릿 포함)
     //==========================================================================
@@ -66,6 +71,8 @@ public:
     // 상수 버퍼 생성/해제
     void CreateConstantBuffers();
     void ReleaseConstantBuffer();
+
+    void CreateCommonShader();
 
 public:
     FGraphicsDevice* Graphics;

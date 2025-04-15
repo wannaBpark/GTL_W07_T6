@@ -3,7 +3,7 @@ Texture2D ViewportTexture : register(t120);
 
 SamplerState Sampler : register(s0);
 
-cbuffer SlateTransform : register(b12)
+cbuffer SlateTransform : register(b13)
 {
     float2 SlateScale;
     float2 SlateOffset;
