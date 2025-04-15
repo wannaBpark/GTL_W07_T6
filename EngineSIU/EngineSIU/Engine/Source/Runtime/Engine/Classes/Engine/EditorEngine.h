@@ -39,7 +39,7 @@ public:
     void HoverActor(AActor* InActor);
 
     
-    void NewLevel();
+    void NewWorld();
 
     void SelectComponent(USceneComponent* InComponent) const;
     bool CanSelectComponent(const USceneComponent* InComponent) const;

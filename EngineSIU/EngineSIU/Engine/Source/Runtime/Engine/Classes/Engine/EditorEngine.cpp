@@ -178,7 +178,7 @@ void UEditorEngine::HoverActor(AActor* InActor)
     }
 }
 
-void UEditorEngine::NewLevel()
+void UEditorEngine::NewWorld()
 {
     SelectActor(nullptr);
     SelectComponent(nullptr);
