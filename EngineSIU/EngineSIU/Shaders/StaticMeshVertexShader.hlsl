@@ -89,22 +89,21 @@ VS_OUTPUT mainVS(VS_INPUT input)
     output.normal = worldNormal;
     output.texcoord = input.texcoord;
     
-    //Tangent
-    float3 worldTangent = normalize(mul(input.tangent, (float3x3) Model));
-
-    // Bitangent = cross(N, T) * handedness
-    float handedness = 1.0f; // 보통 .w 성분에 들어있음 → 생략 시 1.0 가정
-    //float3 worldBitangent = normalize(cross(worldTangent, worldNormal) * handedness);
-    float3 worldBitangent = normalize(cross(worldNormal, worldTangent) * handedness);
-
-    output.normal = worldNormal;
-    matrix<float, 3, 3> TBN =
+    // bHasNormalMap
+    if (TextureFlags & 1 << 2)
     {
-        worldTangent.x, worldTangent.y, worldTangent.z,
+        float handedness = 1.0f;
+        float3 worldTangent = normalize(mul(input.tangent, (float3x3) Model));
+        float3 worldBitangent = normalize(cross(worldNormal, worldTangent) * handedness);
+        
+        matrix<float, 3, 3> TBN =
+        {
+            worldTangent.x, worldTangent.y, worldTangent.z,
         worldBitangent.x, worldBitangent.y, worldBitangent.z,
         worldNormal.x, worldNormal.y, worldNormal.z 
-    };
-    output.mTBN = TBN;
+        };
+        output.mTBN = TBN;
+    }
     
 #ifdef LIGHTING_MODEL_GOURAUD
     float4 litColor = Lighting(worldPosition.xyz, worldNormal);

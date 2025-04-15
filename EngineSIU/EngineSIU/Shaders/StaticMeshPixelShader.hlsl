@@ -88,19 +88,20 @@ PS_OUTPUT mainPS(PS_INPUT input)
     PS_OUTPUT output;
     output.UUID = UUID;
     
-    // 1) 알베도 샘플링
-    float3 albedo = Textures.Sample(Sampler, input.texcoord).rgb;
-    float3 normalTS = NormalMap.Sample(Sampler, input.texcoord).rgb;
-    normalTS = normalize(normalTS * 2.0f - 1.0f);
-    //float3x3 TBN = float3x3(input.tangentWS, input.bitangentWS, input.normal);
-
-    float3 normal = normalize(mul(normalTS, input.mTBN));
+    float3 albedo = Material.DiffuseColor.rgb;
+    if (TextureFlags & 1 << 1)
+    {
+        albedo = Textures.Sample(Sampler, input.texcoord).rgb;
+    }
+    float3 baseColor = albedo;
     
-    // 2) 머티리얼 디퓨즈
-    float3 matDiffuse = Material.DiffuseColor.rgb;
-    bool hasTexture = any(albedo != float3(0, 0, 0));
-    
-    float3 baseColor = hasTexture ? albedo : matDiffuse;
+    float3 normal = input.normal;
+    if (TextureFlags & 1 << 2)
+    {
+        float3 normalTS = NormalMap.Sample(Sampler, input.texcoord).rgb;
+        normalTS = normalize(normalTS * 2.0f - 1.0f);
+        normal = normalize(mul(normalTS, input.mTBN));
+    }
     
 #ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)

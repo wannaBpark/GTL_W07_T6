@@ -119,15 +119,12 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float specularFactor = 0.0;
     if (diffuseFactor > 0.0)
     {
-// Begin Test
         float3 viewDir = normalize(CameraPosition - vPosition);
         float3 halfVector = normalize(lightDir + viewDir);
         specularFactor = pow(max(dot(vNormal, halfVector), 0.0), 4.0);
-// End Test
     }
     
-    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (specularFactor * Material.SpecularColor);
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
                  
     return float4(lit * attenuation * light.Intensity, 1.0);
     
@@ -145,8 +142,12 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float diffuseFactor=CalculateDiffuse(vNormal,lightDir);
     float attenuation = CalculateAttenuation(fDistance, light.Attenuation, light.Radius);
     
-    float3 lit = light.LightColor.rgb * diffuseFactor * Material.DiffuseColor;
-                 
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor);
+    // bHasDiffuseMap
+    if (TextureFlags & 1 << 1)
+    {
+        float3 lit = (light.LightColor.rgb * diffuseFactor);
+    }
     return float4(lit * attenuation * light.Intensity, 1.0);
     
 #else
@@ -166,11 +167,13 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     float diffuseFactor = CalculateDiffuse(vNormal, lightDir);
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     
-    //float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
-    //             (specularFactor * Material.SpecularColor);
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
+    // bHasDiffuseMap
+    if (TextureFlags & 1 << 1)
+    {
+        lit = (light.LightColor.rgb * diffuseFactor) + (specularFactor * Material.SpecularColor);
+    }
     
-    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (specularFactor * Material.SpecularColor);
     return float4(lit * attenuation * light.Intensity, 1.0);
 #endif
 }
@@ -200,9 +203,8 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
         specularFactor = pow(max(dot(vNormal, halfVector), 0.0), 4.0);
     }
     
-    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (specularFactor * Material.SpecularColor);
-                 
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
+    
     return float4(lit * attenuationDistance * spotFactor * light.Intensity, 1.0);
 #elif defined(LIGHTING_MODEL_LAMBERT)
     FSpotLightInfo light = SpotLights[nIndex];
@@ -218,9 +220,13 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
     float diffuseFactor =CalculateDiffuse(vNormal, lightDir);
     float spotFactor = CalculateSpotEffect(lightDir, normalize(light.Direction), light.InnerRad, light.OuterRad, light.Attenuation);
     
-    // Lambert에서는 specular 계산 없음
-    float3 lit = light.LightColor.rgb * diffuseFactor * Material.DiffuseColor;
-                 
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor);
+    // bHasDiffuseMap
+    if (TextureFlags & 1 << 1)
+    {
+        lit = (light.LightColor.rgb * diffuseFactor);
+    }
+    
     return float4(lit * attenuation* spotFactor * light.Intensity, 1.0);
     // End test
 #else
@@ -244,9 +250,13 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
     float diffuseFactor = CalculateDiffuse(vNormal, lightDir);
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     
-    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (specularFactor * Material.SpecularColor);
-                 
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
+    // bHasDiffuseMap
+    if (TextureFlags & 1 << 1)
+    {
+        lit = (light.LightColor.rgb * diffuseFactor) + (specularFactor * Material.SpecularColor);
+    }
+    
     return float4(lit * attenuation * spotFactor * light.Intensity, 1.0);    
 #endif
 }
@@ -271,8 +281,13 @@ float4 DirectionalLight(int nIndex, float3 vPosition, float3 vNormal)
 #else
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     
-    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) +
-                 (specularFactor * Material.SpecularColor);
+    float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
+    // bHasDiffuseMap
+    if (TextureFlags & 1 << 1)
+    {
+        lit = (light.LightColor.rgb * diffuseFactor) + (specularFactor * Material.SpecularColor);
+    }
+
 #endif
     return float4(lit * light.Intensity, 1.0);
 }

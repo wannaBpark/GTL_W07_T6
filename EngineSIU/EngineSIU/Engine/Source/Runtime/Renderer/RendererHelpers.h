@@ -33,6 +33,14 @@ namespace MaterialUtils {
             Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
         }
+        else
+        {
+            ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+            ID3D11SamplerState* nullSampler[1] = { nullptr };
+            Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
+            Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
+
+        }
         // bHasNormalTexture
         if (MaterialInfo.TextureFlags & 1 << 2)
         {
@@ -43,7 +51,6 @@ namespace MaterialUtils {
         else {
             ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
             ID3D11SamplerState* nullSampler[1] = { nullptr };
-            Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
             Graphics->DeviceContext->PSSetShaderResources(1, 1, nullSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
         }
