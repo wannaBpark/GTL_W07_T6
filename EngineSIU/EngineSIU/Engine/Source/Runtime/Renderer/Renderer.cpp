@@ -136,10 +136,10 @@ void FRenderer::CreateCommonShader()
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
 }
 
-void FRenderer::PrepareRender(FRenderTargetRHI* RenderTargetRHI)
+void FRenderer::PrepareRender(FViewportResource* ViewportResource)
 {
     // Setup Viewport
-    Graphics->DeviceContext->RSSetViewports(1, &RenderTargetRHI->GetD3DViewport());
+    Graphics->DeviceContext->RSSetViewports(1, &ViewportResource->GetD3DViewport());
 
     PrepareRenderPass();
 }
@@ -179,15 +179,15 @@ void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>&
 
 void FRenderer::BeginRender(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
-    if (!RenderTargetRHI)
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    if (!ViewportResource)
     {
         return;
     }
 
     UpdateCommonBuffer(Viewport);
     
-    PrepareRender(RenderTargetRHI);
+    PrepareRender(ViewportResource);
 }
 
 
@@ -245,7 +245,7 @@ void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& 
     const uint64 ShowFlag = Viewport->GetShowFlag();
     const EViewModeIndex ViewMode = Viewport->GetViewMode();
 
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
     
     if (ViewMode != EViewModeIndex::VMI_Lit)
     {
@@ -266,8 +266,8 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
     const uint64 ShowFlag = Viewport->GetShowFlag();
     const EViewModeIndex ViewMode = Viewport->GetViewMode();
 
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
-    RenderTargetRHI->ClearRenderTarget(Graphics->DeviceContext, EResourceType::ERT_Editor);
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    ViewportResource->ClearRenderTarget(Graphics->DeviceContext, EResourceType::ERT_Editor);
     
     if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
     {

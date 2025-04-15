@@ -12,7 +12,7 @@
 #define MAX_ORTHOZOOM (1e25)
 
 enum class EViewScreenLocation : uint8;
-class FRenderTargetRHI;
+class FViewportResource;
 class ATransformGizmo;
 class USceneComponent;
 
@@ -110,10 +110,10 @@ public:
     
     D3D11_VIEWPORT& GetD3DViewport() const;
 
-    FRenderTargetRHI* GetRenderTargetRHI();
+    FViewportResource* GetViewportResource();
 
 private:
-    FRenderTargetRHI* RenderTargetCache = nullptr;
+    FViewportResource* ViewportResourceCache = nullptr;
 
 public:
     

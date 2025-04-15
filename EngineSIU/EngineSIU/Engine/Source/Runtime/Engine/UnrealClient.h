@@ -4,7 +4,7 @@
 
 #include "Container/Map.h"
 
-class FRenderTargetRHI;
+class FViewportResource;
 
 enum class EViewScreenLocation : uint8
 {
@@ -25,7 +25,7 @@ enum class EResourceType : uint8
     ERT_MAX,
 };
 
-struct FViewportResources
+struct FRenderTargetRHI
 {
     ID3D11Texture2D* Texture2D = nullptr;
     ID3D11RenderTargetView* RTV = nullptr;
@@ -51,11 +51,11 @@ struct FViewportResources
     }
 };
 
-class FRenderTargetRHI
+class FViewportResource
 {
 public:
-    FRenderTargetRHI();
-    ~FRenderTargetRHI();
+    FViewportResource();
+    ~FViewportResource();
 
     void Initialize(uint32 InWidth, uint32 InHeight);
     void Resize(uint32 NewWidth, uint32 NewHeight);
@@ -73,12 +73,12 @@ public:
     ID3D11Texture2D*& GetGizmoDepthStencilTexture() { return GizmoDepthStencilTexture; }
     ID3D11DepthStencilView*& GetGizmoDepthStencilView() { return GizmoDepthStencilView; }
 
-    TMap<EResourceType, FViewportResources>& GetResources();
+    TMap<EResourceType, FRenderTargetRHI>& GetRenderTargets();
 
     // 해당 타입의 리소스를 리턴. 없는 경우에는 생성해서 리턴.
-    FViewportResources* GetResource(EResourceType Type);
+    FRenderTargetRHI* GetRenderTarget(EResourceType Type);
 
-    bool HasResource(EResourceType Type) const;
+    bool HasRenderTarget(EResourceType Type) const;
 
     // 가지고있는 모든 리소스의 렌더 타겟 뷰를 clear
     void ClearRenderTargets(ID3D11DeviceContext* DeviceContext);
@@ -99,7 +99,7 @@ private:
     ID3D11Texture2D* GizmoDepthStencilTexture = nullptr;
     ID3D11DepthStencilView* GizmoDepthStencilView = nullptr;
 
-    TMap<EResourceType, FViewportResources> Resources;
+    TMap<EResourceType, FRenderTargetRHI> RenderTargets;
 
     HRESULT CreateDepthStencilResources();
 
@@ -126,18 +126,18 @@ public:
     void ResizeViewport(const FRect& InRect);
     void ResizeViewport(const FRect& Top, const FRect& Bottom, const FRect& Left, const FRect& Right);
 
-    D3D11_VIEWPORT& GetD3DViewport() const { return RenderTargetRHI->GetD3DViewport(); }
+    D3D11_VIEWPORT& GetD3DViewport() const { return ViewportResource->GetD3DViewport(); }
 
     EViewScreenLocation GetViewLocation() const { return ViewLocation; }
 
-    FRenderTargetRHI* GetRenderTargetRHI() const { return RenderTargetRHI; }
+    FViewportResource* GetViewportResource() const { return ViewportResource; }
 
     FRect GetRect() const { return Rect; }
 
     bool bIsHovered(const POINT& InPoint) const;
 
 private:
-    FRenderTargetRHI* RenderTargetRHI;
+    FViewportResource* ViewportResource;
 
     EViewScreenLocation ViewLocation;   // 뷰포트 위치
 

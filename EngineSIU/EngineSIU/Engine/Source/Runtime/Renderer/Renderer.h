@@ -24,7 +24,7 @@ class UObject;
 class FDXDShaderManager;
 class FEditorViewportClient;
 
-class FRenderTargetRHI;
+class FViewportResource;
 
 class FStaticMeshRenderPass;
 class FWorldBillboardRenderPass;
@@ -56,7 +56,7 @@ public:
 protected:
     void BeginRender(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
-    void PrepareRender(FRenderTargetRHI* RenderTargetRHI);
+    void PrepareRender(FViewportResource* ViewportResource);
     void PrepareRenderPass();
     void RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& Viewport);

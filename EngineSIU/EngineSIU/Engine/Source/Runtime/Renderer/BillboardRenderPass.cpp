@@ -139,10 +139,10 @@ void FBillboardRenderPass::ReleaseShader()
 
 void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
 
-    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(ResourceType);
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+    FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetDepthStencilView());
 
     PrepareTextureShader();
 

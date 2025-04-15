@@ -3,7 +3,7 @@
 #include "EngineLoop.h"
 #include <array>
 
-FRenderTargetRHI::FRenderTargetRHI()
+FViewportResource::FViewportResource()
 {
     ClearColors.Add(EResourceType::ERT_Compositing, { 0.f, 0.f, 0.f, 1.f });
     ClearColors.Add(EResourceType::ERT_Scene,  { 0.025f, 0.025f, 0.025f, 1.0f });
@@ -12,14 +12,14 @@ FRenderTargetRHI::FRenderTargetRHI()
     ClearColors.Add(EResourceType::ERT_Overlay, { 0.f, 0.f, 0.f, 0.f });
 }
 
-FRenderTargetRHI::~FRenderTargetRHI()
+FViewportResource::~FViewportResource()
 {
     Release();
 
     ClearColors.Empty();
 }
 
-void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)
+void FViewportResource::Initialize(uint32 InWidth, uint32 InHeight)
 {
     D3DViewport.TopLeftX = 0.f;
     D3DViewport.TopLeftY = 0.f;
@@ -49,7 +49,7 @@ void FRenderTargetRHI::Initialize(uint32 InWidth, uint32 InHeight)
     }
 }
 
-void FRenderTargetRHI::Resize(uint32 NewWidth, uint32 NewHeight)
+void FViewportResource::Resize(uint32 NewWidth, uint32 NewHeight)
 {
     Release();
 
@@ -63,26 +63,26 @@ void FRenderTargetRHI::Resize(uint32 NewWidth, uint32 NewHeight)
         return;
     }
 
-    for (auto& [Type, Resource] : Resources)
+    for (auto& [Type, Resource] : RenderTargets)
     {
         CreateResource(Type);
     }
 }
 
-void FRenderTargetRHI::Release()
+void FViewportResource::Release()
 {
     ReleaseDepthStencilResources();
     ReleaseResources();
 }
 
-HRESULT FRenderTargetRHI::CreateResource(EResourceType Type)
+HRESULT FViewportResource::CreateResource(EResourceType Type)
 {
-    if (HasResource(Type))
+    if (HasRenderTarget(Type))
     {
         ReleaseResource(Type);
     }
     
-    FViewportResources NewResource;
+    FRenderTargetRHI NewResource;
     
     HRESULT hr = S_OK;
     
@@ -120,52 +120,52 @@ HRESULT FRenderTargetRHI::CreateResource(EResourceType Type)
         return hr;
     }
 
-    Resources.Add(Type, NewResource);
+    RenderTargets.Add(Type, NewResource);
 
     return hr;
 }
 
-bool FRenderTargetRHI::HasResource(EResourceType Type) const
+bool FViewportResource::HasRenderTarget(EResourceType Type) const
 {
-    return Resources.Contains(Type);
+    return RenderTargets.Contains(Type);
 }
 
-TMap<EResourceType, FViewportResources>& FRenderTargetRHI::GetResources()
+TMap<EResourceType, FRenderTargetRHI>& FViewportResource::GetRenderTargets()
 {
-    return Resources;
+    return RenderTargets;
 }
 
-FViewportResources* FRenderTargetRHI::GetResource(EResourceType Type)
+FRenderTargetRHI* FViewportResource::GetRenderTarget(EResourceType Type)
 {
-    if (!Resources.Contains(Type))
+    if (!RenderTargets.Contains(Type))
     {
         if (FAILED(CreateResource(Type)))
         {
             return nullptr;
         }
     }
-    return Resources.Find(Type);
+    return RenderTargets.Find(Type);
 }
 
-void FRenderTargetRHI::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
+void FViewportResource::ClearRenderTargets(ID3D11DeviceContext* DeviceContext)
 {
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    for (auto& [Type, Resource] : Resources)
+    for (auto& [Type, Resource] : RenderTargets)
     {
         DeviceContext->ClearRenderTargetView(Resource.RTV, ClearColors[Type].data());
     }
 }
 
-void FRenderTargetRHI::ClearRenderTarget(ID3D11DeviceContext* DeviceContext, EResourceType Type)
+void FViewportResource::ClearRenderTarget(ID3D11DeviceContext* DeviceContext, EResourceType Type)
 {
-    if (FViewportResources* Resource = GetResource(Type))
+    if (FRenderTargetRHI* Resource = GetRenderTarget(Type))
     {
         DeviceContext->ClearRenderTargetView(Resource->RTV, ClearColors[Type].data());
     }
 }
 
-std::array<float, 4> FRenderTargetRHI::GetClearColor(EResourceType Type) const
+std::array<float, 4> FViewportResource::GetClearColor(EResourceType Type) const
 {
     if (const std::array<float, 4>* Found = ClearColors.Find(Type))
     {
@@ -174,7 +174,7 @@ std::array<float, 4> FRenderTargetRHI::GetClearColor(EResourceType Type) const
     return { 0.0f, 0.0f, 0.0f, 1.0f };
 }
 
-HRESULT FRenderTargetRHI::CreateDepthStencilResources()
+HRESULT FViewportResource::CreateDepthStencilResources()
 {
     HRESULT hr = S_OK;
     
@@ -230,7 +230,7 @@ HRESULT FRenderTargetRHI::CreateDepthStencilResources()
     return hr;
 }
 
-void FRenderTargetRHI::ReleaseDepthStencilResources()
+void FViewportResource::ReleaseDepthStencilResources()
 {
     if (DepthStencilView)
     {
@@ -249,19 +249,19 @@ void FRenderTargetRHI::ReleaseDepthStencilResources()
     }
 }
 
-void FRenderTargetRHI::ReleaseResources()
+void FViewportResource::ReleaseResources()
 {
-    for (auto& [Type, Resource] : Resources)
+    for (auto& [Type, Resource] : RenderTargets)
     {
         Resource.Release();
     }
 }
 
-void FRenderTargetRHI::ReleaseResource(EResourceType Type)
+void FViewportResource::ReleaseResource(EResourceType Type)
 {
-    if (HasResource(Type))
+    if (HasRenderTarget(Type))
     {
-        Resources[Type].Release();
+        RenderTargets[Type].Release();
     }
 }
 
@@ -272,14 +272,14 @@ FViewport::FViewport()
 }
 
 FViewport::FViewport(EViewScreenLocation InViewLocation)
-    : RenderTargetRHI(new FRenderTargetRHI())
+    : ViewportResource(new FViewportResource())
     , ViewLocation(InViewLocation) 
 {
 }
 
 FViewport::~FViewport()
 {
-    delete RenderTargetRHI;
+    delete ViewportResource;
 }
 
 void FViewport::Initialize(const FRect& InRect)
@@ -288,7 +288,7 @@ void FViewport::Initialize(const FRect& InRect)
     const uint32 Width = static_cast<uint32>(Rect.Width);
     const uint32 Height = static_cast<uint32>(Rect.Height);
 
-    RenderTargetRHI->Initialize(Width, Height);
+    ViewportResource->Initialize(Width, Height);
 }
 
 void FViewport::ResizeViewport(const FRect& InRect)
@@ -297,7 +297,7 @@ void FViewport::ResizeViewport(const FRect& InRect)
     const uint32 Width = static_cast<uint32>(Rect.Width);
     const uint32 Height = static_cast<uint32>(Rect.Height);
 
-    RenderTargetRHI->Resize(Width, Height);
+    ViewportResource->Resize(Width, Height);
 }
 
 void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRect& Left, const FRect& Right)
@@ -334,7 +334,7 @@ void FViewport::ResizeViewport(const FRect& Top, const FRect& Bottom, const FRec
     
     const uint32 Width = static_cast<uint32>(Rect.Width);
     const uint32 Height = static_cast<uint32>(Rect.Height);
-    RenderTargetRHI->Resize(Width, Height);
+    ViewportResource->Resize(Width, Height);
 }
 
 bool FViewport::bIsHovered(const POINT& InPoint) const

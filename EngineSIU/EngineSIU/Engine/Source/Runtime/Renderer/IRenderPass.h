@@ -3,7 +3,7 @@
 
 #include "HAL/PlatformType.h"
 
-class FRenderTargetRHI;
+class FViewportResource;
 class UWorld;
 class FDXDBufferManager;
 class FGraphicsDevice;

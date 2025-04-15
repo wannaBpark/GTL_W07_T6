@@ -26,7 +26,7 @@ FEditorViewportClient::~FEditorViewportClient()
 {
     Release();
 
-    RenderTargetCache = nullptr;
+    ViewportResourceCache = nullptr;
 }
 
 void FEditorViewportClient::Draw(FViewport* Viewport)
@@ -170,13 +170,13 @@ D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
     return Viewport->GetD3DViewport();
 }
 
-FRenderTargetRHI* FEditorViewportClient::GetRenderTargetRHI()
+FViewportResource* FEditorViewportClient::GetViewportResource()
 {
-    if (!RenderTargetCache)
+    if (!ViewportResourceCache)
     {
-        RenderTargetCache = Viewport->GetRenderTargetRHI();
+        ViewportResourceCache = Viewport->GetViewportResource();
     }
-    return RenderTargetCache;
+    return ViewportResourceCache;
 }
 
 void FEditorViewportClient::CameraMoveForward(float InValue)

@@ -47,21 +47,21 @@ void FCompositingPass::PrepareRender()
 void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     // Setup
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
-    if (!RenderTargetRHI)
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    if (!ViewportResource)
     {
         return;
     }
 
     const EResourceType ResourceType = EResourceType::ERT_Compositing; 
-    FViewportResources* ResourceRHI = Viewport->GetRenderTargetRHI()->GetResources().Find(ResourceType);
+    FRenderTargetRHI* RenderTargetRHI = Viewport->GetViewportResource()->GetRenderTargets().Find(ResourceType);
 
-    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Scene), 1, &RenderTargetRHI->GetResource(EResourceType::ERT_Scene)->SRV);
-    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_PostProcess), 1, &RenderTargetRHI->GetResource(EResourceType::ERT_PP_Fog)->SRV);
-    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_EditorOverlay), 1, &RenderTargetRHI->GetResource(EResourceType::ERT_Editor)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Scene), 1, &ViewportResource->GetRenderTarget(EResourceType::ERT_Scene)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_PostProcess), 1, &ViewportResource->GetRenderTarget(EResourceType::ERT_PP_Fog)->SRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_EditorOverlay), 1, &ViewportResource->GetRenderTarget(EResourceType::ERT_Editor)->SRV);
 
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, nullptr);
-    Graphics->DeviceContext->ClearRenderTargetView(ResourceRHI->RTV, RenderTargetRHI->GetClearColor(ResourceType).data());
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, nullptr);
+    Graphics->DeviceContext->ClearRenderTargetView(RenderTargetRHI->RTV, ViewportResource->GetClearColor(ResourceType).data());
 
     Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

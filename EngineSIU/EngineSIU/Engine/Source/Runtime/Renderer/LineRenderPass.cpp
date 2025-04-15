@@ -113,9 +113,9 @@ void FLineRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewp
 {
     const EResourceType ResourceType = EResourceType::ERT_Editor;
 
-    FRenderTargetRHI* RenderTargetRHI = Viewport->GetRenderTargetRHI();
-    FViewportResources* ResourceRHI = RenderTargetRHI->GetResource(ResourceType);
-    Graphics->DeviceContext->OMSetRenderTargets(1, &ResourceRHI->RTV, RenderTargetRHI->GetDepthStencilView());
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetDepthStencilView());
 
     ProcessLineRendering(Viewport);
 
