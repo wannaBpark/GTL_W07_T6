@@ -2,6 +2,39 @@
 #ifndef SHADER_REGISTER_INCLUDE
 #define SHADER_REGISTER_INCLUDE
 
+float LinearToSRGB(float val)
+{
+    float low  = 12.92 * val;
+    float high = 1.055 * pow(val, 1.0 / 2.4) - 0.055;
+    // linear가 임계값보다 큰지 판별 후 선형 보간
+    float t = step(0.0031308, val); // linear >= 0.0031308이면 t = 1, 아니면 t = 0
+    return lerp(low, high, t);
+}
+
+float3 LinearToSRGB(float3 color)
+{
+    color.r = LinearToSRGB(color.r);
+    color.g = LinearToSRGB(color.g);
+    color.b = LinearToSRGB(color.b);
+    return color;
+}
+
+float SRGBToLinear(float val)
+{
+    float low  = val / 12.92;
+    float high = pow((val + 0.055) / 1.055, 2.4);
+    float t = step(0.04045, val); // srgb가 0.04045 이상이면 t = 1, 아니면 t = 0
+    return lerp(low, high, t);
+}
+
+float3 SRGBToLinear(float3 color)
+{
+    color.r = SRGBToLinear(color.r);
+    color.g = SRGBToLinear(color.g);
+    color.b = SRGBToLinear(color.b);
+    return color;
+}
+
 struct FMaterial
 {
     float3 DiffuseColor;
@@ -68,7 +101,7 @@ cbuffer CameraBuffer : register(b13)
     row_major matrix ProjectionMatrix;
     row_major matrix InvProjectionMatrix;
     
-    float3 ViewWorldLocation; // TODO: ShaderLine에서 유일하게 사용 중으로, 가능하면 버퍼에서 빼기
+    float3 ViewWorldLocation; // TODO: 가능하면 버퍼에서 빼기
     float ViewPadding;
     
     float NearClip;

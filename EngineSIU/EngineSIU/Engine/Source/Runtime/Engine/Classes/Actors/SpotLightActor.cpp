@@ -9,6 +9,7 @@ ASpotLight::ASpotLight()
     RootComponent = BillboardComponent;
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/SpotLight_64x.png");
+    BillboardComponent->bIsEditorBillboard = true;
 
     SpotLightComponent->AttachToComponent(RootComponent);
 }

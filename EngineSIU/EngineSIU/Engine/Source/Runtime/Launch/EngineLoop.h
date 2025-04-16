@@ -28,13 +28,14 @@ public:
     void Render() const;
     void Tick();
     void Exit();
-    void Input();
 
     void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
 
 private:
     void WindowInit(HINSTANCE hInstance);
     static LRESULT CALLBACK AppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+    void UpdateUI();
 
 public:
     static FGraphicsDevice GraphicDevice;
@@ -43,7 +44,6 @@ public:
     static FResourceMgr ResourceManager;
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
-
 
     HWND AppWnd;
 

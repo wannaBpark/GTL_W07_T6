@@ -59,7 +59,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-    EditorRenderPass->Initialize(Graphics,ShaderManager);
+    EditorRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     
     CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
     PostProcessCompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -159,7 +159,7 @@ void FRenderer::CreateCommonShader()
         { GOURAUD, "1" },
         { nullptr, nullptr }
     };
-    hr = ShaderManager->AddVertexShader(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", DefinesGouraud);
+    hr = ShaderManager->AddVertexShaderAndInputLayout(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc), DefinesGouraud);
     if (FAILED(hr))
     {
         return;
@@ -185,6 +185,7 @@ void FRenderer::PrepareRenderPass()
     EditorBillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
+    EditorRenderPass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -195,6 +196,7 @@ void FRenderer::ClearRenderArr()
     GizmoRenderPass->ClearRenderArr();
     UpdateLightBufferPass->ClearRenderArr();
     FogRenderPass->ClearRenderArr();
+    EditorRenderPass->ClearRenderArr();
 }
 
 void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport)
@@ -328,6 +330,8 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
     {
         EditorBillboardRenderPass->Render(Viewport);
     }
+
+    EditorRenderPass->Render(Viewport); // TODO: 임시로 이전에 작성되었던 와이어 프레임 렌더 패스로, 이후 개선 필요.
 
     LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
     

@@ -19,7 +19,7 @@ public:
     
     virtual ~FStaticMeshRenderPass();
     
-    virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
+    virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager) override;
     
     virtual void PrepareRender() override;
 
