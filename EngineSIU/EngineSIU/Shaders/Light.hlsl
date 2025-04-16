@@ -72,7 +72,11 @@ float CalculateAttenuation(float Distance, float AttenuationFactor, float Radius
     {
         return 0.0;
     }
-    return 1.0 / (1.0 + AttenuationFactor * Distance * Distance);
+
+    float Falloff = 1.0 / (1.0 + AttenuationFactor * Distance * Distance);
+    float SmoothFactor = (1.0 - (Distance / Radius)); // 부드러운 falloff
+
+    return Falloff * SmoothFactor;
 }
 
 float CalculateSpotEffect(float3 LightDir, float3 SpotDir, float InnerRadius, float OuterRadius, float SpotFalloff)
