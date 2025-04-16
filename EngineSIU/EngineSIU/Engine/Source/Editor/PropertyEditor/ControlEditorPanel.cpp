@@ -28,6 +28,7 @@
 #include "Actors/PointLightActor.h"
 #include "Actors/DirectionalLightActor.h"
 #include "Actors/SpotLightActor.h"
+#include "Actors/AmbientLightActor.h"
 
 void ControlEditorPanel::Render()
 {
@@ -268,13 +269,14 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         static const Primitive primitives[] = {
             { .label= "Cube",      .obj= OBJ_CUBE },
             { .label= "Sphere",    .obj= OBJ_SPHERE },
-            { .label= "PointLight", .obj= OBJ_PointLight },
-            { .label= "SpotLight", .obj= OBJ_SpotLight },
-            { .label= "DirectionalLight", .obj= OBJ_DirectionalLight },
+            { .label= "PointLight", .obj= OBJ_POINTLIGHT },
+            { .label= "SpotLight", .obj= OBJ_SPOTLIGHT },
+            { .label= "DirectionalLight", .obj= OBJ_DIRECTIONALLGIHT },
+            { .label= "AmbientLight", .obj= OBJ_AMBIENTLIGHT },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
-            { .label= "Text",      .obj= OBJ_Text },
-            { .label= "Fireball",  .obj = OBJ_Fireball},
-            { .label= "Fog",       .obj= OBJ_Fog }
+            { .label= "Text",      .obj= OBJ_TEXT },
+            { .label= "Fireball",  .obj = OBJ_FIREBALL},
+            { .label= "Fog",       .obj= OBJ_FOG }
         };
 
         for (const auto& primitive : primitives)
@@ -302,22 +304,28 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     break;
                 }
 
-                case OBJ_SpotLight:
+                case OBJ_SPOTLIGHT:
                 {
                     ASpotLight* SpotActor = World->SpawnActor<ASpotLight>();
-                    SpotActor->SetActorLabel(TEXT("OBJ_SpotLight"));
+                    SpotActor->SetActorLabel(TEXT("OBJ_SPOTLIGHT"));
                     break;
                 }
-                case OBJ_PointLight:
+                case OBJ_POINTLIGHT:
                 {
                     APointLight* LightActor = World->SpawnActor<APointLight>();
-                    LightActor->SetActorLabel(TEXT("OBJ_PointLight"));
+                    LightActor->SetActorLabel(TEXT("OBJ_POINTLIGHT"));
                     break;
                 }
-                case OBJ_DirectionalLight:
+                case OBJ_DIRECTIONALLGIHT:
                 {
                     ADirectionalLight* LightActor = World->SpawnActor<ADirectionalLight>();
-                    LightActor->SetActorLabel(TEXT("OBJ_DirectionalLight"));
+                    LightActor->SetActorLabel(TEXT("OBJ_DIRECTIONALLGIHT"));
+                    break;
+                }
+                case OBJ_AMBIENTLIGHT:
+                {
+                    AAmbientLight* LightActor = World->SpawnActor<AAmbientLight>();
+                    LightActor->SetActorLabel(TEXT("OBJ_AMBIENTLIGHT"));
                     break;
                 }
                 case OBJ_PARTICLE:
@@ -332,10 +340,10 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor->SetActorTickInEditor(true);
                     break;
                 }
-                case OBJ_Text:
+                case OBJ_TEXT:
                 {
                     SpawnedActor = World->SpawnActor<AActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_Text"));
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_TEXT"));
                     UTextComponent* TextComponent = SpawnedActor->AddComponent<UTextComponent>();
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
@@ -343,17 +351,17 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     
                     break;
                 }
-                case OBJ_Fireball:
+                case OBJ_FIREBALL:
                 {
                     SpawnedActor = World->SpawnActor<AFireballActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_FIREBALL"));
 
                     break;
                 }
-                case OBJ_Fog:
+                case OBJ_FOG:
                 {
                     SpawnedActor = World->SpawnActor<AHeightFogActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_HeightFog"));
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_FOG"));
                     break;
                 }
                 case OBJ_TRIANGLE:

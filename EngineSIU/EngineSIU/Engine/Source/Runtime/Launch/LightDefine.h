@@ -2,6 +2,7 @@
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
 #include "Math/Matrix.h"
+#define MAX_AMBIENT_LIGHT 16
 #define MAX_DIRECTIONAL_LIGHT 16
 #define MAX_POINT_LIGHT 16
 #define MAX_SPOT_LIGHT 16
@@ -50,12 +51,12 @@ struct FSpotLightInfo
 
 struct FLightInfoBuffer
 {
-    FAmbientLightInfo Ambient;
+    FAmbientLightInfo Ambient[MAX_AMBIENT_LIGHT];
     FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];
     FPointLightInfo PointLights[MAX_POINT_LIGHT];
     FSpotLightInfo SpotLights[MAX_SPOT_LIGHT];
     int DirectionalLightsCount;
     int PointLightsCount;
     int SpotLightsCount;
-    float    pad0;
+    int AmbientLightsCount;
 };

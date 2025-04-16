@@ -5,6 +5,7 @@ class UDirectionalLightComponent;
 class UPointLightComponent;
 class USpotLightComponent;
 class UDirectionalLightComponent;
+class UAmbientLightComponent;
 class UBillboardComponent;
 
 class ALight :public AActor
