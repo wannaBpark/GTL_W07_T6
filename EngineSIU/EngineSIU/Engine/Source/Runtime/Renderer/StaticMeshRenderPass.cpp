@@ -133,7 +133,6 @@ void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex evi)
     }
 }
 
-
 void FStaticMeshRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
 {
     BufferManager = InBufferManager;
@@ -173,9 +172,8 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
                                   TEXT("FTextureConstants"),
+                                  TEXT("FTextureFlagConstants")
     };
-
-
     BufferManager->BindConstantBuffers(PSBufferKeys, 1, EShaderStage::Pixel);
 
     // Begin Test
@@ -185,6 +183,7 @@ void FStaticMeshRenderPass::PrepareRenderState() const
                                   TEXT("FLitUnlitConstants"),
                                   TEXT("FSubMeshConstants"),
                                   TEXT("FTextureConstants"),
+                                  TEXT("FTextureFlagConstants")
     };
     BufferManager->BindConstantBuffers(VSBufferKeys, 2, EShaderStage::Vertex);
     // End Test    
@@ -223,7 +222,6 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
         int materialIndex = RenderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
         FSubMeshConstants SubMeshData = (subMeshIndex == SelectedSubMeshIndex) ? FSubMeshConstants(true) : FSubMeshConstants(false);
-
         BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), SubMeshData);
 
         if (OverrideMaterials[materialIndex] != nullptr)
@@ -235,6 +233,7 @@ void FStaticMeshRenderPass::RenderPrimitive(OBJ::FStaticMeshRenderData* RenderDa
         uint64 indexCount = RenderData->MaterialSubsets[subMeshIndex].IndexCount;
         Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
     }
+
 }
 
 

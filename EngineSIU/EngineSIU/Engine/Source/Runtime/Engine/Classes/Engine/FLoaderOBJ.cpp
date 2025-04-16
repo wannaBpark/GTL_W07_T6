@@ -309,13 +309,54 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 
             FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
             OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = TexturePath;
-            OutFStaticMesh.Materials[MaterialIndex].bHasTexture = true;
+            OutFStaticMesh.Materials[MaterialIndex].TextureFlags |= 1 << 1;
 
             CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
+        }
+
+        if (Token == "map_Bump")
+        {
+            std::string opt;
+            while (LineStream >> opt)
+            {
+                if (opt == "-bm")
+                {
+                    float bmValue;
+                    LineStream >> bmValue;
+                    OutFStaticMesh.Materials[MaterialIndex].BumpMultiplier = bmValue;
+                }
+                else
+                {
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTextureName = opt;
+                    FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].BumpTextureName.ToWideString();
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath = TexturePath;
+                    OutFStaticMesh.Materials[MaterialIndex].TextureFlags |= 1 << 2;
+
+                    CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath);
+                }
+            }
         }
     }
 
     return true;
+}
+
+FVector CalculateTangentResult(const FStaticMeshVertex& V0, const FStaticMeshVertex& V1, const FStaticMeshVertex& V2)
+{
+    FVector E1 = FVector(V1.X - V0.X, V1.Y - V0.Y, V1.Z - V0.Z);
+    FVector E2 = FVector(V2.X - V0.X, V2.Y - V0.Y, V2.Z - V0.Z);
+
+    float UV1_X = V1.U - V0.U;
+    float UV1_Y = V1.V - V0.V;
+    float UV2_X = V2.U - V0.U;
+    float UV2_Y = V2.V - V0.V;
+
+    float f = 1.0f / (UV1_X * UV2_Y - UV2_X * UV1_Y);
+    float Tx = f * (UV2_Y * E1.X - UV1_Y * E2.X);
+    float Ty = f * (UV2_Y * E1.Y - UV1_Y * E2.Y);
+    float Tz = f * (UV2_Y * E1.Z - UV1_Y * E2.Z);
+
+    return FVector(Tx, Ty, Tz).GetSafeNormal();
 }
 
 bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
@@ -363,19 +404,6 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
                 StaticMeshVertex.NormalZ = RawData.Normals[NormalIndex].Z;
             }
 
-            if (i % 3 == 2) // 삼각형이 구성되면 Tangent 계산
-            {
-                const uint32 IndexNum = OutStaticMesh.Indices.Num();
-
-                FStaticMeshVertex& Vertex0 = OutStaticMesh.Vertices[OutStaticMesh.Indices[IndexNum - 2]];
-                FStaticMeshVertex& Vertex1 = OutStaticMesh.Vertices[OutStaticMesh.Indices[IndexNum - 1]];
-                FStaticMeshVertex& Vertex2 = StaticMeshVertex;
-
-                CalculateTangent(Vertex0, Vertex1, Vertex2);
-                CalculateTangent(Vertex1, Vertex2, Vertex0);
-                CalculateTangent(Vertex2, Vertex0, Vertex1); // 가장 마지막에 계산된 PivotVertex의 Tangent로 덮어씌워짐
-            }
-
             for (int32 j = 0; j < OutStaticMesh.MaterialSubsets.Num(); j++)
             {
                 const FMaterialSubset& Subset = OutStaticMesh.MaterialSubsets[j];
@@ -394,6 +422,65 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
         OutStaticMesh.Indices.Add(FinalIndex);
     }
 
+    // Calculate Tangent
+    for (int32 i = 0; i < OutStaticMesh.Indices.Num(); i += 3)
+    {
+        FStaticMeshVertex& Vertex0 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i]];
+        FStaticMeshVertex& Vertex1 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i + 1]];
+        FStaticMeshVertex& Vertex2 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i + 2]];
+
+        CalculateTangent(Vertex0, Vertex1, Vertex2);
+        CalculateTangent(Vertex1, Vertex2, Vertex0);
+        CalculateTangent(Vertex2, Vertex0, Vertex1);
+    }
+
+    struct FTangentAccumulator
+    {
+        FVector TangentSum = FVector(0, 0, 0);
+        int32 Count = 0;
+
+        void Add(const FVector& Tangent)
+        {
+            TangentSum += Tangent;
+            Count++;
+        }
+
+        FVector GetNormalized() const
+        {
+            return Count > 0 ? TangentSum.GetSafeNormal() : FVector(1, 0, 0); // fallback
+        }
+    };
+
+
+    //TArray<FTangentAccumulator> TangentAccumulators;
+    //TangentAccumulators.SetNum(OutStaticMesh.Vertices.Num());
+
+    //for (int32 i = 0; i < OutStaticMesh.Indices.Num(); i += 3)
+    //{
+    //    int32 i0 = OutStaticMesh.Indices[i + 0];
+    //    int32 i1 = OutStaticMesh.Indices[i + 1];
+    //    int32 i2 = OutStaticMesh.Indices[i + 2];
+
+    //    const FStaticMeshVertex& V0 = OutStaticMesh.Vertices[i0];
+    //    const FStaticMeshVertex& V1 = OutStaticMesh.Vertices[i1];
+    //    const FStaticMeshVertex& V2 = OutStaticMesh.Vertices[i2];
+
+    //    FVector Tangent0 = CalculateTangentResult(V0, V1, V2); // FVector 반환 함수
+    //    FVector Tangent1 = CalculateTangentResult(V1, V2, V0); // FVector 반환 함수
+    //    FVector Tangent2 = CalculateTangentResult(V2, V0, V1); // FVector 반환 함수
+
+    //    TangentAccumulators[i0].Add(Tangent0);
+    //    TangentAccumulators[i1].Add(Tangent1);
+    //    TangentAccumulators[i2].Add(Tangent2);
+    //}
+
+    //for (int32 i = 0; i < OutStaticMesh.Vertices.Num(); i++)
+    //{
+    //    FVector FinalTangent = TangentAccumulators[i].GetNormalized();
+    //    OutStaticMesh.Vertices[i].TangentX = FinalTangent.X;
+    //    OutStaticMesh.Vertices[i].TangentY = FinalTangent.Y;
+    //    OutStaticMesh.Vertices[i].TangentZ = FinalTangent.Z;
+    //}
     // Calculate StaticMesh BoundingBox
     ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
 
@@ -454,7 +541,7 @@ void FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticM
     const float Ty = f * (t2 * E1y - t1 * E2y);
     const float Tz = f * (t2 * E1z - t1 * E2z);
 
-    FVector Tangent = FVector(Tx, Ty, Tz).Normalize();
+    FVector Tangent = FVector(Tx, Ty, Tz).GetSafeNormal();
 
     PivotVertex.TangentX = Tangent.X;
     PivotVertex.TangentY = Tangent.Y;
@@ -568,7 +655,8 @@ bool FManagerOBJ::SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FS
     for (const FObjMaterialInfo& Material : StaticMesh.Materials)
     {
         Serializer::WriteFString(File, Material.MaterialName);
-        File.write(reinterpret_cast<const char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        File.write(reinterpret_cast<const char*>(&Material.TextureFlags), sizeof(Material.TextureFlags));
+        //File.write(reinterpret_cast<const char*>(&Material.bHasNormalMap), sizeof(Material.bHasNormalMap));
         File.write(reinterpret_cast<const char*>(&Material.bTransparent), sizeof(Material.bTransparent));
         File.write(reinterpret_cast<const char*>(&Material.Diffuse), sizeof(Material.Diffuse));
         File.write(reinterpret_cast<const char*>(&Material.Specular), sizeof(Material.Specular));
@@ -649,7 +737,9 @@ bool FManagerOBJ::LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStati
     for (FObjMaterialInfo& Material : OutStaticMesh.Materials)
     {
         Serializer::ReadFString(File, Material.MaterialName);
-        File.read(reinterpret_cast<char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        File.read(reinterpret_cast<char*>(&Material.TextureFlags), sizeof(Material.TextureFlags));
+        //File.read(reinterpret_cast<char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        //File.read(reinterpret_cast<char*>(&Material.bHasNormalMap), sizeof(Material.bHasNormalMap));
         File.read(reinterpret_cast<char*>(&Material.bTransparent), sizeof(Material.bTransparent));
         File.read(reinterpret_cast<char*>(&Material.Diffuse), sizeof(Material.Diffuse));
         File.read(reinterpret_cast<char*>(&Material.Specular), sizeof(Material.Specular));

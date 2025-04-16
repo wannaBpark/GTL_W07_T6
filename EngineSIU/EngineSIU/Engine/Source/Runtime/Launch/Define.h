@@ -82,7 +82,12 @@ struct FObjMaterialInfo
 {
     FString MaterialName;  // newmtl : Material Name.
 
-    bool bHasTexture = false;  // Has Texture?
+    // Begin Test
+    unsigned int TextureFlags=0;
+    //bool bHasTexture = false;  // Has Texture?
+    //bool bHasNormalMap = false;// Has NormalMap?
+    // End Test
+
     bool bTransparent = false; // Has alpha channel?
 
     FVector Diffuse;  // Kd : Diffuse (Vector4)
@@ -93,7 +98,7 @@ struct FObjMaterialInfo
     float SpecularScalar; // Ns : Specular Power (Float)
     float DensityScalar;  // Ni : Optical Density (Float)
     float TransparencyScalar; // d or Tr  : Transparency of surface (Float)
-
+    float BumpMultiplier;     // -bm : Bump Mulitplier ex) normalMap.xy *= BumpMultiplier; 
     uint32 IlluminanceModel; // illum: illumination Model between 0 and 10. (UINT)
 
     /* Texture */
@@ -373,6 +378,12 @@ struct FTextureConstants {
     float pad1;
 };
 
+struct FTextureFlagConstants {
+    unsigned int TextureFlags;
+    float TextureFlagPad0;
+    float TextureFlagPad1;
+    float TextureFlagPad2;
+};
 struct FLinePrimitiveBatchArgs
 {
     FGridParameters GridParam;

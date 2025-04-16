@@ -7,7 +7,7 @@ UDirectionalLightComponent::UDirectionalLightComponent()
 {
 
     DirectionalLightInfo.Direction = -GetUpVector();
-    DirectionalLightInfo.Intensity = 1000.0f;
+    DirectionalLightInfo.Intensity = 10.0f;
 
     DirectionalLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }

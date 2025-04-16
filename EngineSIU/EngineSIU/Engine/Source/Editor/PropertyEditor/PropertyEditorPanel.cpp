@@ -160,7 +160,7 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { pointlightObj->SetLightColor(c); });
 
                 float Intensity = pointlightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 160.0f, "%.1f"))
                     pointlightObj->SetIntensity(Intensity);
 
                 float Radius = pointlightObj->GetRadius();
@@ -187,7 +187,7 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { spotlightObj->SetLightColor(c); });
 
                 float Intensity = spotlightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 160.0f, "%.1f"))
                     spotlightObj->SetIntensity(Intensity);
 
                 float Radius = spotlightObj->GetRadius();
@@ -227,7 +227,7 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { dirlightObj->SetLightColor(c); });
 
                 float Intensity = dirlightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 150.0f, "%.1f"))
                     dirlightObj->SetIntensity(Intensity);
 
                 LightDirection = dirlightObj->GetDirection();

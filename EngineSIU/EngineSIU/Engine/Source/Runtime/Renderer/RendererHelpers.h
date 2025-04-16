@@ -24,16 +24,34 @@ namespace MaterialUtils {
         data.EmmisiveColor = MaterialInfo.Emissive;
 
         BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), data);
-
-        if (MaterialInfo.bHasTexture) {
+        // Begin Test
+        BufferManager->UpdateConstantBuffer(TEXT("FTextureFlagConstants"), MaterialInfo.TextureFlags);
+        // End Test
+        // bHasDiffuseTexture
+        if (MaterialInfo.TextureFlags & 1 << 1) {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
+            Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
+        }
+        else
+        {
+            ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+            ID3D11SamplerState* nullSampler[1] = { nullptr };
+            Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
+            Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
+
+        }
+        // bHasNormalTexture
+        if (MaterialInfo.TextureFlags & 1 << 2)
+        {
+            std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.BumpTexturePath);
+            Graphics->DeviceContext->PSSetShaderResources(1, 1, &texture->TextureSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
         }
         else {
             ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
             ID3D11SamplerState* nullSampler[1] = { nullptr };
-            Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
+            Graphics->DeviceContext->PSSetShaderResources(1, 1, nullSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
         }
     }
