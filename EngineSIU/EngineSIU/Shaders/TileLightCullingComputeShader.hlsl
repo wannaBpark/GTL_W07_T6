@@ -104,11 +104,21 @@ RWStructuredBuffer<uint> TileLightMask : register(u0); // 타일별 조명 마�
 RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
 
 
+// dispatchID = groupID * [numthreads] + threadID
 
 [numthreads(TILE_SIZE, TILE_SIZE, 1)]
-void main(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, uint3 threadID : SV_GroupThreadID)
+void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, uint3 threadID : SV_GroupThreadID)
 {
     uint2 tileCoord = groupID.xy;
+    uint2 pixel = tileCoord * TILE_SIZE + threadID.xy;
+    
+    // 화면 범위 내에 있는 경우에만
+    if (pixel.x < ScreenSize.x && pixel.y < ScreenSize.y)
+    {
+        // 모든 화면 픽셀에 빨간색(1, 0, 0, 1)을 출력
+        DebugHeatmap[pixel] = float4(0.0, 0.0, 0.0, 1.0);
+    }
+
     uint2 screenTileSize = TileSize;  // TILE_SIZE
     uint2 screenSize = ScreenSize;
 
@@ -196,14 +206,24 @@ void main(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, ui
     float4 result = float4(color, 0.8f);
 
     // 타일 내부 모든 픽셀에 출력
-    for (uint i = 0; i < TILE_SIZE*TILE_SIZE; ++i)
-    {
-        uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
-        uint2 pixel = tileCoord * TILE_SIZE + local;
-        if (all(pixel < ScreenSize))
-        {
-            //DebugHeatmap[pixel] = result;
-            DebugHeatmap[pixel] = float4(heatmap[3].xyz, 1.0f);
-        }
-    }
+    //for (uint i = 0; i < TILE_SIZE*TILE_SIZE; ++i)
+    //{
+    //    uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
+    //    // pixel = 타일 내부에서 0부터 TILE_SIZE−1까지의 오프셋
+    //    // tileCoord * TILE_SIZE = 타일의 왼쪽 상단 좌표
+    //    uint2 pixel = tileCoord * TILE_SIZE + local; 
+    //    if (all(pixel < ScreenSize))
+    //    {
+    //        //DebugHeatmap[pixel] = result;
+    //        DebugHeatmap[pixel] = float4(heatmap[3].xyz, 1.0f);
+    //    }
+    //}
+    //for (uint i = 0; i < ScreenSize.x * ScreenSize.y; ++i)
+    //{
+    //    uint2 pixel = unflatten2D(i, ScreenSize);
+    //    DebugHeatmap[pixel] = float4(heatmap[3].xyz, 1.0f);
+    //}
+
+    // SV_DispatchThreadID는 전체 화면상의 픽셀 좌표(전역 좌표)를 나타냅니다.
+    
 }

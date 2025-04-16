@@ -61,11 +61,11 @@ void FTileLightCullingPass::PrepareRender()
     
 }
 
-void FTileLightCullingPass::Render(
-    const std::shared_ptr<FEditorViewportClient>& Viewport,
-    ID3D11ShaderResourceView* DepthSRV
+void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport, 
+    ID3D11ShaderResourceView *& DepthSRV
 )
 {
+    ComputeShader = ShaderManager->GetComputeShaderByKey(L"TileLightCullingComputeShader");
     UpdateTileLightConstantBuffer(Viewport);
     Dispatch(DepthSRV);
 }
@@ -75,7 +75,7 @@ void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>&
 {
 }
 
-void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView* DepthSRV)
+void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView*& DepthSRV)
 {
     // 한 스레드 그룹(groupSizeX, groupSizeY)은 16x16픽셀 영역처리
     const UINT groupSizeX = (Graphics->screenWidth  + TILE_SIZE - 1) / TILE_SIZE;
@@ -287,7 +287,7 @@ void FTileLightCullingPass::Release()
 void FTileLightCullingPass::ClearUAVs()
 {
     // UAV 초기화용 zero값
-    UINT clearColor[4] = { 1, 0, 0, 0 };
+    UINT clearColor[4] = { 0, 0, 0, 0 };
 
     // 1. 타일 마스크 초기화
     Graphics->DeviceContext->ClearUnorderedAccessViewUint(TileUAV, clearColor);

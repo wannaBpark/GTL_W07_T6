@@ -133,15 +133,15 @@ void FFogRenderPass::PrepareRender()
             FogComponents.Add(iter);
         }
     }
-    FogVertexShader = ShaderManager->GetVertexShaderByKey(L"FogVertexShader");
-    FogPixelShader = ShaderManager->GetPixelShaderByKey(L"FogPixelShader");
-    FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(L"FogQuadPixelShader");
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"FogVertexShader");
+
 }
 
 void FFogRenderPass::ClearRenderArr()
 {
     FogComponents.Empty();
+
+    ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(3, 1, nullSRV); // Compute Shader SRV 해제
 }
 
 void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)

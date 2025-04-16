@@ -1,7 +1,7 @@
 Texture2D SceneColor : register(t0);
 Texture2D Fog : register(t1);
 
-Texture2D HeatMap : register(t2); // Added : To use heatmap texture
+Texture2D<float4> HeatMap : register(t2); // Added : To use heatmap texture
 
 SamplerState Sampler : register(s0);
 
@@ -29,7 +29,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
     FogColor.a = 0.5f;
     
     //float3 FinalColor = lerp(Scene.rgb, FogColor.rgb, FogColor.a);
-    float3 FinalColor = Scene.rgb;
+    float3 FinalColor = FogColor.rgb;
     //float3 FinalColor = float3(1.0f, 0.0f, 0.0f);
     
     return float4(FinalColor.rgb, 1.0);

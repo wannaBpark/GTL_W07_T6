@@ -27,7 +27,7 @@ public:
 
     void ResizeDepthStencil();
 
-    ID3D11ShaderResourceView* GetDepthSRV() { return DepthSRV; }
+    ID3D11ShaderResourceView*& GetDepthSRV() { return DepthSRV; }
 
 private:
     FDXDBufferManager* BufferManager;
