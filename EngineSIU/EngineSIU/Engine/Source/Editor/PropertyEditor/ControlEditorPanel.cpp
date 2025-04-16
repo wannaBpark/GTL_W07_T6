@@ -76,6 +76,9 @@ void ControlEditorPanel::Render()
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
 
     ImGui::SameLine();
+    CreateLightSpawnButton(IconSize, IconFont);
+
+    ImGui::SameLine();
     ImGui::PushFont(IconFont);
 
     CreatePIEButton(IconSize, IconFont);
@@ -553,6 +556,37 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
     {
         ImGui::PopStyleColor();
     }
+}
+
+void ControlEditorPanel::CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconFont)
+{
+    UWorld* World = GEngine->ActiveWorld;
+    ImVec2 WindowSize = ImGui::GetIO().DisplaySize;
+
+    float CenterX = (WindowSize.x - ButtonSize.x) / 2.5f;
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX + 40.0f, 10.0f));
+    const char* label = "Light";
+    ImVec2 textSize = ImGui::CalcTextSize(label);
+    ImVec2 padding = ImGui::GetStyle().FramePadding;
+    ImVec2 buttonSize = ImVec2(
+        textSize.x + padding.x * 2.0f,
+        textSize.y + padding.y * 2.0f
+    );
+    buttonSize.y = ButtonSize.y;
+    if (ImGui::Button("Light", buttonSize))
+    {
+        //World->SpawnLightGrid();
+        UE_LOG(LogLevel::Display, TEXT("Light Button Clicked"));
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX + 100.0f, 10.0f));
+    if (ImGui::Button("Light Down", buttonSize))
+    {
+        //World->DeleteLightGrid();
+        UE_LOG(LogLevel::Display, TEXT("Light Button Clicked"));
+    }
+
 }
 
 uint64 ControlEditorPanel::ConvertSelectionToFlags(const bool selected[]) const

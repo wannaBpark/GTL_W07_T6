@@ -799,6 +799,9 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\SpotLightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\DirectionalLightActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\PointLightActor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\DepthPrePass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\TileLightCullingPass.cpp" />
+    <ClCompile Include="LightGridGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -844,6 +847,7 @@
     <FxCompile Include="UberLit.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\TileLightCullingComputeShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SpotLightComponent.h">
@@ -876,6 +880,9 @@
     <ClInclude Include="Engine\Source\Runtime\Renderer\EditorRenderPass.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\RenderResources.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\ShaderConstants.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\DepthPrePass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\TileLightCullingPass.h" />
+    <ClInclude Include="LightGridGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\EditorShaderConstants.hlsli" />
