@@ -277,7 +277,12 @@ float4 DirectionalLight(int nIndex, float3 vPosition, float3 vNormal)
                  
 #elif defined(LIGHTING_MODEL_LAMBERT)
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor);
-                 
+    
+    // bHasDiffuseMap
+    if (TextureFlags & 1 << 1)
+    {
+        lit = light.LightColor.rgb * diffuseFactor;
+    }
 #else
     float specularFactor = CalculateSpecular(vNormal, lightDir, viewDir, Material.SpecularScalar);
     

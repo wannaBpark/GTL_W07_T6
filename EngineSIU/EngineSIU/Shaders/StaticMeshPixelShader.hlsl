@@ -117,11 +117,13 @@ PS_OUTPUT mainPS(PS_INPUT input)
     if (IsLit)
     {
         float4 litColor = Lighting(input.worldPos, normalize(normal));
+        baseColor = pow(baseColor, 2.2);
         float3 finalColor = litColor.rgb * baseColor.rgb;
         output.color = float4(finalColor, 1.0);
     }
     else
     {
+        baseColor = pow(baseColor, 2.2);
         output.color = float4(baseColor, 1.0);
     }
 #endif
