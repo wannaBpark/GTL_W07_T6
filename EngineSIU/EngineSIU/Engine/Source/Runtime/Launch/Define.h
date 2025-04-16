@@ -159,7 +159,7 @@ struct FSimpleVertex
 };
 
 struct FOBB {
-    FVector corners[8];
+    FVector4 corners[8];
 };
 
 struct FRect

@@ -40,7 +40,7 @@ struct FConeData
 };
 struct FOrientedBoxCornerData
 {
-    float3 corners[8]; // 회전/이동 된 월드 공간상의 8꼭짓점
+    float4 corners[8]; // 회전/이동 된 월드 공간상의 8꼭짓점
 };
 
 StructuredBuffer<FBoundingBoxData> g_BoundingBoxes : register(t2);
@@ -229,7 +229,7 @@ float3 ComputeOrientedBoxPosition(uint obIndex, uint edgeIndex, uint vertexID)
 {
     FOrientedBoxCornerData ob = g_OrientedBoxes[obIndex];
     int cornerID = BB_EdgeIndices[edgeIndex][vertexID];
-    return ob.corners[cornerID];
+    return ob.corners[cornerID].xyz;
 }
 
 /////////////////////////////////////////////////////////////////////////
