@@ -103,54 +103,6 @@ float CalculateSpecular(float3 WorldNormal, float3 ToLightDir, float3 ViewDir, f
 
 float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float WorldViewPosition, float3 DiffuseColor)
 {
-#ifdef LIGHTING_MODEL_GOURAUD
-    FPointLightInfo LightInfo = PointLights[Index];
-    
-    float3 ToLight = LightInfo.Position - WorldPosition;
-    float Distance = length(ToLight);
-    
-    if (Distance > LightInfo.Radius)
-        return float4(0.0, 0.0, 0.0, 0.0);
-    
-    float3 LightDir = normalize(ToLight);
-    float DiffuseFactor = CalculateDiffuse(WorldNormal, LightDir);
-    float Attenuation = CalculateAttenuation(Distance, LightInfo.Attenuation, LightInfo.Radius);
-    
-    float SpecularFactor = 0.0;
-    if (DiffuseFactor > 0.0)
-    {
-        float3 ViewDir = normalize(WorldViewPosition - WorldPosition);
-        float3 HalfVector = normalize(LightDir + ViewDir);
-        SpecularFactor = pow(max(dot(WorldNormal, HalfVector), 0.0), 4.0);
-    }
-    
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor) + (SpecularFactor * Material.SpecularColor);
-                 
-    return float4(Lit * Attenuation * LightInfo.Intensity, 1.0);
-    
-#elif defined(LIGHTING_MODEL_LAMBERT)
-
-    FPointLightInfo LightInfo = PointLights[Index];
-    
-    float3 ToLight = LightInfo.Position - WorldPosition;
-    float Distance = length(ToLight);
-    
-    if (Distance > LightInfo.Radius)
-        return float4(0.0, 0.0, 0.0, 0.0);
-    
-    float3 LightDir = normalize(ToLight);
-    float DiffuseFactor=CalculateDiffuse(WorldNormal,LightDir);
-    float Attenuation = CalculateAttenuation(Distance, LightInfo.Attenuation, LightInfo.Radius);
-    
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor);
-    // bHasDiffuseMap
-    if (Material.TextureFlag & 1 << 1)
-    {
-        Lit = (LightInfo.LightColor.rgb * DiffuseFactor);
-    }
-    return float4(Lit * Attenuation * LightInfo.Intensity, 1.0);
-    
-#else
     FPointLightInfo LightInfo = PointLights[Index];
     
     float3 ToLight = LightInfo.Position - WorldPosition;
@@ -158,24 +110,21 @@ float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float Wor
     
     float Attenuation = CalculateAttenuation(Distance, LightInfo.Attenuation, LightInfo.Radius);
     if (Attenuation <= 0.0)
-        return float4(0.f, 0.f, 0.f, 0.f);
-    
-    float3 LightDir = normalize(ToLight);
-    
-    float3 ViewDir = normalize(WorldViewPosition - WorldPosition);
-    
-    float DiffuseFactor = CalculateDiffuse(WorldNormal, LightDir);
-    float SpecularFactor = CalculateSpecular(WorldNormal, LightDir, ViewDir, Material.SpecularScalar);
-    
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor) + (SpecularFactor * Material.SpecularColor);
-    // bHasDiffuseMap
-    if (Material.TextureFlag & 1 << 1)
     {
-        Lit = (LightInfo.LightColor.rgb * DiffuseFactor) + (SpecularFactor * Material.SpecularColor);
+        return float4(0.f, 0.f, 0.f, 0.f);
     }
     
-    return float4(Lit * Attenuation * LightInfo.Intensity, 1.0);
+    float3 LightDir = normalize(ToLight);
+    float DiffuseFactor = CalculateDiffuse(WorldNormal, LightDir);
+#ifdef LIGHTING_MODEL_LAMBERT
+    float3 Lit = (DiffuseFactor * DiffuseColor) * LightInfo.LightColor.rgb;
+#else
+    float3 ViewDir = normalize(WorldViewPosition - WorldPosition);
+    float SpecularFactor = CalculateSpecular(WorldNormal, LightDir, ViewDir, Material.SpecularScalar);
+    float3 Lit = ((DiffuseFactor * DiffuseColor) + (SpecularFactor * Material.SpecularColor)) * LightInfo.LightColor.rgb;
 #endif
+    
+    return float4(Lit * Attenuation * LightInfo.Intensity, 1.0);
 }
 
 float4 SpotLight(int Index, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
