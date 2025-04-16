@@ -9,13 +9,23 @@ FLightGridGenerator::FLightGridGenerator()
 
 FLightGridGenerator::~FLightGridGenerator()
 {
+    for (TArray<AActor*>& shell : LightGrid)
+    {
+        for (AActor* actor : shell)
+        {
+            if (actor)
+            {
+                actor->Destroy();
+            }
+        }
+        shell.Empty();
+    }
+
+    LightGrid.Empty();
 }
 
 void FLightGridGenerator::GenerateLight(UWorld* world)
 {
-    const float spacing = 300.0f;
-    const float jitterAmount = 80.0f;
-
     int minR = currentHalfCountPerAxis;
     int maxR = currentHalfCountPerAxis;
 
