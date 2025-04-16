@@ -5,6 +5,8 @@
 #include "EngineLoop.h"
 #include "UnrealClient.h"
 #include "WindowsCursor.h"
+#include "BaseGizmos/GizmoBaseComponent.h"
+#include "Engine/EditorEngine.h"
 #include "Slate/Widgets/Layout/SSplitter.h"
 #include "SlateCore/Widgets/SWindow.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -85,11 +87,10 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
         {
         case EKeys::RightMouseButton:
         {
-            if (!bIsPressedMouseRightButton && !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+            if (!InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
             {
                 FWindowsCursor::SetShowMouseCursor(false);
                 MousePinPosition = InMouseEvent.GetScreenSpacePosition();
-                bIsPressedMouseRightButton = true;
             }
             break;
         }
@@ -176,15 +177,11 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
         {
         case EKeys::RightMouseButton:
         {
-            if (bIsPressedMouseRightButton)
-            {
-                FWindowsCursor::SetShowMouseCursor(true);
-                FWindowsCursor::SetPosition(
-                    static_cast<int32>(MousePinPosition.X),
-                    static_cast<int32>(MousePinPosition.Y)
-                );
-                bIsPressedMouseRightButton = false;
-            }
+            FWindowsCursor::SetShowMouseCursor(true);
+            FWindowsCursor::SetPosition(
+                static_cast<int32>(MousePinPosition.X),
+                static_cast<int32>(MousePinPosition.Y)
+            );
             return;
         }
 
@@ -210,7 +207,10 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
         )
         {
             // 에디터 카메라 이동 로직
-            if (bIsPressedMouseRightButton)
+            if (
+                !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)
+                && InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton)
+            )
             {
                 ActiveViewportClient->MouseMove(InMouseEvent);
             }
@@ -220,7 +220,7 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
         else if (InMouseEvent.GetEffectingButton() == EKeys::MouseWheelAxis)
         {
             // 카메라 속도 조절
-            if (bIsPressedMouseRightButton && ActiveViewportClient->IsPerspective())
+            if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton) && ActiveViewportClient->IsPerspective())
             {
                 const float CurrentSpeed = ActiveViewportClient->GetCameraSpeedScalar();
                 const float Adjustment = FMath::Sign(InMouseEvent.GetWheelDelta()) * FMath::Loge(CurrentSpeed + 1.0f) * 0.5f;
@@ -237,7 +237,7 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
         // 뷰포트에서 앞뒤 방향으로 화면 이동
         if (ActiveViewportClient->IsPerspective())
         {
-            if (!bIsPressedMouseRightButton)
+            if (!InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
             {
                 const FVector CameraLoc = ActiveViewportClient->PerspectiveCamera.GetLocation();
                 const FVector CameraForward = ActiveViewportClient->PerspectiveCamera.GetForwardVector();
