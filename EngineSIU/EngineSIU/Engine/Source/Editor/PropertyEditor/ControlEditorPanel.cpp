@@ -75,6 +75,8 @@ void ControlEditorPanel::Render()
 
     /* Get Window Content Region */
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
+    ImGui::SameLine();
+    CreateLightSpawnButton(IconSize, IconFont);
 
     ImGui::SameLine();
     ImGui::PushFont(IconFont);
@@ -594,4 +596,62 @@ void ControlEditorPanel::OnResize(HWND hWnd)
     GetClientRect(hWnd, &clientRect);
     Width = clientRect.right - clientRect.left;
     Height = clientRect.bottom - clientRect.top;
+}
+
+
+void ControlEditorPanel::CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconFont)
+{
+    UWorld* World = GEngine->ActiveWorld;
+    ImVec2 WindowSize = ImGui::GetIO().DisplaySize;
+
+    float CenterX = (WindowSize.x - ButtonSize.x) / 2.5f;
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX + 40.0f, 10.0f));
+    const char* label = "Light";
+    ImVec2 textSize = ImGui::CalcTextSize(label);
+    ImVec2 padding = ImGui::GetStyle().FramePadding;
+    ImVec2 buttonSize = ImVec2(
+        textSize.x + padding.x * 2.0f,
+        textSize.y + padding.y * 2.0f
+    );
+    buttonSize.y = ButtonSize.y;
+    if (ImGui::Button("Light", buttonSize))
+    {
+        ImGui::OpenPopup("LightGeneratorControl");
+    }
+
+    if (ImGui::BeginPopup("LightGeneratorControl"))
+    {
+        struct LightGeneratorMode {
+            const char* label;
+            int mode;
+        };
+
+        static const LightGeneratorMode modes[] = {
+            {.label = "Generate",      .mode = ELightGridGenerator::Generate },
+            {.label = "Delete",    .mode = ELightGridGenerator::Delete },
+            {.label = "Reset", .mode = ELightGridGenerator::Reset },
+        };
+
+        for (const auto& mode : modes)
+        {
+            if (ImGui::Selectable(mode.label))
+            {
+                switch (mode.mode)
+                {
+                case ELightGridGenerator::Generate:
+                    LightGridGenerator.GenerateLight(World);
+                    break;
+                case ELightGridGenerator::Delete:
+                    LightGridGenerator.DeleteLight(World);
+                    break;
+                case ELightGridGenerator::Reset:
+                    LightGridGenerator.Reset(World);
+                    break;
+                }
+            }
+        }
+
+        ImGui::EndPopup();
+    }
 }

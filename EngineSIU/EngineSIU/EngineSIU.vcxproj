@@ -223,7 +223,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\CubeComp.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\AmbientLightComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\DirectionalLightComponent.cpp"/>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\DirectionalLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\PointLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\SpotLightComponent.cpp" />
@@ -289,6 +289,7 @@
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
+    <ClCompile Include="LightGridGenerator.cpp" />
     <None Include="Shaders\CompositingShader.hlsl" />
     <None Include="Shaders\DepthBufferPixelShader.hlsl" />
     <None Include="Shaders\DepthBufferVertexShader.hlsl" />
@@ -451,6 +452,7 @@
     <ClInclude Include="Engine\Source\Runtime\Windows\RawInput.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsCursor.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />
+    <ClInclude Include="LightGridGenerator.h" />
     <None Include="Shaders\EditorShaderConstants.hlsli" />
     <None Include="Shaders\ShaderConstants.hlsli" />
   </ItemGroup>
@@ -468,7 +470,7 @@
     <ClInclude Include="Engine\Source\ThirdParty\include\ImGUI\imstb_textedit.h" />
     <ClInclude Include="Engine\Source\ThirdParty\include\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Engine\Source\ThirdParty\JSON\json.hpp" />
-    </ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <FxCompile Include="UberLit.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -577,5 +579,3 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
-
-    
