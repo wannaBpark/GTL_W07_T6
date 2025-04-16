@@ -582,20 +582,20 @@ void ControlEditorPanel::CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconF
     {
         struct LightGeneratorMode {
             const char* label;
-            int obj;
+            int mode;
         };
 
         static const LightGeneratorMode modes[] = {
-            {.label = "Generate",      .obj = ELightGridGenerator::Generate },
-            {.label = "Delete",    .obj = ELightGridGenerator::Delete },
-            {.label = "Reset", .obj = ELightGridGenerator::Reset },
+            {.label = "Generate",      .mode = ELightGridGenerator::Generate },
+            {.label = "Delete",    .mode = ELightGridGenerator::Delete },
+            {.label = "Reset", .mode = ELightGridGenerator::Reset },
         };
 
         for (const auto& mode : modes)
         {
             if (ImGui::Selectable(mode.label))
             {
-                switch (mode.obj)
+                switch (mode.mode)
                 {
                 case ELightGridGenerator::Generate:
                     LightGridGenerator.GenerateLight(World);
