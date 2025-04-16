@@ -25,7 +25,7 @@ FEngineLoop::FEngineLoop()
     , UIMgr(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
-    , bufferManager(nullptr)
+    , BufferManager(nullptr)
 {
 }
 
@@ -40,30 +40,23 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     WindowInit(hInstance);
 
     UnrealEditor = new UnrealEd();
-
-    bufferManager = new FDXDBufferManager();
-
+    BufferManager = new FDXDBufferManager();
     UIMgr = new UImGuiManager;
-
     AppMessageHandler = std::make_unique<FSlateAppMessageHandler>();
-
     LevelEditor = new SLevelEditor();
 
     UnrealEditor->Initialize();
-
     GraphicDevice.Initialize(AppWnd);
-
-    bufferManager->Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext);
-
-    Renderer.Initialize(&GraphicDevice, bufferManager);
-
+    BufferManager->Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext);
+    Renderer.Initialize(&GraphicDevice, BufferManager);
     PrimitiveDrawBatch.Initialize(&GraphicDevice);
-
     UIMgr->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
-
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
-
-    LevelEditor->Initialize();
+    
+    uint32 ClientWidth = 0;
+    uint32 ClientHeight = 0;
+    GetClientSize(ClientWidth, ClientHeight);
+    LevelEditor->Initialize(ClientWidth, ClientHeight);
 
     GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
     GEngine->Init();
@@ -71,46 +64,41 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     return 0;
 }
 
-
 void FEngineLoop::Render() const
 {
-    GraphicDevice.Prepare(LevelEditor->GetActiveViewportClient());
+    GraphicDevice.Prepare();
+    
     if (LevelEditor->IsMultiViewport())
     {
-        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
+        std::shared_ptr<FEditorViewportClient> ActiveViewportCache = GetLevelEditor()->GetActiveViewportClient();
         for (int i = 0; i < 4; ++i)
         {
-            LevelEditor->SetViewportClient(i);
-            // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
-            // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            // renderer.PrepareShader();
-            // renderer.UpdateLightBuffer();
-            // RenderWorld();
-            Renderer.PrepareRender();
+            LevelEditor->SetActiveViewportClient(i);
             Renderer.Render(LevelEditor->GetActiveViewportClient());
         }
-        GetLevelEditor()->SetViewportClient(viewportClient);
+        
+        for (int i = 0; i < 4; ++i)
+        {
+            LevelEditor->SetActiveViewportClient(i);
+            Renderer.RenderViewport(LevelEditor->GetActiveViewportClient());
+        }
+        GetLevelEditor()->SetActiveViewportClient(ActiveViewportCache);
     }
     else
     {
-        // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
-        // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        // renderer.PrepareShader();
-        // renderer.UpdateLightBuffer();
-        // RenderWorld();
-        Renderer.PrepareRender();
         Renderer.Render(LevelEditor->GetActiveViewportClient());
+        
+        Renderer.RenderViewport(LevelEditor->GetActiveViewportClient());
     }
+    
 }
 
 void FEngineLoop::Tick()
 {
-    LARGE_INTEGER frequency;
-    const double targetFrameTime = 1000.0 / targetFPS; // 한 프레임의 목표 시간 (밀리초 단위)
+    LARGE_INTEGER Frequency;
+    const double targetFrameTime = 1000.0 / TargetFPS; // 한 프레임의 목표 시간 (밀리초 단위)
 
-    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceFrequency(&Frequency);
 
     LARGE_INTEGER startTime, endTime;
     double elapsedTime = 0.0;
@@ -152,28 +140,33 @@ void FEngineLoop::Tick()
         {
             Sleep(0);
             QueryPerformanceCounter(&endTime);
-            elapsedTime = (endTime.QuadPart - startTime.QuadPart) * 1000.f / frequency.QuadPart;
+            elapsedTime = (endTime.QuadPart - startTime.QuadPart) * 1000.f / Frequency.QuadPart;
         } while (elapsedTime < targetFrameTime);
     }
 }
 
-float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain) const
+void FEngineLoop::GetClientSize(uint32& OutWidth, uint32& OutHeight) const
 {
-    DXGI_SWAP_CHAIN_DESC desc;
-    swapChain->GetDesc(&desc);
-    return static_cast<float>(desc.BufferDesc.Width) / static_cast<float>(desc.BufferDesc.Height);
+    RECT ClientRect = {};
+    GetClientRect(AppWnd, &ClientRect);
+            
+    OutWidth = ClientRect.right - ClientRect.left;
+    OutHeight = ClientRect.bottom - ClientRect.top;
 }
 
 void FEngineLoop::Exit()
 {
     LevelEditor->Release();
     UIMgr->Shutdown();
-    delete UIMgr;
     ResourceManager.Release(&Renderer);
     Renderer.Release();
     GraphicDevice.Release();
-}
 
+    delete UnrealEditor;
+    delete BufferManager;
+    delete UIMgr;
+    delete LevelEditor;
+}
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)
 {
@@ -181,13 +174,13 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 
     WCHAR Title[] = L"Game Tech Lab";
 
-    WNDCLASSW wndclass{};
-    wndclass.lpfnWndProc = AppWndProc;
-    wndclass.hInstance = hInstance;
-    wndclass.lpszClassName = WindowClass;
-    wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+    WNDCLASSW wc{};
+    wc.lpfnWndProc = AppWndProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = WindowClass;
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 
-    RegisterClassW(&wndclass);
+    RegisterClassW(&wc);
 
     AppWnd = CreateWindowExW(
         0, WindowClass, Title, WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
@@ -214,9 +207,13 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             auto LevelEditor = GEngineLoop.GetLevelEditor();
             if (LevelEditor)
             {
-                FEngineLoop::GraphicDevice.OnResize(hWnd);
-                //UGraphicsDevice 객체의 OnResize 함수 호출
-                LevelEditor->ResizeLevelEditor();
+                FEngineLoop::GraphicDevice.Resize(hWnd);
+                
+                uint32 ClientWidth = 0;
+                uint32 ClientHeight = 0;
+                GEngineLoop.GetClientSize(ClientWidth, ClientHeight);
+            
+                LevelEditor->ResizeEditor(ClientWidth, ClientHeight);
             }
         }
         Console::GetInstance().OnResize(hWnd);

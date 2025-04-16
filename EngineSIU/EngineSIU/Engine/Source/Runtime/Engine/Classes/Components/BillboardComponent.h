@@ -32,6 +32,8 @@ public:
     float finalIndexV = 0.0f;
     std::shared_ptr<FTexture> Texture;
 
+    bool bIsEditorBillboard = false;
+
 protected:
     USceneComponent* m_parent = nullptr;
     FString TexturePath = TEXT("default");

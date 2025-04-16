@@ -248,7 +248,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         ImGui::SetNextItemWidth(120.0f);
         if (ImGui::DragFloat("##CamSpeed", &CameraSpeed, 0.1f, 0.198f, 192.0f, "%.1f"))
         {
-            GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(CameraSpeed);
+            GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeed(CameraSpeed);
         }
 
         ImGui::EndPopup();
@@ -399,11 +399,12 @@ void ControlEditorPanel::CreateFlagButton() const
 
     ImGui::SameLine();
 
-    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "SceneDepth" };
+    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "Scene Depth", "World Normal" };
+    uint32 ViewModeCount = sizeof(ViewModeNames) / sizeof(ViewModeNames[0]);
     
-    int rawViewMode = (int)ActiveViewport->GetViewMode();
-    int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 4) : 0;
-    FString ViewModeControl = ViewModeNames[safeIndex];
+    int RawViewMode = (int)ActiveViewport->GetViewMode();
+    int SafeIndex = (RawViewMode >= 0) ? (RawViewMode % ViewModeCount) : 0;
+    FString ViewModeControl = ViewModeNames[SafeIndex];
 
     ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
 
@@ -416,12 +417,10 @@ void ControlEditorPanel::CreateFlagButton() const
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
-            bool bIsSelected = ((int)ActiveViewport->GetViewMode() == i);
+            bool bIsSelected = (static_cast<int>(ActiveViewport->GetViewMode()) == i);
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
-                ActiveViewport->SetViewMode((EViewModeIndex)i);
-                FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                ActiveViewport->SetViewMode(static_cast<EViewModeIndex>(i));
             }
 
             if (bIsSelected)
@@ -497,7 +496,7 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
 
-    ControlMode ControlMode = Player->GetControlMode();
+    EControlMode ControlMode = Player->GetControlMode();
 
     if (ControlMode == CM_TRANSLATION)
     {

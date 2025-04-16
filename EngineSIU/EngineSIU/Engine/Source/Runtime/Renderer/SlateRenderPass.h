@@ -1,34 +1,38 @@
+﻿
 #pragma once
-
 #include "IRenderPass.h"
 #include "EngineBaseTypes.h"
-#include "Container/Set.h"
+
 #include "Define.h"
 
-class FDXDShaderManager;
-class UWorld;
-class FEditorViewportClient;
+struct FSlateTransform
+{
+    FVector2D Scale;
+    FVector2D Offset;
+};
 
-class UPointLightComponent;
-class USpotLightComponent;
-
-class FUpdateLightBufferPass : public IRenderPass
+class FSlateRenderPass : public IRenderPass
 {
 public:
-    FUpdateLightBufferPass();
-    virtual ~FUpdateLightBufferPass();
+    FSlateRenderPass();
+    virtual ~FSlateRenderPass();
 
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager) override;
+    
     virtual void PrepareRender() override;
+
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
+
     virtual void ClearRenderArr() override;
-    void UpdateLightBuffer(FLight Light) const;
+
+    void CreateShader();
+    void CreateBuffer();
+    void CreateSampler();
 
 private:
-    TArray<USpotLightComponent*> SpotLights;
-    TArray<UPointLightComponent*> PointLights;
-
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
     FDXDShaderManager* ShaderManager;
+
+    ID3D11SamplerState* Sampler;
 };

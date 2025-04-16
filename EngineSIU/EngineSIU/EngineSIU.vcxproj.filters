@@ -609,12 +609,6 @@
     <ClInclude Include="Engine\Source\Runtime\Renderer\BillboardRenderPass.h">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.cpp">
-      <Filter>Engine\Source\Runtime\Renderer</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Renderer\DepthBufferDebugPass.h">
-      <Filter>Engine\Source\Runtime\Renderer</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\GizmoRenderPass.cpp">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
@@ -776,6 +770,8 @@
       <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\CompositingPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\SlateRenderPass.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\BillboardComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\TextComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.cpp" />
@@ -822,6 +818,7 @@
     <FxCompile Include="Shaders\FogPixelShader.hlsl" />
     <FxCompile Include="Shaders\FogVertexShader.hlsl" />
     <FxCompile Include="Shaders\FogQuadPixelShader.hlsl" />
+    <FxCompile Include="Shaders\CompositingShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\FireballActor.h">
@@ -844,10 +841,16 @@
       <Filter>Engine\Source\Runtime\Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\AssetManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\CompositingPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\SlateRenderPass.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\BillboardComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\TextComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\PointLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\SpotLightComponent.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SlateShader.hlsl" />
+    <None Include="Shaders\ShaderRegisters.hlsl" />
   </ItemGroup>
 </Project>

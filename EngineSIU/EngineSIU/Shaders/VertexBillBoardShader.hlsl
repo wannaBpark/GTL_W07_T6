@@ -1,27 +1,27 @@
-cbuffer constants : register(b0)
-{
-    row_major float4x4 MVP;
-    float Flag;
-}
 
-struct VSInput 
+#include "ShaderRegisters.hlsl"
+
+struct VS_Input 
 {
-    float3 position : POSITION;
-    float2 texCoord : TEXCOORD;
+    float3 Position : POSITION;
+    float2 UV : TEXCOORD;
 };
 
-struct PSInput {
-    float4 position : SV_POSITION;
-    float2 texCoord : TEXCOORD;
+struct PS_Input
+{
+    float4 Position : SV_POSITION;
+    float2 UV : TEXCOORD;
 };
 
-PSInput main(VSInput input) {
-
-
-    PSInput output;
-    output.position = mul(float4(input.position, 1.0f), MVP);
+PS_Input main(VS_Input Input)
+{
+    PS_Input Output;
+    Output.Position = float4(Input.Position, 1.0);
+    Output.Position = mul(Output.Position, WorldMatrix);
+    Output.Position = mul(Output.Position, ViewMatrix);
+    Output.Position = mul(Output.Position, ProjectionMatrix);
     
-    output.texCoord = input.texCoord;
+    Output.UV = Input.UV;
     
-    return output;
+    return Output;
 }

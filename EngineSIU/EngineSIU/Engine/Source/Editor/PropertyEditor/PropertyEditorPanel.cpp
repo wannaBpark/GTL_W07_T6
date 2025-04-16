@@ -78,9 +78,9 @@ void PropertyEditorPanel::Render()
             PickedActor->SetActorScale(Scale);
 
             std::string coordiButtonLabel;
-            if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
+            if (player->GetCoordMode() == ECoordMode::CDM_WORLD)
                 coordiButtonLabel = "World";
-            else if (player->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+            else if (player->GetCoordMode() == ECoordMode::CDM_LOCAL)
                 coordiButtonLabel = "Local";
 
             if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))

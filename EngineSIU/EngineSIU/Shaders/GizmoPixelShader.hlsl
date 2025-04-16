@@ -1,66 +1,75 @@
-// GizmoPixelShader.hlsl
 
-cbuffer MatrixConstants : register(b0)
-{
-    row_major float4x4 Model;
-    row_major float4x4 MInverseTranspose;
-    float4 UUID;
-    bool isSelected;
-    float3 MatrixPad0;
-};
+#include "ShaderRegisters.hlsl"
 
-struct FMaterial
-{
-    float3 DiffuseColor;
-    float TransparencyScalar;
-    float4 AmbientColor;
-    float DensityScalar;
-    float3 SpecularColor;
-    float SpecularScalar;
-    float3 EmissiveColor;
-    float MaterialPad0;
-};
+Texture2D SceneDepthTexture : register(t99);
+
+SamplerState Sampler : register(s0);
 
 cbuffer MaterialConstants : register(b1)
 {
     FMaterial Material;
 }
 
-cbuffer FlagConstants : register(b2)
+cbuffer ViewportSizeBuffer : register(b2)
 {
-    bool IsLit;
-    float3 flagPad0;
+    float2 ViewportSize;
+    float2 Padding;
 }
 
-struct PS_INPUT
+float3 ReconstructWorldPosition(float2 UV, float Z)
 {
-    float4 position : SV_POSITION; // 클립 공간 화면 좌표
-    float3 worldPos : TEXCOORD0; // 월드 공간 위치
-    float4 color : COLOR; // 전달된 베이스 컬러
-    float3 normal : NORMAL; // 월드 공간 노멀
-    float2 texcoord : TEXCOORD2; // UV 좌표
-    int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
-};
+    float2 NDC;
+    NDC.x = UV.x * 2.0f - 1.0f;
+    NDC.y = (1.0f - UV.y) * 2.0f - 1.0f;
 
-struct PS_OUTPUT
-{
-    float4 color : SV_Target0;
-    float4 UUID : SV_Target1;
-};
-
-
-PS_OUTPUT mainPS(PS_INPUT input)
-{
-    PS_OUTPUT output;
-    output.UUID = UUID;
+    float4 ClipPosition = float4(NDC, Z, 1.0f);
     
-    float3 matDiffuse = Material.DiffuseColor.rgb;
+    float4 ViewPosition = mul(ClipPosition, InvProjectionMatrix);
+    ViewPosition /= ViewPosition.w;
     
-    output.color = float4(matDiffuse, 1);
-    if (isSelected)
+    float4 WorldPosition = mul(ViewPosition, InvViewMatrix);
+    WorldPosition /= WorldPosition.w;
+
+    return WorldPosition.xyz;
+}
+
+bool IsShaded(float3 SceneWorldPosition, float3 GizmoWorldPosition)
+{
+    const float Bias = 0.01f;
+
+    float SceneDistance = length(SceneWorldPosition - ViewWorldLocation);
+    float GizmoDistance = length(GizmoWorldPosition - ViewWorldLocation);
+
+    return GizmoDistance > SceneDistance - Bias;
+}
+
+float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
+{
+    float4 FinalColor = float4(Material.DiffuseColor, 1);
+    
+    if (bIsSelected)
     {
-        output.color += float4(0.5f, 0.5f, 0.5f, 1); // 선택된 경우 빨간색으로 설정
+        FinalColor += float4(0.5f, 0.5f, 0.5f, 1); // 선택된 경우 강조
     }
-      
-    return output;
+    else
+    {
+        float2 DepthUV = Input.Position.xy / ViewportSize.xy;
+        float Z = SceneDepthTexture.Sample(Sampler, DepthUV);
+        float3 SceneWorldPosition = ReconstructWorldPosition(DepthUV, Z);
+
+        if (IsShaded(SceneWorldPosition, Input.WorldPosition))
+        {
+            FinalColor.xyz *= 0.15f;
+        }
+        else
+        {
+            float3 WorldNormal = normalize(Input.WorldNormal);
+            float3 LightDirection = normalize(float3(1, 2, 4));
+            float Cos = max(dot(WorldNormal, LightDirection), 0.5f); // Fake Ambient
+            
+            FinalColor.xyz *= Cos;
+        }
+    }
+       
+    return FinalColor;
 }

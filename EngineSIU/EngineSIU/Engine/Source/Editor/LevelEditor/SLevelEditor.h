@@ -14,13 +14,13 @@ class SLevelEditor
 public:
     SLevelEditor();
 
-    void Initialize();
+    void Initialize(uint32 InEditorWidth, uint32 InEditorHeight);
     void Tick(float DeltaTime);
     void Release();
 
-    void SelectViewport(FVector2D InPoint);
+    void ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight);
+    void SelectViewport(const FVector2D& Point);
 
-    void ResizeLevelEditor();
     void ResizeViewports();
     void SetEnableMultiViewport(bool bIsEnable);
     bool IsMultiViewport() const;
@@ -28,6 +28,7 @@ public:
 private:
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
+    
     std::shared_ptr<FEditorViewportClient> ViewportClients[4];
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
 
@@ -38,9 +39,9 @@ private:
     bool bIsPressedMouseRightButton = false;
 
     bool bMultiViewportMode;
-
-    float EditorWidth;
-    float EditorHeight;
+    
+    uint32 EditorWidth;
+    uint32 EditorHeight;
 
 public:
     std::shared_ptr<FEditorViewportClient>* GetViewports() { return ViewportClients; }
@@ -48,13 +49,13 @@ public:
     {
         return ActiveViewportClient;
     }
-    void SetViewportClient(const std::shared_ptr<FEditorViewportClient>& viewportClient)
+    void SetActiveViewportClient(const std::shared_ptr<FEditorViewportClient>& InViewportClient)
     {
-        ActiveViewportClient = viewportClient;
+        ActiveViewportClient = InViewportClient;
     }
-    void SetViewportClient(int index)
+    void SetActiveViewportClient(int Index)
     {
-        ActiveViewportClient = ViewportClients[index];
+        ActiveViewportClient = ViewportClients[Index];
     }
 
     //Save And Load
@@ -66,20 +67,20 @@ public:
     void SaveConfig();
 
 private:
-    TMap<FString, FString> ReadIniFile(const FString& filePath);
-    void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
+    TMap<FString, FString> ReadIniFile(const FString& FilePath);
+    void WriteIniFile(const FString& FilePath, const TMap<FString, FString>& Config);
 
     template <typename T>
-    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
-        if (const FString* Value = config.Find(key))
+    T GetValueFromConfig(const TMap<FString, FString>& Config, const FString& Key, T DefaultValue) {
+        if (const FString* Value = Config.Find(Key))
         {
             std::istringstream iss(**Value);
-            T value;
-            if (iss >> value)
+            T ConfigValue;
+            if (iss >> ConfigValue)
             {
-                return value;
+                return ConfigValue;
             }
         }
-        return defaultValue;
+        return DefaultValue;
     }
 };

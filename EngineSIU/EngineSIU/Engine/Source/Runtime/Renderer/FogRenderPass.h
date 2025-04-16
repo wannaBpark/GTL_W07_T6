@@ -15,7 +15,7 @@ class FFogRenderPass
 {
 public:
     FFogRenderPass();
-    ~FFogRenderPass();
+    virtual ~FFogRenderPass();
 
     // 초기화: 그래픽 디바이스와 셰이더 매니저를 등록
     void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager);

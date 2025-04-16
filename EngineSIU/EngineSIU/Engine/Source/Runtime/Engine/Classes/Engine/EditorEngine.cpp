@@ -2,6 +2,7 @@
 
 #include "World/World.h"
 #include "Level.h"
+#include "Actors/Cube.h"
 #include "GameFramework/Actor.h"
 #include "Classes/Engine/AssetManager.h"
 
@@ -36,6 +37,10 @@ void UEditorEngine::Init()
         assert(AssetManager);
         AssetManager->InitAssetManager();
     }
+
+#ifdef _DEBUG
+    AActor* Actor = EditorWorld->SpawnActor<ACube>();
+#endif
 }
 
 void UEditorEngine::Tick(float DeltaTime)

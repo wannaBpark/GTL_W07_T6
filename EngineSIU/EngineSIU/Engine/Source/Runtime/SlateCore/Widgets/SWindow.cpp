@@ -1,29 +1,29 @@
 #include "SWindow.h"
 
 
-SWindow::SWindow(FRect initRect) : Rect(initRect)
+SWindow::SWindow(FRect InRect)
+    : Rect(InRect)
+{}
+
+void SWindow::Initialize(FRect InitRect)
 {
+    Rect = InitRect;
 }
 
-void SWindow::Initialize(FRect initRect)
+void SWindow::OnResize(uint32 InWidth, uint32 InHeight)
 {
-    Rect = initRect;
+    Rect.Width = InWidth;
+    Rect.Height = InHeight;
 }
 
-void SWindow::OnResize(float width, float height)
+bool SWindow::IsHover(const FPoint& InPoint) 
 {
-    Rect.width = width;
-    Rect.height = height;
+    bIsHovered = (Rect.TopLeftX <= InPoint.x && InPoint.x < Rect.TopLeftX + Rect.Width) &&
+                 (Rect.TopLeftY <= InPoint.y && InPoint.y < Rect.TopLeftY + Rect.Height);
+    return bIsHovered;
 }
 
-
-bool SWindow::IsHover(FPoint coord) 
-{
-    return bIsHoverd = coord.x >= Rect.leftTopX && coord.x < Rect.leftTopX + Rect.width &&
-        coord.y >= Rect.leftTopY && coord.y < Rect.leftTopY + Rect.height;
-}
-
-bool SWindow::OnPressed(FPoint coord)
+bool SWindow::OnPressed(const FPoint& InPoint)
 {
     return false;
 }

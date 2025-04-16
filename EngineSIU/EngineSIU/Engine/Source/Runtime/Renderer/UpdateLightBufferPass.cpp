@@ -72,12 +72,6 @@ void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>
     {
         if (LightCount < MAX_LIGHTS)
         {
-            //// 월드 변환 행렬 계산 (스케일 1로 가정)
-            //FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), { 1, 1, 1 });
-
-            //FEngineLoop::PrimitiveDrawBatch.AddConeToBatch(Light->GetWorldLocation(), 100, Light->GetRange(), 140, {1,1,1,1}, Model);
-
-            //FEngineLoop::PrimitiveDrawBatch.AddOBBToBatch(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
             LightBufferData.gLights[LightCount] = Light->GetLightInfo();
             LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
             LightBufferData.gLights[LightCount].Direction = Light->GetForwardVector();

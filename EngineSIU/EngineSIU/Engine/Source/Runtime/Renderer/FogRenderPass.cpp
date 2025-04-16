@@ -21,14 +21,6 @@ FFogRenderPass::FFogRenderPass()
 
 FFogRenderPass::~FFogRenderPass()
 {
-    if (FogVertexShader) { FogVertexShader->Release(); FogVertexShader = nullptr; }
-    if (FogPixelShader) { FogPixelShader->Release(); FogPixelShader = nullptr; }
-    if (InputLayout) { InputLayout->Release(); InputLayout = nullptr; }
-    if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
-    if (FogBlendState) { FogBlendState->Release(); FogBlendState = nullptr; }
-    if (FogBuffer) { FogBuffer->Release(); FogBuffer = nullptr; }
-    if (FogRTV) { FogRTV->Release(); FogRTV = nullptr; }
-    if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
 }
 
 void FFogRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
@@ -77,51 +69,11 @@ void FFogRenderPass::CreateShader()
     FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(L"FogQuadPixelShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"FogVertexShader");
 
-    CreateSceneSrv();
 }
 
 void FFogRenderPass::CreateSceneSrv()
 {
-    D3D11_SAMPLER_DESC sampDesc;
-    ZeroMemory(&sampDesc, sizeof(sampDesc));
-    sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    sampDesc.MinLOD = 0;
-    sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    Graphics->Device->CreateSamplerState(&sampDesc, &Sampler);
-
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    srvDesc.Texture2D.MipLevels = 1;
-
-    // 기존 SRV가 있다면 해제
-    if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
-
-    HRESULT hr = Graphics->Device->CreateShaderResourceView(Graphics->SceneColorBuffer, &srvDesc, &SceneSRV);
-    if (FAILED(hr)) {
-        return;
-    }
-
-    srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = 1;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-
-    // 기존 SRV가 있다면 해제
-    if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
-
-    hr = Graphics->Device->CreateShaderResourceView(FogBuffer, &srvDesc, &FogSRV);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, L"FogSRV 생성 실패!", L"Error", MB_ICONERROR | MB_OK);
-        return;
-    }
+    
 }
 
 void FFogRenderPass::PrepareRender()
@@ -195,52 +147,11 @@ void FFogRenderPass::RenderFog(const std::shared_ptr<FEditorViewportClient>& Act
     PrepareFinalRender();
     FinalRender();
 
-    Graphics->DeviceContext->OMSetRenderTargets(2, Graphics->RTVs, Graphics->DepthStencilView);
-    Graphics->DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff);
-
 }
 
 void FFogRenderPass::CheckResize()
 {
-    // 화면 크기가 변경되었으면 SRV를 재생성
-    if (screenWidth != Graphics->screenWidth || screenHeight != Graphics->screenHeight) {
-        if (FogBuffer) { FogBuffer->Release(); FogBuffer = nullptr; }
-        if (FogRTV) { FogRTV->Release(); FogRTV = nullptr; }
-        CreateRTV();
 
-        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MostDetailedMip = 0;
-        srvDesc.Texture2D.MipLevels = 1;
-
-        // 기존 SRV가 있다면 해제
-        if (SceneSRV) { SceneSRV->Release(); SceneSRV = nullptr; }
-
-        HRESULT hr = Graphics->Device->CreateShaderResourceView(Graphics->SceneColorBuffer, &srvDesc, &SceneSRV);
-        if (FAILED(hr)) {
-            return;
-        }
-
-        srvDesc = {};
-        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = 1;
-        srvDesc.Texture2D.MostDetailedMip = 0;
-
-        // 기존 SRV가 있다면 해제
-        if (FogSRV) { FogSRV->Release(); FogSRV = nullptr; }
-
-        hr = Graphics->Device->CreateShaderResourceView(FogBuffer, &srvDesc, &FogSRV);
-        if (FAILED(hr))
-        {
-            MessageBox(NULL, L"FogSRV 생성 실패!", L"Error", MB_ICONERROR | MB_OK);
-            return;
-        }
-
-        screenWidth = Graphics->screenWidth;
-        screenHeight = Graphics->screenHeight;
-    }
 }
 
 void FFogRenderPass::UpdateScreenConstant(const D3D11_VIEWPORT& viewport)
@@ -268,15 +179,15 @@ void FFogRenderPass::UpdateFogConstant(const std::shared_ptr<FEditorViewportClie
     {
         Constants.InvViewProj = Inverse;
         Constants.FogColor = Fog->GetFogColor();
-        Constants.CameraPos = ActiveViewport->ViewTransformPerspective.GetLocation();
+        Constants.CameraPos = ActiveViewport->PerspectiveCamera.GetLocation();
         Constants.FogDensity = Fog->GetFogDensity();
         Constants.FogHeightFalloff = Fog->GetFogHeightFalloff();
         Constants.StartDistance = Fog->GetStartDistance();
         Constants.FogCutoffDistance = Fog->GetFogCutoffDistance();
         Constants.FogMaxOpacity = Fog->GetFogMaxOpacity();
         Constants.FogPosition = Fog->GetWorldLocation();
-        Constants.CameraNear = ActiveViewport->nearPlane;
-        Constants.CameraFar = ActiveViewport->farPlane;
+        Constants.CameraNear = ActiveViewport->NearClip;
+        Constants.CameraFar = ActiveViewport->FarClip;
     }
     //상수버퍼 업데이트
     BufferManager->UpdateConstantBuffer(TEXT("FFogConstants"), Constants);
@@ -309,7 +220,7 @@ void FFogRenderPass::CreateBlendState()
 void FFogRenderPass::PrepareFinalRender()
 {
     // 셰이더 설정
-    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, nullptr);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, nullptr);
     Graphics->DeviceContext->OMSetBlendState(FogBlendState, nullptr, 0xffffffff);
 
     Graphics->DeviceContext->VSSetShader(FogVertexShader, nullptr, 0);

@@ -28,7 +28,7 @@ struct LIGHT
     float3 LightPad;
 };
 
-cbuffer cbLights : register(b2)
+cbuffer cbLights : register(b0)
 {
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
@@ -55,7 +55,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal)
 
     if (fDiffuseFactor > 0.0f)
     {
-        float3 vView = normalize(CameraPosition - vPosition);
+        float3 vView = normalize(ViewWorldLocation - vPosition);
         float3 vHalf = normalize(vToLight + vView);
         fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
     }
@@ -89,7 +89,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
 
     if (fDiffuseFactor > 0.0f)
     {
-        float3 vView = normalize(CameraPosition - vPosition);
+        float3 vView = normalize(ViewWorldLocation - vPosition);
         float3 vHalf = normalize(vToLight + vView);
         fSpecularFactor = pow(max(dot(normalize(vNormal), vHalf), 0.0f), 1);
     }

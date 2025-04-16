@@ -6,15 +6,10 @@
 #include "Define.h"
 
 class FDXDShaderManager;
-
 class UWorld;
-
 class UMaterial;
-
 class FEditorViewportClient;
-
 class UStaticMeshComponent;
-
 struct FStaticMaterial;
 
 class FStaticMeshRenderPass : public IRenderPass
@@ -22,7 +17,7 @@ class FStaticMeshRenderPass : public IRenderPass
 public:
     FStaticMeshRenderPass();
     
-    ~FStaticMeshRenderPass();
+    virtual ~FStaticMeshRenderPass();
     
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
     
@@ -32,11 +27,11 @@ public:
 
     virtual void ClearRenderArr() override;
 
-    void PrepareRenderState() const;
+    void PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) const;
     
-    void UpdatePerObjectConstant(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection, const FVector4& UUIDColor, bool Selected) const;
+    void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
   
-    void UpdateLitUnlitConstant(int isLit) const;
+    void UpdateLitUnlitConstant(int32 isLit) const;
 
     void RenderPrimitive(OBJ::FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
     
@@ -48,21 +43,19 @@ public:
     void CreateShader();
     void ReleaseShader();
 
-    void ChangeViewMode(EViewModeIndex evi) const;
+    void ChangeViewMode(EViewModeIndex ViewModeIndex) const;
+    
 private:
-    TArray<UStaticMeshComponent*> StaticMeshObjs;
+    TArray<UStaticMeshComponent*> StaticMeshComponents;
 
     ID3D11VertexShader* VertexShader;
-    
-    ID3D11PixelShader* PixelShader;
-    
     ID3D11InputLayout* InputLayout;
     
-    uint32 Stride;
+    ID3D11PixelShader* PixelShader;
+    ID3D11PixelShader* DebugDepthShader;
+    ID3D11PixelShader* DebugWorldNormalShader;
 
     FDXDBufferManager* BufferManager;
-    
     FGraphicsDevice* Graphics;
-    
     FDXDShaderManager* ShaderManager;
 };
