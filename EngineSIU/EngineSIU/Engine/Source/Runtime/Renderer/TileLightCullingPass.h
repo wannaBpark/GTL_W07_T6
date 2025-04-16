@@ -70,6 +70,7 @@ public:
 
     void SetDepthSRV(ID3D11ShaderResourceView* InDepthSRV) { DepthSRV = InDepthSRV; }
     ID3D11ShaderResourceView* GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
+    ID3D11ShaderResourceView* GetLightStructuredBufferSRV() { return LightSRV; }
 
 private:
     TArray<USpotLightComponent*> SpotLights;
