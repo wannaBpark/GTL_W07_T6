@@ -6,6 +6,7 @@
 #include "Components/Light/PointLightComponent.h"
 #include "Components/Light/SpotLightComponent.h"
 #include "Components/Light/DirectionalLightComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
@@ -214,7 +215,6 @@ void PropertyEditorPanel::Render()
             ImGui::PopStyleColor();
         }
 
-
     if (PickedActor)
         if (UDirectionalLightComponent* dirlightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>())
         {
@@ -233,6 +233,22 @@ void PropertyEditorPanel::Render()
                 LightDirection = dirlightObj->GetDirection();
                 FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
 
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
+    if(PickedActor)
+        if (UAmbientLightComponent* ambientLightObj = PickedActor->GetComponentByClass<UAmbientLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("AmbientLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return ambientLightObj->GetLightColor(); },
+                    [&](FLinearColor c) { ambientLightObj->SetLightColor(c); });
                 ImGui::TreePop();
             }
 
@@ -334,8 +350,8 @@ void PropertyEditorPanel::Render()
                 float h, s, v;
                 float lightColor[4] = { r, g, b, a };
 
-                // SpotLight Color
-                if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
+                // Fog Color
+                if (ImGui::ColorPicker4("##Fog Color", lightColor,
                     ImGuiColorEditFlags_DisplayRGB |
                     ImGuiColorEditFlags_NoSidePreview |
                     ImGuiColorEditFlags_NoInputs |
