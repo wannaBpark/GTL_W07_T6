@@ -433,9 +433,6 @@ struct FScreenConstants
 
 struct FFogConstants
 {
-    FMatrix InvView;
-    FMatrix InvProj;
-
     FLinearColor FogColor;
     
     float StartDistance;

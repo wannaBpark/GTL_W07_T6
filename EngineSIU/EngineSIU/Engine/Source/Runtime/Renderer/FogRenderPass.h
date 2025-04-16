@@ -32,7 +32,7 @@ public:
 
     void PrepareRenderState();
 
-    void UpdateFogConstant(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, UHeightFogComponent* Fog);
+    void UpdateFogConstant(UHeightFogComponent* Fog);
 
     void CreateBlendState();
     void CreateSampler();

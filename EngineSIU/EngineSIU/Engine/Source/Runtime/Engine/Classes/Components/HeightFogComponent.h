@@ -14,7 +14,7 @@ private:
     FLinearColor FogInscatteringColor;
 
 public:
-    UHeightFogComponent(float Density = 0.5f, float HeightFalloff = 0.05f, float StartDist = 15.0f, float CutoffDist = 0.0f, float MaxOpacity = 0.75f);
+    UHeightFogComponent(float Density = 0.5f, float HeightFalloff = 0.05f, float StartDist = 0.f, float EndDist = 0.1f, float DistanceWeight = 0.75f);
 
     float GetFogDensity() { return FogDensity; }
     float GetFogHeightFalloff() { return FogHeightFalloff; }

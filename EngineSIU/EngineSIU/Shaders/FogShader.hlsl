@@ -1,11 +1,10 @@
-Texture2D DepthTexture : register(t103);
+#include "ShaderRegisters.hlsl"
+
+Texture2D SceneDepthTexture : register(t99);
 SamplerState Sampler : register(s0);
 
 cbuffer FogConstant : register(b0)
 {
-    row_major float4x4 InvView;
-    row_major float4x4 InvProj;
-
     float4 FogColor;
     
     float StartDistance;
@@ -32,10 +31,10 @@ float3 ReconstructWorldPos(float2 UV, float Depth)
     NDC.z = Depth;
     NDC.w = 1.0;
 
-    float4 WorldPos = mul(NDC, InvProj);
+    float4 WorldPos = mul(NDC, InvProjectionMatrix);
     WorldPos /= WorldPos.w;
 
-    WorldPos = mul(WorldPos, InvView);
+    WorldPos = mul(WorldPos, InvViewMatrix);
 
     return WorldPos.xyz;
 }
@@ -44,14 +43,14 @@ float GetCameraDistance(float Depth)
 {
     float Z = Depth;
     float4 ClipPos = float4(0, 0, Z, 1);
-    float4 ViewPos = mul(ClipPos, InvProj);
+    float4 ViewPos = mul(ClipPos, InvProjectionMatrix);
     float ViewZ = ViewPos.z / ViewPos.w;
     return abs(ViewZ); // 카메라 기준 거리
 }
 
 float ComputeFogFactor(float3 WorldPos, float Depth)
 {
-    float3 CameraPos = InvView[3].xyz;
+    float3 CameraPos = InvViewMatrix[3].xyz;
 
     float CameraDist = GetCameraDistance(Depth);
     float DistFactor = saturate((CameraDist - StartDistance) / (EndDistance - StartDistance));
@@ -103,7 +102,7 @@ PS_INPUT mainVS(uint VertexID : SV_VertexID)
 float4 mainPS(PS_INPUT input) : SV_Target
 {
     float2 UV = input.UV;
-    float rawDepth = DepthTexture.Sample(Sampler, UV).r;
+    float rawDepth = SceneDepthTexture.Sample(Sampler, UV).r;
     float3 WorldPos = ReconstructWorldPos(UV, rawDepth);
     
     float FogFactor = ComputeFogFactor(WorldPos, rawDepth);

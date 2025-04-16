@@ -1,8 +1,8 @@
 #include "HeightFogComponent.h"
 #include <UObject/Casts.h>
 
-UHeightFogComponent::UHeightFogComponent(float Density, float HeightFalloff, float StartDist, float CutoffDist, float MaxOpacity)
-    :FogDensity(Density), FogHeightFalloff(HeightFalloff), StartDistance(StartDist), FogDistanceWeight(CutoffDist), EndDistance(MaxOpacity)
+UHeightFogComponent::UHeightFogComponent(float Density, float HeightFalloff, float StartDist, float EndDist, float DistanceWeight)
+    :FogDensity(Density), FogHeightFalloff(HeightFalloff), StartDistance(StartDist), EndDistance(EndDist), FogDistanceWeight(DistanceWeight)
 {
     FogInscatteringColor = FLinearColor::White;
 }

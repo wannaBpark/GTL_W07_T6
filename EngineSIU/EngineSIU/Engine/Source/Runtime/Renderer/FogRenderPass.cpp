@@ -110,7 +110,7 @@ void FFogRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, nullptr);
     Graphics->DeviceContext->OMSetBlendState(BlendState, nullptr, 0xffffffff);
 
-    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Depth), 1, &ViewportResource->GetDepthStencilSRV());
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_SceneDepth), 1, &ViewportResource->GetDepthStencilSRV());
     
     PrepareRenderState();
     
@@ -118,24 +118,20 @@ void FFogRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     {
         if (Fog->GetFogDensity() > 0)
         {
-            UpdateFogConstant(Viewport, Fog);
+            UpdateFogConstant(Fog);
 
             Graphics->DeviceContext->Draw(6, 0);
         }
     }
 
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
-    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_Depth), 1, NullSRV);
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_SceneDepth), 1, NullSRV);
 }
 
-void FFogRenderPass::UpdateFogConstant(const std::shared_ptr<FEditorViewportClient>& ActiveViewport, UHeightFogComponent* Fog)
+void FFogRenderPass::UpdateFogConstant(UHeightFogComponent* Fog)
 {
-    FMatrix View = ActiveViewport->View;
-    FMatrix Projection = ActiveViewport->GetProjectionMatrix();
     FFogConstants Constants; 
     {
-        Constants.InvView = FMatrix::Inverse(View);
-        Constants.InvProj = FMatrix::Inverse(Projection);
         Constants.FogColor = Fog->GetFogColor();
         Constants.FogDensity = Fog->GetFogDensity();
         Constants.FogDistanceWeight = Fog->GetFogDistanceWeight();
