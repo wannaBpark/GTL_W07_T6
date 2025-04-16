@@ -5,6 +5,8 @@ cbuffer GridParametersData : register(b1)
 {
     float GridSpacing;
     int GridCount; // 총 grid 라인 수
+    float2 Padding1;
+    
     float3 GridOrigin; // Grid의 중심
     float Padding;
 };

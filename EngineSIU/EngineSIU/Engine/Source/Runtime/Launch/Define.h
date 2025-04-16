@@ -146,6 +146,8 @@ struct FGridParameters
 {
     float GridSpacing;
     int   NumGridLines;
+    FVector2D Padding1;
+    
     FVector GridOrigin;
     float pad;
 };
@@ -269,6 +271,7 @@ struct FCone
 
     FVector ConeBaseCenter; // 원뿔 밑면 중심
     float ConeHeight; // 원뿔 높이 (Apex와 BaseCenter 간 차이)
+    
     FVector4 Color;
 
     int ConeSegmentCount; // 원뿔 밑면 분할 수

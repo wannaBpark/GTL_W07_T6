@@ -5,6 +5,7 @@
 #include "Container/Set.h"
 #include "RenderResources.h"
 
+class FDXDBufferManager;
 class FGraphicsDevice;
 class UWorld;
 class FEditorViewportClient;
@@ -13,14 +14,19 @@ class FDXDShaderManager;
 class FEditorRenderPass
 {
 public:
-    void Initialize(FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager);
-    void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager);
+    void Render(std::shared_ptr<FEditorViewportClient> Viewport);
     void Release();
 
+    void PrepareRender();
+
+    void ClearRenderArr();
+
 private:
+    FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
-    FRenderResourcesDebug Resources;
     FDXDShaderManager* ShaderManager;
+    FRenderResourcesDebug Resources;
 
     void CreateShaders();
     void PrepareShader(FShaderResource ShaderResource) const;
@@ -30,9 +36,8 @@ private:
     void CreateConstantBuffers();
 
     void LazyLoad();
-
-    void PrepareRendertarget();
-    void PrepareComponents(UWorld* World);
+    
+    void PrepareRendertarget(std::shared_ptr<FEditorViewportClient> Viewport);
 
     void PrepareConstantbufferGlobal();
     void UpdateConstantbufferGlobal(FConstantBufferCamera Buffer);
@@ -51,12 +56,12 @@ private:
     void UdpateConstantbufferAABBInstanced(TArray<FConstantBufferDebugAABB> Buffer);
 
     // Sphere
-    void RenderPointlightInstanced(const UWorld* World);
+    void RenderPointlightInstanced();
     void PrepareConstantbufferPointlight();
     void UdpateConstantbufferPointlightInstanced(TArray<FConstantBufferDebugSphere> Buffer);
      
     // Cone
-    void RenderSpotlightInstanced(const UWorld* World);
+    void RenderSpotlightInstanced();
     void PrepareConstantbufferSpotlight();
     void UdpateConstantbufferSpotlightInstanced(TArray<FConstantBufferDebugCone> Buffer);
 
@@ -72,7 +77,7 @@ private:
     void UpdateTextureIcon(IconType type);
 
     // Arrow
-    void RenderArrows(const UWorld* World);
+    void RenderArrows();
     void PrepareConstantbufferArrow();
     void UdpateConstantbufferArrow(FConstantBufferDebugArrow Buffer);
 

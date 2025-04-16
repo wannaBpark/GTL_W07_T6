@@ -59,7 +59,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-    EditorRenderPass->Initialize(Graphics,ShaderManager);
+    EditorRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     
     CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
     PostProcessCompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -185,6 +185,7 @@ void FRenderer::PrepareRenderPass()
     EditorBillboardRenderPass->PrepareRender();
     UpdateLightBufferPass->PrepareRender();
     FogRenderPass->PrepareRender();
+    EditorRenderPass->PrepareRender();
 }
 
 void FRenderer::ClearRenderArr()
@@ -195,6 +196,7 @@ void FRenderer::ClearRenderArr()
     GizmoRenderPass->ClearRenderArr();
     UpdateLightBufferPass->ClearRenderArr();
     FogRenderPass->ClearRenderArr();
+    EditorRenderPass->ClearRenderArr();
 }
 
 void FRenderer::UpdateCommonBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport)
@@ -328,6 +330,8 @@ void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>
     {
         EditorBillboardRenderPass->Render(Viewport);
     }
+
+    EditorRenderPass->Render(Viewport);
 
     LineRenderPass->Render(Viewport); // 기존 뎁스를 그대로 사용하지만 뎁스를 클리어하지는 않음
     

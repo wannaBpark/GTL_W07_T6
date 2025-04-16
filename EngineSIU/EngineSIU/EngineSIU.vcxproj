@@ -293,9 +293,6 @@
     <None Include="Shaders\DepthBufferPixelShader.hlsl" />
     <None Include="Shaders\DepthBufferVertexShader.hlsl" />
     <None Include="Shaders\EditorShader.hlsl" />
-    <None Include="Shaders\FogPixelShader.hlsl" />
-    <None Include="Shaders\FogQuadPixelShader.hlsl" />
-    <None Include="Shaders\FogVertexShader.hlsl" />
     <None Include="Shaders\GizmoPixelShader.hlsl" />
     <None Include="Shaders\GizmoVertexShader.hlsl" />
     <None Include="Shaders\Light.hlsl" />

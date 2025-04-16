@@ -95,12 +95,12 @@ struct FRenderResourcesDebug
     struct FConstantBuffers
     {
         ID3D11Buffer* Camera00;
-        ID3D11Buffer* AABB13;
-        ID3D11Buffer* Sphere13;
-        ID3D11Buffer* Cone13;
-        ID3D11Buffer* Grid13;
-        ID3D11Buffer* Icon13;
-        ID3D11Buffer* Arrow13;
+        ID3D11Buffer* AABB11;
+        ID3D11Buffer* Sphere11;
+        ID3D11Buffer* Cone11;
+        ID3D11Buffer* Grid11;
+        ID3D11Buffer* Icon11;
+        ID3D11Buffer* Arrow11;
     } ConstantBuffers;
 
     struct FPrimitiveResourceContainer
