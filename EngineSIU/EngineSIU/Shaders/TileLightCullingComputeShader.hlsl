@@ -105,7 +105,7 @@ RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
 
 
 
-[numthreads(THREAD_GROUP_SIZE, THREAD_GROUP_SIZE, 1)]
+[numthreads(TILE_SIZE, TILE_SIZE, 1)]
 void main(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, uint3 threadID : SV_GroupThreadID)
 {
     uint2 tileCoord = groupID.xy;
@@ -131,13 +131,17 @@ void main(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, ui
     for (uint i = 0; i < 4; ++i)
     {
         float2 uv = float2((i & 1) ? tileMax.x : tileMin.x, (i & 2) ? tileMax.y : tileMin.y);
+        // i=0: (tileMin.x, tileMin.y) → 왼쪽 상단
+        // i=1: (tileMax.x, tileMin.y) → 오른쪽 상단
+        // i=2: (tileMin.x, tileMax.y) → 왼쪽 하단
+        // i=3: (tileMax.x, tileMax.y) → 오른쪽 하단
         uv /= screenSize;
 
         float4 clipNear = float4(uv * 2.0 - 1.0, nearZ, 1.0);
-        float4 clipFar = float4(uv * 2.0 - 1.0, farZ, 1.0);
+        float4 clipFar =  float4(uv * 2.0 - 1.0, farZ , 1.0);
 
-        float4 viewNear = mul(InverseProjection, clipNear);
-        float4 viewFar = mul(InverseProjection, clipFar);
+        float4 viewNear = mul(clipNear, InverseProjection);
+        float4 viewFar =  mul(clipFar , InverseProjection);
         viewCorners[i + 0] = viewNear.xyz / viewNear.w;
         viewCorners[i + 4] = viewFar.xyz / viewFar.w;
     }
@@ -192,13 +196,14 @@ void main(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, ui
     float4 result = float4(color, 0.8f);
 
     // 타일 내부 모든 픽셀에 출력
-    for (uint i = 0; i < 64; ++i)
+    for (uint i = 0; i < TILE_SIZE*TILE_SIZE; ++i)
     {
-        uint2 local = unflatten2D(i, 8);
-        uint2 pixel = tileCoord * 8 + local;
+        uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
+        uint2 pixel = tileCoord * TILE_SIZE + local;
         if (all(pixel < ScreenSize))
         {
-            DebugHeatmap[pixel] = result;
+            //DebugHeatmap[pixel] = result;
+            DebugHeatmap[pixel] = float4(heatmap[3].xyz, 1.0f);
         }
     }
 }

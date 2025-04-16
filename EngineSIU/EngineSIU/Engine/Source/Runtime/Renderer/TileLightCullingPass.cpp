@@ -32,7 +32,7 @@ void FTileLightCullingPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     TILE_COUNT_X = (Graphics->screenWidth + TILE_SIZE - 1) / TILE_SIZE;
     TILE_COUNT_Y = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE;
     TILE_COUNT = TILE_COUNT_X * TILE_COUNT_Y;
-    SHADER_ENTITY_TILE_BUCKET_COUNT = MAX_LIGHTS_PER_TILE / sizeof(uint32);
+    SHADER_ENTITY_TILE_BUCKET_COUNT = MAX_LIGHTS_PER_TILE / 32;
     // 한 타일이 가질 수 있는 조명 ID 목록을 비트마스크로 표현한 총 슬롯 수
 
     CreateShader();
@@ -57,6 +57,7 @@ void FTileLightCullingPass::PrepareRender()
         }
     }
     CreateLightBufferGPU();
+    //ClearUAVs();
     
 }
 
@@ -76,9 +77,9 @@ void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>&
 
 void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView* DepthSRV)
 {
-    // 스레드 그룹 수 계산
-    const UINT groupSizeX = (Graphics->screenWidth + TILE_SIZE - 1) / TILE_SIZE;
-    const UINT groupSizeY = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE;
+    // 한 스레드 그룹(groupSizeX, groupSizeY)은 16x16픽셀 영역처리
+    const UINT groupSizeX = (Graphics->screenWidth  + TILE_SIZE - 1) / TILE_SIZE;
+    const UINT groupSizeY = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE; 
 
     Graphics->DeviceContext->CSSetConstantBuffers(0, 1, &TileLightConstantBuffer);
 
@@ -286,7 +287,7 @@ void FTileLightCullingPass::Release()
 void FTileLightCullingPass::ClearUAVs()
 {
     // UAV 초기화용 zero값
-    UINT clearColor[4] = { 0, 0, 0, 0 };
+    UINT clearColor[4] = { 1, 0, 0, 0 };
 
     // 1. 타일 마스크 초기화
     Graphics->DeviceContext->ClearUnorderedAccessViewUint(TileUAV, clearColor);

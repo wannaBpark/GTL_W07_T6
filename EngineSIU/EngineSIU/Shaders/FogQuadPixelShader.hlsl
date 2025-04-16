@@ -21,11 +21,16 @@ struct PS_INPUT
 
 float4 mainPS(PS_INPUT input) : SV_Target
 {
-    return HeatMap.Sample(Sampler, input.UV);
     float2 UV = input.UV * UVScale + UVOffset;
+
     float4 Scene = SceneColor.Sample(Sampler, UV);
-    float4 FogColor = Fog.Sample(Sampler, UV);
+    //float4 FogColor = Fog.Sample(Sampler, UV);
+    float4 FogColor = HeatMap.Sample(Sampler, input.UV);
+    FogColor.a = 0.5f;
     
-    float3 FinalColor = lerp(Scene.rgb, FogColor.rgb, FogColor.a);
+    //float3 FinalColor = lerp(Scene.rgb, FogColor.rgb, FogColor.a);
+    float3 FinalColor = Scene.rgb;
+    //float3 FinalColor = float3(1.0f, 0.0f, 0.0f);
+    
     return float4(FinalColor.rgb, 1.0);
 }

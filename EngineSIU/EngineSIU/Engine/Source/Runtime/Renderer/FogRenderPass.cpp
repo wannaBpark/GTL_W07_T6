@@ -133,6 +133,10 @@ void FFogRenderPass::PrepareRender()
             FogComponents.Add(iter);
         }
     }
+    FogVertexShader = ShaderManager->GetVertexShaderByKey(L"FogVertexShader");
+    FogPixelShader = ShaderManager->GetPixelShaderByKey(L"FogPixelShader");
+    FogQuadPixelShader = ShaderManager->GetPixelShaderByKey(L"FogQuadPixelShader");
+    InputLayout = ShaderManager->GetInputLayoutByKey(L"FogVertexShader");
 }
 
 void FFogRenderPass::ClearRenderArr()
@@ -149,7 +153,7 @@ void FFogRenderPass::PrepareRenderState(ID3D11ShaderResourceView* DepthSRV)
     Graphics->DeviceContext->OMSetRenderTargets(1, &FogRTV, nullptr);
     Graphics->DeviceContext->OMSetBlendState(FogBlendState, nullptr, 0xffffffff);
 
-    // 셰이더 설정
+
     Graphics->DeviceContext->VSSetShader(FogVertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(FogPixelShader, nullptr, 0);
 
