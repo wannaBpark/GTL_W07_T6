@@ -795,6 +795,7 @@
     <ClCompile Include="Engine\Source\Runtime\SlateCore\Input\Events.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\RawInput.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\WindowsCursor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponentBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -875,6 +876,7 @@
     <ClInclude Include="Engine\Source\Runtime\SlateCore\Input\Events.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\RawInput.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsCursor.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponentBase.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\SlateShader.hlsl" />

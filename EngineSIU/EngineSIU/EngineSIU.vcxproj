@@ -304,6 +304,7 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponentBase.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\PointLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Light\SpotLightComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.cpp" />
@@ -460,6 +461,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\HeightFogComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\AmbientLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\DirectionalLightComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponentBase.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\LightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\PointLightComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Light\SpotLightComponent.h" />
