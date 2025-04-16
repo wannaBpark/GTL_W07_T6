@@ -154,8 +154,7 @@ void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorView
         TEXT("FMaterialConstants"),
         TEXT("FLitUnlitConstants"),
         TEXT("FSubMeshConstants"),
-        TEXT("FTextureConstants"),
-        TEXT("FTextureFlagConstants")
+        TEXT("FTextureConstants")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
@@ -203,7 +202,7 @@ void FStaticMeshRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, con
 void FStaticMeshRenderPass::UpdateLitUnlitConstant(int32 isLit) const
 {
     FLitUnlitConstants Data;
-    Data.isLit = isLit;
+    Data.bIsLit = isLit;
     BufferManager->UpdateConstantBuffer(TEXT("FLitUnlitConstants"), Data);
 }
 

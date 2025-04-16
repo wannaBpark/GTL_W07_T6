@@ -28,13 +28,12 @@ namespace MaterialUtils
         Data.DensityScalar = MaterialInfo.DensityScalar;
         
         Data.AmbientColor = MaterialInfo.Ambient;
+        Data.TextureFlag = MaterialInfo.TextureFlag;
 
         BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), Data);
-        // Begin Test
-        BufferManager->UpdateConstantBuffer(TEXT("FTextureFlagConstants"), MaterialInfo.TextureFlags);
-        // End Test
-        // bHasDiffuseTexture
-        if (MaterialInfo.TextureFlags & (1 << 1)) {
+        
+        // Update Textures
+        if (MaterialInfo.TextureFlag & (1 << 1)) {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
@@ -47,8 +46,8 @@ namespace MaterialUtils
             Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
 
         }
-        // bHasNormalTexture
-        if (MaterialInfo.TextureFlags & (1 << 2))
+        
+        if (MaterialInfo.TextureFlag & (1 << 2))
         {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.BumpTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(1, 1, &texture->TextureSRV);

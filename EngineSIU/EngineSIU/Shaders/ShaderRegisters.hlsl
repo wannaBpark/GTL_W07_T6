@@ -14,7 +14,7 @@ struct FMaterial
     float DensityScalar;
     
     float3 AmbientColor;
-    float MaterialPad0;
+    uint TextureFlag;
 };
 
 struct VS_INPUT_StaticMesh

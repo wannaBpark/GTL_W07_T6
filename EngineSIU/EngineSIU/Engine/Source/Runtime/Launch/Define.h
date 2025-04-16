@@ -82,7 +82,7 @@ struct FObjMaterialInfo
 {
     FString MaterialName;  // newmtl : Material Name.
 
-    uint32 TextureFlags = 0;
+    uint32 TextureFlag = 0;
 
     bool bTransparent = false; // Has alpha channel?
 
@@ -304,7 +304,7 @@ struct FMaterialConstants
     float DensityScalar;
 
     FVector AmbientColor;
-    float MaterialPad0;
+    uint32 TextureFlag;
 };
 
 struct FObjectConstantBuffer
@@ -342,7 +342,7 @@ struct FSubUVConstant
 
 struct FLitUnlitConstants
 {
-    int isLit; // 1 = Lit, 0 = Unlit 
+    int bIsLit; // 1 = Lit, 0 = Unlit 
     FVector pad;
 };
 
@@ -354,23 +354,16 @@ struct FViewModeConstants
 
 struct FSubMeshConstants
 {
-    float isSelectedSubMesh;
+    float bIsSelectedSubMesh;
     FVector pad;
 };
 
-struct FTextureConstants
+struct FTextureUVConstants
 {
     float UOffset;
     float VOffset;
     float pad0;
     float pad1;
-};
-
-struct FTextureFlagConstants {
-    unsigned int TextureFlags;
-    float TextureFlagPad0;
-    float TextureFlagPad1;
-    float TextureFlagPad2;
 };
 
 struct FLinePrimitiveBatchArgs

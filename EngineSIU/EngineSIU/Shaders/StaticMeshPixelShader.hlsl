@@ -30,12 +30,6 @@ cbuffer TextureConstants : register(b4)
     float2 TexturePad0;
 }
 
-cbuffer TextureFlagConstants : register(b5)
-{
-    uint TextureFlags;
-    float3 TextureFlagPad;
-}
-
 #include "Light.hlsl"
 
 float LinearToSRGB(float val)
@@ -77,7 +71,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 
     // Diffuse
     float3 DiffuseColor = Material.DiffuseColor;
-    if (TextureFlags & (1 << 1))
+    if (Material.TextureFlag & (1 << 1))
     {
         DiffuseColor = DiffuseTexture.Sample(DiffuseSampler, Input.UV).rgb;
         DiffuseColor = SRGBToLinear(DiffuseColor);
@@ -85,7 +79,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 
     // Normal
     float3 WorldNormal = Input.WorldNormal;
-    if (TextureFlags & (1 << 2))
+    if (Material.TextureFlag & (1 << 2))
     {
         float3 Normal = NormalTexture.Sample(NormalSampler, Input.UV).rgb;
         Normal = normalize(2.f * Normal - 1.f);

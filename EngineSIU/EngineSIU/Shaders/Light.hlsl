@@ -138,7 +138,7 @@ float4 PointLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float Wo
     
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor);
     // bHasDiffuseMap
-    if (TextureFlags & 1 << 1)
+    if (Material.TextureFlag & 1 << 1)
     {
         lit = (light.LightColor.rgb * diffuseFactor);
     }
@@ -163,7 +163,7 @@ float4 PointLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float Wo
     
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
     // bHasDiffuseMap
-    if (TextureFlags & 1 << 1)
+    if (Material.TextureFlag & 1 << 1)
     {
         lit = (light.LightColor.rgb * diffuseFactor) + (specularFactor * Material.SpecularColor);
     }
@@ -216,7 +216,7 @@ float4 SpotLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float3 Wo
     
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor);
     // bHasDiffuseMap
-    if (TextureFlags & 1 << 1)
+    if (Material.TextureFlag & 1 << 1)
     {
         lit = (light.LightColor.rgb * diffuseFactor);
     }
@@ -246,7 +246,7 @@ float4 SpotLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float3 Wo
     
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
     // bHasDiffuseMap
-    if (TextureFlags & 1 << 1)
+    if (Material.TextureFlag & 1 << 1)
     {
         lit = (light.LightColor.rgb * diffuseFactor) + (specularFactor * Material.SpecularColor);
     }
@@ -273,7 +273,7 @@ float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, fl
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor);
     
     // bHasDiffuseMap
-    if (TextureFlags & 1 << 1)
+    if (Material.TextureFlag & 1 << 1)
     {
         lit = light.LightColor.rgb * diffuseFactor;
     }
@@ -282,7 +282,7 @@ float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, fl
     
     float3 lit = (light.LightColor.rgb * diffuseFactor * Material.DiffuseColor) + (specularFactor * Material.SpecularColor);
     // bHasDiffuseMap
-    if (TextureFlags & 1 << 1)
+    if (Material.TextureFlag & 1 << 1)
     {
         lit = (light.LightColor.rgb * diffuseFactor) + (specularFactor * Material.SpecularColor);
     }
