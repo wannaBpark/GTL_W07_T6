@@ -66,6 +66,8 @@ public:
     void ClearUAVs();
     void UpdateTileLightConstantBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
 
+    void Resize();
+
     void SetDepthSRV(ID3D11ShaderResourceView* InDepthSRV) { DepthSRV = InDepthSRV; }
     ID3D11ShaderResourceView* GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
 

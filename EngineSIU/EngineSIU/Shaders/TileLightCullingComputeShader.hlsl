@@ -126,31 +126,35 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     {
         tileDepthMask = 0;
     }
-    GroupMemoryBarrierWithGroupSync();
     
-     // 픽셀이 화면 내에 속하는지 검사 후,
-    float depthSample = 0;
-    if (all(pixel < screenSize))
+    // (1) 만약 Enable25DCulling 옵션이 켜져 있다면, 해당 타일 내의 depth mask 구성
+    if (Enable25DCulling != 0)
     {
-        depthSample = gDepthTexture[pixel];
+        if (threadID.x == 0 && threadID.y == 0)
+        {
+            tileDepthMask = 0;
+        }
+        GroupMemoryBarrierWithGroupSync();
+
+        // 픽셀이 화면 내에 속하면 depth 샘플링
+        float depthSample = 0;
+        if (all(pixel < screenSize))
+        {
+            depthSample = gDepthTexture[pixel];
+        }
+        // 깊이값 변환: gDepthTexture가 보통 [0,1] 범위의 비선형 값이면 선형화
+        float linearZ = (depthSample == 1.0f)
+            ? FarZ
+            : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
+        float depthNormalized = saturate((linearZ - NearZ) / (FarZ - NearZ));
+
+        // 해당 구간의 depth slice 인덱스 계산함
+        int sliceIndex = (int) floor(depthNormalized * NUM_SLICES); 
+        sliceIndex = clamp(sliceIndex, 0, NUM_SLICES - 1);
+        uint sliceBit = 1u << sliceIndex;
+        InterlockedOr(tileDepthMask, sliceBit);
+        GroupMemoryBarrierWithGroupSync();          // 동기화 (32x32픽셀: 스레드가 각 픽셀 맡음)
     }
-    // 선형 깊이로 변환:
-    // depthSample이 1.0이면 FarZ로 처리하여 수치 불안정을 방지 (흠)
-    float linearZ = (depthSample == 1.0f)
-    ? FarZ
-    : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
-    float depthNormalized = saturate((linearZ - NearZ) / (FarZ - NearZ));
-    
-    // 슬라이스 인덱스 계산: NUM_SLICES개의 슬라이스로 나누기
-    int sliceIndex = (int) floor(depthNormalized * NUM_SLICES);
-    sliceIndex = clamp(sliceIndex, 0, NUM_SLICES - 1);
-    
-    // 각 픽셀의 스레드가 해당 슬라이스 해당하는 비트를 1로 설정
-    // Comment) 즉 스레드 하나가 픽셀 하나의 depth마스킹 수행
-    uint sliceBit = 1u << sliceIndex;
-    InterlockedOr(tileDepthMask, sliceBit);     // Atomic OR (그룹 공유에 누적)
-    
-    GroupMemoryBarrierWithGroupSync();
 
     // 뷰 공간 프러스텀 계산
     float2 dim_rcp = 1.0 / float2(screenSize);
@@ -200,22 +204,46 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     uint mask = 0;
     uint hitCount = 0;
 
+    // 2.5D 컬링이 활성화 -> 각 라이트의 view space 깊이 범위를 구해 depth mask와 교차 검사
     [loop]
     for (uint i = 0; i < NumLights; ++i)
     {
         FLightGPU light = LightBuffer[i];
-
         Sphere s;
         s.c = mul(float4(light.Position, 1), View).xyz;
         s.r = light.Radius;
         
-        if (SphereInsideFrustum(s, frustum, nearZ, farZ))
+        bool insideFrustum = SphereInsideFrustum(s, frustum, NearZ, FarZ);
+        bool depthOverlap = true; // 2.5D 컬링이 비활성화면 무조건 true
+        
+        if (Enable25DCulling != 0)
+        {
+            // 빛의 Bounding Sphere의 view-space z값 범위 계산
+            float3 posVS = mul(float4(light.Position, 1), View).xyz;
+            float s_minDepth = posVS.z - s.r;
+            float s_maxDepth = posVS.z + s.r;
+            float normMin = saturate((s_minDepth - NearZ) / (FarZ - NearZ)); // 가까운 곳부터 light
+            float normMax = saturate((s_maxDepth - NearZ) / (FarZ - NearZ)); // light부터 farplane
+            int sphereSliceMin = (int) floor(normMin * NUM_SLICES);     // light 포함 X -> 내림
+            int sphereSliceMax = (int) ceil(normMax * NUM_SLICES);      // light 포함 X -> 올림
+            sphereSliceMin = clamp(sphereSliceMin, 0, NUM_SLICES - 1);  // 0~31 인덱스로 클램프
+            sphereSliceMax = clamp(sphereSliceMax, 0, NUM_SLICES - 1);
+            uint sphereMask = 0;
+            for (int j = sphereSliceMin; j <= sphereSliceMax; ++j)
+            {
+                sphereMask |= (1u << j);
+            }
+            
+            // 깊이 영역이 겹치지 않으면, 해당 라이트는 2.5D 기준에서 컬링됨
+            depthOverlap = (sphereMask & tileDepthMask) != 0;
+        }
+        
+        if (insideFrustum && depthOverlap)
         {
             uint bucketIdx = i / 32;
             uint bitIdx = i % 32;
-            
             InterlockedOr(TileLightMask[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1 << bitIdx);
-            hitCount++; 
+            hitCount++;
         }
     }
     

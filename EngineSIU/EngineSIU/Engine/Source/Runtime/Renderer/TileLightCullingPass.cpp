@@ -271,6 +271,7 @@ void FTileLightCullingPass::CreateBuffers()
 
 void FTileLightCullingPass::Release()
 {
+    // Compute Shader Release는 ShaderManager에서 관리
     SAFE_RELEASE(TileUAVBuffer);
     SAFE_RELEASE(TileUAV);
     
@@ -322,4 +323,13 @@ void FTileLightCullingPass::UpdateTileLightConstantBuffer(const std::shared_ptr<
     memcpy(msr.pData, &settings, sizeof(TileLightCullSettings));
     
     Graphics->DeviceContext->Unmap(TileLightConstantBuffer, 0);
+}
+
+void FTileLightCullingPass::Resize()
+{
+    Release();
+
+    CreateShader();
+    CreateViews();
+    CreateBuffers();
 }
