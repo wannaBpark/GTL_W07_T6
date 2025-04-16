@@ -1,6 +1,8 @@
 
 #include "GizmoRenderPass.h"
 
+#include <array>
+
 #include "UObject/UObjectIterator.h"
 #include "UObject/Casts.h"
 
@@ -20,9 +22,8 @@
 
 #include "UnrealEd/EditorViewportClient.h"
 
-#include "PropertyEditor/ShowFlags.h"
-
 #include "EngineLoop.h"
+#include "UnrealClient.h"
 
 #include "UObject/ObjectTypes.h"
 
@@ -30,7 +31,6 @@
 #include "Engine/EditorEngine.h"
 
 
-// 생성자/소멸자
 FGizmoRenderPass::FGizmoRenderPass()
     : BufferManager(nullptr)
     , Graphics(nullptr)
@@ -40,12 +40,6 @@ FGizmoRenderPass::FGizmoRenderPass()
 
 FGizmoRenderPass::~FGizmoRenderPass()
 {
-    ReleaseShader();
-    if (ShaderManager)
-    {
-        delete ShaderManager;
-        ShaderManager = nullptr;
-    }
 }
 
 void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)
@@ -53,108 +47,96 @@ void FGizmoRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManager;
+
+    CreateBuffer();
     CreateShader();
+
+    D3D11_SAMPLER_DESC SamplerDesc = {};
+    SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    SamplerDesc.MinLOD = 0;
+    SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    
+    Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
 }
 
 void FGizmoRenderPass::CreateShader()
 {
-    D3D11_INPUT_ELEMENT_DESC GizmoInputLayout[] = {
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-    };
+    VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+    InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
 
-    Stride = sizeof(FStaticMeshVertex);
-
-    HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"GizmoVertexShader", L"Shaders/GizmoVertexShader.hlsl", "mainVS", GizmoInputLayout, ARRAYSIZE(GizmoInputLayout));
-
-    hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
-
-    VertexShader = ShaderManager->GetVertexShaderByKey(L"GizmoVertexShader");
-
+    HRESULT hr = ShaderManager->AddPixelShader(L"GizmoPixelShader", L"Shaders/GizmoPixelShader.hlsl", "mainPS");
+    if (FAILED(hr))
+    {
+        return;
+    }
     PixelShader = ShaderManager->GetPixelShaderByKey(L"GizmoPixelShader");
-
-    InputLayout = ShaderManager->GetInputLayoutByKey(L"GizmoVertexShader");
-
 }
+
 void FGizmoRenderPass::ReleaseShader()
 {
-    FDXDBufferManager::SafeRelease(InputLayout);
-    FDXDBufferManager::SafeRelease(PixelShader);
-    FDXDBufferManager::SafeRelease(VertexShader);
 }
 
+void FGizmoRenderPass::CreateBuffer()
+{
+    BufferManager->CreateBufferGeneric<FViewportSize>("FViewportSize", nullptr, sizeof(FViewportSize), D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+}
 
 void FGizmoRenderPass::ClearRenderArr()
 {
-    //GizmoObjs.Empty();
 }
 
 void FGizmoRenderPass::PrepareRenderState() const
 {
+    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    
     Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(InputLayout);
 
-    // 상수 버퍼 바인딩 예시
-    ID3D11Buffer* PerObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FPerObjectConstantBuffer"));
-    ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
-    Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &PerObjectBuffer);
-    Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &CameraConstantBuffer);
+    BufferManager->BindConstantBuffer(TEXT("FMaterialConstants"), 1, EShaderStage::Pixel);
 
-    TArray<FString> PSBufferKeys = {
-                                  TEXT("FPerObjectConstantBuffer"),
-                                   TEXT("FMaterialConstants"),
-                                  TEXT("FLitUnlitConstants")
-    };
-
-    BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+    BufferManager->BindConstantBuffer(TEXT("FViewportSize"), 2, EShaderStage::Pixel);
+    
+    Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
 
 void FGizmoRenderPass::PrepareRender()
 {
-    /*for (const auto iter : TObjectRange<UGizmoBaseComponent>())
-    {
-        GizmoObjs.Add(iter);
-    }*/
 }
 
 void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
-        return;
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(EResourceType::ERT_Editor);
+    Graphics->DeviceContext->ClearDepthStencilView(ViewportResource->GetGizmoDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetGizmoDepthStencilView());
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_SceneDepth), 1, &ViewportResource->GetDepthStencilSRV());
     
-    PrepareRenderState();
-    Graphics->DeviceContext->ClearDepthStencilView(Graphics->DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+    Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerSolidBack);
+
+    FViewportSize ViewportSize;
+    ViewportSize.ViewportSize.X = Viewport->GetViewport()->GetRect().Width;
+    ViewportSize.ViewportSize.Y = Viewport->GetViewport()->GetRect().Height;
+    BufferManager->UpdateConstantBuffer(TEXT("FViewportSize"), ViewportSize);
+    
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
     {
         UE_LOG(LogLevel::Error, TEXT("Gizmo RenderPass : Render : Engine is not valid."));
         return;
     }
-    ControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
-    UWorld* ActiveWorld = GEngine->ActiveWorld;
-    if (!ActiveWorld)
-    {
-        UE_LOG(LogLevel::Error, TEXT("Gizmo RenderPass : Render : ActiveWorld is not valid."));
-        return;
-    }
-
+    
+    EControlMode Mode = Engine->GetEditorPlayer()->GetControlMode();
     if (Mode == CM_TRANSLATION)
     {
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetArrowArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
-            Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
-
-            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
-
-            Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
-            Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+            RenderGizmoComponent(GizmoComp, Viewport);
         }
     }
     else if (Mode == CM_SCALE)
@@ -162,13 +144,7 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetScaleArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
-
-            Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
-
-            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
-
-            Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
-            Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+            RenderGizmoComponent(GizmoComp, Viewport);
         }
     }
     else if (Mode == CM_ROTATION)
@@ -176,81 +152,93 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         for (UStaticMeshComponent* StaticMeshComp : Viewport->GetGizmoActor()->GetDiscArr())
         {
             UGizmoBaseComponent* GizmoComp = Cast<UGizmoBaseComponent>(StaticMeshComp);
-            Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
-            Graphics->DeviceContext->RSSetState(FEngineLoop::GraphicDevice.RasterizerStateSOLID);
-
-            RenderGizmoComponent(GizmoComp, Viewport, ActiveWorld);
-
-            Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
-            Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+            RenderGizmoComponent(GizmoComp, Viewport);
         }
     }
+    
+    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+    ID3D11ShaderResourceView* NullSRV[1] = { nullptr };
+    Graphics->DeviceContext->PSSetShaderResources(static_cast<UINT>(EShaderSRVSlot::SRV_SceneDepth), 1, NullSRV);
 }
 
-void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport, const UWorld* World)
+void FGizmoRenderPass::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const
+{
+    FObjectConstantBuffer ObjectData = {};
+    ObjectData.WorldMatrix = WorldMatrix;
+    ObjectData.InverseTransposedWorld = FMatrix::Transpose(FMatrix::Inverse(WorldMatrix));
+    ObjectData.UUIDColor = UUIDColor;
+    ObjectData.bIsSelected = bIsSelected;
+    
+    BufferManager->UpdateConstantBuffer(TEXT("FObjectConstantBuffer"), ObjectData);
+}
+
+void FGizmoRenderPass::RenderGizmoComponent(UGizmoBaseComponent* GizmoComp, const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (Engine && !Engine->GetSelectedActor())
+    {
         return;
-    // 모델 행렬.
-    FMatrix Model = GizmoComp->GetWorldMatrix();
-
-    FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
-
-    bool Selected = (GizmoComp == Viewport->GetPickedGizmoComponent());
-
-    FMatrix NormalMatrix = RendererHelpers::CalculateNormalMatrix(Model);
-
-    FPerObjectConstantBuffer Data(Model, NormalMatrix, UUIDColor, Selected);
-
-    FCameraConstantBuffer CameraData(Viewport->View, Viewport->Projection);
-
-    BufferManager->UpdateConstantBuffer(TEXT("FPerObjectConstantBuffer"), Data);
-    BufferManager->UpdateConstantBuffer(TEXT("FCameraConstantBuffer"), CameraData);
-
-    // Gizmo가 렌더링할 StaticMesh가 없으면 렌더링하지 않음
+    }
     if (!GizmoComp->GetStaticMesh())
+    {
         return;
-
+    }
+    
     OBJ::FStaticMeshRenderData* RenderData = GizmoComp->GetStaticMesh()->GetRenderData();
-
     if (!RenderData)
+    {
         return;
+    }
 
-    UINT stride = sizeof(FStaticMeshVertex);
+    PrepareRenderState();
+    
+    // 오브젝트 버퍼 업데이트
+    FMatrix WorldMatrix = GizmoComp->GetWorldMatrix();
+    FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
+    bool bIsSelected = (GizmoComp == Viewport->GetPickedGizmoComponent());
+    UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
 
-    UINT offset = 0;
+    UINT Stride = sizeof(FStaticMeshVertex);
+    UINT Offset = 0;
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &Stride, &Offset);
 
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &RenderData->VertexBuffer, &stride, &offset);
-
-    if (RenderData->IndexBuffer)
-        Graphics->DeviceContext->IASetIndexBuffer(RenderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
+    if (!RenderData->IndexBuffer)
+    {
+        // TODO: 인덱스 버퍼가 없는 경우?
+    }
+    Graphics->DeviceContext->IASetIndexBuffer(RenderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    
     if (RenderData->MaterialSubsets.Num() == 0)
     {
         Graphics->DeviceContext->DrawIndexed(RenderData->Indices.Num(), 0, 0);
     }
     else
     {
-        for (int subMeshIndex = 0; subMeshIndex < RenderData->MaterialSubsets.Num(); subMeshIndex++)
+        // TODO: 현재 기즈모 메시는 머티리얼이 하나뿐이지만, 추후 여러 머티리얼을 사용하는 경우가 생길 수 있음.
+        for (int SubMeshIndex = 0; SubMeshIndex < RenderData->MaterialSubsets.Num(); SubMeshIndex++)
         {
-            int materialIndex = RenderData->MaterialSubsets[subMeshIndex].MaterialIndex;
+            int32 MaterialIndex = RenderData->MaterialSubsets[SubMeshIndex].MaterialIndex;
 
             FSubMeshConstants SubMeshData = FSubMeshConstants(false);
             BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), SubMeshData);
 
-            TArray<FStaticMaterial*>Materials = GizmoComp->GetStaticMesh()->GetMaterials();
-            TArray<UMaterial*>OverrideMaterials = GizmoComp->GetOverrideMaterials();
-
-            if (OverrideMaterials[materialIndex] != nullptr)
-                MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[materialIndex]->GetMaterialInfo());
+            TArray<UMaterial*> OverrideMaterials = GizmoComp->GetOverrideMaterials();
+            if (OverrideMaterials[MaterialIndex] != nullptr)
+            {
+                MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[MaterialIndex]->GetMaterialInfo());
+            }
             else
-                MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[materialIndex]->Material->GetMaterialInfo());
+            {
+                TArray<FStaticMaterial*> Materials = GizmoComp->GetStaticMesh()->GetMaterials();
+                MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[MaterialIndex]->Material->GetMaterialInfo());
+            }
 
-            uint64 startIndex = RenderData->MaterialSubsets[subMeshIndex].IndexStart;
-            uint64 indexCount = RenderData->MaterialSubsets[subMeshIndex].IndexCount;
+            uint32 StartIndex = RenderData->MaterialSubsets[SubMeshIndex].IndexStart;
+            uint32 IndexCount = RenderData->MaterialSubsets[SubMeshIndex].IndexCount;
 
-            Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
+            Graphics->DeviceContext->DrawIndexed(IndexCount, StartIndex, 0);
         }
     }
 }

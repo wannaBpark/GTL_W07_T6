@@ -4,15 +4,12 @@
 #include "D3D11RHI/DXDBufferManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
-#include "Components/AmbientLightComponent.h"
-#include "Math/JungleMath.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 #include "Engine/EditorEngine.h"
-#include "World/World.h"
-#include "EngineLoop.h"
 #include "GameFramework/Actor.h"
 #include "UObject/UObjectIterator.h"
 
@@ -55,6 +52,12 @@ void FUpdateLightBufferPass::PrepareRender()
             {
                 DirectionalLights.Add(DirectionalLight);
             }
+            // Begin Test
+            else if (UAmbientLightComponent* AmbientLight = Cast<UAmbientLightComponent>(iter))
+            {
+                AmbientLights.Add(AmbientLight);
+            }
+            // End Test
         }
     }
 }
@@ -69,17 +72,18 @@ void FUpdateLightBufferPass::ClearRenderArr()
     PointLights.Empty();
     SpotLights.Empty();
     DirectionalLights.Empty();
+    AmbientLights.Empty();
 }
 
 
 void FUpdateLightBufferPass::UpdateLightBuffer() const
 {
     FLightInfoBuffer LightBufferData = {};
-   
 
     int DirectionalLightsCount=0;
     int PointLightsCount=0;
     int SpotLightsCount=0;
+    int AmbientLightsCount=0;
     
     for (auto Light : SpotLights)
     {
@@ -101,7 +105,7 @@ void FUpdateLightBufferPass::UpdateLightBuffer() const
             PointLightsCount++;
         }
     }
-    
+
     for (auto Light : DirectionalLights)
     {
         if (DirectionalLightsCount < MAX_DIRECTIONAL_LIGHT)
@@ -111,16 +115,22 @@ void FUpdateLightBufferPass::UpdateLightBuffer() const
             DirectionalLightsCount++;
         }
     }
+
+    for (auto Light : AmbientLights)
+    {
+        if (AmbientLightsCount < MAX_DIRECTIONAL_LIGHT)
+        {
+            LightBufferData.Ambient[AmbientLightsCount] = Light->GetAmbientLightInfo();
+            LightBufferData.Ambient[AmbientLightsCount].AmbientColor = Light->GetLightColor();
+            AmbientLightsCount++;
+        }
+    }
     
-    //LightBufferData.Ambient = AmbientLights->GetAmbientLightInfo();
-    FAmbientLightInfo ambient;
-    ambient.AmbientColor = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    LightBufferData.Ambient = ambient;
     LightBufferData.DirectionalLightsCount = DirectionalLightsCount;
     LightBufferData.PointLightsCount = PointLightsCount;
     LightBufferData.SpotLightsCount = SpotLightsCount;
+    LightBufferData.AmbientLightsCount = AmbientLightsCount;
 
     BufferManager->UpdateConstantBuffer(TEXT("FLightInfoBuffer"), LightBufferData);
     
 }
-

@@ -1,5 +1,6 @@
-Texture2D gTexture : register(t0);
-SamplerState gSampler : register(s0);
+
+Texture2D Texture : register(t0);
+SamplerState Sampler : register(s0);
 
 cbuffer SubUVConstant : register(b1)
 {
@@ -7,40 +8,26 @@ cbuffer SubUVConstant : register(b1)
     float2 uvScale; // sub UV 셀의 크기 (예: 1/CellsPerColumn, 1/CellsPerRow)
 }
 
-cbuffer UUIDConstant : register(b2)
+struct PS_Input
 {
-    float4 UUID;
-}
-
-struct PSInput
-{
-    float4 position : SV_POSITION;
-    float2 texCoord : TEXCOORD;
+    float4 Position : SV_POSITION;
+    float2 UV : TEXCOORD;
 };
 
-struct PSOutput
+float4 main(PS_Input input) : SV_TARGET
 {
-    float4 color : SV_Target0;
-    float4 uuid : SV_Target1;
-};
-
-float4 main(PSInput input) : SV_TARGET
-{
-    PSOutput output;
-    float2 uv = input.texCoord * uvScale + uvOffset;
-    float4 col = gTexture.Sample(gSampler, uv);
+    float4 FinalColor = float4(0.f, 0.f, 0.f, 1.f);
+    
+    float2 UV = input.UV * uvScale + uvOffset;
+    float4 Color = Texture.Sample(Sampler, UV);
     float threshold = 0.1f;
 
-    if (col.r < threshold && col.g < threshold && col.b < threshold || col.a < threshold)
+    if (max(max(Color.r, Color.g), Color.b) < threshold)
     {
         discard;
     }
-    else
-    {
-        output.color = col;
-    }
     
-    output.uuid = UUID;
+    FinalColor = Color;
     
-    return output.color  ;
+    return FinalColor;
 }

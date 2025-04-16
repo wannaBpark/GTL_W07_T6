@@ -18,7 +18,7 @@ class FUpdateLightBufferPass : public IRenderPass
 {
 public:
     FUpdateLightBufferPass();
-    ~FUpdateLightBufferPass();
+    virtual ~FUpdateLightBufferPass();
 
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager) override;
     virtual void PrepareRender() override;
@@ -30,7 +30,7 @@ private:
     TArray<USpotLightComponent*> SpotLights;
     TArray<UPointLightComponent*> PointLights;
     TArray<UDirectionalLightComponent*> DirectionalLights;
-    UAmbientLightComponent* AmbientLights;
+    TArray<UAmbientLightComponent*> AmbientLights;
 
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;

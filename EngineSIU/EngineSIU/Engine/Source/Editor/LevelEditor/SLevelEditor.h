@@ -14,34 +14,34 @@ class SLevelEditor
 public:
     SLevelEditor();
 
-    void Initialize();
-    void Tick(double deltaTime);
-    void Input();
+    void Initialize(uint32 InEditorWidth, uint32 InEditorHeight);
+    void Tick(float DeltaTime);
     void Release();
-    
-    void SelectViewport(POINT point);
-    void OnResize();
+
+    void ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight);
+    void SelectViewport(const FVector2D& Point);
+
     void ResizeViewports();
-    void OnMultiViewport();
-    void OffMultiViewport();
+    void SetEnableMultiViewport(bool bIsEnable);
     bool IsMultiViewport() const;
 
 private:
-    bool bInitialize;
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
-    UWorld* World;
+    
     std::shared_ptr<FEditorViewportClient> ViewportClients[4];
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
 
-    bool bLButtonDown = false;
-    bool bRButtonDown = false;
-    
-    bool bMultiViewportMode;
+    /** 우클릭 시 캡처된 마우스 커서의 초기 위치 (스크린 좌표계) */
+    FVector2D MousePinPosition;
 
-    POINT lastMousePos;
-    float EditorWidth;
-    float EditorHeight;
+    /** 우클릭이 눌려있는지 여부 */
+    bool bIsPressedMouseRightButton = false;
+
+    bool bMultiViewportMode;
+    
+    uint32 EditorWidth;
+    uint32 EditorHeight;
 
 public:
     std::shared_ptr<FEditorViewportClient>* GetViewports() { return ViewportClients; }
@@ -49,13 +49,13 @@ public:
     {
         return ActiveViewportClient;
     }
-    void SetViewportClient(const std::shared_ptr<FEditorViewportClient>& viewportClient)
+    void SetActiveViewportClient(const std::shared_ptr<FEditorViewportClient>& InViewportClient)
     {
-        ActiveViewportClient = viewportClient;
+        ActiveViewportClient = InViewportClient;
     }
-    void SetViewportClient(int index)
+    void SetActiveViewportClient(int Index)
     {
-        ActiveViewportClient = ViewportClients[index];
+        ActiveViewportClient = ViewportClients[Index];
     }
 
     //Save And Load
@@ -67,20 +67,20 @@ public:
     void SaveConfig();
 
 private:
-    TMap<FString, FString> ReadIniFile(const FString& filePath);
-    void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
+    TMap<FString, FString> ReadIniFile(const FString& FilePath);
+    void WriteIniFile(const FString& FilePath, const TMap<FString, FString>& Config);
 
     template <typename T>
-    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
-        if (const FString* Value = config.Find(key))
+    T GetValueFromConfig(const TMap<FString, FString>& Config, const FString& Key, T DefaultValue) {
+        if (const FString* Value = Config.Find(Key))
         {
             std::istringstream iss(**Value);
-            T value;
-            if (iss >> value)
+            T ConfigValue;
+            if (iss >> ConfigValue)
             {
-                return value;
+                return ConfigValue;
             }
         }
-        return defaultValue;
+        return DefaultValue;
     }
 };

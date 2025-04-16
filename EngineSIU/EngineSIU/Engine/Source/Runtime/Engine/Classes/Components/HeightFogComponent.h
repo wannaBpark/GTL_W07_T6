@@ -9,26 +9,29 @@ private:
     float FogDensity;
     float FogHeightFalloff;
     float StartDistance;
-    float FogCutoffDistance;
-    float FogMaxOpacity;
+    float FogDistanceWeight;
+    float EndDistance;
     FLinearColor FogInscatteringColor;
 
 public:
-    UHeightFogComponent(float Density = 0.5f, float HeightFalloff = 0.05f, float StartDist = 15.0f, float CutoffDist = 0.0f, float MaxOpacity = 0.75f);
+    UHeightFogComponent(float Density = 0.5f, float HeightFalloff = 0.05f, float StartDist = 0.f, float EndDist = 0.1f, float DistanceWeight = 0.75f);
 
     float GetFogDensity() { return FogDensity; }
     float GetFogHeightFalloff() { return FogHeightFalloff; }
     float GetStartDistance() { return StartDistance; }
-    float GetFogCutoffDistance() { return FogCutoffDistance; }
-    float GetFogMaxOpacity() { return FogMaxOpacity; }
+    float GetFogDistanceWeight() { return FogDistanceWeight; }
+    float GetEndDistance() { return EndDistance; }
     FLinearColor GetFogColor() { return FogInscatteringColor; }
     
     void SetFogDensity(float value);
     void SetFogHeightFalloff(float value);
     void SetStartDistance(float value);
-    void SetFogCutoffDistance(float value);
-    void SetFogMaxOpacity(float value);
+    void SetFogDistanceWeight(float value);
+    void SetEndDistance(float value);
     void SetFogColor(FLinearColor color);
 
     virtual UObject* Duplicate(UObject* InOuter) override;
+    virtual void GetProperties(TMap<FString, FString>& OutProperties) const override;
+    virtual void SetProperties(const TMap<FString, FString>& InProperties) override;
+    
 };

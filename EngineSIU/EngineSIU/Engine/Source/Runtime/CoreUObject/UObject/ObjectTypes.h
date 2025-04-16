@@ -5,16 +5,17 @@ enum OBJECTS : uint8
 {
     OBJ_SPHERE,
     OBJ_CUBE,
-    OBJ_SpotLight,
-    OBJ_PointLight,
-    OBJ_DirectionalLight,
+    OBJ_SPOTLIGHT,
+    OBJ_POINTLIGHT,
+    OBJ_DIRECTIONALLGIHT,
+    OBJ_AMBIENTLIGHT,
     OBJ_PARTICLE,
-    OBJ_Text,
-    OBJ_Fireball,
+    OBJ_TEXT,
+    OBJ_FIREBALL,
     OBJ_TRIANGLE,
     OBJ_CAMERA,
     OBJ_PLAYER,
-    OBJ_Fog,
+    OBJ_FOG,
     OBJ_END
 };
 
@@ -26,7 +27,7 @@ enum ARROW_DIR : uint8
     AD_END
 };
 
-enum ControlMode : uint8
+enum EControlMode : uint8
 {
     CM_TRANSLATION,
     CM_ROTATION,
@@ -34,7 +35,7 @@ enum ControlMode : uint8
     CM_END
 };
 
-enum CoordiMode : uint8
+enum ECoordMode : uint8
 {
     CDM_WORLD,
     CDM_LOCAL,

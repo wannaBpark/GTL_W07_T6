@@ -1,5 +1,5 @@
 #include "SpotLightActor.h"
-#include "Components/SpotLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
 #include "Components/BillboardComponent.h"
 ASpotLight::ASpotLight()
 {
