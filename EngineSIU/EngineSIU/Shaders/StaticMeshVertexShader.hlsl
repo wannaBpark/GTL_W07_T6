@@ -1,12 +1,16 @@
 
 #include "ShaderRegisters.hlsl"
 
+#ifdef LIGHTING_MODEL_GOURAUD
+SamplerState DiffuseSampler : register(s0);
+
+Texture2D DiffuseTexture : register(t0);
+
 cbuffer MaterialConstants : register(b1)
 {
     FMaterial Material;
 }
 
-#ifdef LIGHTING_MODEL_GOURAUD
 #include "Light.hlsl"
 #endif
 
@@ -38,7 +42,7 @@ PS_INPUT_StaticMesh mainVS(VS_INPUT_StaticMesh Input)
     Output.MaterialIndex = Input.MaterialIndex;
 
 #ifdef LIGHTING_MODEL_GOURAUD
-    float4 Diffuse = Lighting(Output.WorldPosition, Output.WorldNormal, ViewWorldLocation);
+    float4 Diffuse = Lighting(Output.WorldPosition, Output.WorldNormal, ViewWorldLocation, float3(1,1,1));
     Output.Color = float4(Diffuse.rgb, 1.0);
 #else
     Output.Color = Input.Color;

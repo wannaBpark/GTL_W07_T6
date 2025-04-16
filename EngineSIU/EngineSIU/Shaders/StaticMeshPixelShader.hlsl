@@ -32,39 +32,6 @@ cbuffer TextureConstants : register(b4)
 
 #include "Light.hlsl"
 
-float LinearToSRGB(float val)
-{
-    float low  = 12.92 * val;
-    float high = 1.055 * pow(val, 1.0 / 2.4) - 0.055;
-    // linear가 임계값보다 큰지 판별 후 선형 보간
-    float t = step(0.0031308, val); // linear >= 0.0031308이면 t = 1, 아니면 t = 0
-    return lerp(low, high, t);
-}
-
-float3 LinearToSRGB(float3 color)
-{
-    color.r = LinearToSRGB(color.r);
-    color.g = LinearToSRGB(color.g);
-    color.b = LinearToSRGB(color.b);
-    return color;
-}
-
-float SRGBToLinear(float val)
-{
-    float low  = val / 12.92;
-    float high = pow((val + 0.055) / 1.055, 2.4);
-    float t = step(0.04045, val); // srgb가 0.04045 이상이면 t = 1, 아니면 t = 0
-    return lerp(low, high, t);
-}
-
-float3 SRGBToLinear(float3 color)
-{
-    color.r = SRGBToLinear(color.r);
-    color.g = SRGBToLinear(color.g);
-    color.b = SRGBToLinear(color.b);
-    return color;
-}
-
 float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 {
     float4 FinalColor = float4(0.f, 0.f, 0.f, 1.f);
@@ -90,10 +57,9 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
     if (IsLit)
     {
 #ifdef LIGHTING_MODEL_GOURAUD
-        FinalColor = float4(Input.Color.rgb, 1.0);
+        FinalColor = float4(Input.Color.rgb * DiffuseColor, 1.0);
 #else
-        float3 LightRgb = Lighting(Input.WorldPosition, WorldNormal, Input.WorldViewPosition).rgb;
-        float3 LitColor = DiffuseColor * LightRgb;
+        float3 LitColor = Lighting(Input.WorldPosition, WorldNormal, Input.WorldViewPosition, DiffuseColor).rgb;
         FinalColor = float4(LitColor, 1);
 #endif
     }

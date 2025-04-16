@@ -91,12 +91,17 @@ float CalculateDiffuse(float3 WorldNormal, float3 LightDir)
 
 float CalculateSpecular(float3 WorldNormal, float3 ToLightDir, float3 ViewDir, float Shininess, float SpecularStrength = 0.5)
 {
+#ifdef LIGHTING_MODEL_GOURAUD
     float3 ReflectDir = reflect(-ToLightDir, WorldNormal);
     float Spec = pow(max(dot(ViewDir, ReflectDir), 0.0), Shininess);
-    return Spec * ToLightDir * SpecularStrength;
+#else
+    float3 HalfDir = normalize(ToLightDir + ViewDir);
+    float Spec = pow(max(dot(WorldNormal, HalfDir), 0.0), Shininess);
+#endif
+    return Spec * SpecularStrength;
 }
 
-float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float WorldViewPosition)
+float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float WorldViewPosition, float3 DiffuseColor)
 {
 #ifdef LIGHTING_MODEL_GOURAUD
     FPointLightInfo LightInfo = PointLights[Index];
@@ -174,7 +179,7 @@ float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float Wor
 }
 
 // 기존 방식과 달라서 att부분 수정이 필요함.
-float4 SpotLight(int Index, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition)
+float4 SpotLight(int Index, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
 {
 #ifdef LIGHTING_MODEL_GOURAUD
     FSpotLightInfo LightInfo = SpotLights[Index];
@@ -256,7 +261,7 @@ float4 SpotLight(int Index, float3 WorldPosition, float3 WorldNormal, float3 Wor
 #endif
 }
 
-float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition)
+float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
 {
     FDirectionalLightInfo LightInfo = Directional[nIndex];
     
@@ -267,33 +272,18 @@ float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, fl
 #ifdef LIGHTING_MODEL_GOURAUD
     float SpecularFactor = CalculateSpecular(WorldNormal, LightDir, ViewDir, Material.SpecularScalar);
     
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor) +
-                 (SpecularFactor * Material.SpecularColor);
-    Lit = float3(1,1,1);
-                 
+    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * DiffuseColor) + (SpecularFactor * Material.SpecularColor);
 #elif defined(LIGHTING_MODEL_LAMBERT)
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor);
-    
-    // bHasDiffuseMap
-    if (Material.TextureFlag & 1 << 1)
-    {
-        Lit = LightInfo.LightColor.rgb * DiffuseFactor;
-    }
+    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * DiffuseColor);
 #else
     float SpecularFactor = CalculateSpecular(WorldNormal, LightDir, ViewDir, Material.SpecularScalar);
     
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor) + (SpecularFactor * Material.SpecularColor);
-    // bHasDiffuseMap
-    if (Material.TextureFlag & 1 << 1)
-    {
-        Lit = (LightInfo.LightColor.rgb * DiffuseFactor) + (SpecularFactor * Material.SpecularColor);
-    }
-
+    float3 Lit = ((DiffuseFactor * DiffuseColor) + (SpecularFactor * Material.SpecularColor)) * LightInfo.LightColor.rgb;
 #endif
     return float4(Lit * LightInfo.Intensity, 1.0);
 }
 
-float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition)
+float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
 {
     float4 FinalColor = float4(0.0, 0.0, 0.0, 0.0);
     
@@ -301,17 +291,17 @@ float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPositi
     [unroll(MAX_POINT_LIGHT)]
     for (int i = 0; i < PointLightsCount; i++)
     {
-        FinalColor += PointLight(i, WorldPosition, WorldNormal, WorldViewPosition);
+        FinalColor += PointLight(i, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }    
     [unroll(MAX_SPOT_LIGHT)]
     for (int j = 0; j < SpotLightsCount; j++)
     {
-        FinalColor += SpotLight(j, WorldPosition, WorldNormal, WorldViewPosition);
+        FinalColor += SpotLight(j, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }
     [unroll(MAX_DIRECTIONAL_LIGHT)]
     for (int k = 0; k < DirectionalLightsCount; k++)
     {
-        FinalColor += DirectionalLight(k, WorldPosition, WorldNormal, WorldViewPosition);
+        FinalColor += DirectionalLight(k, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }
     [unroll(MAX_AMBIENT_LIGHT)]
     for (int l = 0; l < AmbientLightsCount; l++)

@@ -176,6 +176,7 @@ void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorView
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
 
+    BufferManager->BindConstantBuffer(TEXT("FLightInfoBuffer"), 0, EShaderStage::Vertex);
     BufferManager->BindConstantBuffer(TEXT("FMaterialConstants"), 1, EShaderStage::Vertex);
 
     ChangeViewMode(ViewMode);
