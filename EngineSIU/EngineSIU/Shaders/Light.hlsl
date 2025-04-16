@@ -95,7 +95,7 @@ float CalculateSpecular(float3 WorldNormal, float3 ToLightDir, float3 ViewDir, f
     float3 ReflectDir = reflect(-ToLightDir, WorldNormal);
     float Spec = pow(max(dot(ViewDir, ReflectDir), 0.0), Shininess);
 #else
-    float3 HalfDir = normalize(ToLightDir + ViewDir);
+    float3 HalfDir = normalize(ToLightDir + ViewDir); // Blinn-Phong
     float Spec = pow(max(dot(WorldNormal, HalfDir), 0.0), Shininess);
 #endif
     return Spec * SpecularStrength;
@@ -178,7 +178,6 @@ float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float Wor
 #endif
 }
 
-// 기존 방식과 달라서 att부분 수정이 필요함.
 float4 SpotLight(int Index, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
 {
 #ifdef LIGHTING_MODEL_GOURAUD
@@ -269,15 +268,10 @@ float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, fl
     float3 ViewDir = normalize(WorldViewPosition - WorldPosition);
     float DiffuseFactor = CalculateDiffuse(WorldNormal, LightDir);
     
-#ifdef LIGHTING_MODEL_GOURAUD
-    float SpecularFactor = CalculateSpecular(WorldNormal, LightDir, ViewDir, Material.SpecularScalar);
-    
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * DiffuseColor) + (SpecularFactor * Material.SpecularColor);
-#elif defined(LIGHTING_MODEL_LAMBERT)
-    float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * DiffuseColor);
+#ifdef LIGHTING_MODEL_LAMBERT
+    float3 Lit = DiffuseFactor * DiffuseColor * LightInfo.LightColor.rgb;
 #else
     float SpecularFactor = CalculateSpecular(WorldNormal, LightDir, ViewDir, Material.SpecularScalar);
-    
     float3 Lit = ((DiffuseFactor * DiffuseColor) + (SpecularFactor * Material.SpecularColor)) * LightInfo.LightColor.rgb;
 #endif
     return float4(Lit * LightInfo.Intensity, 1.0);
