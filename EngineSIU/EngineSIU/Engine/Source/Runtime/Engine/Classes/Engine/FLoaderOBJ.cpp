@@ -473,12 +473,36 @@ void FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticM
     const float E2x = Vertex2.X - PivotVertex.X;
     const float E2y = Vertex2.Y - PivotVertex.Y;
     const float E2z = Vertex2.Z - PivotVertex.Z;
-    const float f = 1.f / (s1 * t2 - s2 * t1);
-    const float Tx = f * (t2 * E1x - t1 * E2x);
-    const float Ty = f * (t2 * E1y - t1 * E2y);
-    const float Tz = f * (t2 * E1z - t1 * E2z);
 
-    FVector Tangent = FVector(Tx, Ty, Tz).GetSafeNormal();
+    const float Denominator = s1 * t2 - s2 * t1;
+    FVector Tangent;
+    
+    if (FMath::Abs(Denominator) > SMALL_NUMBER)
+    {
+        // 정상적인 계산 진행
+        const float f = 1.f / Denominator;
+        const float Tx = f * (t2 * E1x - t1 * E2x);
+        const float Ty = f * (t2 * E1y - t1 * E2y);
+        const float Tz = f * (t2 * E1z - t1 * E2z);
+        Tangent = FVector(Tx, Ty, Tz).GetSafeNormal();
+    }
+    else
+    {
+        // 대체 탄젠트 계산 방법
+        // 방법 1: 다른 방향에서 탄젠트 계산 시도
+        FVector Edge1(E1x, E1y, E1z);
+        FVector Edge2(E2x, E2y, E2z);
+    
+        // 기하학적 접근: 두 에지 사이의 각도 이등분선 사용
+        Tangent = (Edge1.GetSafeNormal() + Edge2.GetSafeNormal()).GetSafeNormal();
+    
+        // 만약 두 에지가 평행하거나 반대 방향이면 다른 방법 사용
+        if (Tangent.IsNearlyZero())
+        {
+            // TODO: 기본 축 방향 중 하나 선택 (메시의 주 방향에 따라 선택)
+            Tangent = FVector(1.0f, 0.0f, 0.0f);
+        }
+    }
 
     PivotVertex.TangentX = Tangent.X;
     PivotVertex.TangentY = Tangent.Y;
