@@ -29,9 +29,9 @@ void UWorld::InitializeNewWorld()
 void UWorld::InitializeLightScene()
 {
 	const int TotalLights = 1000;		// 최대 개수
-	const int HalfCountPerAxis = 4;		// -4 ~ +4. 9*9*9 개수만큼 생성
+	const int HalfCountPerAxis = 10;	// -4 ~ +4. 9*9*9 개수만큼 생성
 	const float Spacing = 300.0f;		// 오브젝트간의 간격
-	const float JitterAmount = 80.0f;	// 랜덤 흔들림 정도. 
+	const float JitterAmount = 100.0f;	// 랜덤 흔들림 정도. 
 
 	//고정 시드 랜덤 오프셋. 매 실행마다 같은 결과.
 	auto HashOffset = [JitterAmount](int x, int y, int z) -> FVector
