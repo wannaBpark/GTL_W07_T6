@@ -3,7 +3,7 @@
 UPointLightComponent::UPointLightComponent()
 {
     PointLightInfo.Position = GetWorldLocation();
-    PointLightInfo.Radius = 30;
+    PointLightInfo.Radius = 5.0f;
 
     PointLightInfo.LightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 

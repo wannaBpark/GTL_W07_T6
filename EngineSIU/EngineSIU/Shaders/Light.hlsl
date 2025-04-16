@@ -1,8 +1,8 @@
 #define MAX_LIGHTS 16 
 
-#define MAX_DIRECTIONAL_LIGHT 16
-#define MAX_POINT_LIGHT 16
-#define MAX_SPOT_LIGHT 16
+#define MAX_DIRECTIONAL_LIGHT 1
+#define MAX_POINT_LIGHT 27
+#define MAX_SPOT_LIGHT 27
 
 #define POINT_LIGHT         1
 #define SPOT_LIGHT          2

@@ -2,9 +2,9 @@
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
 #include "Math/Matrix.h"
-#define MAX_DIRECTIONAL_LIGHT 16
-#define MAX_POINT_LIGHT 16
-#define MAX_SPOT_LIGHT 16
+#define MAX_DIRECTIONAL_LIGHT 1
+#define MAX_POINT_LIGHT 27
+#define MAX_SPOT_LIGHT 27
 
 struct FAmbientLightInfo
 {
