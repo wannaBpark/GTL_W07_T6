@@ -1,7 +1,7 @@
 #pragma once
-#include "PrimitiveComponent.h"
 #include "Define.h"
-class UBillboardComponent;
+#include "Components/SceneComponent.h"
+
 
 class ULightComponentBase : public USceneComponent
 {
@@ -20,6 +20,4 @@ protected:
 
 public:
     FBoundingBox GetBoundingBox() const {return AABB;}
-    
-    
 };

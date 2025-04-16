@@ -4,15 +4,12 @@
 #include "D3D11RHI/DXDBufferManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
-#include "Components/AmbientLightComponent.h"
-#include "Math/JungleMath.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 #include "Engine/EditorEngine.h"
-#include "World/World.h"
-#include "EngineLoop.h"
 #include "GameFramework/Actor.h"
 #include "UObject/UObjectIterator.h"
 
@@ -137,4 +134,3 @@ void FUpdateLightBufferPass::UpdateLightBuffer() const
     BufferManager->UpdateConstantBuffer(TEXT("FLightInfoBuffer"), LightBufferData);
     
 }
-

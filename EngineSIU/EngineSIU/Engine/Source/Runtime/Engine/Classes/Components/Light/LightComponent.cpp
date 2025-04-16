@@ -1,5 +1,4 @@
 #include "LightComponent.h"
-#include "BillboardComponent.h"
 #include "UObject/Casts.h"
 
 ULightComponentBase::ULightComponentBase()

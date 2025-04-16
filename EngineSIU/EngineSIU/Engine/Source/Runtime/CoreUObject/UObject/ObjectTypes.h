@@ -27,7 +27,7 @@ enum ARROW_DIR : uint8
     AD_END
 };
 
-enum ControlMode : uint8
+enum EControlMode : uint8
 {
     CM_TRANSLATION,
     CM_ROTATION,
@@ -35,7 +35,7 @@ enum ControlMode : uint8
     CM_END
 };
 
-enum CoordiMode : uint8
+enum ECoordMode : uint8
 {
     CDM_WORLD,
     CDM_LOCAL,

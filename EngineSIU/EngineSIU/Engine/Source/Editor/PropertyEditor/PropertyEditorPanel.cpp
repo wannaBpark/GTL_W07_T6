@@ -2,11 +2,11 @@
 
 #include "World/World.h"
 #include "Actors/Player.h"
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
-#include "Components/AmbientLightComponent.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
@@ -80,9 +80,9 @@ void PropertyEditorPanel::Render()
             PickedActor->SetActorScale(Scale);
 
             std::string coordiButtonLabel;
-            if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
+            if (player->GetCoordMode() == ECoordMode::CDM_WORLD)
                 coordiButtonLabel = "World";
-            else if (player->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+            else if (player->GetCoordMode() == ECoordMode::CDM_LOCAL)
                 coordiButtonLabel = "Local";
 
             if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
@@ -106,7 +106,7 @@ void PropertyEditorPanel::Render()
 
     //// TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     //if (PickedActor)
-    //    if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
+    //    if (ULightComponent* lightObj = PickedActor->GetComponentByClass<ULightComponent>())
     //    {
     //        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
@@ -402,15 +402,15 @@ void PropertyEditorPanel::Render()
                 }
 
                 float FogDensity = FogComponent->GetFogDensity();
-                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
+                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 3.0f))
                 {
                     FogComponent->SetFogDensity(FogDensity);
                 }
 
-                float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
-                if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
+                float FogDistanceWeight = FogComponent->GetFogDistanceWeight();
+                if (ImGui::SliderFloat("Distance Weight", &FogDistanceWeight, 0.00f, 3.0f))
                 {
-                    FogComponent->SetFogMaxOpacity(FogMaxOpacity);
+                    FogComponent->SetFogDistanceWeight(FogDistanceWeight);
                 }
 
                 float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
@@ -423,6 +423,12 @@ void PropertyEditorPanel::Render()
                 if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
                 {
                     FogComponent->SetStartDistance(FogStartDistance);
+                }
+
+                float FogEndtDistance = FogComponent->GetEndDistance();
+                if (ImGui::SliderFloat("End Distance", &FogEndtDistance, 0.00f, 50.0f))
+                {
+                    FogComponent->SetEndDistance(FogEndtDistance);
                 }
 
                 ImGui::TreePop();
@@ -540,7 +546,10 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
                 if (ImGui::Selectable(GetData(Class->GetName()), false))
                 {
                     USceneComponent* NewComp = Cast<USceneComponent>(StaticMeshComp->GetOwner()->AddComponent(Class));
-                    NewComp->SetupAttachment(StaticMeshComp);
+                    if (NewComp)
+                    {
+                        NewComp->SetupAttachment(StaticMeshComp);
+                    }
                     // 추후 Engine으로부터 SelectedComponent 받아서 선택된 Comp 아래로 붙일 수있으면 붙이기.
                 }
             }

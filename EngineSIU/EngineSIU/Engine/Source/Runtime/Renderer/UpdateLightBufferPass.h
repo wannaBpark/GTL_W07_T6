@@ -18,7 +18,7 @@ class FUpdateLightBufferPass : public IRenderPass
 {
 public:
     FUpdateLightBufferPass();
-    ~FUpdateLightBufferPass();
+    virtual ~FUpdateLightBufferPass();
 
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager) override;
     virtual void PrepareRender() override;

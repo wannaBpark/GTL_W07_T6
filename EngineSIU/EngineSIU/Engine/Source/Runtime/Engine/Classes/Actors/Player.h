@@ -20,29 +20,28 @@ class AEditorPlayer : public AActor
     virtual void Tick(float DeltaTime) override;
 
     void Input();
-    bool PickGizmo(FVector& rayOrigin, FEditorViewportClient* InActiveViewport);
-    void ProcessGizmoIntersection(UStaticMeshComponent* iter, const FVector& pickPosition, FEditorViewportClient* InActiveViewport, bool& isPickedGizmo);
+    bool PickGizmo(FVector& RayOrigin, FEditorViewportClient* InActiveViewport);
+    void ProcessGizmoIntersection(UStaticMeshComponent* Component, const FVector& PickPosition, FEditorViewportClient* InActiveViewport, bool& bIsPickedGizmo);
     void PickActor(const FVector& pickPosition);
     void AddControlMode();
     void AddCoordiMode();
 
 private:
-    int RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount);
-    void ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& rayOrigin);
+    int RayIntersectsObject(const FVector& PickPosition, USceneComponent* Component, float& HitDistance, int& IntersectCount);
+    void ScreenToViewSpace(int32 ScreenX, int32 ScreenY, std::shared_ptr<FEditorViewportClient> ActiveViewport, FVector& RayOrigin);
     void PickedObjControl();
-    void ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
-    void ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
-    void ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
+    void ControlRotation(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY);
+    void ControlTranslation(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY);
+    void ControlScale(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY);
+
     bool bLeftMouseDown = false;
-    bool bRightMouseDown = false;
-    bool bSpaceDown = false;
 
     POINT m_LastMousePos;
-    ControlMode cMode = CM_TRANSLATION;
-    CoordiMode cdMode = CDM_WORLD;
+    EControlMode ControlMode = CM_TRANSLATION;
+    ECoordMode CoordMode = CDM_WORLD;
 
 public:
-    void SetMode(ControlMode _Mode) { cMode = _Mode; }
-    ControlMode GetControlMode() const { return cMode; }
-    CoordiMode GetCoordiMode() const { return cdMode; }
+    void SetMode(EControlMode Mode) { ControlMode = Mode; }
+    EControlMode GetControlMode() const { return ControlMode; }
+    ECoordMode GetCoordMode() const { return CoordMode; }
 };

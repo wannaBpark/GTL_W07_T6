@@ -85,23 +85,30 @@ void ATransformGizmo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    // Editor 모드에서만 Gizmo를 표시.
+    // Editor 모드에서만 Tick.
     if (GEngine->ActiveWorld->WorldType != EWorldType::Editor)
+    {
         return;
+    }
 
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
+    {
         return;
+    }
+    
     if (const AActor* PickedActor = Engine->GetSelectedActor())
     {
         SetActorLocation(PickedActor->GetActorLocation());
-        if (Engine->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+        if (Engine->GetEditorPlayer()->GetCoordMode() == ECoordMode::CDM_LOCAL)
         {
             // TODO: 임시로 RootComponent의 정보로 사용
             SetActorRotation(PickedActor->GetActorRotation());
         }
-        else if (Engine->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
+        else if (Engine->GetEditorPlayer()->GetCoordMode() == ECoordMode::CDM_WORLD)
+        {
             SetActorRotation(FVector(0.0f, 0.0f, 0.0f));
+        }
     }
 }
 

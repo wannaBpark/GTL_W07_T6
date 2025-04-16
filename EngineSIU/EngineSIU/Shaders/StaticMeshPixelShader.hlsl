@@ -1,137 +1,111 @@
-// staticMeshPixelShader.hlsl
 
-Texture2D Textures : register(t0);
-Texture2D NormalMap : register(t1);
-SamplerState Sampler : register(s0);
+#include "ShaderRegisters.hlsl"
 
-cbuffer MatrixConstants : register(b0)
-{
-    row_major float4x4 Model;
-    row_major float4x4 MInverseTranspose;
-    float4 UUID;
-    bool isSelected;
-    float3 MatrixPad0;
-};
-cbuffer CameraConstants : register(b1)
-{
-    row_major float4x4 View;
-    row_major float4x4 Projection;
-    float3 CameraPosition;
-    float pad;
-};
+SamplerState DiffuseSampler : register(s0);
+SamplerState NormalSampler : register(s1);
 
-struct FMaterial
-{
-    float3 DiffuseColor;
-    float TransparencyScalar;
-    
-    float3 AmbientColor;    //do not use
-    float DensityScalar;
-    
-    float3 SpecularColor;
-    float SpecularScalar;
-    
-    float3 EmissiveColor;
-    float MaterialPad0;
-};
-cbuffer MaterialConstants : register(b3)
+Texture2D DiffuseTexture : register(t0);
+Texture2D NormalTexture : register(t1);
+
+cbuffer MaterialConstants : register(b1)
 {
     FMaterial Material;
 }
 
-cbuffer FlagConstants : register(b4)
+cbuffer FlagConstants : register(b2)
 {
     bool IsLit;
     float3 flagPad0;
 }
 
-cbuffer SubMeshConstants : register(b5)
+cbuffer SubMeshConstants : register(b3)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
 }
 
-cbuffer TextureConstants : register(b6)
+cbuffer TextureConstants : register(b4)
 {
     float2 UVOffset;
     float2 TexturePad0;
 }
 
-cbuffer TextureFlagConstants : register(b7)
-{
-    uint TextureFlags;
-    float3 TextureFlagPad;
-}
-
 #include "Light.hlsl"
 
-struct PS_INPUT
+float LinearToSRGB(float val)
 {
-    float4 position : SV_POSITION; // 클립 공간 화면 좌표
-    float3 worldPos : TEXCOORD0; // 월드 공간 위치
-    float4 color : COLOR; // 전달된 베이스 컬러
-    float normalFlag : TEXCOORD1; // 노멀 유효 플래그
-    float2 texcoord : TEXCOORD2; // UV 좌표
-    float3 normal : TEXCOORD5;        //N
-    float3x3 mTBN : TBN;
-    int materialIndex : MATERIAL_INDEX; // 머티리얼 인덱스
-};
+    float low  = 12.92 * val;
+    float high = 1.055 * pow(val, 1.0 / 2.4) - 0.055;
+    // linear가 임계값보다 큰지 판별 후 선형 보간
+    float t = step(0.0031308, val); // linear >= 0.0031308이면 t = 1, 아니면 t = 0
+    return lerp(low, high, t);
+}
 
-struct PS_OUTPUT
+float3 LinearToSRGB(float3 color)
 {
-    float4 color : SV_Target0;
-    float4 UUID : SV_Target1;
-};
+    color.r = LinearToSRGB(color.r);
+    color.g = LinearToSRGB(color.g);
+    color.b = LinearToSRGB(color.b);
+    return color;
+}
 
-PS_OUTPUT mainPS(PS_INPUT input)
+float SRGBToLinear(float val)
 {
-    PS_OUTPUT output;
-    output.UUID = UUID;
-    
-    float3 albedo = Material.DiffuseColor.rgb;
-    if (TextureFlags & 1 << 1)
+    float low  = val / 12.92;
+    float high = pow((val + 0.055) / 1.055, 2.4);
+    float t = step(0.04045, val); // srgb가 0.04045 이상이면 t = 1, 아니면 t = 0
+    return lerp(low, high, t);
+}
+
+float3 SRGBToLinear(float3 color)
+{
+    color.r = SRGBToLinear(color.r);
+    color.g = SRGBToLinear(color.g);
+    color.b = SRGBToLinear(color.b);
+    return color;
+}
+
+float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
+{
+    float4 FinalColor = float4(0.f, 0.f, 0.f, 1.f);
+
+    // Diffuse
+    float3 DiffuseColor = Material.DiffuseColor;
+    if (Material.TextureFlag & (1 << 1))
     {
-        albedo = Textures.Sample(Sampler, input.texcoord).rgb;
+        DiffuseColor = DiffuseTexture.Sample(DiffuseSampler, Input.UV).rgb;
+        DiffuseColor = SRGBToLinear(DiffuseColor);
     }
-    float3 baseColor = albedo;
-    
-    float3 normal = input.normal;
-    if (TextureFlags & 1 << 2)
+
+    // Normal
+    float3 WorldNormal = Input.WorldNormal;
+    if (Material.TextureFlag & (1 << 2))
     {
-        float3 normalTS = NormalMap.Sample(Sampler, input.texcoord).rgb;
-        normalTS = normalize(normalTS * 2.0f - 1.0f);
-        normal = normalize(mul(normalTS, input.mTBN));
+        float3 Normal = NormalTexture.Sample(NormalSampler, Input.UV).rgb;
+        Normal = normalize(2.f * Normal - 1.f);
+        WorldNormal = normalize(mul(mul(Normal, Input.TBN), (float3x3) InverseTransposedWorld));
     }
     
+    // Lighting
+    if (IsLit)
+    {
 #ifdef LIGHTING_MODEL_GOURAUD
-    if (IsLit)
-    {
-        float3 finalColor = input.color.rgb * baseColor.rgb;
-        output.color = float4(finalColor, 1.0);
-    }
-    else
-    {
-        output.color = float4(baseColor, 1.0);
-    }
+        FinalColor = float4(Input.Color.rgb, 1.0);
 #else
-    if (IsLit)
-    {
-        float4 litColor = Lighting(input.worldPos, normalize(normal));
-        baseColor = pow(baseColor, 2.2);
-        float3 finalColor = litColor.rgb * baseColor.rgb;
-        output.color = float4(finalColor, 1.0);
+        float3 LightRgb = Lighting(Input.WorldPosition, WorldNormal, Input.WorldViewPosition).rgb;
+        float3 LitColor = DiffuseColor * LightRgb;
+        FinalColor = float4(LitColor, 1);
+#endif
     }
     else
     {
-        baseColor = pow(baseColor, 2.2);
-        output.color = float4(baseColor, 1.0);
+        FinalColor = float4(DiffuseColor, 1);
     }
-#endif
     
-    if (IsSelectedSubMesh)
+    if (bIsSelected)
     {
-        output.color += float4(0.02, 0.02, 0.02, 0);
+        FinalColor += float4(0.01, 0.01, 0.0, 1);
     }
     
-    return output;
+    return FinalColor;
 }

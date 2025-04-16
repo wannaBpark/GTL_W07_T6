@@ -1,34 +1,40 @@
 #pragma once
 #include "Launch/EngineLoop.h"
 
-namespace RendererHelpers {
+enum class EShaderSRVSlot : int8
+{
+    SRV_SceneDepth = 99,
+    SRV_Scene = 100,
+    SRV_PostProcess = 101,
+    SRV_EditorOverlay = 102,
+    SRV_Fog = 103,
     
-    inline FMatrix CalculateMVP(const FMatrix& Model, const FMatrix& View, const FMatrix& Projection) {
-        return Model * View * Projection;
-    }
+    SRV_Viewport = 120,
 
-    inline FMatrix CalculateNormalMatrix(const FMatrix& Model) {
-        return FMatrix::Transpose(FMatrix::Inverse(Model));
-    }
-}
+    SRV_MAX = 127,
+};
 
-namespace MaterialUtils {
-    inline void UpdateMaterial(FDXDBufferManager* BufferManager, FGraphicsDevice* Graphics, const FObjMaterialInfo& MaterialInfo) {
-        FMaterialConstants data;
-        data.DiffuseColor = MaterialInfo.Diffuse;
-        data.TransparencyScalar = MaterialInfo.TransparencyScalar;
-        data.AmbientColor = MaterialInfo.Ambient;
-        data.DensityScalar = MaterialInfo.DensityScalar;
-        data.SpecularColor = MaterialInfo.Specular;
-        data.SpecularScalar = MaterialInfo.SpecularScalar;
-        data.EmmisiveColor = MaterialInfo.Emissive;
+namespace MaterialUtils
+{
+    inline void UpdateMaterial(FDXDBufferManager* BufferManager, FGraphicsDevice* Graphics, const FObjMaterialInfo& MaterialInfo)
+    {
+        FMaterialConstants Data;
+        Data.DiffuseColor = MaterialInfo.Diffuse;
+        Data.TransparencyScalar = MaterialInfo.TransparencyScalar;
+        
+        Data.SpecularColor = MaterialInfo.Specular;
+        Data.SpecularScalar = MaterialInfo.SpecularScalar;
+        
+        Data.EmissiveColor = MaterialInfo.Emissive;
+        Data.DensityScalar = MaterialInfo.DensityScalar;
+        
+        Data.AmbientColor = MaterialInfo.Ambient;
+        Data.TextureFlag = MaterialInfo.TextureFlag;
 
-        BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), data);
-        // Begin Test
-        BufferManager->UpdateConstantBuffer(TEXT("FTextureFlagConstants"), MaterialInfo.TextureFlags);
-        // End Test
-        // bHasDiffuseTexture
-        if (MaterialInfo.TextureFlags & 1 << 1) {
+        BufferManager->UpdateConstantBuffer(TEXT("FMaterialConstants"), Data);
+        
+        // Update Textures
+        if (MaterialInfo.TextureFlag & (1 << 1)) {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.DiffuseTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
             Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
@@ -41,18 +47,18 @@ namespace MaterialUtils {
             Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
 
         }
-        // bHasNormalTexture
-        if (MaterialInfo.TextureFlags & 1 << 2)
+        
+        if (MaterialInfo.TextureFlag & (1 << 2))
         {
             std::shared_ptr<FTexture> texture = FEngineLoop::ResourceManager.GetTexture(MaterialInfo.BumpTexturePath);
             Graphics->DeviceContext->PSSetShaderResources(1, 1, &texture->TextureSRV);
-            Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
+            Graphics->DeviceContext->PSSetSamplers(1, 1, &texture->SamplerState);
         }
         else {
             ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
             ID3D11SamplerState* nullSampler[1] = { nullptr };
             Graphics->DeviceContext->PSSetShaderResources(1, 1, nullSRV);
-            Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
+            Graphics->DeviceContext->PSSetSamplers(1, 1, nullSampler);
         }
     }
 }

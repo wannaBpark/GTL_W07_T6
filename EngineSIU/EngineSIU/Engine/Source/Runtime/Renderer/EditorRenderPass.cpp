@@ -13,12 +13,12 @@
 #include "BaseGizmos/GizmoBaseComponent.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Classes/Actors/Player.h"
-#include "Engine/Classes/Components/LightComponent.h"
-#include "Engine/Classes/Components/DirectionalLightComponent.h"
-#include "Engine/Classes/Components/SpotLightComponent.h"
-#include "Engine/Classes/Components/PointLightComponent.h"
+#include "Engine/Classes/Components/Light/LightComponent.h"
+#include "Engine/Classes/Components/Light/DirectionalLightComponent.h"
+#include "Engine/Classes/Components/Light/SpotLightComponent.h"
+#include "Engine/Classes/Components/Light/PointLightComponent.h"
 #include "Engine/Classes/Components/HeightFogComponent.h"
-#include "Engine/Classes/Components/AmbientLightComponent.h"
+#include "Engine/Classes/Components/Light/AmbientLightComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Engine/FLoaderOBJ.h"
 
@@ -63,24 +63,6 @@ void FEditorRenderPass::CreateShaders()
             target.Layout = ShaderManager->GetInputLayoutByKey(keyPrefix + L"VS");
             target.Topology = topology;
         };
-
-    //// 기즈모
-    //AddShaderSet(L"Gizmo", "gizmoVS", "gizmoPS", layoutGizmo, ARRAYSIZE(layoutGizmo),
-    //    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Gizmo);
-
-    //// axisline (layout 없음)
-    //AddShaderSet(L"Axis", "axisVS", "axisPS", nullptr, 0,
-    //    D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AxisLine);
-    //Resources.Shaders.AxisLine.Layout = nullptr;
-
-    //// AABB
-    //AddShaderSet(L"AABB", "aabbVS", "aabbPS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
-    //    D3D11_PRIMITIVE_TOPOLOGY_LINELIST, Resources.Shaders.AABB);
-
-    //// Grid (layout 없음)
-    //AddShaderSet(L"Grid", "gridVS", "gridPS", nullptr, 0,
-    //    D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, Resources.Shaders.Grid);
-    //Resources.Shaders.Grid.Layout = nullptr;
 
     // Sphere
     AddShaderSet(L"Sphere", "sphereVS", "spherePS", layoutPosOnly, ARRAYSIZE(layoutPosOnly),
@@ -413,9 +395,11 @@ void FEditorRenderPass::CreateConstantBuffers()
 
 void FEditorRenderPass::PrepareRendertarget()
 {
+    /*
     ID3D11RenderTargetView* RenderTargetView = Graphics->FrameBufferRTV;
     ID3D11DepthStencilView* DepthStencilView = Graphics->DepthStencilView;
     Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+    */
 }
 
 void FEditorRenderPass::PrepareComponents(UWorld* World)
@@ -497,8 +481,8 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     FConstantBufferCamera buf;
     buf.ViewMatrix = ActiveViewport->GetViewMatrix();
     buf.ProjMatrix = ActiveViewport->GetProjectionMatrix();
-    buf.CameraPos = ActiveViewport->ViewTransformPerspective.GetLocation();
-    buf.CameraLookAt = ActiveViewport->ViewTransformPerspective.GetLookAt();
+    buf.CameraPos = ActiveViewport->GetCameraLocation();
+    // buf.CameraLookAt = ActiveViewport->ViewTransformPerspective.GetLookAt();
     UpdateConstantbufferGlobal(buf);
 
     ID3D11DepthStencilState* DepthStateEnable = Graphics->DepthStencilState;
@@ -510,15 +494,6 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
     RenderSpotlightInstanced(World);
     RenderArrows(World);    // Directional Light Arrow : Depth Test Enabled
     //RenderIcons(World, ActiveViewport); // 기존 렌더패스에서 아이콘 렌더하고 있으므로 제거
-    
-
-    //RenderAxis();
-    //RenderGrid(ActiveViewport); // 기존 동적 LOD 월드 그리드 렌더 X
-	
-    // 기즈모는 depth 무시
-    ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
-    Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-    //RenderGizmos(World);
 }
 
 

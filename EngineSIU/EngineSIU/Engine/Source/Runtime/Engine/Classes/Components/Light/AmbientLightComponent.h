@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "LightComponent.h"
 
 class UAmbientLightComponent : public ULightComponentBase
 {
-
     DECLARE_CLASS(UAmbientLightComponent, ULightComponentBase)
+
 public:
     UAmbientLightComponent();
     virtual ~UAmbientLightComponent() override;
@@ -14,6 +14,7 @@ public:
 
     FLinearColor GetLightColor() const;
     void SetLightColor(const FLinearColor& InColor);
+
 private:
     FAmbientLightInfo AmbientLightInfo;
 };

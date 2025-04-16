@@ -1,5 +1,5 @@
 #include "DirectionalLightActor.h"
-#include "Components/DirectionalLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
 #include "Components/BillboardComponent.h"
 ADirectionalLight::ADirectionalLight()
 {

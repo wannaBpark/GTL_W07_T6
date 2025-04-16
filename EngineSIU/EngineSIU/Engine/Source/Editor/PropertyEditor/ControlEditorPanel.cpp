@@ -6,9 +6,9 @@
 #include "Actors/LightActor.h"
 #include "Actors/FireballActor.h"
 
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/ParticleSubUVComponent.h"
 #include "Components/TextComponent.h"
@@ -108,12 +108,15 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
 
         ImGui::Begin("Menu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-        if (ImGui::MenuItem("New Scene"))
+        if (ImGui::MenuItem("New World"))
         {
-            // TODO: New Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->NewWorld();
+            }
         }
 
-        if (ImGui::MenuItem("Load Scene"))
+        if (ImGui::MenuItem("Load World"))
         {
             char const* lFilterPatterns[1] = { "*.scene" };
             const char* FileName = tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns, "Scene(.scene) file", 0);
@@ -124,13 +127,16 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
-
-            // TODO: Load Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->NewWorld();
+                EditorEngine->LoadWorld(FileName);
+            }
         }
 
         ImGui::Separator();
 
-        if (ImGui::MenuItem("Save Scene"))
+        if (ImGui::MenuItem("Save World"))
         {
             char const* lFilterPatterns[1] = { "*.scene" };
             const char* FileName = tinyfd_saveFileDialog("Save Scene File", "", 1, lFilterPatterns, "Scene(.scene) file");
@@ -140,8 +146,10 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
-
-            // TODO: Save Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->SaveWorld(FileName);
+            }
 
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
@@ -244,7 +252,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         ImGui::SetNextItemWidth(120.0f);
         if (ImGui::DragFloat("##CamSpeed", &CameraSpeed, 0.1f, 0.198f, 192.0f, "%.1f"))
         {
-            GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(CameraSpeed);
+            GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeed(CameraSpeed);
         }
 
         ImGui::EndPopup();
@@ -418,12 +426,13 @@ void ControlEditorPanel::CreateFlagButton() const
 
     const char* ViewModeNames[] = { 
         "Lit_Gouraud", "Lit_Lambert", "Lit_Phong", 
-        "Unlit", "Wireframe", "SceneDepth", "WorldNormal"
+        "Unlit", "Wireframe", "Scene Depth", "World Normal"
     };
+    uint32 ViewModeCount = sizeof(ViewModeNames) / sizeof(ViewModeNames[0]);
     
-    int rawViewMode = (int)ActiveViewport->GetViewMode();
-    int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 8) : 0;
-    FString ViewModeControl = ViewModeNames[safeIndex];
+    int RawViewMode = (int)ActiveViewport->GetViewMode();
+    int SafeIndex = (RawViewMode >= 0) ? (RawViewMode % ViewModeCount) : 0;
+    FString ViewModeControl = ViewModeNames[SafeIndex];
 
     ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
 
@@ -436,12 +445,10 @@ void ControlEditorPanel::CreateFlagButton() const
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
-            bool bIsSelected = ((int)ActiveViewport->GetViewMode() == i);
+            bool bIsSelected = (static_cast<int>(ActiveViewport->GetViewMode()) == i);
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
-                ActiveViewport->SetViewMode((EViewModeIndex)i);
-                //FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                //FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                ActiveViewport->SetViewMode(static_cast<EViewModeIndex>(i));
             }
 
             if (bIsSelected)
@@ -517,7 +524,7 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
 
-    ControlMode ControlMode = Player->GetControlMode();
+    EControlMode ControlMode = Player->GetControlMode();
 
     if (ControlMode == CM_TRANSLATION)
     {
