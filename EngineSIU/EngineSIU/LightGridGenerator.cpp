@@ -2,7 +2,8 @@
 #include "Actors/PointLightActor.h"
 #include "Actors/SpotLightActor.h"
 #include "World/World.h"
-
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
 FLightGridGenerator::FLightGridGenerator()
 {
 }
@@ -37,7 +38,6 @@ void FLightGridGenerator::GenerateLight(UWorld* world)
     TArray<AActor*> newShell;
     newShell.Reserve(approxShellSize);
 
-    int shellLightCount = 0;
 
     for (int x = -maxR; x <= maxR; ++x)
     {
@@ -58,11 +58,15 @@ void FLightGridGenerator::GenerateLight(UWorld* world)
                 {
                     light = world->SpawnActor<APointLight>();
                     light->SetActorLabel(FString::Printf(TEXT("PointLight_%d"), shellLightCount));
+                    UPointLightComponent* comp = light->GetComponentByClass<UPointLightComponent>();
+                    //comp->SetLightColor(RandomColor());
                 }
                 else
                 {
                     light = world->SpawnActor<ASpotLight>();
                     light->SetActorLabel(FString::Printf(TEXT("SpotLight_%d"), shellLightCount));
+                    USpotLightComponent* comp = light->GetComponentByClass<USpotLightComponent>();
+                    //comp->SetLightColor(RandomColor());
                 }
 
                 if (light)
@@ -140,5 +144,21 @@ FVector FLightGridGenerator::GetJitteredPosition(int x, int y, int z, float spac
     float dz = (LCG(seedBase + 3) - 0.5f) * 2.0f * jitterAmount;
 
     return FVector(x * spacing + dx, y * spacing + dy, z * spacing + dz);
+}
+
+FLinearColor FLightGridGenerator::RandomColor()
+{
+    auto HashFloat01 = [](int seed) -> float {
+        seed = (1103515245 * seed + 12345) & 0x7fffffff;
+        return (seed % 1000) / 1000.0f; // 0.0 ~ 0.999
+        };
+
+    int colorSeed = shellLightCount * 1234567; // shellLightCount를 기반 시드로 사용
+
+    float r = HashFloat01(colorSeed + 1);
+    float g = HashFloat01(colorSeed + 2);
+    float b = HashFloat01(colorSeed + 3);
+
+    return FLinearColor(r,g,b,1.0f);
 }
 
