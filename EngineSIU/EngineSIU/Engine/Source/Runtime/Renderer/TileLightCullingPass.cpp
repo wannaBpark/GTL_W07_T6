@@ -15,6 +15,8 @@
 
 #define SAFE_RELEASE(p) if (p) { p->Release(); p = nullptr; }
 
+#define _PRINTDEBUG FALSE
+
 FTileLightCullingPass::FTileLightCullingPass()
 {
 }
@@ -68,6 +70,8 @@ void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>&
     ComputeShader = ShaderManager->GetComputeShaderByKey(L"TileLightCullingComputeShader");
     UpdateTileLightConstantBuffer(Viewport);
     Dispatch(DepthSRV);
+
+    ParseTileLightMaskData();
 }
 
 // Not In Use
@@ -111,6 +115,10 @@ void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView*& DepthSRV)
     // 5-2. SRV 해제
     ID3D11ShaderResourceView* nullSRVs[2] = { nullptr, nullptr };
     Graphics->DeviceContext->CSSetShaderResources(0, 2, nullSRVs);
+
+    // 5-3. 상수버퍼 해제
+    ID3D11Buffer* nullBuffer[1] = { nullptr };
+    Graphics->DeviceContext->CSSetConstantBuffers(0, 1, nullBuffer);
 }
 
 
@@ -338,3 +346,141 @@ void FTileLightCullingPass::ResizeViewBuffers()
     CreateViews();
     CreateBuffers();
 }
+
+bool FTileLightCullingPass::CopyTileLightMaskToCPU(TArray<uint32>& OutData)
+{
+    // TileUAVBuffer = 조명 비트마스크 결과를 저장 UAV 
+    // UAV -> StagingBuffer로 복사하는 코드를 만들 것임 (UAV는 USAGE_DEFAULT라서 CPU에서 읽을 수 없음)
+
+    D3D11_BUFFER_DESC bufferDesc = {};
+    TileUAVBuffer->GetDesc(&bufferDesc);
+    bufferDesc.Usage = D3D11_USAGE_STAGING;
+    bufferDesc.BindFlags = 0; 
+    bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ; // CPU 읽기 가능
+
+    ID3D11Buffer* StagingBuffer = nullptr;
+    HRESULT hr = Graphics->Device->CreateBuffer(&bufferDesc, nullptr, &StagingBuffer);
+
+    if (FAILED(hr))
+    {
+        UE_LOG(LogLevel::Error, TEXT("Failed to create staging buffer for TileUAVBuffer"));
+        return false;
+    }
+
+    Graphics->DeviceContext->CopyResource(StagingBuffer, TileUAVBuffer);
+    D3D11_MAPPED_SUBRESOURCE MSR = {};
+    hr = Graphics->DeviceContext->Map(StagingBuffer, 0, D3D11_MAP_READ, 0, &MSR);
+    if (FAILED(hr))
+    {
+        UE_LOG(LogLevel::Error, TEXT("TileUAVBuffer Staging Buffer Mapping Failed"));
+        SAFE_RELEASE(StagingBuffer);
+        return false;
+    }
+
+    uint32 count = bufferDesc.ByteWidth / sizeof(uint32);
+    OutData.SetNum(count);
+    memcpy(OutData.GetData(), MSR.pData, bufferDesc.ByteWidth);
+
+    Graphics->DeviceContext->Unmap(StagingBuffer, 0);
+    SAFE_RELEASE(StagingBuffer);
+
+    return true;
+}
+
+void FTileLightCullingPass::ParseTileLightMaskData()
+{
+    // UAV 버퍼 데이터를 CPU 메모리로 복사
+    if (!CopyTileLightMaskToCPU(PointLightMaskData))
+    {
+        UE_LOG(LogLevel::Error, TEXT("TileLightMask 데이터를 CPU로 복사 실패"));
+        return;
+    }
+
+    // 화면 타일 수: TileUAVBuffer의 데이터는 각 타일마다 SHADER_ENTITY_TILE_BUCKET_COUNT개의 uint32로 구성
+
+    uint32 TotalTiles = TILE_COUNT_X * TILE_COUNT_Y; // MaskData사이즈 = TILECNT_X * TILECNT_Y * 32비트
+    PointLightPerTiles.SetNum(TotalTiles);
+
+    uint32 BucketsPerTile = SHADER_ENTITY_TILE_BUCKET_COUNT;
+    uint32 TotalLightCount = PointLights.Num(); 
+
+    // 각 타일을 순회하면서 각 타일별 비트마스크를 파싱
+    for (uint32 tileIndex = 0; tileIndex < TotalTiles; ++tileIndex)
+    {
+        TArray<uint32> LightIndices;
+
+        uint32 startIndex = tileIndex * BucketsPerTile;
+        for (uint32 bucket = 0; bucket < BucketsPerTile; ++bucket)
+        {
+            uint32 mask = PointLightMaskData[startIndex + bucket];
+            for (uint32 bit = 0; bit < 32; ++bit)
+            {
+                if (mask & (1u << bit))
+                {
+                    // 전역 조명 인덱스는 bucket * 32 + bit 로 계산됨.
+                    uint32 globalLightIndex = bucket * 32 + bit;
+                    // 전역 조명 인덱스가 총 조명 수보다 작은 경우에만 추가
+                    if (globalLightIndex < TotalLightCount)
+                    {
+                        LightIndices.Add(globalLightIndex);
+                    }
+                }
+            }
+        }
+        PointLightPerTiles[tileIndex] = LightIndices;
+    }
+
+#if _PRINTDEBUG
+    PrintLightTilesMapping();
+#endif
+    //UE_LOG(LogLevel::Error, TEXT("타일별 조명 파싱 완료. 총 타일 수: %d"), TotalTiles);
+
+}
+
+void FTileLightCullingPass::PrintLightTilesMapping()
+{
+    // 총 전역 조명 수
+    uint32 TotalLights = PointLights.Num();
+
+    TArray<TArray<uint32>> LightTiles;
+    LightTiles.SetNum(TotalLights);
+
+    uint32 TotalTiles = PointLightPerTiles.Num();
+    for (uint32 tileIndex = 0; tileIndex < TotalTiles; ++tileIndex)
+    {
+        // 해당 타일에 영향을 주는 조명 인덱스 목록
+        const TArray<uint32>& LightIndices = PointLightPerTiles[tileIndex];
+        for (uint32 idx = 0; idx < LightIndices.Num(); ++idx)
+        {
+            uint32 globalLightIndex = LightIndices[idx]; // 전역 조명 인덱스 (예: 0, 4, 7 등)
+            if (globalLightIndex < TotalLights)
+            {
+                LightTiles[globalLightIndex].Add(tileIndex);
+            }
+        }
+    }
+
+    // 각 조명별로 어떤 타일이 영향을 받는지 출력
+    for (uint32 lightIndex = 0; lightIndex < TotalLights; ++lightIndex)
+    {
+        const TArray<uint32>& Tiles = LightTiles[lightIndex];
+        if (Tiles.Num() == 0)
+        {
+            continue; // 해당 조명이 어느 타일에도 영향을 주지 않으면 생략
+        }
+
+        // 출력 문자열 구성 (예: "Light No. 1: 0, 3, 5")
+        FString Output = FString::Printf(TEXT("Light No. %d: "), lightIndex + 1);
+        for (int32 i = 0; i < Tiles.Num(); ++i)
+        {
+            Output += FString::Printf(TEXT("%d"), Tiles[i]);
+            if (i < Tiles.Num() - 1)
+            {
+                Output += TEXT(", ");
+            }
+        }
+
+        UE_LOG(LogLevel::Error, TEXT("%s"), *Output);
+    }
+}
+

@@ -1,5 +1,7 @@
 // staticMeshPixelShader.hlsl
 
+
+
 Texture2D Textures : register(t0);
 SamplerState Sampler : register(s0);
 
@@ -56,7 +58,11 @@ cbuffer TextureConstants : register(b6)
     float2 TexturePad0;
 }
 
+
+
 #include "Light.hlsl"
+
+
 
 struct PS_INPUT
 {
@@ -87,6 +93,26 @@ PS_OUTPUT mainPS(PS_INPUT input)
     bool hasTexture = any(albedo != float3(0, 0, 0));
     
     float3 baseColor = hasTexture ? albedo : matDiffuse;
+    
+    // (1) 현재 픽셀이 속한 타일 계산 (input.position = 화면 픽셀좌표계)
+    uint2 pixelCoord = uint2(input.position.xy);
+    uint2 tileCoord = pixelCoord / TileSize; // 각 성분별 나눔
+    uint tilesX = ScreenSize.x / TileSize.x; // 한 행에 존재하는 타일 수
+    uint flatTileIndex = tileCoord.x + tileCoord.y * tilesX;
+    
+    // (2) 현재 타일의 조명 정보 읽기
+    LightPerTiles tileLights = gLightPerTiles[flatTileIndex];
+    
+    // 조명 기여 누적 (예시: 단순히 조명 색상을 더함)
+    float3 lightingAccum = 0;
+    for (uint i = 0; i < tileLights.NumLights; ++i)
+    {
+         // tileLights.Indices[i] 는 전역 조명 인덱스
+        uint globalLightIndex = tileLights.Indices[i];
+        FPointLightInfo light = gPointLights[globalLightIndex];
+        
+        
+    }
     
 #ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)

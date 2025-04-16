@@ -154,10 +154,14 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
     {
         TileLightCullingPass->Render(ActiveViewport, DepthPrePass->GetDepthSRV());
         FogRenderPass->SetDebugHeatmapSRV(TileLightCullingPass->GetDebugHeatmapSRV());
+        UpdateLightBufferPass->SetPointLightData(TileLightCullingPass->GetPointLights(),
+                                                TileLightCullingPass->GetPointLightPerTiles()
+        ); 
+        UpdateLightBufferPass->SetTileConstantBuffer(TileLightCullingPass->GetTileConstantBuffer());
     }
 
-    StaticMeshRenderPass->Render(ActiveViewport);
     UpdateLightBufferPass->Render(ActiveViewport);
+    StaticMeshRenderPass->Render(ActiveViewport);
     BillboardRenderPass->Render(ActiveViewport);
     EditorRenderPass->Render(GEngine->ActiveWorld, ActiveViewport);
 

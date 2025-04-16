@@ -8,6 +8,8 @@
 #define SPOT_LIGHT          2
 #define DIRECTIONAL_LIGHT   3
 
+#define MAX_LIGHT_PER_TILE 256
+
 //struct LIGHT
 //{
 //    float3 m_cDiffuse; // 광원의 확산 색상
@@ -95,6 +97,31 @@ cbuffer Lighting : register(b2)
     int SpotLightsCount;
     float pad0;
 };
+
+cbuffer TileLightCullSettings : register(b8)
+{
+    uint2 ScreenSize; // 화면 해상도
+    uint2 TileSize; // 한 타일의 크기 (예: 16x16)
+
+    float NearZ; // 카메라 near plane
+    float FarZ; // 카메라 far plane
+
+    row_major matrix ViewMatrix; // View 행렬
+    row_major matrix ProjectionMatrix; // Projection 행렬
+    row_major matrix InverseProjection; // Projection^-1, 뷰스페이스 복원용
+
+    uint NumLights; // 총 라이트 수
+    uint Enable25DCulling; // 1이면 2.5D 컬링 사용
+}
+
+struct LightPerTiles
+{
+    uint NumLights;
+    uint Indices[MAX_LIGHT_PER_TILE];
+    uint Padding[3];
+};
+StructuredBuffer<FPointLightInfo> gPointLights : register(t10);
+StructuredBuffer<LightPerTiles> gLightPerTiles : register(t20);
 
 float CalculateAttenuation(float distance, float attenuationFactor, float radius)
 {

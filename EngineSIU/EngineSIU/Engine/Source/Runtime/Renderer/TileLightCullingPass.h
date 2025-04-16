@@ -68,13 +68,26 @@ public:
 
     void ResizeViewBuffers();
 
+    // UAV 결과를 파싱하여 타일별 영향을 주는 전역 조명 인덱스로 바꾸는 함수
+    bool CopyTileLightMaskToCPU(TArray<uint32>& OutData);
+    void ParseTileLightMaskData();
+    void PrintLightTilesMapping();
+
     void SetDepthSRV(ID3D11ShaderResourceView* InDepthSRV) { DepthSRV = InDepthSRV; }
     ID3D11ShaderResourceView* GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
     ID3D11ShaderResourceView* GetLightStructuredBufferSRV() { return LightSRV; }
+    ID3D11Buffer* GetTileConstantBuffer() { return TileLightConstantBuffer; }
+    TArray<UPointLightComponent*> GetPointLights() { return PointLights; }
+    TArray<TArray<uint32>> GetPointLightPerTiles() { return PointLightPerTiles;  }
+
+    uint32 GetTotalTileCount() { return TILE_COUNT; }
 
 private:
     TArray<USpotLightComponent*> SpotLights;
     TArray<UPointLightComponent*> PointLights;
+
+    TArray<uint32> PointLightMaskData;  // 타일별 조명 마스크 데이터 (n번째 타일에 대한 전역 조명 인덱스 목록 벡터)
+    TArray<TArray<uint32>> PointLightPerTiles;
 
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;
@@ -103,6 +116,7 @@ private:
     uint32 TILE_COUNT_Y;
     uint32 TILE_COUNT;                          // 타일의 총 개수 (몇개 타일로 나눌지에 따라 결정)
     uint32 SHADER_ENTITY_TILE_BUCKET_COUNT;     // 한 타일이 가질 수 있는 조명 ID를 비트마스크로 표현한 총 슬롯 수
+
     // 한 타일에 1024개의 라이트 인덱스를 마스크 비트로 저장하려면 : 1024 / sizeof(uint32) = 32
 };
 
