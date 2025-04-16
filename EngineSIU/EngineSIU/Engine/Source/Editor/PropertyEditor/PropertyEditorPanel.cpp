@@ -78,9 +78,9 @@ void PropertyEditorPanel::Render()
             PickedActor->SetActorScale(Scale);
 
             std::string coordiButtonLabel;
-            if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
+            if (player->GetCoordMode() == ECoordMode::CDM_WORLD)
                 coordiButtonLabel = "World";
-            else if (player->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+            else if (player->GetCoordMode() == ECoordMode::CDM_LOCAL)
                 coordiButtonLabel = "Local";
 
             if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
@@ -298,15 +298,15 @@ void PropertyEditorPanel::Render()
                 }
 
                 float FogDensity = FogComponent->GetFogDensity();
-                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
+                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 3.0f))
                 {
                     FogComponent->SetFogDensity(FogDensity);
                 }
 
-                float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
-                if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
+                float FogDistanceWeight = FogComponent->GetFogDistanceWeight();
+                if (ImGui::SliderFloat("Distance Weight", &FogDistanceWeight, 0.00f, 3.0f))
                 {
-                    FogComponent->SetFogMaxOpacity(FogMaxOpacity);
+                    FogComponent->SetFogDistanceWeight(FogDistanceWeight);
                 }
 
                 float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
@@ -319,6 +319,12 @@ void PropertyEditorPanel::Render()
                 if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
                 {
                     FogComponent->SetStartDistance(FogStartDistance);
+                }
+
+                float FogEndtDistance = FogComponent->GetEndDistance();
+                if (ImGui::SliderFloat("End Distance", &FogEndtDistance, 0.00f, 50.0f))
+                {
+                    FogComponent->SetEndDistance(FogEndtDistance);
                 }
 
                 ImGui::TreePop();

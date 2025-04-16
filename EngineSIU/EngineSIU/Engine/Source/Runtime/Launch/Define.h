@@ -19,10 +19,10 @@
 struct FStaticMeshVertex
 {
     float X, Y, Z;    // Position
+    float R, G, B, A; // Color
     float NormalX, NormalY, NormalZ;
     float TangentX, TangentY, TangentZ;
     float U = 0, V = 0;
-    float R, G, B, A; // Color
     uint32 MaterialIndex;
 };
 
@@ -39,7 +39,6 @@ struct FStaticMaterial
 {
     class UMaterial* Material;
     FName MaterialSlotName;
-    //FMeshUVChannelInfo UVChannelData;
 };
 
 // OBJ File Raw Data
@@ -133,6 +132,7 @@ struct FVertexTexture
     float x, y, z;    // Position
     float u, v; // Texture
 };
+
 struct FGridParameters
 {
     float GridSpacing;
@@ -140,20 +140,24 @@ struct FGridParameters
     FVector GridOrigin;
     float pad;
 };
+
 struct FSimpleVertex
 {
     float dummy; // 내용은 사용되지 않음
     float padding[11];
 };
+
 struct FOBB {
     FVector corners[8];
 };
+
 struct FRect
 {
-    FRect() : leftTopX(0), leftTopY(0), width(0), height(0) {}
-    FRect(float x, float y, float w, float h) : leftTopX(x), leftTopY(y), width(w), height(h) {}
-    float leftTopX, leftTopY, width, height;
+    FRect() : TopLeftX(0), TopLeftY(0), Width(0), Height(0) {}
+    FRect(float x, float y, float w, float h) : TopLeftX(x), TopLeftY(y), Width(w), Height(h) {}
+    float TopLeftX, TopLeftY, Width, Height;
 };
+
 struct FPoint
 {
     FPoint() : x(0), y(0) {}
@@ -163,6 +167,7 @@ struct FPoint
 
     float x, y;
 };
+
 struct FBoundingBox
 {
     FBoundingBox() = default;
@@ -248,6 +253,7 @@ struct FBoundingBox
     }
 
 };
+
 struct FCone
 {
     FVector ConeApex; // 원뿔의 꼭짓점
@@ -261,6 +267,7 @@ struct FCone
     float pad[3];
 
 };
+
 struct FPrimitiveCounts
 {
     int BoundingBoxCount;
@@ -293,6 +300,7 @@ struct FLight
     int   Enabled;
     int   Type;
     float Intensity = 1000.f;    // m_fIntensity: 광원 강도
+    
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
 };
@@ -301,40 +309,51 @@ struct FLightBuffer
 {
     FLight gLights[MAX_LIGHTS]{};
     FVector4 GlobalAmbientLight;
+    
     int nLights;
     float    pad0, pad1, pad2;
 };
 
-
-struct FMaterialConstants {
+struct FMaterialConstants
+{
     FVector DiffuseColor;
     float TransparencyScalar;
-
-    FVector AmbientColor;
-    float DensityScalar;
 
     FVector SpecularColor;
     float SpecularScalar;
 
-    FVector EmmisiveColor;
-    float MaterialPad0;
+    FVector EmissiveColor;
+    float DensityScalar;
 
+    FVector AmbientColor;
+    float MaterialPad0;
 };
 
-struct FPerObjectConstantBuffer {
-    FMatrix Model;      // 모델
-    FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
+struct FObjectConstantBuffer
+{
+    FMatrix WorldMatrix;
+    FMatrix InverseTransposedWorld;
+    
     FVector4 UUIDColor;
-    int IsSelected;
+    
+    int bIsSelected;
     FVector pad;
 };
 
 struct FCameraConstantBuffer
 {
-    FMatrix View;
-    FMatrix Projection;
-    FVector CameraPosition;
-    float pad;
+    FMatrix ViewMatrix;
+    FMatrix InvViewMatrix;
+    
+    FMatrix ProjectionMatrix;
+    FMatrix InvProjectionMatrix;
+    
+    FVector ViewLocation;
+    float Padding1;
+
+    float NearClip;
+    float FarClip;
+    FVector2D Padding2;
 };
 
 struct FSubUVConstant
@@ -342,17 +361,27 @@ struct FSubUVConstant
     FVector2D uvOffset;
     FVector2D uvScale;
 };
-struct FLitUnlitConstants {
+
+struct FLitUnlitConstants
+{
     int isLit; // 1 = Lit, 0 = Unlit 
     FVector pad;
 };
 
-struct FSubMeshConstants {
+struct FViewModeConstants
+{
+    uint32 ViewMode;
+    FVector pad;
+};
+
+struct FSubMeshConstants
+{
     float isSelectedSubMesh;
     FVector pad;
 };
 
-struct FTextureConstants {
+struct FTextureConstants
+{
     float UOffset;
     float VOffset;
     float pad0;
@@ -367,6 +396,12 @@ struct FLinePrimitiveBatchArgs
     int ConeCount;
     int ConeSegmentCount;
     int OBBCount;
+};
+
+struct FViewportSize
+{
+    FVector2D ViewportSize;
+    FVector2D Padding;
 };
 
 struct FVertexInfo
@@ -396,19 +431,17 @@ struct FScreenConstants
     FVector2D Padding;      // 정렬용 (사용 안 해도 무방)
 };
 
-
 struct FFogConstants
 {
-    FMatrix InvViewProj;
     FLinearColor FogColor;
-    FVector CameraPos;
-    float FogDensity;
-    float FogHeightFalloff;
+    
     float StartDistance;
-    float FogCutoffDistance;
-    float FogMaxOpacity;
-    FVector FogPosition;
-    float CameraNear;
-    float CameraFar;
-    FVector padding;
+    float EndDistance;    
+    float FogHeight;
+    float FogHeightFalloff;
+    
+    float FogDensity;
+    float FogDistanceWeight;
+    float padding1;
+    float padding2;
 };

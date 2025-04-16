@@ -19,28 +19,61 @@ SLevelEditor::SLevelEditor()
 {
 }
 
-void SLevelEditor::Initialize()
+void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
 {
-    EditorWidth = FEngineLoop::GraphicDevice.screenWidth;
-    EditorHeight = FEngineLoop::GraphicDevice.screenHeight;
+    ResizeEditor(InEditorWidth, InEditorHeight);
     
+    VSplitter = new SSplitterV();
+    VSplitter->Initialize(FRect(0.0f, 0.f, InEditorWidth, InEditorHeight));
+    
+    HSplitter = new SSplitterH();
+    HSplitter->Initialize(FRect(0.f, 0.0f, InEditorWidth, InEditorHeight));
+    
+    FRect Top = VSplitter->SideLT->GetRect();
+    FRect Bottom = VSplitter->SideRB->GetRect();
+    FRect Left = HSplitter->SideLT->GetRect();
+    FRect Right = HSplitter->SideRB->GetRect();
+
     for (size_t i = 0; i < 4; i++)
     {
+        EViewScreenLocation Location = static_cast<EViewScreenLocation>(i);
+        FRect Rect;
+        switch (Location)
+        {
+        case EViewScreenLocation::EVL_TopLeft:
+            Rect.TopLeftX = Left.TopLeftX;
+            Rect.TopLeftY = Top.TopLeftY;
+            Rect.Width = Left.Width;
+            Rect.Height = Top.Height;
+            break;
+        case EViewScreenLocation::EVL_TopRight:
+            Rect.TopLeftX = Right.TopLeftX;
+            Rect.TopLeftY = Top.TopLeftY;
+            Rect.Width = Right.Width;
+            Rect.Height = Top.Height;
+            break;
+        case EViewScreenLocation::EVL_BottomLeft:
+            Rect.TopLeftX = Left.TopLeftX;
+            Rect.TopLeftY = Bottom.TopLeftY;
+            Rect.Width = Left.Width;
+            Rect.Height = Bottom.Height;
+            break;
+        case EViewScreenLocation::EVL_BottomRight:
+            Rect.TopLeftX = Right.TopLeftX;
+            Rect.TopLeftY = Bottom.TopLeftY;
+            Rect.Width = Right.Width;
+            Rect.Height = Bottom.Height;
+            break;
+        default:
+            return;
+        }
         ViewportClients[i] = std::make_shared<FEditorViewportClient>();
-        ViewportClients[i]->Initialize(i);
+        ViewportClients[i]->Initialize(Location, Rect);
     }
+    
     ActiveViewportClient = ViewportClients[0];
-    VSplitter = new SSplitterV();
-    VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
-    VSplitter->OnDrag(FPoint(0, 0));
-    HSplitter = new SSplitterH();
-    HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
-    HSplitter->OnDrag(FPoint(0, 0));
+    
     LoadConfig();
-
-    SetEnableMultiViewport(bMultiViewportMode);
-    ResizeLevelEditor();
-
 
     FSlateAppMessageHandler* Handler = GEngineLoop.GetAppMessageHandler();
 
@@ -85,17 +118,21 @@ void SLevelEditor::Initialize()
         if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
         {
             const auto& [DeltaX, DeltaY] = InMouseEvent.GetCursorDelta();
-            if (VSplitter->IsPressing())
+            
+            bool bSplitterDragging = false;
+            if (VSplitter->IsSplitterPressed())
             {
                 VSplitter->OnDrag(FPoint(DeltaX, DeltaY));
+                bSplitterDragging = true;
             }
-            if (HSplitter->IsPressing())
+            if (HSplitter->IsSplitterPressed())
             {
                 HSplitter->OnDrag(FPoint(DeltaX, DeltaY));
+                bSplitterDragging = true;
             }
-            if (VSplitter->IsPressing() || HSplitter->IsPressing())
+
+            if (bSplitterDragging)
             {
-                FEngineLoop::GraphicDevice.OnResize(GEngineLoop.AppWnd);
                 ResizeViewports();
             }
         }
@@ -114,8 +151,8 @@ void SLevelEditor::Initialize()
             GetCursorPos(&Point);
             ScreenToClient(GEngineLoop.AppWnd, &Point);
             FVector2D ClientPos = FVector2D{static_cast<float>(Point.x), static_cast<float>(Point.y)};
-            const bool bIsVerticalHovered = VSplitter->IsHover({ClientPos.X, ClientPos.Y});
-            const bool bIsHorizontalHovered = HSplitter->IsHover({ClientPos.X, ClientPos.Y});
+            const bool bIsVerticalHovered = VSplitter->IsSplitterHovered({ClientPos.X, ClientPos.Y});
+            const bool bIsHorizontalHovered = HSplitter->IsSplitterHovered({ClientPos.X, ClientPos.Y});
 
             if (bIsHorizontalHovered && bIsVerticalHovered)
             {
@@ -188,7 +225,7 @@ void SLevelEditor::Initialize()
                 const float CurrentSpeed = ActiveViewportClient->GetCameraSpeedScalar();
                 const float Adjustment = FMath::Sign(InMouseEvent.GetWheelDelta()) * FMath::Loge(CurrentSpeed + 1.0f) * 0.5f;
 
-                ActiveViewportClient->SetCameraSpeedScalar(CurrentSpeed + Adjustment);
+                ActiveViewportClient->SetCameraSpeed(CurrentSpeed + Adjustment);
             }
         }
     });
@@ -202,9 +239,9 @@ void SLevelEditor::Initialize()
         {
             if (!bIsPressedMouseRightButton)
             {
-                const FVector CameraLoc = ActiveViewportClient->ViewTransformPerspective.GetLocation();
-                const FVector CameraForward = ActiveViewportClient->ViewTransformPerspective.GetForwardVector();
-                ActiveViewportClient->ViewTransformPerspective.SetLocation(
+                const FVector CameraLoc = ActiveViewportClient->PerspectiveCamera.GetLocation();
+                const FVector CameraForward = ActiveViewportClient->PerspectiveCamera.GetForwardVector();
+                ActiveViewportClient->PerspectiveCamera.SetLocation(
                     CameraLoc + CameraForward * InMouseEvent.GetWheelDelta() * 50.0f
                 );
             }
@@ -241,40 +278,50 @@ void SLevelEditor::Release()
     delete HSplitter;
 }
 
-void SLevelEditor::SelectViewport(FVector2D InPoint)
+void SLevelEditor::ResizeEditor(uint32 InEditorWidth, uint32 InEditorHeight)
 {
-    for (int Idx = 0; Idx < 4; Idx++)
+    if (InEditorWidth == EditorWidth && InEditorHeight == EditorHeight)
     {
-        if (ViewportClients[Idx]->IsSelected(InPoint))
+        return;
+    }
+    
+    EditorWidth = InEditorWidth;
+    EditorHeight = InEditorHeight;
+
+    if (HSplitter && VSplitter)
+    {
+        HSplitter->OnResize(EditorWidth, EditorHeight);
+        VSplitter->OnResize(EditorWidth, EditorHeight);
+        ResizeViewports();
+    }
+}
+
+void SLevelEditor::SelectViewport(const FVector2D& Point)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        if (ViewportClients[i]->IsSelected(Point))
         {
-            SetViewportClient(Idx);
-            break;
+            SetActiveViewportClient(i);
+            return;
         }
     }
 }
 
-void SLevelEditor::ResizeLevelEditor()
-{
-    float PrevWidth = EditorWidth;
-    float PrevHeight = EditorHeight;
-    EditorWidth = FEngineLoop::GraphicDevice.screenWidth;
-    EditorHeight = FEngineLoop::GraphicDevice.screenHeight;
-    
-    //HSplitter 에는 바뀐 width 비율이 들어감 
-    HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
-    //HSplitter 에는 바뀐 Height 비율이 들어감 
-    VSplitter->OnResize(EditorWidth, EditorHeight/PrevHeight);
-    ResizeViewports();
-}
-
 void SLevelEditor::ResizeViewports()
 {
-    if (bMultiViewportMode) {
-        if (GetViewports()[0]) {
-            for (int i = 0;i < 4;++i)
+    if (bMultiViewportMode)
+    {
+        if (GetViewports()[0])
+        {
+            for (int i = 0; i < 4; ++i)
             {
-                GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
-                    HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
+                GetViewports()[i]->ResizeViewport(
+                    VSplitter->SideLT->GetRect(),
+                    VSplitter->SideRB->GetRect(),
+                    HSplitter->SideLT->GetRect(),
+                    HSplitter->SideRB->GetRect()
+                );
             }
         }
     }
@@ -297,71 +344,94 @@ bool SLevelEditor::IsMultiViewport() const
 
 void SLevelEditor::LoadConfig()
 {
-    auto config = ReadIniFile(IniFilePath);
-    ActiveViewportClient->Pivot.X = GetValueFromConfig(config, "OrthoPivotX", 0.0f);
-    ActiveViewportClient->Pivot.Y = GetValueFromConfig(config, "OrthoPivotY", 0.0f);
-    ActiveViewportClient->Pivot.Z = GetValueFromConfig(config, "OrthoPivotZ", 0.0f);
-    ActiveViewportClient->orthoSize = GetValueFromConfig(config, "OrthoZoomSize", 10.0f);
-    EditorWidth = GetValueFromConfig(config, "EditorWidth", FEngineLoop::GraphicDevice.screenWidth);
-    EditorHeight = GetValueFromConfig(config, "EditorHeight", FEngineLoop::GraphicDevice.screenHeight);
+    auto Config = ReadIniFile(IniFilePath);
+    FEditorViewportClient::Pivot.X = GetValueFromConfig(Config, "OrthoPivotX", 0.0f);
+    FEditorViewportClient::Pivot.Y = GetValueFromConfig(Config, "OrthoPivotY", 0.0f);
+    FEditorViewportClient::Pivot.Z = GetValueFromConfig(Config, "OrthoPivotZ", 0.0f);
+    FEditorViewportClient::OrthoSize = GetValueFromConfig(Config, "OrthoZoomSize", 10.0f);
 
-    SetViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
-    bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
-    for (const auto& ViewportClient : ViewportClients)
+    SetActiveViewportClient(GetValueFromConfig(Config, "ActiveViewportIndex", 0));
+    bMultiViewportMode = GetValueFromConfig(Config, "bMultiView", false);
+    if (bMultiViewportMode)
     {
-        ViewportClient->LoadConfig(config);
+        SetEnableMultiViewport(true);
     }
+    else
+    {
+        SetEnableMultiViewport(false);
+    }
+    
+    for (size_t i = 0; i < 4; i++)
+    {
+        ViewportClients[i]->LoadConfig(Config);
+    }
+    
     if (HSplitter)
-        HSplitter->LoadConfig(config);
+    {
+        HSplitter->LoadConfig(Config);
+    }
     if (VSplitter)
-        VSplitter->LoadConfig(config);
+    {
+        VSplitter->LoadConfig(Config);
+    }
 
+    ResizeViewports();
 }
 
 void SLevelEditor::SaveConfig()
 {
     TMap<FString, FString> config;
     if (HSplitter)
+    {
         HSplitter->SaveConfig(config);
+    }
     if (VSplitter)
+    {
         VSplitter->SaveConfig(config);
+    }
     for (size_t i = 0; i < 4; i++)
     {
         ViewportClients[i]->SaveConfig(config);
     }
     ActiveViewportClient->SaveConfig(config);
-    config["bMutiView"] = std::to_string(bMultiViewportMode);
+    config["bMultiView"] = std::to_string(bMultiViewportMode);
     config["ActiveViewportIndex"] = std::to_string(ActiveViewportClient->ViewportIndex);
     config["ScreenWidth"] = std::to_string(EditorWidth);
     config["ScreenHeight"] = std::to_string(EditorHeight);
     config["OrthoPivotX"] = std::to_string(ActiveViewportClient->Pivot.X);
     config["OrthoPivotY"] = std::to_string(ActiveViewportClient->Pivot.Y);
     config["OrthoPivotZ"] = std::to_string(ActiveViewportClient->Pivot.Z);
-    config["OrthoZoomSize"] = std::to_string(ActiveViewportClient->orthoSize);
+    config["OrthoZoomSize"] = std::to_string(ActiveViewportClient->OrthoSize);
     WriteIniFile(IniFilePath, config);
 }
 
-TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& filePath)
+TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& FilePath)
 {
     TMap<FString, FString> config;
-    std::ifstream file(*filePath);
+    std::ifstream file(*FilePath);
     std::string line;
 
-    while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '[' || line[0] == ';') continue;
+    while (std::getline(file, line))
+    {
+        if (line.empty() || line[0] == '[' || line[0] == ';')
+        {
+            continue;
+        }
         std::istringstream ss(line);
         std::string key, value;
-        if (std::getline(ss, key, '=') && std::getline(ss, value)) {
+        if (std::getline(ss, key, '=') && std::getline(ss, value))
+        {
             config[key] = value;
         }
     }
     return config;
 }
 
-void SLevelEditor::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
+void SLevelEditor::WriteIniFile(const FString& FilePath, const TMap<FString, FString>& Config)
 {
-    std::ofstream file(*filePath);
-    for (const auto& pair : config) {
+    std::ofstream file(*FilePath);
+    for (const auto& pair : Config)
+    {
         file << *pair.Key << "=" << *pair.Value << "\n";
     }
 }

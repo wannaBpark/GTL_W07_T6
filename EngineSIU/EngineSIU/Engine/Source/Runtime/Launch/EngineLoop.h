@@ -28,7 +28,9 @@ public:
     void Render() const;
     void Tick();
     void Exit();
-    float GetAspectRatio(IDXGISwapChain* swapChain) const;
+    void Input();
+
+    void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
 
 private:
     void WindowInit(HINSTANCE hInstance);
@@ -52,10 +54,10 @@ private:
     std::unique_ptr<FSlateAppMessageHandler> AppMessageHandler;
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
-    FDXDBufferManager* bufferManager; //ToDo UEngine으로 옮겨야함.
+    FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
     bool bIsExit = false;
-    const int32 targetFPS = 60;
+    int32 TargetFPS = 60;
 
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
