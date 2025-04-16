@@ -383,7 +383,7 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
             StaticMeshVertex.Y = RawData.Vertices[VertexIndex].Y;
             StaticMeshVertex.Z = RawData.Vertices[VertexIndex].Z;
 
-            StaticMeshVertex.R = 0.0f; StaticMeshVertex.G = 0.0f; StaticMeshVertex.B = 0.0f; StaticMeshVertex.A = 1.0f; // 기본 색상
+            StaticMeshVertex.R = 0.7f; StaticMeshVertex.G = 0.7f; StaticMeshVertex.B = 0.7f; StaticMeshVertex.A = 1.0f; // 기본 색상
 
             if (UVIndex != UINT32_MAX && UVIndex < RawData.UVs.Num())
             {

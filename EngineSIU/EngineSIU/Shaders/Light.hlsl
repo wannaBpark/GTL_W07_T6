@@ -269,6 +269,7 @@ float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, fl
     
     float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor) +
                  (SpecularFactor * Material.SpecularColor);
+    Lit = float3(1,1,1);
                  
 #elif defined(LIGHTING_MODEL_LAMBERT)
     float3 Lit = (LightInfo.LightColor.rgb * DiffuseFactor * Material.DiffuseColor);
