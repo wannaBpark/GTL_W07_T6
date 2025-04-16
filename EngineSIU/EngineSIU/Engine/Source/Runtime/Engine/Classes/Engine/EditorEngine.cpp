@@ -3,8 +3,10 @@
 #include "World/World.h"
 #include "Level.h"
 #include "Actors/Cube.h"
+#include "Actors/DirectionalLightActor.h"
 #include "GameFramework/Actor.h"
 #include "Classes/Engine/AssetManager.h"
+#include "Components/Light/DirectionalLightComponent.h"
 
 namespace PrivateEditorSelection
 {
@@ -40,6 +42,11 @@ void UEditorEngine::Init()
 
 #ifdef _DEBUG
     AActor* Actor = EditorWorld->SpawnActor<ACube>();
+    
+    ADirectionalLight* DirLight = EditorWorld->SpawnActor<ADirectionalLight>();
+    DirLight->SetActorRotation(FRotator(20, -61, 11));
+    DirLight->SetActorLocation(FVector(0, 0, 20));
+    DirLight->SetIntensity(2.f);
 #endif
 }
 

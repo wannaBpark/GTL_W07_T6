@@ -17,3 +17,11 @@ ADirectionalLight::ADirectionalLight()
 ADirectionalLight::~ADirectionalLight()
 {
 }
+
+void ADirectionalLight::SetIntensity(float Intensity)
+{
+    if (DirectionalLightComponent)
+    {
+        DirectionalLightComponent->SetIntensity(Intensity);
+    }
+}
