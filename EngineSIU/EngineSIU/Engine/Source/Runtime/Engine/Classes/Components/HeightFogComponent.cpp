@@ -1,8 +1,8 @@
 #include "HeightFogComponent.h"
 #include <UObject/Casts.h>
 
-UHeightFogComponent::UHeightFogComponent(float Density, float HeightFalloff, float StartDist, float CutoffDist, float MaxOpacity)
-    :FogDensity(Density), FogHeightFalloff(HeightFalloff), StartDistance(StartDist), FogCutoffDistance(CutoffDist), FogMaxOpacity(MaxOpacity)
+UHeightFogComponent::UHeightFogComponent(float Density, float HeightFalloff, float StartDist, float EndDist, float DistanceWeight)
+    :FogDensity(Density), FogHeightFalloff(HeightFalloff), StartDistance(StartDist), EndDistance(EndDist), FogDistanceWeight(DistanceWeight)
 {
     FogInscatteringColor = FLinearColor::White;
 }
@@ -22,14 +22,14 @@ void UHeightFogComponent::SetStartDistance(float value)
     StartDistance = value;
 }
 
-void UHeightFogComponent::SetFogCutoffDistance(float value)
+void UHeightFogComponent::SetFogDistanceWeight(float value)
 {
-    FogCutoffDistance = value;
+    FogDistanceWeight = value;
 }
 
-void UHeightFogComponent::SetFogMaxOpacity(float value)
+void UHeightFogComponent::SetEndDistance(float value)
 {
-    FogMaxOpacity = value;
+    EndDistance = value;
 }
 
 void UHeightFogComponent::SetFogColor(FLinearColor color)
@@ -44,8 +44,8 @@ UObject* UHeightFogComponent::Duplicate(UObject* InOuter)
     NewComponent->FogDensity = FogDensity;
     NewComponent->FogHeightFalloff = FogHeightFalloff;
     NewComponent->StartDistance = StartDistance;
-    NewComponent->FogCutoffDistance = FogCutoffDistance;
-    NewComponent->FogMaxOpacity = FogMaxOpacity;
+    NewComponent->FogDistanceWeight = FogDistanceWeight;
+    NewComponent->EndDistance = EndDistance;
     NewComponent->FogInscatteringColor = FogInscatteringColor;
 
     return NewComponent;
@@ -57,8 +57,8 @@ void UHeightFogComponent::GetProperties(TMap<FString, FString>& OutProperties) c
     OutProperties.Add(TEXT("FogDensity"), FString::Printf(TEXT("%f"), FogDensity));
     OutProperties.Add(TEXT("FogHeightFalloff"), FString::Printf(TEXT("%f"), FogHeightFalloff));
     OutProperties.Add(TEXT("StartDistance"), FString::Printf(TEXT("%f"), StartDistance));
-    OutProperties.Add(TEXT("FogCutoffDistance"), FString::Printf(TEXT("%f"), FogCutoffDistance));
-    OutProperties.Add(TEXT("FogMaxOpacity"), FString::Printf(TEXT("%f"), FogMaxOpacity));
+    OutProperties.Add(TEXT("FogCutoffDistance"), FString::Printf(TEXT("%f"), FogDistanceWeight));
+    OutProperties.Add(TEXT("FogMaxOpacity"), FString::Printf(TEXT("%f"), EndDistance));
     //FVector4 Color = FVector4(FogInscatteringColor.R, FogInscatteringColor.G, FogInscatteringColor.B, FogInscatteringColor.A);
     
     OutProperties.Add(TEXT("FogInscatteringColor"), FString::Printf(TEXT("%s"), *FogInscatteringColor.ToString()));
@@ -86,12 +86,12 @@ void UHeightFogComponent::SetProperties(const TMap<FString, FString>& InProperti
     TempStr = InProperties.Find(TEXT("FogCutoffDistance"));
     if (TempStr)
     {
-        FogCutoffDistance = FString::ToFloat(*TempStr);
+        FogDistanceWeight = FString::ToFloat(*TempStr);
     }
     TempStr = InProperties.Find(TEXT("FogMaxOpacity"));
     if (TempStr)
     {
-        FogMaxOpacity = FString::ToFloat(*TempStr);
+        EndDistance = FString::ToFloat(*TempStr);
     }
     TempStr = InProperties.Find(TEXT("FogInscatteringColor"));
     if (TempStr)

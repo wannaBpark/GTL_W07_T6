@@ -15,6 +15,7 @@
 #include "D3D11RHI/DXDBufferManager.h"
 
 
+class FPostProcessCompositingPass;
 enum class EResourceType : uint8;
 
 class FSceneRenderPass;
@@ -96,6 +97,7 @@ public:
     FEditorRenderPass* EditorRenderPass = nullptr;
     
     FCompositingPass* CompositingPass = nullptr;
+    FPostProcessCompositingPass* PostProcessCompositingPass = nullptr;
     
     FSlateRenderPass* SlateRenderPass = nullptr;
 };
