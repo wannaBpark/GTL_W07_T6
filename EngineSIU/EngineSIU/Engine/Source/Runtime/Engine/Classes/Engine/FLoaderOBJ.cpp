@@ -309,28 +309,28 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 
             FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
             OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = TexturePath;
-            OutFStaticMesh.Materials[MaterialIndex].TextureFlags |= 1 << 1;
+            OutFStaticMesh.Materials[MaterialIndex].TextureFlags |= (1 << 1);
 
             CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
         }
 
         if (Token == "map_Bump")
         {
-            std::string opt;
-            while (LineStream >> opt)
+            std::string Option;
+            while (LineStream >> Option)
             {
-                if (opt == "-bm")
+                if (Option == "-bm")
                 {
-                    float bmValue;
-                    LineStream >> bmValue;
-                    OutFStaticMesh.Materials[MaterialIndex].BumpMultiplier = bmValue;
+                    float BumpMultiplier;
+                    LineStream >> BumpMultiplier;
+                    OutFStaticMesh.Materials[MaterialIndex].BumpMultiplier = BumpMultiplier;
                 }
                 else
                 {
-                    OutFStaticMesh.Materials[MaterialIndex].BumpTextureName = opt;
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTextureName = Option;
                     FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].BumpTextureName.ToWideString();
                     OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath = TexturePath;
-                    OutFStaticMesh.Materials[MaterialIndex].TextureFlags |= 1 << 2;
+                    OutFStaticMesh.Materials[MaterialIndex].TextureFlags |= (1 << 2);
 
                     CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath);
                 }
@@ -344,7 +344,7 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
 {
     OutStaticMesh.ObjectName = RawData.ObjectName;
-    //OutStaticMesh.PathName = RawData.PathName;
+    // OutStaticMesh.PathName = RawData.PathName;
     OutStaticMesh.DisplayName = RawData.DisplayName;
 
     // 고유 정점을 기반으로 FVertexSimple 배열 생성
@@ -366,7 +366,7 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
                 break;
             }
         }
-        
+
         // 키 생성 (v/vt/vn 조합)
         std::string Key = std::to_string(VertexIndex) + "/" + std::to_string(UVIndex) + "/" + std::to_string(NormalIndex);
 
@@ -399,14 +399,14 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
             }
 
             FinalIndex = OutStaticMesh.Vertices.Num();
-            OutStaticMesh.Vertices.Add(StaticMeshVertex);
             IndexMap[Key] = FinalIndex;
+            OutStaticMesh.Vertices.Add(StaticMeshVertex);
         }
 
         OutStaticMesh.Indices.Add(FinalIndex);
     }
 
-    // Calculate Tangent
+    // Tangent
     for (int32 i = 0; i < OutStaticMesh.Indices.Num(); i += 3)
     {
         FStaticMeshVertex& Vertex0 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i]];

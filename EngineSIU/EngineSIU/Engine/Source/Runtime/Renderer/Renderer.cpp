@@ -105,9 +105,6 @@ void FRenderer::CreateConstantBuffers()
     UINT textureFlagBufferSize = sizeof(FTextureFlagConstants);
     BufferManager->CreateBufferGeneric<FTextureFlagConstants>("FTextureFlagConstants", nullptr, textureFlagBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    UINT LightingBufferSize = sizeof(FLightBuffer);
-    BufferManager->CreateBufferGeneric<FLightBuffer>("FLightBuffer", nullptr, LightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
     UINT LitUnlitBufferSize = sizeof(FLitUnlitConstants);
     BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, LitUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 

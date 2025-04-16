@@ -7,7 +7,7 @@
 #include "Components/Light/LightComponent.h"
 #include "Components/Light/PointLightComponent.h"
 #include "Components/Light/SpotLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
 #include "Engine/EditorEngine.h"
 #include "GameFramework/Actor.h"
 #include "UObject/UObjectIterator.h"

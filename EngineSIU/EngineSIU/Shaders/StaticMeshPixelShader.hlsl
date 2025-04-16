@@ -1,7 +1,8 @@
 
 #include "ShaderRegisters.hlsl"
 
-SamplerState Sampler : register(s0);
+SamplerState DiffuseSampler : register(s0);
+SamplerState NormalSampler : register(s1);
 
 Texture2D DiffuseTexture : register(t0);
 Texture2D NormalTexture : register(t1);
@@ -29,7 +30,7 @@ cbuffer TextureConstants : register(b4)
     float2 TexturePad0;
 }
 
-cbuffer TextureFlagConstants : register(b7)
+cbuffer TextureFlagConstants : register(b5)
 {
     uint TextureFlags;
     float3 TextureFlagPad;
@@ -78,7 +79,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
     float3 DiffuseColor = Material.DiffuseColor;
     if (TextureFlags & (1 << 1))
     {
-        DiffuseColor = DiffuseTexture.Sample(Sampler, Input.UV).rgb;
+        DiffuseColor = DiffuseTexture.Sample(DiffuseSampler, Input.UV).rgb;
         DiffuseColor = SRGBToLinear(DiffuseColor);
     }
 
@@ -86,7 +87,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
     float3 WorldNormal = Input.WorldNormal;
     if (TextureFlags & (1 << 2))
     {
-        float3 Normal = NormalTexture.Sample(Sampler, Input.UV).rgb;
+        float3 Normal = NormalTexture.Sample(NormalSampler, Input.UV).rgb;
         Normal = normalize(2.f * Normal - 1.f);
         WorldNormal = normalize(mul(mul(Normal, Input.TBN), (float3x3) InverseTransposedWorld));
     }
@@ -97,7 +98,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
 #ifdef LIGHTING_MODEL_GOURAUD
         FinalColor = float4(Input.Color.rgb, 1.0);
 #else
-        float3 LightRgb = Lighting(Input.WorldPosition, Input.WorldNormal, Input.WorldViewPosition).rgb;
+        float3 LightRgb = Lighting(Input.WorldPosition, WorldNormal, Input.WorldViewPosition).rgb;
         float3 LitColor = DiffuseColor * LightRgb;
         FinalColor = float4(LitColor, 1);
 #endif
@@ -109,7 +110,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
     
     if (bIsSelected)
     {
-        FinalColor += float4(0.02, 0.02, 0.02, 1);
+        FinalColor += float4(0.01, 0.01, 0.0, 1);
     }
     
     return FinalColor;

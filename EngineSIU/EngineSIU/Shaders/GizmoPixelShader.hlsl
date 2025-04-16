@@ -33,12 +33,12 @@ float3 ReconstructWorldPosition(float2 UV, float Z)
     return WorldPosition.xyz;
 }
 
-bool IsShaded(float3 SceneWorldPosition, float3 GizmoWorldPosition)
+bool IsShaded(float3 SceneWorldPosition, float3 GizmoWorldPosition, float3 WorldViewPosition)
 {
     const float Bias = 0.01f;
 
-    float SceneDistance = length(SceneWorldPosition - ViewWorldLocation);
-    float GizmoDistance = length(GizmoWorldPosition - ViewWorldLocation);
+    float SceneDistance = length(SceneWorldPosition - WorldViewPosition);
+    float GizmoDistance = length(GizmoWorldPosition - WorldViewPosition);
 
     return GizmoDistance > SceneDistance - Bias;
 }
@@ -57,9 +57,17 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
         float Z = SceneDepthTexture.Sample(Sampler, DepthUV);
         float3 SceneWorldPosition = ReconstructWorldPosition(DepthUV, Z);
 
-        if (IsShaded(SceneWorldPosition, Input.WorldPosition))
+        if (IsShaded(SceneWorldPosition, Input.WorldPosition, Input.WorldViewPosition))
         {
-            FinalColor.xyz *= 0.15f;
+            float GridSize = 3.f;
+            float2 GridCoord = floor(Input.Position.xy / GridSize);
+            bool bIsBlack = fmod(GridCoord.x + GridCoord.y, 2.0) < 1.0;
+            if (bIsBlack)
+            {
+                return float4(0, 0, 0, 1);
+            }
+            
+            FinalColor.xyz *= 0.15f; 
         }
         else
         {

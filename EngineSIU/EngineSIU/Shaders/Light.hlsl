@@ -51,7 +51,7 @@ struct FSpotLightInfo
     float Attenuation;
 };
 
-cbuffer Lighting : register(b2)
+cbuffer Lighting : register(b0)
 {
     FAmbientLightInfo Ambient;
     FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];

@@ -82,20 +82,16 @@ struct FObjMaterialInfo
 {
     FString MaterialName;  // newmtl : Material Name.
 
-    // Begin Test
-    unsigned int TextureFlags=0;
-    //bool bHasTexture = false;  // Has Texture?
-    //bool bHasNormalMap = false;// Has NormalMap?
-    // End Test
+    uint32 TextureFlags = 0;
 
     bool bTransparent = false; // Has alpha channel?
 
-    FVector Diffuse;  // Kd : Diffuse (Vector4)
-    FVector Specular;  // Ks : Specular (Vector) 
-    FVector Ambient;   // Ka : Ambient (Vector)
-    FVector Emissive;  // Ke : Emissive (Vector)
+    FVector Diffuse = FVector(0.7f, 0.7f, 0.7f);  // Kd : Diffuse (Vector4)
+    FVector Specular = FVector(0.5f, 0.5f, 0.5f);  // Ks : Specular (Vector) 
+    FVector Ambient = FVector(0.01f, 0.01f, 0.01f);   // Ka : Ambient (Vector)
+    FVector Emissive = FVector::ZeroVector;  // Ke : Emissive (Vector)
 
-    float SpecularScalar; // Ns : Specular Power (Float)
+    float SpecularScalar = 64.f; // Ns : Specular Power (Float)
     float DensityScalar;  // Ni : Optical Density (Float)
     float TransparencyScalar; // d or Tr  : Transparency of surface (Float)
     float BumpMultiplier;     // -bm : Bump Mulitplier ex) normalMap.xy *= BumpMultiplier; 
@@ -264,7 +260,6 @@ struct FBoundingBox
 
         return true;
     }
-
 };
 
 struct FCone
@@ -278,7 +273,6 @@ struct FCone
 
     int ConeSegmentCount; // 원뿔 밑면 분할 수
     float pad[3];
-
 };
 
 struct FPrimitiveCounts
@@ -296,41 +290,6 @@ enum ELightType {
     DIRECTIONAL_LIGHT = 3,
     AMBIENT_LIGHT = 4,
     NUM_LIGHT_TYPES = 5
-};
-
-struct FLight
-{
-    FVector DiffuseColor;
-    float pad1;
-
-
-    FVector Position;
-    float Falloff;
-
-    FVector Direction;
-    float pad3;
-
-    float Attenuation = 20.f;
-    int   Enabled;
-    int   Type;
-    float Intensity = 1000.f;    // m_fIntensity: 광원 강도
-    
-    float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
-    FVector LightPad;
-
-    float InnerCos; // cos(inner angle)
-    float OuterCos; // cos(outer angle)
-    float pad4;
-    float pad5;
-};
-
-struct FLightBuffer
-{
-    FLight gLights[MAX_LIGHTS]{};
-    FVector4 GlobalAmbientLight;
-    
-    int nLights;
-    float    pad0, pad1, pad2;
 };
 
 struct FMaterialConstants

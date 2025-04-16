@@ -150,14 +150,17 @@ void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorView
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     TArray<FString> PSBufferKeys = {
-        TEXT("FLightBuffer"),
+        TEXT("FLightInfoBuffer"),
         TEXT("FMaterialConstants"),
         TEXT("FLitUnlitConstants"),
         TEXT("FSubMeshConstants"),
-        TEXT("FTextureConstants")
+        TEXT("FTextureConstants"),
+        TEXT("FTextureFlagConstants")
     };
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+
+    BufferManager->BindConstantBuffer(TEXT("FMaterialConstants"), 1, EShaderStage::Vertex);
 
     ChangeViewMode(ViewMode);
 

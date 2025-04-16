@@ -68,7 +68,7 @@ cbuffer CameraBuffer : register(b13)
     row_major matrix ProjectionMatrix;
     row_major matrix InvProjectionMatrix;
     
-    float3 ViewWorldLocation;
+    float3 ViewWorldLocation; // TODO: ShaderLine에서 유일하게 사용 중으로, 가능하면 버퍼에서 빼기
     float ViewPadding;
     
     float NearClip;

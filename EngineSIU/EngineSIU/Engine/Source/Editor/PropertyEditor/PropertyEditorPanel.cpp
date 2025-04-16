@@ -5,7 +5,7 @@
 #include "Components/Light/LightComponent.h"
 #include "Components/Light/PointLightComponent.h"
 #include "Components/Light/SpotLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
