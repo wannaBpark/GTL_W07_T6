@@ -557,7 +557,6 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
         ImGui::PopStyleColor();
     }
 }
-
 void ControlEditorPanel::CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconFont)
 {
     UWorld* World = GEngine->ActiveWorld;
@@ -576,17 +575,43 @@ void ControlEditorPanel::CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconF
     buttonSize.y = ButtonSize.y;
     if (ImGui::Button("Light", buttonSize))
     {
-        //World->SpawnLightGrid();
-        UE_LOG(LogLevel::Display, TEXT("Light Button Clicked"));
+        ImGui::OpenPopup("LightGeneratorControl");
     }
 
-    ImGui::SetCursorScreenPos(ImVec2(CenterX + 100.0f, 10.0f));
-    if (ImGui::Button("Light Down", buttonSize))
+    if (ImGui::BeginPopup("LightGeneratorControl"))
     {
-        //World->DeleteLightGrid();
-        UE_LOG(LogLevel::Display, TEXT("Light Button Clicked"));
-    }
+        struct LightGeneratorMode {
+            const char* label;
+            int obj;
+        };
 
+        static const LightGeneratorMode modes[] = {
+            {.label = "Generate",      .obj = ELightGridGenerator::Generate },
+            {.label = "Delete",    .obj = ELightGridGenerator::Delete },
+            {.label = "Reset", .obj = ELightGridGenerator::Reset },
+        };
+
+        for (const auto& mode : modes)
+        {
+            if (ImGui::Selectable(mode.label))
+            {
+                switch (mode.obj)
+                {
+                case ELightGridGenerator::Generate:
+                    LightGridGenerator.GenerateLight(World);
+                    break;
+                case ELightGridGenerator::Delete:
+                    LightGridGenerator.DeleteLight(World);
+                    break;
+                case ELightGridGenerator::Reset:
+                    LightGridGenerator.Reset(World);
+                    break;
+                }
+            }
+        }
+
+        ImGui::EndPopup();
+    }
 }
 
 uint64 ControlEditorPanel::ConvertSelectionToFlags(const bool selected[]) const

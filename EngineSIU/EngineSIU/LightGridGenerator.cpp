@@ -3,73 +3,132 @@
 #include "Actors/SpotLightActor.h"
 #include "World/World.h"
 
+FLightGridGenerator::FLightGridGenerator()
+{
+}
+
+FLightGridGenerator::~FLightGridGenerator()
+{
+}
+
 void FLightGridGenerator::GenerateLight(UWorld* world)
 {
-    const int MinRadius = currentHalfCountPerAxis;
-    const int MaxRadius = currentHalfCountPerAxis;
+    const float spacing = 300.0f;
+    const float jitterAmount = 80.0f;
 
-    const float Spacing = 300.0f;
-    const float JitterAmount = 100.0f;
-    const int MaxLights = 10000; // 총 한도 (원하면 제한)
+    int minR = currentHalfCountPerAxis;
+    int maxR = currentHalfCountPerAxis;
 
-    static int LightCount = 0;
+    int r = currentHalfCountPerAxis;
+    int outerCube = (2 * r + 1) * (2 * r + 1) * (2 * r + 1);
+    int innerCube = FMath::Max(0, (2 * r - 1) * (2 * r - 1) * (2 * r - 1));
+    int approxShellSize = outerCube - innerCube;
 
-    auto HashOffset = [JitterAmount](int x, int y, int z) -> FVector
-        {
-            auto LCG = [](int seed) -> float {
-                seed = (1103515245 * seed + 12345) & 0x7fffffff;
-                return (seed % 1000) / 1000.0f;
-                };
+    TArray<AActor*> newShell;
+    newShell.Reserve(approxShellSize);
 
-            int seedBase = x * 73856093 ^ y * 19349663 ^ z * 83492791;
-            float dx = (LCG(seedBase + 1) - 0.5f) * 2.0f * JitterAmount;
-            float dy = (LCG(seedBase + 2) - 0.5f) * 2.0f * JitterAmount;
-            float dz = (LCG(seedBase + 3) - 0.5f) * 2.0f * JitterAmount;
-            return FVector(dx, dy, dz);
-        };
+    int shellLightCount = 0;
 
-    for (int x = -MaxRadius; x <= MaxRadius; ++x)
+    for (int x = -maxR; x <= maxR; ++x)
     {
-        for (int y = -MaxRadius; y <= MaxRadius; ++y)
+        for (int y = -maxR; y <= maxR; ++y)
         {
-            for (int z = -MaxRadius; z <= MaxRadius; ++z)
+            for (int z = -maxR; z <= maxR; ++z)
             {
-                // 중심은 생략
-                if (x == 0 && y == 0 && z == 0)
+                //if (x == 0 && y == 0 && z == 0) continue;
+
+                // 이전 쉘 내부는 제외
+                if (FMath::Abs(x) < minR && FMath::Abs(y) < minR && FMath::Abs(z) < minR)
                     continue;
 
-                // 이미 생성된 범위는 스킵
-                if (FMath::Abs(x) < MinRadius &&
-                    FMath::Abs(y) < MinRadius &&
-                    FMath::Abs(z) < MinRadius)
-                    continue;
+                FVector pos = GetJitteredPosition(x, y, z, spacing, jitterAmount);
 
-                FVector basePos = FVector(x * Spacing, y * Spacing, z * Spacing);
-                FVector jitter = HashOffset(x, y, z);
-                FVector finalPos = basePos + jitter;
-
-                if (LightCount % 2 == 0)
+                AActor* light = nullptr;
+                if ((shellLightCount % 2) == 0)
                 {
-                    APointLight* Light = world->SpawnActor<APointLight>();
-                    Light->SetActorLabel(FString::Printf(TEXT("OBJ_PointLight_%d"), LightCount));
-                    Light->SetActorLocation(finalPos);
+                    light = world->SpawnActor<APointLight>();
+                    light->SetActorLabel(FString::Printf(TEXT("PointLight_%d"), shellLightCount));
                 }
                 else
                 {
-                    ASpotLight* Light = world->SpawnActor<ASpotLight>();
-                    Light->SetActorLabel(FString::Printf(TEXT("OBJ_SpotLight_%d"), LightCount));
-                    Light->SetActorLocation(finalPos);
+                    light = world->SpawnActor<ASpotLight>();
+                    light->SetActorLabel(FString::Printf(TEXT("SpotLight_%d"), shellLightCount));
                 }
 
-                if (++LightCount >= MaxLights)
-                    return;
+                if (light)
+                {
+                    light->SetActorLocation(pos);
+                    newShell.Add(light);
+                }
+
+                ++shellLightCount;
             }
         }
     }
 
-    ++currentHalfCountPerAxis; // 다음 호출 땐 한 겹 더 퍼지게
+    if (LightGrid.Num() <= currentHalfCountPerAxis)
+    {
+        LightGrid.SetNum(currentHalfCountPerAxis + 1);
+    }
+
+    LightGrid[currentHalfCountPerAxis] = std::move(newShell);
+    ++currentHalfCountPerAxis;
 }
+
 
 void FLightGridGenerator::DeleteLight(UWorld* world)
 {
+    if (currentHalfCountPerAxis <= 0 || LightGrid.Num() == 0)
+        return;
+
+    int shellIndex = currentHalfCountPerAxis - 1;
+
+    // 유효한 인덱스인지 확인
+    if (!LightGrid.IsValidIndex(shellIndex))
+        return;
+
+    TArray<AActor*>& shell = LightGrid[shellIndex];
+
+    for (AActor* light : shell)
+    {
+        if (light)
+        {
+            light->Destroy();
+        }
+    }
+
+    // TArray는 SetNum을 통해 capacity 보존 가능
+    shell.Empty();
+
+    --currentHalfCountPerAxis;
 }
+
+void FLightGridGenerator::Reset(UWorld* world)
+{
+    for (TArray<AActor*>& shell : LightGrid)
+    {
+        for (AActor* light : shell)
+        {
+            if (light)
+                light->Destroy();
+        }
+        shell.Empty();
+    }
+    currentHalfCountPerAxis = startCountPerAxis;
+}
+
+FVector FLightGridGenerator::GetJitteredPosition(int x, int y, int z, float spacing, float jitterAmount)
+{
+    auto LCG = [](int seed) -> float {
+        seed = (1103515245 * seed + 12345) & 0x7fffffff;
+        return (seed % 1000) / 1000.0f;
+        };
+
+    int seedBase = x * 73856093 ^ y * 19349663 ^ z * 83492791;
+    float dx = (LCG(seedBase + 1) - 0.5f) * 2.0f * jitterAmount;
+    float dy = (LCG(seedBase + 2) - 0.5f) * 2.0f * jitterAmount;
+    float dz = (LCG(seedBase + 3) - 0.5f) * 2.0f * jitterAmount;
+
+    return FVector(x * spacing + dx, y * spacing + dy, z * spacing + dz);
+}
+
