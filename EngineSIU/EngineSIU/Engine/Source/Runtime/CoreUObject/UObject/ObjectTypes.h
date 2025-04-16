@@ -5,16 +5,17 @@ enum OBJECTS : uint8
 {
     OBJ_SPHERE,
     OBJ_CUBE,
-    OBJ_SpotLight,
-    OBJ_PointLight,
-    OBJ_DirectionalLight,
+    OBJ_SPOTLIGHT,
+    OBJ_POINTLIGHT,
+    OBJ_DIRECTIONALLGIHT,
+    OBJ_AMBIENTLIGHT,
     OBJ_PARTICLE,
-    OBJ_Text,
-    OBJ_Fireball,
+    OBJ_TEXT,
+    OBJ_FIREBALL,
     OBJ_TRIANGLE,
     OBJ_CAMERA,
     OBJ_PLAYER,
-    OBJ_Fog,
+    OBJ_FOG,
     OBJ_END
 };
 

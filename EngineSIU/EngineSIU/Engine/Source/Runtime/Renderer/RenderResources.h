@@ -66,6 +66,7 @@ enum class IconType
     DirectionalLight,
     PointLight,
     SpotLight,
+    AmbientLight,
     ExponentialFog,
     AtmosphericFog,
 };

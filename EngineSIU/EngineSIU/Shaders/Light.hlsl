@@ -3,10 +3,12 @@
 #define MAX_DIRECTIONAL_LIGHT 16
 #define MAX_POINT_LIGHT 16
 #define MAX_SPOT_LIGHT 16
+#define MAX_AMBIENT_LIGHT 16
 
 #define POINT_LIGHT         1
 #define SPOT_LIGHT          2
 #define DIRECTIONAL_LIGHT   3
+#define AMBIENT_LIGHT       4
 
 struct FAmbientLightInfo
 {
@@ -53,14 +55,14 @@ struct FSpotLightInfo
 
 cbuffer Lighting : register(b2)
 {
-    FAmbientLightInfo Ambient;
+    FAmbientLightInfo Ambient[MAX_AMBIENT_LIGHT];
     FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];
     FPointLightInfo PointLights[MAX_POINT_LIGHT];
     FSpotLightInfo SpotLights[MAX_SPOT_LIGHT];
     int DirectionalLightsCount;
     int PointLightsCount;
     int SpotLightsCount;
-    float pad0;
+    int AmbientLightsCount;
 };
 
 float CalculateAttenuation(float distance, float attenuationFactor, float radius)
@@ -318,10 +320,14 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     {
         cColor += DirectionalLight(k, vPosition, normalizedNormal);
     }
-
+    [unroll(MAX_AMBIENT_LIGHT)]
+    for (int l = 0; l < AmbientLightsCount; l++)
+    {
+        cColor += float4(Ambient[l].AmbientColor.rgb, 0.0);
+        cColor.a = 1.0;
+    }
+    
     // Add global ambient light
-    cColor += float4(Ambient.AmbientColor.rgb, 0.0);
-    cColor.a = 1.0;
     
     return cColor;
 }
