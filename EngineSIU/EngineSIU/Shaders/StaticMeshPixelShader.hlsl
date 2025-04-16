@@ -104,20 +104,22 @@ PS_OUTPUT mainPS(PS_INPUT input)
     LightPerTiles tileLights = gLightPerTiles[flatTileIndex];
     
     // 조명 기여 누적 (예시: 단순히 조명 색상을 더함)
-    float3 lightingAccum = 0;
+    float3 lightingAccum = float3(0, 0, 0);
     for (uint i = 0; i < tileLights.NumLights; ++i)
     {
          // tileLights.Indices[i] 는 전역 조명 인덱스
-        uint globalLightIndex = tileLights.Indices[i];
-        FPointLightInfo light = gPointLights[globalLightIndex];
+        uint gPointLightIndex = tileLights.Indices[i];
+        //FPointLightInfo light = gPointLights[gPointLightIndex];
         
-        
+        float4 lightContribution = PointLight(gPointLightIndex, input.worldPos, normalize(input.normal));
+        lightingAccum += lightContribution.rgb;
     }
+    lightingAccum += Ambient.AmbientColor.rgb;
     
 #ifdef LIGHTING_MODEL_GOURAUD
     if (IsLit)
     {
-        float3 finalColor = input.color.rgb * baseColor.rgb;
+        float3 finalColor = input.color.rgb * baseColor.rgb * lightingAccum;
         output.color = float4(finalColor, 1.0);
     }
     else
@@ -127,9 +129,11 @@ PS_OUTPUT mainPS(PS_INPUT input)
 #else
     if (IsLit && input.normalFlag > 0.5)
     {
-        float4 litColor = Lighting(input.worldPos, normalize(input.normal));
-        float3 finalColor = litColor.rgb * baseColor.rgb;
-        output.color = float4(finalColor, 1.0);
+        // Deprecated(전역조명인덱싱으로바꾸며 주석)
+        //float4 litColor = Lighting(input.worldPos, normalize(input.normal)); 
+        //float3 finalColor = litColor.rgb * baseColor.rgb;
+        //output.color = float4(finalColor, 1.0);
+        output.color = float4(baseColor * lightingAccum, 1.0);
     }
     else
     {

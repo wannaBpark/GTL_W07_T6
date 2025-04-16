@@ -163,8 +163,9 @@ float CalculateSpecular(float3 normal, float3 lightDir, float3 viewDir, float sp
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
 {
+    FPointLightInfo light = gPointLights[nIndex];
 #ifdef LIGHTING_MODEL_GOURAUD
-    FPointLightInfo light = PointLights[nIndex];
+    //FPointLightInfo light = PointLights[nIndex];
     
     float3 vToLight = light.Position - vPosition;
     float fDistance = length(vToLight);
@@ -193,7 +194,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     
 #elif defined(LIGHTING_MODEL_LAMBERT)
 
-    FPointLightInfo light = PointLights[nIndex];
+    //FPointLightInfo light = PointLights[nIndex];
     
     float3 vToLight = light.Position - vPosition;
     float fDistance = length(vToLight);
@@ -210,7 +211,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal)
     return float4(lit * attenuation * light.Intensity, 1.0);
     
 #else
-    FPointLightInfo light = PointLights[nIndex];
+    //FPointLightInfo light = PointLights[nIndex];
     
     float3 vToLight = light.Position - vPosition;
     float fDistance = length(vToLight);
@@ -341,11 +342,11 @@ float4 Lighting(float3 vPosition, float3 vNormal)
     float3 normalizedNormal = normalize(vNormal);
     
     // 다소 비효율적일 수도 있음.
-    [unroll(MAX_POINT_LIGHT)]
-    for (int i = 0; i < PointLightsCount; i++)
-    {
-        cColor += PointLight(i, vPosition, normalizedNormal);
-    }    
+    //[unroll(MAX_POINT_LIGHT)]
+    //for (int i = 0; i < PointLightsCount; i++)
+    //{
+    //    cColor += PointLight(i, vPosition, normalizedNormal);
+    //}    
     [unroll(MAX_SPOT_LIGHT)]
     for (int j = 0; j < SpotLightsCount; j++)
     {

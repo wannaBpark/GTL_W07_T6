@@ -241,6 +241,7 @@ void FUpdateLightBufferPass::UpdatePointLightBuffer()
     for (uint32 i = 0; i < PointLights.Num(); ++i)
     {
         TempBuffer[i] = PointLights[i]->GetPointLightInfo();
+        TempBuffer[i].Position = PointLights[i]->GetWorldLocation();
     }
     // 이제 TempBuffer에 대해 업데이트
     Graphics->DeviceContext->UpdateSubresource(PointLightBuffer, 0, nullptr,

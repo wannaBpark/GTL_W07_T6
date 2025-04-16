@@ -505,9 +505,12 @@ void FEditorRenderPass::Render(UWorld* World, std::shared_ptr<FEditorViewportCli
 
     // TODO : 월드 그리드 춤추는 현상 원인 파악
     //RenderAABBInstanced(World);
-    RenderPointlightInstanced(World);
-    RenderSpotlightInstanced(World);
-    RenderArrows(World);    // Directional Light Arrow : Depth Test Enabled
+    
+    // [NOTE] ----------- Light Culling 프레임 보호 위해 잠시 주석처리 ---------- //
+    //RenderPointlightInstanced(World);
+    //RenderSpotlightInstanced(World);
+    //RenderArrows(World);    // Directional Light Arrow : Depth Test Enabled
+    
     //RenderIcons(World, ActiveViewport); // 기존 렌더패스에서 아이콘 렌더하고 있으므로 제거
     
 
