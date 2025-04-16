@@ -151,8 +151,8 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
             GetCursorPos(&Point);
             ScreenToClient(GEngineLoop.AppWnd, &Point);
             FVector2D ClientPos = FVector2D{static_cast<float>(Point.x), static_cast<float>(Point.y)};
-            const bool bIsVerticalHovered = VSplitter->IsHover({ClientPos.X, ClientPos.Y});
-            const bool bIsHorizontalHovered = HSplitter->IsHover({ClientPos.X, ClientPos.Y});
+            const bool bIsVerticalHovered = VSplitter->IsSplitterHovered({ClientPos.X, ClientPos.Y});
+            const bool bIsHorizontalHovered = HSplitter->IsSplitterHovered({ClientPos.X, ClientPos.Y});
 
             if (bIsHorizontalHovered && bIsVerticalHovered)
             {
