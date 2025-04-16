@@ -37,7 +37,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             {
                 FEngineLoop::GraphicDevice.OnResize(hWnd);
                 FEngineLoop::Renderer.DepthPrePass->ResizeDepthStencil();
-                FEngineLoop::Renderer.TileLightCullingPass->Resize();
+                FEngineLoop::Renderer.TileLightCullingPass->ResizeViewBuffers();
             }
             for (int i = 0; i < 4; i++)
             {

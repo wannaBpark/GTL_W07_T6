@@ -329,11 +329,12 @@ void FTileLightCullingPass::UpdateTileLightConstantBuffer(const std::shared_ptr<
     Graphics->DeviceContext->Unmap(TileLightConstantBuffer, 0);
 }
 
-void FTileLightCullingPass::Resize()
+// Compute Shader에 사용되는 모든 SRV와 UAV를 해제
+void FTileLightCullingPass::ResizeViewBuffers()
 {
     Release();
 
-    CreateShader();
+    //CreateShader();
     CreateViews();
     CreateBuffers();
 }
