@@ -20,6 +20,7 @@
 #include <UObject/Casts.h>
 
 #include "CompositingPass.h"
+#include "PostProcessCompositingPass.h"
 #include "SlateRenderPass.h"
 #include "UnrealClient.h"
 #include "GameFrameWork/Actor.h"
@@ -47,6 +48,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass = new FLineRenderPass();
     FogRenderPass = new FFogRenderPass();
     CompositingPass = new FCompositingPass();
+    PostProcessCompositingPass = new FPostProcessCompositingPass();
     SlateRenderPass = new FSlateRenderPass();
 
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -58,6 +60,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     
     CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
+    PostProcessCompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
     
     SlateRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 }
@@ -74,6 +77,7 @@ void FRenderer::Release()
     delete LineRenderPass;
     delete FogRenderPass;
     delete CompositingPass;
+    delete PostProcessCompositingPass;
     delete SlateRenderPass;
 }
 
@@ -264,11 +268,16 @@ void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& 
     
     if (ShowFlag & EEngineShowFlags::SF_Fog)
     {
+        FogRenderPass->Render(Viewport);
         /**
          * TODO: Fog 렌더 작업 해야 함.
          * 여기에서는 씬 렌더가 적용된 뎁스 스텐실 뷰를 SRV로 전달하고, 뎁스 스텐실 뷰를 아래에서 다시 써야함.
          */
     }
+
+    PostProcessCompositingPass->Render(Viewport);
+    
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 }
 
 void FRenderer::RenderEditorOverlay(const std::shared_ptr<FEditorViewportClient>& Viewport)

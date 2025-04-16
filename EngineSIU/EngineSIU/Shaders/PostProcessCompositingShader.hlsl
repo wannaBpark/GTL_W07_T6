@@ -1,15 +1,7 @@
-
-Texture2D SceneTexture : register(t100);
-Texture2D PP_PostProcessTexture : register(t101);
-Texture2D EditorTexture : register(t102);
+Texture2D FogTexture : register(t104);
+// PostProcessing 추가 시 Texture 추가 (EShaderSRVSlot)
 
 SamplerState CompositingSampler : register(s0);
-
-cbuffer ViewMode : register(b0)
-{
-    uint ViewMode;
-    float3 Padding;
-}
 
 struct PS_Input
 {
@@ -41,15 +33,12 @@ PS_Input mainVS(uint VertexID : SV_VertexID)
     return Output;
 }
 
-float4 mainPS(PS_Input Input) : SV_TARGET
+float4 mainPS(PS_Input input) : SV_Target
 {
-    float4 Scene = SceneTexture.Sample(CompositingSampler, Input.UV);
-    float4 PostProcess = PP_PostProcessTexture.Sample(CompositingSampler, Input.UV);
-    float4 Editor = EditorTexture.Sample(CompositingSampler, Input.UV);
+    float2 UV = input.UV;
+    float4 FogColor = FogTexture.Sample(CompositingSampler, UV);
 
-    float4 FinalColor;
-    FinalColor = lerp(Scene, PostProcess, PostProcess.a);
-    FinalColor = lerp(FinalColor, Editor, Editor.a);
-
+    // PostProcessing Texture 추가
+    float4 FinalColor = FogColor;
     return FinalColor;
 }

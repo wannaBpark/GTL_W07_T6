@@ -433,16 +433,18 @@ struct FScreenConstants
 
 struct FFogConstants
 {
-    FMatrix InvViewProj;
+    FMatrix InvView;
+    FMatrix InvProj;
+
     FLinearColor FogColor;
-    FVector CameraPos;
-    float FogDensity;
-    float FogHeightFalloff;
+    
     float StartDistance;
-    float FogCutoffDistance;
-    float FogMaxOpacity;
-    FVector FogPosition;
-    float CameraNear;
-    float CameraFar;
-    FVector padding;
+    float EndDistance;    
+    float FogHeight;
+    float FogHeightFalloff;
+    
+    float FogDensity;
+    float FogDistanceWeight;
+    float padding1;
+    float padding2;
 };

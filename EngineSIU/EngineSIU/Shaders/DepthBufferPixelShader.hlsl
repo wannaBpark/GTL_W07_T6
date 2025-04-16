@@ -2,7 +2,7 @@
 #define CAMERA_NEAR 0.1f
 #define CAMERA_FAR  100.0f
 
-Texture2D DepthTexture : register(t101);
+Texture2D DepthTexture : register(t103);
 SamplerState DepthSampler : register(s0);
 
 struct PS_INPUT

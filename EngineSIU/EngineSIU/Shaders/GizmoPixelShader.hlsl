@@ -1,7 +1,7 @@
 
 #include "ShaderRegisters.hlsl"
 
-Texture2D SceneDepthTexture : register(t99);
+Texture2D DepthTexture : register(t103);
 
 SamplerState Sampler : register(s0);
 
@@ -54,7 +54,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
     else
     {
         float2 DepthUV = Input.Position.xy / ViewportSize.xy;
-        float Z = SceneDepthTexture.Sample(Sampler, DepthUV);
+        float Z = DepthTexture.Sample(Sampler, DepthUV);
         float3 SceneWorldPosition = ReconstructWorldPosition(DepthUV, Z);
 
         if (IsShaded(SceneWorldPosition, Input.WorldPosition))

@@ -9,8 +9,8 @@ private:
     float FogDensity;
     float FogHeightFalloff;
     float StartDistance;
-    float FogCutoffDistance;
-    float FogMaxOpacity;
+    float FogDistanceWeight;
+    float EndDistance;
     FLinearColor FogInscatteringColor;
 
 public:
@@ -19,15 +19,15 @@ public:
     float GetFogDensity() { return FogDensity; }
     float GetFogHeightFalloff() { return FogHeightFalloff; }
     float GetStartDistance() { return StartDistance; }
-    float GetFogCutoffDistance() { return FogCutoffDistance; }
-    float GetFogMaxOpacity() { return FogMaxOpacity; }
+    float GetFogDistanceWeight() { return FogDistanceWeight; }
+    float GetEndDistance() { return EndDistance; }
     FLinearColor GetFogColor() { return FogInscatteringColor; }
     
     void SetFogDensity(float value);
     void SetFogHeightFalloff(float value);
     void SetStartDistance(float value);
-    void SetFogCutoffDistance(float value);
-    void SetFogMaxOpacity(float value);
+    void SetFogDistanceWeight(float value);
+    void SetEndDistance(float value);
     void SetFogColor(FLinearColor color);
 
     virtual UObject* Duplicate(UObject* InOuter) override;
