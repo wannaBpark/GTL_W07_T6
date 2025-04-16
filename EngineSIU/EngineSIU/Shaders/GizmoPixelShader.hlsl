@@ -54,7 +54,7 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
     else
     {
         float2 DepthUV = Input.Position.xy / ViewportSize.xy;
-        float Z = SceneDepthTexture.Sample(Sampler, DepthUV);
+        float Z = SceneDepthTexture.Sample(Sampler, DepthUV).r;
         float3 SceneWorldPosition = ReconstructWorldPosition(DepthUV, Z);
 
         if (IsShaded(SceneWorldPosition, Input.WorldPosition, Input.WorldViewPosition))
