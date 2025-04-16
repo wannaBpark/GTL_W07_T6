@@ -1,4 +1,7 @@
 
+#ifndef SHADER_REGISTER_INCLUDE
+#define SHADER_REGISTER_INCLUDE
+
 struct FMaterial
 {
     float3 DiffuseColor;
@@ -31,6 +34,8 @@ struct PS_INPUT_StaticMesh
     float3 WorldNormal : NORMAL;
     float2 UV : TEXCOORD0;
     float3 WorldPosition : TEXCOORD1;
+    float3 WorldViewPosition : TEXCOORD2;
+    float3x3 TBN : TBN;
     int MaterialIndex : MATERIAL_INDEX;
 };
 
@@ -70,3 +75,5 @@ cbuffer CameraBuffer : register(b13)
     float FarClip;
     float2 ProjectionPadding;
 }
+
+#endif

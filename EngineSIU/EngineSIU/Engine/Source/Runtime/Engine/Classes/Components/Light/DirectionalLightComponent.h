@@ -1,5 +1,5 @@
 #pragma once
-#include "Light/LightComponent.h"
+#include "LightComponent.h"
 #include "UObject/ObjectMacros.h"
 
 class UDirectionalLightComponent : public ULightComponentBase
