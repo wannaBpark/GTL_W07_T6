@@ -10,6 +10,7 @@ AAmbientLight::AAmbientLight()
     RootComponent = BillboardComponent;
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/AmbientLight_64x.png");
+    BillboardComponent->bIsEditorBillboard = true;
 
     AmbientLightComponent->AttachToComponent(RootComponent);
 

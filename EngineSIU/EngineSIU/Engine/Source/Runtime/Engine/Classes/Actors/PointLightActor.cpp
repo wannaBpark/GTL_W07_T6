@@ -10,6 +10,7 @@ APointLight::APointLight()
     RootComponent = BillboardComponent;
 
     BillboardComponent->SetTexture(L"Assets/Editor/Icon/PointLight_64x.png");
+    BillboardComponent->bIsEditorBillboard = true;
 
     PointLightComponent->AttachToComponent(RootComponent);
 }

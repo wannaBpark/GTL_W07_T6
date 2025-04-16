@@ -191,7 +191,7 @@ PS_INPUT coneVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
 {
     PS_INPUT output;
     
-    float3 pos = DataCone[instanceID%2].ApexPosiiton;
+    float3 pos = DataCone[instanceID%2].ApexPosition;
     float radius = DataCone[instanceID].InnerRadius;
     if (instanceID % 2 == 1)
     {

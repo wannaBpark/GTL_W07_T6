@@ -20,7 +20,7 @@ cbuffer ConstantBufferDebugSphere : register(b13)
 
 struct ConeData
 {
-    float3 ApexPosiiton;
+    float3 ApexPosition;
     float InnerRadius;
     float OuterRadius;
     float3 Direction;
