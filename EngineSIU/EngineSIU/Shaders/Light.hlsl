@@ -59,42 +59,41 @@ cbuffer Lighting : register(b0)
     FDirectionalLightInfo Directional[MAX_DIRECTIONAL_LIGHT];
     FPointLightInfo PointLights[MAX_POINT_LIGHT];
     FSpotLightInfo SpotLights[MAX_SPOT_LIGHT];
+    
     int DirectionalLightsCount;
     int PointLightsCount;
     int SpotLightsCount;
     int AmbientLightsCount;
 };
 
-float CalculateAttenuation(float distance, float attenuationFactor, float radius)
+float CalculateAttenuation(float Distance, float AttenuationFactor, float Radius)
 {
-    if (distance > radius)
+    if (Distance > Radius)
+    {
         return 0.0;
-        
-    return 1.0 / (1.0 + attenuationFactor * distance * distance);
+    }
+    return 1.0 / (1.0 + AttenuationFactor * Distance * Distance);
 }
 
-float CalculateSpotEffect(float3 lightDir, float3 spotDir, float innerRad, float outerRad, float spotFalloff)
+float CalculateSpotEffect(float3 LightDir, float3 SpotDir, float InnerRadius, float OuterRadius, float SpotFalloff)
 {
-    float dotProduct = dot(-lightDir, spotDir); //[-1,1]이고
+    float Dot = dot(-LightDir, SpotDir); // [-1,1]
     
-    float spotEffect = smoothstep(cos(outerRad/2), cos(innerRad/2), dotProduct);
+    float SpotEffect = smoothstep(cos(OuterRadius / 2), cos(InnerRadius / 2), Dot);
     
-    return spotEffect * pow(max(dotProduct, 0.0), 1);
+    return SpotEffect * pow(max(Dot, 0.0), SpotFalloff);
 }
 
-float CalculateDiffuse(float3 normal, float3 lightDir)
+float CalculateDiffuse(float3 WorldNormal, float3 LightDir)
 {
-    return max(dot(normal, lightDir), 0.0);
+    return max(dot(WorldNormal, LightDir), 0.0);
 }
 
-float CalculateSpecular(float3 normal, float3 lightDir, float3 viewDir, float specularPower)
+float CalculateSpecular(float3 WorldNormal, float3 ToLightDir, float3 ViewDir, float Shininess, float SpecularStrength = 0.5)
 {
-    float NdotL = dot(normal, lightDir);
-    if (NdotL <= 0.0)
-        return 0.0;
-        
-    float3 halfVector = normalize(lightDir + viewDir);
-    return pow(max(dot(normal, halfVector), 0.0), max(specularPower, 1.0) * 5.0);
+    float3 ReflectDir = reflect(-ToLightDir, WorldNormal);
+    float Spec = pow(max(dot(ViewDir, ReflectDir), 0.0), Shininess);
+    return Spec * ToLightDir * SpecularStrength;
 }
 
 float4 PointLight(int nIndex, float3 WorldPosition, float3 WorldNormal, float WorldViewPosition)
@@ -319,8 +318,6 @@ float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPositi
         FinalColor += float4(Ambient[l].AmbientColor.rgb, 0.0);
         FinalColor.a = 1.0;
     }
-    
-    // Add global ambient light
     
     return FinalColor;
 }
