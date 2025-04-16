@@ -92,9 +92,9 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
                 if (const AActor* SelectedActor = EdEngine->GetSelectedActor())
                 {
                     // 초기 Actor와 Cursor의 거리차를 저장
-                    const FViewportCameraTransform* ViewTransform = ActiveViewportClient->GetViewportType() == LVT_Perspective
-                                                                        ? &ActiveViewportClient->ViewTransformPerspective
-                                                                        : &ActiveViewportClient->ViewTransformOrthographic;
+                    const FViewportCamera* ViewTransform = ActiveViewportClient->GetViewportType() == LVT_Perspective
+                                                        ? &ActiveViewportClient->PerspectiveCamera
+                                                        : &ActiveViewportClient->OrthogonalCamera;
 
                     FVector RayOrigin, RayDir;
                     ActiveViewportClient->DeprojectFVector2D(FWindowsCursor::GetClientPosition(), RayOrigin, RayDir);
@@ -249,9 +249,9 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
                         // TODO: 추후 Component를 이동하는걸로 바꾸기
                         if (const UGizmoBaseComponent* Gizmo = Cast<UGizmoBaseComponent>(ActiveViewportClient->GetPickedGizmoComponent()))
                         {
-                            const FViewportCameraTransform* ViewTransform = ActiveViewportClient->GetViewportType() == LVT_Perspective
-                                                        ? &ActiveViewportClient->ViewTransformPerspective
-                                                        : &ActiveViewportClient->ViewTransformOrthographic;
+                            const FViewportCamera* ViewTransform = ActiveViewportClient->GetViewportType() == LVT_Perspective
+                                                        ? &ActiveViewportClient->PerspectiveCamera
+                                                        : &ActiveViewportClient->OrthogonalCamera;
 
                             FVector RayOrigin, RayDir;
                             ActiveViewportClient->DeprojectFVector2D(FWindowsCursor::GetClientPosition(), RayOrigin, RayDir);
@@ -260,7 +260,7 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
                             const FVector TargetRayEnd = RayOrigin + RayDir * TargetDist;
                             const FVector Result = TargetRayEnd + TargetDiff;
 
-                            if (EdEngine->GetEditorPlayer()->GetCoordiMode() == CDM_WORLD)
+                            if (EdEngine->GetEditorPlayer()->GetCoordMode() == CDM_WORLD)
                             {
                                 // 월드 좌표계에서 카메라 방향을 고려한 이동
                                 if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
