@@ -103,10 +103,14 @@ void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView*& DepthSRV)
     // 4. 디스패치
     Graphics->DeviceContext->Dispatch(groupSizeX, groupSizeY, 1);
 
-    // 5. 바인딩 해제
+    // 5-1. UAV 바인딩 해제 (다른 렌더패스에서 사용하기 위함)
     ID3D11UnorderedAccessView* nullUAV = nullptr;
     Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
     Graphics->DeviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
+
+    // 5-2. SRV 해제
+    ID3D11ShaderResourceView* nullSRVs[2] = { nullptr, nullptr };
+    Graphics->DeviceContext->CSSetShaderResources(0, 2, nullSRVs);
 }
 
 
