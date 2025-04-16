@@ -172,6 +172,14 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& ActiveViewp
         
         FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV());
     }
+
+    // 테스트용 tile light 열화상맵 추가
+    if (TileLightCullingPass)
+    {
+        DepthBufferDebugPass->UpdateDepthBufferSRV();
+        FogRenderPass->RenderFog(ActiveViewport, DepthBufferDebugPass->GetDepthSRV());
+    }
+
     LineRenderPass->Render(ActiveViewport);
     GizmoRenderPass->Render(ActiveViewport);
 

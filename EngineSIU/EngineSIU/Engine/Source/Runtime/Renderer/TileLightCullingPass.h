@@ -66,6 +66,7 @@ public:
     void ClearUAVs();
     void UpdateTileLightConstantBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
 
+    void SetDepthSRV(ID3D11ShaderResourceView* InDepthSRV) { DepthSRV = InDepthSRV; }
     ID3D11ShaderResourceView* GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
 
 private:
@@ -88,10 +89,11 @@ private:
     ID3D11Buffer* LightBufferGPU;               // GPU에서 사용할 라이트 버퍼    
     ID3D11ShaderResourceView* LightSRV;         // 라이트 버퍼 SRV (StructruredBuffer)
     
+    ID3D11ShaderResourceView* DepthSRV;         // 깊이 버퍼 SRV
     
     ID3D11Buffer* TileLightConstantBuffer;
 
-    const uint32 TILE_SIZE = 16;
+    const uint32 TILE_SIZE = 32;
     const uint32 MAX_LIGHTS_PER_TILE = 1024;
     
     uint32 TILE_COUNT_X;

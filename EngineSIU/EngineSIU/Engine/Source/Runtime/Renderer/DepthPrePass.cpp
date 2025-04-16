@@ -53,6 +53,7 @@ void FDepthPrePass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpor
 
 void FDepthPrePass::ClearRenderArr()
 {
+    Graphics->DeviceContext->OMSetRenderTargets(0,nullptr, nullptr);
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
 }
 

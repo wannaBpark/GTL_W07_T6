@@ -1,8 +1,9 @@
 // 상수 정의
-#define TILE_SIZE 16
+#define TILE_SIZE 32
 #define MAX_LIGHTS_PER_TILE 1024
 #define SHADER_ENTITY_TILE_BUCKET_COUNT (MAX_LIGHTS_PER_TILE / 32)
 #define THREAD_GROUP_SIZE 8
+#define NUM_SLICES 32    // 타일 내 depth를 32개의 슬라이스로 분할 (시그래프 Harada 값과 동일)
 
 cbuffer TileLightCullSettings : register(b0)
 {
@@ -104,16 +105,52 @@ RWStructuredBuffer<uint> TileLightMask : register(u0); // 타일별 조명 마�
 RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
 
 
+// Group Shared 메모리 - Depth Masking 누적에 쓰입니다~
+groupshared uint tileDepthMask;
+
 // dispatchID = groupID * [numthreads] + threadID
 
-[numthreads(TILE_SIZE, TILE_SIZE, 1)] // no difference between [1,1,1]
+// no difference between [1,1,1] - 그러나 DepthMap Texturing할 때 한 픽셀의 값 읽어오려면 TILE_SIZE만큼 나눠야 효율적
+[numthreads(TILE_SIZE, TILE_SIZE, 1)] 
 void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, uint3 threadID : SV_GroupThreadID)
 {
     uint2 tileCoord = groupID.xy;
     uint2 pixel = tileCoord * TILE_SIZE + threadID.xy;
-
+    
     uint2 screenTileSize = TileSize;  // TILE_SIZE
     uint2 screenSize = ScreenSize;
+    
+    // --- 1. 타일 내 각 픽셀의 Depth를 샘플링하고, 해당 슬라이스 인덱스의 비트를 그룹 공유 변수에 누적
+    // 초기화: 그룹의 첫 번째 스레드가 tileDepthMask를 0으로 초기화
+    if (threadID.x == 0 && threadID.y == 0)
+    {
+        tileDepthMask = 0;
+    }
+    GroupMemoryBarrierWithGroupSync();
+    
+     // 픽셀이 화면 내에 속하는지 검사 후,
+    float depthSample = 0;
+    if (all(pixel < screenSize))
+    {
+        depthSample = gDepthTexture[pixel];
+    }
+    // 선형 깊이로 변환:
+    // depthSample이 1.0이면 FarZ로 처리하여 수치 불안정을 방지 (흠)
+    float linearZ = (depthSample == 1.0f)
+    ? FarZ
+    : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
+    float depthNormalized = saturate((linearZ - NearZ) / (FarZ - NearZ));
+    
+    // 슬라이스 인덱스 계산: NUM_SLICES개의 슬라이스로 나누기
+    int sliceIndex = (int) floor(depthNormalized * NUM_SLICES);
+    sliceIndex = clamp(sliceIndex, 0, NUM_SLICES - 1);
+    
+    // 각 픽셀의 스레드가 해당 슬라이스 해당하는 비트를 1로 설정
+    // Comment) 즉 스레드 하나가 픽셀 하나의 depth마스킹 수행
+    uint sliceBit = 1u << sliceIndex;
+    InterlockedOr(tileDepthMask, sliceBit);     // Atomic OR (그룹 공유에 누적)
+    
+    GroupMemoryBarrierWithGroupSync();
 
     // 뷰 공간 프러스텀 계산
     float2 dim_rcp = 1.0 / float2(screenSize);
@@ -171,7 +208,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         Sphere s;
         s.c = mul(float4(light.Position, 1), View).xyz;
         s.r = light.Radius;
-
+        
         if (SphereInsideFrustum(s, frustum, nearZ, farZ))
         {
             uint bucketIdx = i / 32;
