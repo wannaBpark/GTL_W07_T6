@@ -94,7 +94,7 @@ struct FLightGPU
     float3 Position;
     float Radius;
     float3 Direction; // 사용하지 않음
-    float Padding;
+    uint isPointLight;
 };
 
 StructuredBuffer<FLightGPU> LightBuffer : register(t0); // CPU에서 전달된 PointLight들
@@ -106,7 +106,7 @@ RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
 
 // dispatchID = groupID * [numthreads] + threadID
 
-[numthreads(1, 1, 1)]
+[numthreads(TILE_SIZE, TILE_SIZE, 1)] // no difference between [1,1,1]
 void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, uint3 threadID : SV_GroupThreadID)
 {
     uint2 tileCoord = groupID.xy;
@@ -120,7 +120,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     float tilePixelWidth = screenTileSize.x;
     float tilePixelHeight = screenTileSize.y;
 
-    float2 tileMin = tileCoord * screenTileSize;
+    float2 tileMin = tileCoord * screenTileSize; // GroupID 기준 tile Min, Max
     float2 tileMax = tileMin + screenTileSize;
 
     // 8개 코너의 clip space 점을 inverse projection하여 view space로 변환
@@ -139,7 +139,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         // i=2: (tileMin.x, tileMax.y) → 왼쪽 하단
         // i=3: (tileMax.x, tileMax.y) → 오른쪽 하단
         uv /= screenSize;
-        uv.y = 1.0 - uv.y; // y축 반전
+        uv.y = 1.0 - uv.y; // y축 반전해야 카메라 위로 들어올렸을 때 사각형은 아래로 감
         float4 clipNear = float4(uv * 2.0 - 1.0, nearZ, 1.0);
         float4 clipFar =  float4(uv * 2.0 - 1.0, farZ , 1.0);
 
@@ -208,7 +208,6 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         if (all(pixel < screenSize))
         {
             DebugHeatmap[pixel] = result;
-            //DebugHeatmap[pixel] = float4(heatmap[0].xyz, 1.0f);
         }
     }
     //for (uint i = 0; i < screenSize.x * screenSize.y; ++i)
