@@ -61,6 +61,8 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
     GEngine->Init();
 
+    UpdateUI();
+
     return 0;
 }
 
@@ -216,17 +218,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
                 LevelEditor->ResizeEditor(ClientWidth, ClientHeight);
             }
         }
-        Console::GetInstance().OnResize(hWnd);
-        // ControlPanel::GetInstance().OnResize(hWnd);
-        // PropertyPanel::GetInstance().OnResize(hWnd);
-        // Outliner::GetInstance().OnResize(hWnd);
-        // ViewModeDropdown::GetInstance().OnResize(hWnd);
-        // ShowFlags::GetInstance().OnResize(hWnd);
-        if (GEngineLoop.GetUnrealEditor())
-        {
-            GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
-        }
-        ViewportTypePanel::GetInstance().OnResize(hWnd);
+        GEngineLoop.UpdateUI();
         break;
     default:
         GEngineLoop.AppMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
@@ -234,4 +226,14 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
     }
 
     return 0;
+}
+
+void FEngineLoop::UpdateUI()
+{
+    Console::GetInstance().OnResize(AppWnd);
+    if (GEngineLoop.GetUnrealEditor())
+    {
+        GEngineLoop.GetUnrealEditor()->OnResize(AppWnd);
+    }
+    ViewportTypePanel::GetInstance().OnResize(AppWnd);
 }
