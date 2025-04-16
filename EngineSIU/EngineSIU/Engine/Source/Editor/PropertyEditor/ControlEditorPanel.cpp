@@ -25,6 +25,9 @@
 
 #include "Engine/EditorEngine.h"
 #include <Actors/HeightFogActor.h>
+#include "Actors/PointLightActor.h"
+#include "Actors/DirectionalLightActor.h"
+#include "Actors/SpotLightActor.h"
 
 void ControlEditorPanel::Render()
 {
@@ -274,6 +277,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             { .label= "Cube",      .obj= OBJ_CUBE },
             { .label= "Sphere",    .obj= OBJ_SPHERE },
             { .label= "PointLight", .obj= OBJ_PointLight },
+            { .label= "SpotLight", .obj= OBJ_SpotLight },
+            { .label= "DirectionalLight", .obj= OBJ_DirectionalLight },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
             { .label= "Text",      .obj= OBJ_Text },
             { .label= "Fireball",  .obj = OBJ_Fireball},
@@ -304,10 +309,23 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     CubeActor->SetActorLabel(TEXT("OBJ_CUBE"));
                     break;
                 }
+
+                case OBJ_SpotLight:
+                {
+                    ASpotLight* SpotActor = World->SpawnActor<ASpotLight>();
+                    SpotActor->SetActorLabel(TEXT("OBJ_SpotLight"));
+                    break;
+                }
                 case OBJ_PointLight:
                 {
-                    ALight* LightActor = World->SpawnActor<ALight>();
+                    APointLight* LightActor = World->SpawnActor<APointLight>();
                     LightActor->SetActorLabel(TEXT("OBJ_PointLight"));
+                    break;
+                }
+                case OBJ_DirectionalLight:
+                {
+                    ADirectionalLight* LightActor = World->SpawnActor<ADirectionalLight>();
+                    LightActor->SetActorLabel(TEXT("OBJ_DirectionalLight"));
                     break;
                 }
                 case OBJ_PARTICLE:
@@ -346,7 +364,6 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor->SetActorLabel(TEXT("OBJ_HeightFog"));
                     break;
                 }
-                case OBJ_SpotLight:
                 case OBJ_TRIANGLE:
                 case OBJ_CAMERA:
                 case OBJ_PLAYER:
@@ -399,7 +416,10 @@ void ControlEditorPanel::CreateFlagButton() const
 
     ImGui::SameLine();
 
-    const char* ViewModeNames[] = { "Lit", "Unlit", "Wireframe", "Scene Depth", "World Normal" };
+    const char* ViewModeNames[] = { 
+        "Lit_Gouraud", "Lit_Lambert", "Lit_Phong", 
+        "Unlit", "Wireframe", "Scene Depth", "World Normal"
+    };
     uint32 ViewModeCount = sizeof(ViewModeNames) / sizeof(ViewModeNames[0]);
     
     int RawViewMode = (int)ActiveViewport->GetViewMode();

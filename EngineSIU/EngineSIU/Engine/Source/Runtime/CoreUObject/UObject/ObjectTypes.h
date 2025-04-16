@@ -7,6 +7,7 @@ enum OBJECTS : uint8
     OBJ_CUBE,
     OBJ_SpotLight,
     OBJ_PointLight,
+    OBJ_DirectionalLight,
     OBJ_PARTICLE,
     OBJ_Text,
     OBJ_Fireball,

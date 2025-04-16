@@ -11,10 +11,18 @@
 #include "Math/Matrix.h"
 
 
+#define UE_LOG Console::GetInstance().AddLog
+
 #define _TCHAR_DEFINED
 #include <d3d11.h>
 
+#include "UserInterface/Console.h"
 #include <Math/Color.h>
+#include "LightDefine.h"
+
+#define GOURAUD "LIGHTING_MODEL_GOURAUD"
+#define LAMBERT "LIGHTING_MODEL_LAMBERT"
+#define PHONG "LIGHTING_MODEL_BLINN_PHONG"
 
 struct FStaticMeshVertex
 {
@@ -74,7 +82,12 @@ struct FObjMaterialInfo
 {
     FString MaterialName;  // newmtl : Material Name.
 
-    bool bHasTexture = false;  // Has Texture?
+    // Begin Test
+    unsigned int TextureFlags=0;
+    //bool bHasTexture = false;  // Has Texture?
+    //bool bHasNormalMap = false;// Has NormalMap?
+    // End Test
+
     bool bTransparent = false; // Has alpha channel?
 
     FVector Diffuse;  // Kd : Diffuse (Vector4)
@@ -85,7 +98,7 @@ struct FObjMaterialInfo
     float SpecularScalar; // Ns : Specular Power (Float)
     float DensityScalar;  // Ni : Optical Density (Float)
     float TransparencyScalar; // d or Tr  : Transparency of surface (Float)
-
+    float BumpMultiplier;     // -bm : Bump Mulitplier ex) normalMap.xy *= BumpMultiplier; 
     uint32 IlluminanceModel; // illum: illumination Model between 0 and 10. (UINT)
 
     /* Texture */
@@ -279,7 +292,10 @@ struct FPrimitiveCounts
 #define MAX_LIGHTS 16
 enum ELightType {
     POINT_LIGHT = 1,
-    SPOT_LIGHT = 2
+    SPOT_LIGHT = 2,
+    DIRECTIONAL_LIGHT = 3,
+    AMBIENT_LIGHT = 4,
+    NUM_LIGHT_TYPES = 5
 };
 
 struct FLight
@@ -287,8 +303,6 @@ struct FLight
     FVector DiffuseColor;
     float pad1;
 
-    FVector SpecularColor;
-    float pad2;
 
     FVector Position;
     float Falloff;
@@ -303,6 +317,11 @@ struct FLight
     
     float AttRadius = 100.f;    // m_fAttRadius: 감쇠 반경
     FVector LightPad;
+
+    float InnerCos; // cos(inner angle)
+    float OuterCos; // cos(outer angle)
+    float pad4;
+    float pad5;
 };
 
 struct FLightBuffer
@@ -386,6 +405,13 @@ struct FTextureConstants
     float VOffset;
     float pad0;
     float pad1;
+};
+
+struct FTextureFlagConstants {
+    unsigned int TextureFlags;
+    float TextureFlagPad0;
+    float TextureFlagPad1;
+    float TextureFlagPad2;
 };
 
 struct FLinePrimitiveBatchArgs

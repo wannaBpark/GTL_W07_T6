@@ -11,6 +11,8 @@ class FEditorViewportClient;
 
 class UPointLightComponent;
 class USpotLightComponent;
+class UDirectionalLightComponent;
+class UAmbientLightComponent;
 
 class FUpdateLightBufferPass : public IRenderPass
 {
@@ -22,11 +24,13 @@ public:
     virtual void PrepareRender() override;
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     virtual void ClearRenderArr() override;
-    void UpdateLightBuffer(FLight Light) const;
+    void UpdateLightBuffer() const;
 
 private:
     TArray<USpotLightComponent*> SpotLights;
     TArray<UPointLightComponent*> PointLights;
+    TArray<UDirectionalLightComponent*> DirectionalLights;
+    UAmbientLightComponent* AmbientLights;
 
     FDXDBufferManager* BufferManager;
     FGraphicsDevice* Graphics;

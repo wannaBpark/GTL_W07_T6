@@ -1,6 +1,10 @@
 
 #include "ShaderRegisters.hlsl"
 
+#ifdef LIGHTING_MODEL_GOURAUD
+#include "Light.hlsl"
+#endif
+
 PS_INPUT_StaticMesh mainVS(VS_INPUT_StaticMesh Input)
 {
     PS_INPUT_StaticMesh Output;
@@ -17,6 +21,13 @@ PS_INPUT_StaticMesh mainVS(VS_INPUT_StaticMesh Input)
     Output.UV = Input.UV;
     Output.Color = Input.Color;
     Output.MaterialIndex = Input.MaterialIndex;
+
+#ifdef LIGHTING_MODEL_GOURAUD
+    float4 litColor = Lighting(worldPosition.xyz, worldNormal);
+    output.color = float4(litColor.rgb, 1.0);
+#else
+    output.color = input.color;
+#endif
     
     return Output;
 }

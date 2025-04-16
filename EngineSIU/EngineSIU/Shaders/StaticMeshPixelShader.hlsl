@@ -4,6 +4,7 @@
 SamplerState Sampler : register(s0);
 
 Texture2D Textures : register(t0);
+Texture2D NormalMap : register(t1);
 
 cbuffer MaterialConstants : register(b1)
 {
@@ -26,6 +27,12 @@ cbuffer TextureConstants : register(b4)
 {
     float2 UVOffset;
     float2 TexturePad0;
+}
+
+cbuffer TextureFlagConstants : register(b7)
+{
+    uint TextureFlags;
+    float3 TextureFlagPad;
 }
 
 #include "Light.hlsl"

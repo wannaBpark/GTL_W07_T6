@@ -7,9 +7,9 @@
 #include "Components/Light/LightComponent.h"
 #include "Components/Light/PointLightComponent.h"
 #include "Components/Light/SpotLightComponent.h"
+#include "Components/DirectionalLightComponent.h"
 #include "Engine/EditorEngine.h"
 #include "GameFramework/Actor.h"
-
 #include "UObject/UObjectIterator.h"
 
 //------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ void FUpdateLightBufferPass::Initialize(FDXDBufferManager* InBufferManager, FGra
 
 void FUpdateLightBufferPass::PrepareRender()
 {
-    for (const auto iter : TObjectRange<ULightComponent>())
+    for (const auto iter : TObjectRange<ULightComponentBase>())
     {
         if (iter->GetWorld() == GEngine->ActiveWorld)
         {
@@ -47,51 +47,75 @@ void FUpdateLightBufferPass::PrepareRender()
             {
                 SpotLights.Add(SpotLight);
             }
+            else if (UDirectionalLightComponent* DirectionalLight = Cast<UDirectionalLightComponent>(iter))
+            {
+                DirectionalLights.Add(DirectionalLight);
+            }
         }
     }
 }
 
 void FUpdateLightBufferPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    FLightBuffer LightBufferData = {};
-    int LightCount = 0;
-
-    LightBufferData.GlobalAmbientLight = FVector4(0.1f, 0.1f, 0.1f, 1.f);
-    for (auto Light : PointLights)
-    {
-        if (LightCount < MAX_LIGHTS)
-        {
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-
-            LightCount++;
-        }
-    }
-
-    for (auto Light : SpotLights)
-    {
-        if (LightCount < MAX_LIGHTS)
-        {
-            LightBufferData.gLights[LightCount] = Light->GetLightInfo();
-            LightBufferData.gLights[LightCount].Position = Light->GetWorldLocation();
-            LightBufferData.gLights[LightCount].Direction = Light->GetForwardVector();
-            LightBufferData.gLights[LightCount].Type = ELightType::SPOT_LIGHT;
-
-            LightCount++;
-        }
-    }
-    LightBufferData.nLights = LightCount;
-
-    BufferManager->UpdateConstantBuffer(TEXT("FLightBuffer"), LightBufferData);
+    UpdateLightBuffer();
 }
 
 void FUpdateLightBufferPass::ClearRenderArr()
 {
     PointLights.Empty();
     SpotLights.Empty();
+    DirectionalLights.Empty();
 }
 
-void FUpdateLightBufferPass::UpdateLightBuffer(FLight Light) const
-{
 
+void FUpdateLightBufferPass::UpdateLightBuffer() const
+{
+    FLightInfoBuffer LightBufferData = {};
+   
+
+    int DirectionalLightsCount=0;
+    int PointLightsCount=0;
+    int SpotLightsCount=0;
+    
+    for (auto Light : SpotLights)
+    {
+        if (SpotLightsCount < MAX_SPOT_LIGHT)
+        {
+            LightBufferData.SpotLights[SpotLightsCount] = Light->GetSpotLightInfo();
+            LightBufferData.SpotLights[SpotLightsCount].Position = Light->GetWorldLocation();
+            LightBufferData.SpotLights[SpotLightsCount].Direction = Light->GetDirection();
+            SpotLightsCount++;
+        }
+    }
+
+    for (auto Light : PointLights)
+    {
+        if (PointLightsCount < MAX_POINT_LIGHT)
+        {
+            LightBufferData.PointLights[PointLightsCount] = Light->GetPointLightInfo();
+            LightBufferData.PointLights[PointLightsCount].Position = Light->GetWorldLocation();
+            PointLightsCount++;
+        }
+    }
+    
+    for (auto Light : DirectionalLights)
+    {
+        if (DirectionalLightsCount < MAX_DIRECTIONAL_LIGHT)
+        {
+            LightBufferData.Directional[DirectionalLightsCount] = Light->GetDirectionalLightInfo();
+            LightBufferData.Directional[DirectionalLightsCount].Direction = Light->GetDirection();
+            DirectionalLightsCount++;
+        }
+    }
+    
+    //LightBufferData.Ambient = AmbientLights->GetAmbientLightInfo();
+    FAmbientLightInfo ambient;
+    ambient.AmbientColor = FLinearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    LightBufferData.Ambient = ambient;
+    LightBufferData.DirectionalLightsCount = DirectionalLightsCount;
+    LightBufferData.PointLightsCount = PointLightsCount;
+    LightBufferData.SpotLightsCount = SpotLightsCount;
+
+    BufferManager->UpdateConstantBuffer(TEXT("FLightInfoBuffer"), LightBufferData);
+    
 }

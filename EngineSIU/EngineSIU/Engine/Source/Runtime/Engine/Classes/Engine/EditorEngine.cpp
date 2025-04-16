@@ -153,13 +153,17 @@ FWorldContext* UEditorEngine::GetPIEWorldContext(/*int32 WorldPIEInstance*/)
     return nullptr;
 }
 
-void UEditorEngine::SelectActor(AActor* InActor) const
+void UEditorEngine::SelectActor(AActor* InActor)
 {
     if (InActor && CanSelectActor(InActor))
     {
         PrivateEditorSelection::GActorSelected = InActor;
     }
-    else if (InActor == nullptr)
+}
+
+void UEditorEngine::DeselectActor(AActor* InActor)
+{
+    if (InActor)
     {
         PrivateEditorSelection::GActorSelected = nullptr;
     }
@@ -200,7 +204,11 @@ void UEditorEngine::SelectComponent(USceneComponent* InComponent) const
     {
         PrivateEditorSelection::GComponentSelected = InComponent;
     }
-    else if (InComponent == nullptr)
+}
+
+void UEditorEngine::DeselectComponent(USceneComponent* InComponent)
+{
+    if (InComponent == nullptr)
     {
         PrivateEditorSelection::GComponentSelected = nullptr;
     }

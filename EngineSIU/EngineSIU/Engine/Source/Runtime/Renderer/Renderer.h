@@ -37,6 +37,7 @@ class FLineRenderPass;
 class FFogRenderPass;
 class FCompositingPass;
 class FSlateRenderPass;
+class FEditorRenderPass;
 
 class FRenderer
 {
@@ -92,6 +93,7 @@ public:
     FUpdateLightBufferPass* UpdateLightBufferPass = nullptr;
     FLineRenderPass* LineRenderPass = nullptr;
     FFogRenderPass* FogRenderPass = nullptr;
+    FEditorRenderPass* EditorRenderPass = nullptr;
     
     FCompositingPass* CompositingPass = nullptr;
     

@@ -27,7 +27,7 @@ public:
 
     virtual void ClearRenderArr() override;
 
-    void PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) const;
+    void PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport);
     
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
   
@@ -43,7 +43,7 @@ public:
     void CreateShader();
     void ReleaseShader();
 
-    void ChangeViewMode(EViewModeIndex ViewModeIndex) const;
+    void ChangeViewMode(EViewModeIndex ViewModeIndex);
     
 private:
     TArray<UStaticMeshComponent*> StaticMeshComponents;

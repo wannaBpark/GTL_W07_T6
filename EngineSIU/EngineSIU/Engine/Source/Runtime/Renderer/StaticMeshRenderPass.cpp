@@ -43,12 +43,8 @@ FStaticMeshRenderPass::~FStaticMeshRenderPass()
 
 void FStaticMeshRenderPass::CreateShader()
 {
-    HRESULT hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS");
-    if (FAILED(hr))
-    {
-        return;
-    }
-    hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShaderDepth", L"Shaders/StaticMeshPixelShaderDepth.hlsl", "mainPS");
+    // Begin Debug Shaders
+    HRESULT hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShaderDepth", L"Shaders/StaticMeshPixelShaderDepth.hlsl", "mainPS");
     if (FAILED(hr))
     {
         return;
@@ -58,11 +54,35 @@ void FStaticMeshRenderPass::CreateShader()
     {
         return;
     }
+    // End Debug Shaders
+
+#pragma region UberShader
+    D3D_SHADER_MACRO DefinesGouraud[] =
+    {
+        { GOURAUD, "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"GOURAUD_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesGouraud);
+    
+    D3D_SHADER_MACRO DefinesLambert[] =
+    {
+        { LAMBERT, "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"LAMBERT_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesLambert);
+
+    D3D_SHADER_MACRO DefinesBlinnPhong[] =
+    {
+        { PHONG, "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesBlinnPhong);
+#pragma endregion UberShader
     
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
     
-    PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
+    PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
     DebugDepthShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderDepth");
     DebugWorldNormalShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderWorldNormal");
 }
@@ -72,15 +92,29 @@ void FStaticMeshRenderPass::ReleaseShader()
     
 }
 
-void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex) const
+void FStaticMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex)
 {
     switch (ViewModeIndex)
     {
-    case EViewModeIndex::VMI_Lit:
+    case EViewModeIndex::VMI_Lit_Gouraud:
+        VertexShader = ShaderManager->GetVertexShaderByKey(L"GOURAUD_StaticMeshVertexShader");
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"GOURAUD_StaticMeshPixelShader");
+        UpdateLitUnlitConstant(1);
+        break;
+    case EViewModeIndex::VMI_Lit_Lambert:
+        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"LAMBERT_StaticMeshPixelShader");
+        UpdateLitUnlitConstant(1);
+        break;
+    case EViewModeIndex::VMI_Lit_BlinnPhong:
+        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
         break;
     case EViewModeIndex::VMI_Wireframe:
     case EViewModeIndex::VMI_Unlit:
+        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+        PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(0);
         break;
     }
@@ -106,7 +140,7 @@ void FStaticMeshRenderPass::PrepareRender()
     }
 }
 
-void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) const
+void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) 
 {
     const EViewModeIndex ViewMode = Viewport->GetViewMode();
     
@@ -125,7 +159,6 @@ void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorView
 
     BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
 
-    
     ChangeViewMode(ViewMode);
 
     // Rasterizer

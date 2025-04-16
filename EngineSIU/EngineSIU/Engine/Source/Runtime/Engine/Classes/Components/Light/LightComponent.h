@@ -1,42 +1,23 @@
 #pragma once
-#include "LightComponentBase.h"
 #include "Define.h"
-class UBillboardComponent;
+#include "Components/SceneComponent.h"
 
-class ULightComponent : public ULightComponentBase
+
+class ULightComponentBase : public USceneComponent
 {
-    DECLARE_CLASS(ULightComponent, ULightComponentBase)
+    DECLARE_CLASS(ULightComponentBase, USceneComponent)
 
 public:
-    ULightComponent();
-    virtual ~ULightComponent() override;
+    ULightComponentBase();
+    virtual ~ULightComponentBase() override;
     virtual UObject* Duplicate(UObject* InOuter) override;
 
     virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
-    void InitializeLight();
-    
-    void SetDiffuseColor(FLinearColor NewColor);
-    void SetSpecularColor(FLinearColor NewColor);
-    void SetAttenuation(float Attenuation);
-    void SetAttenuationRadius(float AttenuationRadius);
-    void SetIntensity(float Intensity);
-    void SetFalloff(float fallOff);
-
-    FLinearColor GetDiffuseColor();
-    FLinearColor GetSpecularColor();
-    float GetAttenuation();
-    float GetAttenuationRadius();
-    float GetFalloff();
-    FLight GetLightInfo() const { return Light; };
 protected:
 
     FBoundingBox AABB;
-    FLight Light;
 
 public:
     FBoundingBox GetBoundingBox() const {return AABB;}
-    
-    float GetIntensity() const {return Light.Intensity;}
-    
 };

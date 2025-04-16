@@ -2,7 +2,6 @@
 #include "Renderer.h"
 
 #include <array>
-
 #include "World/World.h"
 #include "Engine/EditorEngine.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -16,6 +15,7 @@
 #include "LineRenderPass.h"
 #include "FogRenderPass.h"
 #include "SlateRenderPass.h"
+#include "EditorRenderPass.h"
 #include <UObject/UObjectIterator.h>
 #include <UObject/Casts.h>
 
@@ -46,6 +46,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     UpdateLightBufferPass = new FUpdateLightBufferPass();
     LineRenderPass = new FLineRenderPass();
     FogRenderPass = new FFogRenderPass();
+    EditorRenderPass = new FEditorRenderPass();
     CompositingPass = new FCompositingPass();
     SlateRenderPass = new FSlateRenderPass();
 
@@ -56,6 +57,7 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     UpdateLightBufferPass->Initialize(BufferManager, Graphics, ShaderManager);
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    EditorRenderPass->Initialize(Graphics,ShaderManager);
     
     CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
     
@@ -99,6 +101,9 @@ void FRenderer::CreateConstantBuffers()
 
     UINT TextureBufferSize = sizeof(FTextureConstants);
     BufferManager->CreateBufferGeneric<FTextureConstants>("FTextureConstants", nullptr, TextureBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    
+    UINT textureFlagBufferSize = sizeof(FTextureFlagConstants);
+    BufferManager->CreateBufferGeneric<FTextureFlagConstants>("FTextureFlagConstants", nullptr, textureFlagBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
     UINT LightingBufferSize = sizeof(FLightBuffer);
     BufferManager->CreateBufferGeneric<FLightBuffer>("FLightBuffer", nullptr, LightingBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -114,6 +119,9 @@ void FRenderer::CreateConstantBuffers()
 
     UINT FogConstantBufferSize = sizeof(FFogConstants);
     BufferManager->CreateBufferGeneric<FFogConstants>("FFogConstants", nullptr, FogConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT LightInfoBufferSize = sizeof(FLightInfoBuffer);
+    BufferManager->CreateBufferGeneric<FLightInfoBuffer>("FLightInfoBuffer", nullptr, LightInfoBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
 
     // TODO: 함수로 분리
@@ -142,6 +150,23 @@ void FRenderer::CreateCommonShader()
     };
 
     HRESULT hr = ShaderManager->AddVertexShaderAndInputLayout(L"StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", StaticMeshLayoutDesc, ARRAYSIZE(StaticMeshLayoutDesc));
+    if (FAILED(hr))
+    {
+        return;
+    }
+    
+#pragma region UberShader
+    D3D_SHADER_MACRO DefinesGouraud[] =
+    {
+        { GOURAUD, "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddVertexShader(L"GOURAUD_StaticMeshVertexShader", L"Shaders/StaticMeshVertexShader.hlsl", "mainVS", DefinesGouraud);
+    if (FAILED(hr))
+    {
+        return;
+    }
+#pragma endregion UberShader
 }
 
 void FRenderer::PrepareRender(FViewportResource* ViewportResource)
@@ -231,6 +256,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 void FRenderer::EndRender()
 {
     ClearRenderArr();
+    ShaderManager->ReloadAllShaders(); // 
 }
 
 void FRenderer::RenderWorldScene(const std::shared_ptr<FEditorViewportClient>& Viewport)
@@ -257,7 +283,7 @@ void FRenderer::RenderPostProcess(const std::shared_ptr<FEditorViewportClient>& 
 
     FViewportResource* ViewportResource = Viewport->GetViewportResource();
     
-    if (ViewMode != EViewModeIndex::VMI_Lit)
+    if (ViewMode >= EViewModeIndex::VMI_Unlit)
     {
         return;
     }

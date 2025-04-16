@@ -26,10 +26,12 @@ void AEditorPlayer::Input()
 {
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
+    if (io.WantCaptureKeyboard) return;
+
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
         if (!bLeftMouseDown)
-        {
+        {   
             bLeftMouseDown = true;
 
             POINT mousePos;
@@ -139,7 +141,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     for (const auto iter : TObjectRange<UPrimitiveComponent>())
     {
         UPrimitiveComponent* pObj;
-        if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponent>())
+        if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
         {
             pObj = static_cast<UPrimitiveComponent*>(iter);
         }
@@ -171,6 +173,10 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     if (Possible)
     {
         Cast<UEditorEngine>(GEngine)->SelectActor(Possible->GetOwner());
+    }
+    else
+    {
+        Cast<UEditorEngine>(GEngine)->DeselectActor(Cast<UEditorEngine>(GEngine)->GetSelectedActor());
     }
 }
 

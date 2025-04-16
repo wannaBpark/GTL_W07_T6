@@ -32,7 +32,8 @@ public:
     FWorldContext* GetPIEWorldContext(/*int32 WorldPIEInstance = 0*/);
 
 public:
-    void SelectActor(AActor* InActor) const;
+    void SelectActor(AActor* InActor);
+    void DeselectActor(AActor* InActor);
     bool CanSelectActor(const AActor* InActor) const;
     AActor* GetSelectedActor() const;
 
@@ -42,6 +43,7 @@ public:
     void NewWorld();
 
     void SelectComponent(USceneComponent* InComponent) const;
+    void DeselectComponent(USceneComponent* InComponent);
     bool CanSelectComponent(const USceneComponent* InComponent) const;
     USceneComponent* GetSelectedComponent() const;
 
