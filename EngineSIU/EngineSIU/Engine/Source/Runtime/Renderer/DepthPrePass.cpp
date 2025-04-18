@@ -3,7 +3,7 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "Renderer/Renderer.h"
-#include "DepthBufferDebugPass.h"
+
 #define SAFE_RELEASE(p) if (p) { p->Release(); p = nullptr; }
 
 FDepthPrePass::FDepthPrePass()

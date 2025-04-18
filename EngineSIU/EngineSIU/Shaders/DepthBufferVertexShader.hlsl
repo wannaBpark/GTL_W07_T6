@@ -1,21 +1,31 @@
-// 입력 구조체: POSITION과 TEXCOORD
-struct VS_INPUT
-{
-    float3 position : POSITION;
-    float2 texCoord : TEXCOORD;
-};
 
-// 출력 구조체
+
 struct VS_OUTPUT
 {
-    float4 position : SV_POSITION;
-    float2 texCoord : TEXCOORD;
+    float4 Position : SV_POSITION;
+    float2 UV : TEXCOORD;
 };
 
-VS_OUTPUT mainVS(VS_INPUT input)
+VS_OUTPUT mainVS(uint VertexID : SV_VertexID)
 {
-    VS_OUTPUT output;
-    output.position = float4(input.position.xy, 1.0, 1.0);
-    output.texCoord = input.texCoord;
-    return output;
+    VS_OUTPUT Output;
+
+    float2 QuadPositions[6] = {
+        float2(-1,  1),  // Top Left
+        float2( 1,  1),  // Top Right
+        float2(-1, -1),  // Bottom Left
+        float2( 1,  1),  // Top Right
+        float2( 1, -1),  // Bottom Right
+        float2(-1, -1)   // Bottom Left
+    };
+
+    float2 UVs[6] = {
+        float2(0, 0), float2(1, 0), float2(0, 1),
+        float2(1, 0), float2(1, 1), float2(0, 1)
+    };
+    
+    Output.Position = float4(QuadPositions[VertexID], 0, 1);
+    Output.UV = UVs[VertexID];
+
+    return Output;
 }

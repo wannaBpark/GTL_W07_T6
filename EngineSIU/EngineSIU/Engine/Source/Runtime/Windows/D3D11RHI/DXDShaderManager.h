@@ -37,6 +37,8 @@ public:
 	FDXDShaderManager() = default;
 	FDXDShaderManager(ID3D11Device* Device);
 
+    ~FDXDShaderManager();
+
     // Hot Reload 관련 함수
 	void ReleaseAllShader();
     void UpdateShaderIfOutdated(const std::wstring Key, const std::wstring FilePath, const std::string EntryPoint, bool IsVertexShader, const D3D_SHADER_MACRO * Defines = nullptr, const D3D11_INPUT_ELEMENT_DESC * Layout = nullptr, uint32 LayoutSize = 0);
@@ -53,6 +55,7 @@ private:
 public:
 	HRESULT AddVertexShader(const std::wstring& Key, const std::wstring& FileName);
 	HRESULT AddVertexShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint);
+    HRESULT AddVertexShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint, const D3D_SHADER_MACRO* defines);
 	HRESULT AddInputLayout(const std::wstring& Key, const D3D11_INPUT_ELEMENT_DESC* Layout, uint32_t LayoutSize);
     HRESULT AddComputeShader(const std::wstring& Key, const std::wstring& FileName, const std::string& EntryPoint);
 	

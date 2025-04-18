@@ -1,9 +1,12 @@
 #pragma once
 #include "Core/HAL/PlatformType.h"
+#include "Engine/ResourceMgr.h"
+#include "LevelEditor/SlateAppMessageHandler.h"
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveDrawBatch.h"
-#include "Engine/ResourceMgr.h"
 
+
+class FSlateAppMessageHandler;
 class UnrealEd;
 class UImGuiManager;
 class UWorld;
@@ -25,11 +28,14 @@ public:
     void Render() const;
     void Tick();
     void Exit();
-    float GetAspectRatio(IDXGISwapChain* swapChain) const;
-    void Input();
+
+    void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
 
 private:
     void WindowInit(HINSTANCE hInstance);
+    static LRESULT CALLBACK AppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+    void UpdateUI();
 
 public:
     static FGraphicsDevice GraphicDevice;
@@ -39,22 +45,23 @@ public:
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
-
-    HWND hWnd;
+    HWND AppWnd;
 
 private:
     UImGuiManager* UIMgr;
     //TODO: GWorld 제거, Editor들 EditorEngine으로 넣기
-    
+
+    std::unique_ptr<FSlateAppMessageHandler> AppMessageHandler;
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
-    FDXDBufferManager* bufferManager; //ToDo UEngine으로 옮겨야함.
+    FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
     bool bIsExit = false;
-    const int32 targetFPS = 60;
-    bool bTestInput = false;
+    int32 TargetFPS = 60;
 
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
+
+    FSlateAppMessageHandler* GetAppMessageHandler() const { return AppMessageHandler.get(); }
 };

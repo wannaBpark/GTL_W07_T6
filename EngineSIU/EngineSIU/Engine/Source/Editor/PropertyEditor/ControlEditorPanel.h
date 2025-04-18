@@ -1,6 +1,7 @@
-﻿#pragma once
+#pragma once
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
+#include "LightGridGenerator.h"
 
 class ControlEditorPanel : public UEditorPanel
 {
@@ -15,7 +16,7 @@ private:
     void CreateFlagButton() const;
     void CreatePIEButton(ImVec2 ButtonSize, ImFont* IconFont) const;
     void CreateSRTButton(ImVec2 ButtonSize) const;
-
+    void CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconFont);
     uint64 ConvertSelectionToFlags(const bool selected[]) const;
     
 private:
@@ -25,5 +26,6 @@ private:
     float* FOV = nullptr;
     float CameraSpeed = 0.0f;
     float GridScale = 1.0f;
+    FLightGridGenerator LightGridGenerator;
 };
 

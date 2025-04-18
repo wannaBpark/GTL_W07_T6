@@ -3,21 +3,23 @@
 
 #include "Define.h"
 #include "Container/Map.h"
-#include "UObject/ObjectMacros.h"
 #include "ViewportClient.h"
 #include "EngineLoop.h"
 #include "EngineBaseTypes.h"
 
-#define MIN_ORTHOZOOM				1.0							/* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
-#define MAX_ORTHOZOOM				1e25
+#define MIN_ORTHOZOOM (1.0)  // 2D ortho viewport zoom >= MIN_ORTHOZOOM
+#define MAX_ORTHOZOOM (1e25)
 
+struct FPointerEvent;
+enum class EViewScreenLocation : uint8;
+class FViewportResource;
 class ATransformGizmo;
 class USceneComponent;
 
-struct FViewportCameraTransform
+struct FViewportCamera
 {
 public:
-    FViewportCameraTransform() = default;
+    FViewportCamera() = default;
 
     /** Sets the transform's location */
     void SetLocation(const FVector& Position)
@@ -85,43 +87,58 @@ public:
 
     virtual void Draw(FViewport* Viewport) override;
     virtual UWorld* GetWorld() const override { return nullptr; }
-    void Initialize(int32 viewportIndex);
+    void Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect);
     void Tick(float DeltaTime);
     void Release() const;
 
     void Input();
-    void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
+    void UpdateEditorCameraMovement(float DeltaTime);
+    void InputKey(const FKeyEvent& InKeyEvent);
+    void MouseMove(const FPointerEvent& InMouseEvent);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
 
-    bool IsSelected(POINT InPoint) const;
+    bool IsSelected(const FVector2D& InPoint) const;
+
+    /**
+     * ScreenPos를 World Space로 Deprojection 합니다.
+     * @param ScreenPos Deproject할 스크린 좌표
+     * @param OutWorldOrigin Origin Vector (World Space)
+     * @param OutWorldDir Direction Vector (World Space)
+     */
+    void DeprojectFVector2D(const FVector2D& ScreenPos, FVector& OutWorldOrigin, FVector& OutWorldDir) const;
 
 protected:
     /** Camera speed setting */
     int32 CameraSpeedSetting = 1;
     /** Camera speed scalar */
-    float CameraSpeedScalar = 1.0f;
+    float CameraSpeed = 1.0f;
     float GridSize;
 
 public:
     FViewport* Viewport;
     int32 ViewportIndex;
     FViewport* GetViewport() const { return Viewport; }
+    
     D3D11_VIEWPORT& GetD3DViewport() const;
 
+    FViewportResource* GetViewportResource();
+
+private:
+    FViewportResource* ViewportResourceCache = nullptr;
+
 public:
+    
     //카메라
     /** Viewport camera transform data for perspective viewports */
-    FViewportCameraTransform ViewTransformPerspective;
-    FViewportCameraTransform ViewTransformOrthographic;
+    FViewportCamera PerspectiveCamera;
+    FViewportCamera OrthogonalCamera;
     // 카메라 정보 
-    float ViewFOV = 60.0f;
-    /** Viewport's stored horizontal field of view (saved in ini files). */
-    float FOVAngle = 60.0f;
+    float ViewFOV = 90.0f;
     float AspectRatio;
-    float nearPlane = 0.1f;
-    float farPlane = 10000.0f;
+    float NearClip = 0.1f;
+    float FarClip = 1000.0f;
     static FVector Pivot;
-    static float orthoSize;
+    static float OrthoSize;
     ELevelViewportType ViewportType;
     uint64 ShowFlag;
     EViewModeIndex ViewMode;
@@ -129,7 +146,7 @@ public:
     FMatrix View;
     FMatrix Projection;
 
-public: //Camera Movement
+    //Camera Movement
     void CameraMoveForward(float InValue);
     void CameraMoveRight(float InValue);
     void CameraMoveUp(float InValue);
@@ -143,23 +160,36 @@ public: //Camera Movement
     void UpdateViewMatrix();
     void UpdateProjectionMatrix();
 
-    bool IsOrtho() const;
+    bool IsOrthographic() const;
     bool IsPerspective() const;
+
+    FVector GetCameraLocation() const;
+
+    float GetCameraLearClip() const;
+    float GetCameraFarClip() const;
+    
     ELevelViewportType GetViewportType() const;
     void SetViewportType(ELevelViewportType InViewportType);
+    
     void UpdateOrthoCameraLoc();
+    
     EViewModeIndex GetViewMode() const { return ViewMode; }
-    void SetViewMode(EViewModeIndex newMode) { ViewMode = newMode; }
+    void SetViewMode(EViewModeIndex InViewMode) { ViewMode = InViewMode; }
+    
     uint64 GetShowFlag() const { return ShowFlag; }
-    void SetShowFlag(uint64 newMode) { ShowFlag = newMode; }
+    void SetShowFlag(uint64 InShowFlag) { ShowFlag = InShowFlag; }
+    
     bool GetIsOnRBMouseClick() const { return bRightMouseDown; }
 
-    //Flag Test Code
+    // Flag Test Code
     static void SetOthoSize(float InValue);
 
 private: // Input
-    POINT lastMousePos;
+    POINT PrevMousePos;
     bool bRightMouseDown = false;
+
+    // 카메라 움직임에 사용될 키를 임시로 저장해서 사용할 예정
+    TSet<EKeys::Type> PressedKeys;
 
 public:
     void LoadConfig(const TMap<FString, FString>& config);
@@ -174,8 +204,8 @@ public:
     int32 GetCameraSpeedSetting() const { return CameraSpeedSetting; }
     void SetGridSize(const float& value) { GridSize = value; }
     float GetGridSize() const { return GridSize; }
-    float GetCameraSpeedScalar() const { return CameraSpeedScalar; }
-    void SetCameraSpeedScalar(float value);
+    float GetCameraSpeedScalar() const { return CameraSpeed; }
+    void SetCameraSpeed(float InValue);
 
 private:
     template <typename T>
@@ -195,19 +225,17 @@ private:
 
 public:
     // Gizmo
-    void SetGizmoActor(ATransformGizmo* gizmo) { GizmoActor = gizmo; }
+    // void SetGizmoActor(ATransformGizmo* gizmo) { GizmoActor = gizmo; }
     ATransformGizmo* GetGizmoActor() const { return GizmoActor; }
 
     void SetPickedGizmoComponent(USceneComponent* component) { PickedGizmoComponent = component; }
     USceneComponent* GetPickedGizmoComponent() const { return PickedGizmoComponent; }
 
-    void SetShowGizmo(bool show) { bShowGizmo = show; }
+    void SetShowGizmo(bool bShow) { bShowGizmo = bShow; }
     bool IsShowGizmo() const { return bShowGizmo; }
 
 private:
     ATransformGizmo* GizmoActor = nullptr;
     USceneComponent* PickedGizmoComponent = nullptr;
     bool bShowGizmo = true;
-
-
 };

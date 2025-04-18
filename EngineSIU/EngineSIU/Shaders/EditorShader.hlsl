@@ -1,5 +1,13 @@
+
 #include "EditorShaderConstants.hlsli"
-#include "ShaderConstants.hlsli"
+// #include "ShaderConstants.hlsli"
+
+#include "ShaderRegisters.hlsl"
+
+cbuffer MaterialConstants : register(b1)
+{
+    FMaterial Material;
+}
 
 // Input Layout은 float3이지만, shader에서 missing w = 1로 처리해서 사용
 // https://stackoverflow.com/questions/29728349/hlsl-sv-position-why-how-from-float3-to-float4
@@ -25,9 +33,9 @@ PS_INPUT gizmoVS(VS_INPUT input)
     PS_INPUT output;
     
     float4 pos;
-    pos = mul(input.position, ModelMatrix);
+    pos = mul(input.position, WorldMatrix);
     pos = mul(pos, ViewMatrix);
-    pos = mul(pos, ProjMatrix);
+    pos = mul(pos, ProjectionMatrix);
     
     output.position = pos;
     
@@ -70,7 +78,7 @@ PS_INPUT axisVS(uint vertexID : SV_VertexID)
     
     float4 Vertex = AxisPos[vertexID];
     Vertex = mul(Vertex, ViewMatrix);
-    Vertex = mul(Vertex, ProjMatrix);
+    Vertex = mul(Vertex, ProjectionMatrix);
     output.position = Vertex;
     
     output.color = AxisColor[vertexID / 2];
@@ -101,7 +109,7 @@ PS_INPUT aabbVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
     float4 localPos = float4(input.position.xyz * scale + pos, 1.f);
         
     localPos = mul(localPos, ViewMatrix);
-    localPos = mul(localPos, ProjMatrix);
+    localPos = mul(localPos, ProjectionMatrix);
     output.position = localPos;
     
     // color는 지정안해줌
@@ -127,7 +135,7 @@ PS_INPUT sphereVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
     float4 localPos = float4(input.position.xyz * scale + pos, 1.f);
         
     localPos = mul(localPos, ViewMatrix);
-    localPos = mul(localPos, ProjMatrix);
+    localPos = mul(localPos, ProjectionMatrix);
     output.position = localPos;
     
     // color는 지정안해줌
@@ -190,7 +198,7 @@ PS_INPUT coneVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
 {
     PS_INPUT output;
     
-    float3 pos = DataCone[instanceID%2].ApexPosiiton;
+    float3 pos = DataCone[instanceID%2].ApexPosition;
     float radius = DataCone[instanceID].InnerRadius;
     if (instanceID % 2 == 1)
     {
@@ -212,7 +220,7 @@ PS_INPUT coneVS(VS_INPUT_POS_ONLY input, uint instanceID : SV_InstanceID)
     float4 localPos = float4(localPos3, 1.f);
         
     localPos = mul(localPos, ViewMatrix);
-    localPos = mul(localPos, ProjMatrix);
+    localPos = mul(localPos, ProjectionMatrix);
     output.position = localPos;
     
     return output;
@@ -260,6 +268,7 @@ static const float3 XZQuadPos[12] =
     float3(1, 0, -1), float3(-1, 0, 1), float3(-1, 0, -1),
 };
 
+/*
 PS_INPUT_GRID gridVS(uint vertexID : SV_VertexID)
 {
     // 상수버퍼의 CaemerLookAt : (screenWidth, screenHeight, ViewMode)
@@ -286,21 +295,21 @@ PS_INPUT_GRID gridVS(uint vertexID : SV_VertexID)
     float3 offset = float3(0.0, 0.0, 0.0);
     if (viewMode <= 2.0)
     {
-        offset = float3(CameraPos.x, CameraPos.y, 0.0);
+        offset = float3(ViewWorldLocation.x, ViewWorldLocation.y, 0.0);
     }
     else if (viewMode <= 4.0)
     {
-        offset = float3(0.0, CameraPos.x, CameraPos.z);
+        offset = float3(0.0, ViewWorldLocation.x, ViewWorldLocation.z);
     }
     else
     {
-        offset = float3(CameraPos.y, 0.0, CameraPos.z);
+        offset = float3(ViewWorldLocation.y, 0.0, ViewWorldLocation.z);
     }
     vPos3 += offset;
     
     float4 vPos4 = float4(vPos3, 1.0f);
     vPos4 = mul(vPos4, ViewMatrix);
-    vPos4 = mul(vPos4, ProjMatrix);
+    vPos4 = mul(vPos4, ProjectionMatrix);
     output.Position = vPos4;
     output.WorldPos = vPos3;
     output.Deriv = 2.0 / CameraLookAt.xy;
@@ -308,6 +317,7 @@ PS_INPUT_GRID gridVS(uint vertexID : SV_VertexID)
     
     return output;
 }
+*/
 
 float log10f(float x)
 {
@@ -356,7 +366,7 @@ struct PS_OUTPUT
     float Depth : SV_Depth;
 };
 
-
+/*
 PS_OUTPUT gridPS(PS_INPUT_GRID input)
 {
     PS_OUTPUT output;
@@ -414,14 +424,14 @@ PS_OUTPUT gridPS(PS_INPUT_GRID input)
     }
 
     // 카메라와의 거리 기반 페이드아웃 ( TOFIX: 여기선 XY 평면을 기준으로함)
-    float OpacityFalloff = (1.0 - saturate(length(input.WorldPos.xy - CameraPos.xy) / gGridSize));
+    float OpacityFalloff = (1.0 - saturate(length(input.WorldPos.xy - ViewWorldLocation.xy) / gGridSize));
     Color.a *= OpacityFalloff;
 
     output.Color = Color;
     output.Depth = 0.9999999; // 월드 그리드는 강제로 먼 깊이값 부여 (Forced to be Occluded ALL THE TIME)
     return output;
 }
-
+*/
 
 
 
@@ -454,7 +464,7 @@ PS_INPUT_ICON iconVS(uint vertexID : SV_VertexID)
     PS_INPUT_ICON output;
 
     // 카메라를 향하는 billboard 좌표계 생성
-    float3 forward = normalize(CameraPos - IconPosition);
+    float3 forward = normalize(ViewWorldLocation - IconPosition);
     float3 up = float3(0, 0, 1);
     float3 right = normalize(cross(up, forward));
     up = cross(forward, right);
@@ -465,7 +475,7 @@ PS_INPUT_ICON iconVS(uint vertexID : SV_VertexID)
 
         // 변환
     float4 viewPos = mul(float4(worldPos, 1.0), ViewMatrix);
-    output.Position = mul(viewPos, ProjMatrix);
+    output.Position = mul(viewPos, ProjectionMatrix);
 
     output.TexCoord =
     QuadTexCoord[vertexID];
@@ -514,7 +524,7 @@ PS_INPUT arrowVS(VS_INPUT input)
 
     float4 pos = float4(worldPos, 1.0);
     pos = mul(pos, ViewMatrix);
-    pos = mul(pos, ProjMatrix);
+    pos = mul(pos, ProjectionMatrix);
 
     output.position = pos;
     output.color = float4(0.7, 0.7, 0.7, 1.0f);

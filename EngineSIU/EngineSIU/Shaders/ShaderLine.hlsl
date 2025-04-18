@@ -1,22 +1,14 @@
 
-cbuffer MatrixBuffer : register(b0)
-{
-    row_major float4x4 MVP;
-};
+#include "ShaderRegisters.hlsl"
 
 cbuffer GridParametersData : register(b1)
 {
     float GridSpacing;
     int GridCount; // 총 grid 라인 수
+    float2 Padding1;
+    
     float3 GridOrigin; // Grid의 중심
     float Padding;
-};
-cbuffer CameraConstants : register(b2)
-{
-    row_major float4x4 View;
-    row_major float4x4 Projection;
-    float3 CameraPosition;
-    float CameraPad;
 };
 
 cbuffer PrimitiveCounts : register(b3)
@@ -48,7 +40,7 @@ struct FConeData
 };
 struct FOrientedBoxCornerData
 {
-    float3 corners[8]; // 회전/이동 된 월드 공간상의 8꼭짓점
+    float4 corners[8]; // 회전/이동 된 월드 공간상의 8꼭짓점
 };
 
 StructuredBuffer<FBoundingBoxData> g_BoundingBoxes : register(t2);
@@ -237,7 +229,7 @@ float3 ComputeOrientedBoxPosition(uint obIndex, uint edgeIndex, uint vertexID)
 {
     FOrientedBoxCornerData ob = g_OrientedBoxes[obIndex];
     int cornerID = BB_EdgeIndices[edgeIndex][vertexID];
-    return ob.corners[cornerID];
+    return ob.corners[cornerID].xyz;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -317,8 +309,13 @@ PS_INPUT mainVS(VS_INPUT input)
     }
 
     // 출력 변환
-    output.WorldPosition = float4(pos, 1.0);
-    output.Position = mul(float4(pos, 1.0), MVP);
+    output.Position = float4(pos, 1.f);
+    output.Position = mul(output.Position, WorldMatrix);
+    output.WorldPosition = output.Position;
+    
+    output.Position = mul(output.Position, ViewMatrix);
+    output.Position = mul(output.Position, ProjectionMatrix);
+    
     output.Color = color;
     output.instanceID = input.instanceID;
     return output;
@@ -328,7 +325,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
 {
     if (input.instanceID < GridCount || input.instanceID < GridCount + 3)
     {
-        float Dist = length(input.WorldPosition.xyz - CameraPosition);
+        float Dist = length(input.WorldPosition.xyz - ViewWorldLocation);
 
         float MaxDist = 400 * 1.2f;
         float MinDist = MaxDist * 0.3f;

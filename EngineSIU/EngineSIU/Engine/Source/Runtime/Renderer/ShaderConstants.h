@@ -166,58 +166,65 @@ struct alignas(16) FConstantBufferCamera
 /// <summary>
 /// Debug용 AABB 상수버퍼 : b13
 /// </summary>
-struct alignas(16) FConstantBufferDebugAABB
+struct FConstantBufferDebugAABB
 {
-    alignas(16) FVector Position;
-    alignas(16) FVector Extent;
+    FVector Position;
+    float Padding1;
+    
+    FVector Extent;
+    float Padding2;
 };
 
 /// <summary>
 /// Debug용 sphere 상수버퍼 : b13
 /// </summary>
-struct alignas(16) FConstantBufferDebugSphere
+struct FConstantBufferDebugSphere
 {
-    alignas(16) FVector Position;
+    FVector Position;
     float Radius;
 };
 
 /// <summary>
 /// Debug용 cone 상수버퍼 : b13
 /// </summary>
-struct alignas(16) FConstantBufferDebugCone
+struct FConstantBufferDebugCone
 {
-    alignas(16) FVector ApexPosiiton;
+    FVector ApexPosiiton;
     float InnerRadius;
+    
     float OuterRadius;
     FVector Direction;
+    
     float Height;
+    FVector Padding;
 };
 
 /// <summary>
 /// Debug용 grid 상수버퍼 : b13
 /// </summary>
-struct alignas(16) FConstantBufferDebugGrid
+struct FConstantBufferDebugGrid
 {
-    alignas(16) FMatrix InverseViewProj;
+    FMatrix InverseViewProj;
 };
 
 /// <summary>
 /// Debug용 grid 상수버퍼 : b13
 /// </summary>
-struct alignas(16) FConstantBufferDebugIcon
+struct FConstantBufferDebugIcon
 {
-    alignas(16) FVector Position;
+    FVector Position;
     float Scale;
 };
 
 /// <summary>
 /// Debug용 arrow 상수버퍼 : b13
 /// </summary>
-struct alignas(16) FConstantBufferDebugArrow
+struct FConstantBufferDebugArrow
 {
-    alignas(16) FVector Position;
+    FVector Position;
     float ArrowScaleXYZ;
-    alignas(16) FVector Direction;
+    
+    FVector Direction;
     float ArrowScaleZ;
 };
 

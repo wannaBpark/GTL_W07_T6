@@ -6,9 +6,9 @@
 #include "Actors/LightActor.h"
 #include "Actors/FireballActor.h"
 
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/ParticleSubUVComponent.h"
 #include "Components/TextComponent.h"
@@ -28,6 +28,7 @@
 #include "Actors/PointLightActor.h"
 #include "Actors/DirectionalLightActor.h"
 #include "Actors/SpotLightActor.h"
+#include "Actors/AmbientLightActor.h"
 
 void ControlEditorPanel::Render()
 {
@@ -74,6 +75,8 @@ void ControlEditorPanel::Render()
 
     /* Get Window Content Region */
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
+    ImGui::SameLine();
+    CreateLightSpawnButton(IconSize, IconFont);
 
     ImGui::SameLine();
     ImGui::PushFont(IconFont);
@@ -107,12 +110,15 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
 
         ImGui::Begin("Menu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-        if (ImGui::MenuItem("New Scene"))
+        if (ImGui::MenuItem("New World"))
         {
-            // TODO: New Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->NewWorld();
+            }
         }
 
-        if (ImGui::MenuItem("Load Scene"))
+        if (ImGui::MenuItem("Load World"))
         {
             char const* lFilterPatterns[1] = { "*.scene" };
             const char* FileName = tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns, "Scene(.scene) file", 0);
@@ -123,13 +129,16 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
-
-            // TODO: Load Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->NewWorld();
+                EditorEngine->LoadWorld(FileName);
+            }
         }
 
         ImGui::Separator();
 
-        if (ImGui::MenuItem("Save Scene"))
+        if (ImGui::MenuItem("Save World"))
         {
             char const* lFilterPatterns[1] = { "*.scene" };
             const char* FileName = tinyfd_saveFileDialog("Save Scene File", "", 1, lFilterPatterns, "Scene(.scene) file");
@@ -139,8 +148,10 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
-
-            // TODO: Save Scene
+            if (UEditorEngine* EditorEngine = Cast<UEditorEngine>(GEngine))
+            {
+                EditorEngine->SaveWorld(FileName);
+            }
 
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
@@ -243,7 +254,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         ImGui::SetNextItemWidth(120.0f);
         if (ImGui::DragFloat("##CamSpeed", &CameraSpeed, 0.1f, 0.198f, 192.0f, "%.1f"))
         {
-            GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(CameraSpeed);
+            GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeed(CameraSpeed);
         }
 
         ImGui::EndPopup();
@@ -268,13 +279,14 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         static const Primitive primitives[] = {
             { .label= "Cube",      .obj= OBJ_CUBE },
             { .label= "Sphere",    .obj= OBJ_SPHERE },
-            { .label= "PointLight", .obj= OBJ_PointLight },
-            { .label= "SpotLight", .obj= OBJ_SpotLight },
-            { .label= "DirectionalLight", .obj= OBJ_DirectionalLight },
+            { .label= "PointLight", .obj= OBJ_POINTLIGHT },
+            { .label= "SpotLight", .obj= OBJ_SPOTLIGHT },
+            { .label= "DirectionalLight", .obj= OBJ_DIRECTIONALLGIHT },
+            { .label= "AmbientLight", .obj= OBJ_AMBIENTLIGHT },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
-            { .label= "Text",      .obj= OBJ_Text },
-            { .label= "Fireball",  .obj = OBJ_Fireball},
-            { .label= "Fog",       .obj= OBJ_Fog }
+            { .label= "Text",      .obj= OBJ_TEXT },
+            { .label= "Fireball",  .obj = OBJ_FIREBALL},
+            { .label= "Fog",       .obj= OBJ_FOG }
         };
 
         for (const auto& primitive : primitives)
@@ -302,22 +314,28 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     break;
                 }
 
-                case OBJ_SpotLight:
+                case OBJ_SPOTLIGHT:
                 {
                     ASpotLight* SpotActor = World->SpawnActor<ASpotLight>();
-                    SpotActor->SetActorLabel(TEXT("OBJ_SpotLight"));
+                    SpotActor->SetActorLabel(TEXT("OBJ_SPOTLIGHT"));
                     break;
                 }
-                case OBJ_PointLight:
+                case OBJ_POINTLIGHT:
                 {
                     APointLight* LightActor = World->SpawnActor<APointLight>();
-                    LightActor->SetActorLabel(TEXT("OBJ_PointLight"));
+                    LightActor->SetActorLabel(TEXT("OBJ_POINTLIGHT"));
                     break;
                 }
-                case OBJ_DirectionalLight:
+                case OBJ_DIRECTIONALLGIHT:
                 {
                     ADirectionalLight* LightActor = World->SpawnActor<ADirectionalLight>();
-                    LightActor->SetActorLabel(TEXT("OBJ_DirectionalLight"));
+                    LightActor->SetActorLabel(TEXT("OBJ_DIRECTIONALLGIHT"));
+                    break;
+                }
+                case OBJ_AMBIENTLIGHT:
+                {
+                    AAmbientLight* LightActor = World->SpawnActor<AAmbientLight>();
+                    LightActor->SetActorLabel(TEXT("OBJ_AMBIENTLIGHT"));
                     break;
                 }
                 case OBJ_PARTICLE:
@@ -332,10 +350,10 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor->SetActorTickInEditor(true);
                     break;
                 }
-                case OBJ_Text:
+                case OBJ_TEXT:
                 {
                     SpawnedActor = World->SpawnActor<AActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_Text"));
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_TEXT"));
                     UTextComponent* TextComponent = SpawnedActor->AddComponent<UTextComponent>();
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
@@ -343,17 +361,17 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     
                     break;
                 }
-                case OBJ_Fireball:
+                case OBJ_FIREBALL:
                 {
                     SpawnedActor = World->SpawnActor<AFireballActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_Fireball"));
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_FIREBALL"));
 
                     break;
                 }
-                case OBJ_Fog:
+                case OBJ_FOG:
                 {
                     SpawnedActor = World->SpawnActor<AHeightFogActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_HeightFog"));
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_FOG"));
                     break;
                 }
                 case OBJ_TRIANGLE:
@@ -410,12 +428,13 @@ void ControlEditorPanel::CreateFlagButton() const
 
     const char* ViewModeNames[] = { 
         "Lit_Gouraud", "Lit_Lambert", "Lit_Phong", 
-        "Unlit", "Wireframe", "SceneDepth", "WorldNormal"
+        "Unlit", "Wireframe", "Scene Depth", "World Normal"
     };
+    uint32 ViewModeCount = sizeof(ViewModeNames) / sizeof(ViewModeNames[0]);
     
-    int rawViewMode = (int)ActiveViewport->GetViewMode();
-    int safeIndex = (rawViewMode >= 0) ? (rawViewMode % 8) : 0;
-    FString ViewModeControl = ViewModeNames[safeIndex];
+    int RawViewMode = (int)ActiveViewport->GetViewMode();
+    int SafeIndex = (RawViewMode >= 0) ? (RawViewMode % ViewModeCount) : 0;
+    FString ViewModeControl = ViewModeNames[SafeIndex];
 
     ImVec2 ViewModeTextSize = ImGui::CalcTextSize(GetData(ViewModeControl));
 
@@ -428,12 +447,10 @@ void ControlEditorPanel::CreateFlagButton() const
     {
         for (int i = 0; i < IM_ARRAYSIZE(ViewModeNames); i++)
         {
-            bool bIsSelected = ((int)ActiveViewport->GetViewMode() == i);
+            bool bIsSelected = (static_cast<int>(ActiveViewport->GetViewMode()) == i);
             if (ImGui::Selectable(ViewModeNames[i], bIsSelected))
             {
-                ActiveViewport->SetViewMode((EViewModeIndex)i);
-                //FEngineLoop::GraphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                //FEngineLoop::Renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                ActiveViewport->SetViewMode(static_cast<EViewModeIndex>(i));
             }
 
             if (bIsSelected)
@@ -509,7 +526,7 @@ void ControlEditorPanel::CreateSRTButton(ImVec2 ButtonSize) const
 
     ImVec4 ActiveColor = ImVec4(0.00f, 0.00f, 0.85f, 1.0f);
 
-    ControlMode ControlMode = Player->GetControlMode();
+    EControlMode ControlMode = Player->GetControlMode();
 
     if (ControlMode == CM_TRANSLATION)
     {
@@ -579,4 +596,62 @@ void ControlEditorPanel::OnResize(HWND hWnd)
     GetClientRect(hWnd, &clientRect);
     Width = clientRect.right - clientRect.left;
     Height = clientRect.bottom - clientRect.top;
+}
+
+
+void ControlEditorPanel::CreateLightSpawnButton(ImVec2 ButtonSize, ImFont* IconFont)
+{
+    UWorld* World = GEngine->ActiveWorld;
+    ImVec2 WindowSize = ImGui::GetIO().DisplaySize;
+
+    float CenterX = (WindowSize.x - ButtonSize.x) / 2.5f;
+
+    ImGui::SetCursorScreenPos(ImVec2(CenterX + 40.0f, 10.0f));
+    const char* label = "Light";
+    ImVec2 textSize = ImGui::CalcTextSize(label);
+    ImVec2 padding = ImGui::GetStyle().FramePadding;
+    ImVec2 buttonSize = ImVec2(
+        textSize.x + padding.x * 2.0f,
+        textSize.y + padding.y * 2.0f
+    );
+    buttonSize.y = ButtonSize.y;
+    if (ImGui::Button("Light", buttonSize))
+    {
+        ImGui::OpenPopup("LightGeneratorControl");
+    }
+
+    if (ImGui::BeginPopup("LightGeneratorControl"))
+    {
+        struct LightGeneratorMode {
+            const char* label;
+            int mode;
+        };
+
+        static const LightGeneratorMode modes[] = {
+            {.label = "Generate",      .mode = ELightGridGenerator::Generate },
+            {.label = "Delete",    .mode = ELightGridGenerator::Delete },
+            {.label = "Reset", .mode = ELightGridGenerator::Reset },
+        };
+
+        for (const auto& mode : modes)
+        {
+            if (ImGui::Selectable(mode.label))
+            {
+                switch (mode.mode)
+                {
+                case ELightGridGenerator::Generate:
+                    LightGridGenerator.GenerateLight(World);
+                    break;
+                case ELightGridGenerator::Delete:
+                    LightGridGenerator.DeleteLight(World);
+                    break;
+                case ELightGridGenerator::Reset:
+                    LightGridGenerator.Reset(World);
+                    break;
+                }
+            }
+        }
+
+        ImGui::EndPopup();
+    }
 }

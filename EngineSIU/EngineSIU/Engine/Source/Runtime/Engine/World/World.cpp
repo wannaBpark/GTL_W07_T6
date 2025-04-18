@@ -1,5 +1,6 @@
 #include "World.h"
 
+#include "Actors/Cube.h"
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
@@ -7,8 +8,14 @@
 #include "Components/SkySphereComponent.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Actors/HeightFogActor.h"
+#include "Engine/EditorEngine.h"
+#include "Engine/Engine.h"
+#include "UnrealEd/SceneManager.h"
 #include "Actors/PointLightActor.h"
 #include "Actors/SpotLightActor.h"
+
+class UEditorEngine;
+
 UWorld* UWorld::CreateWorld(UObject* InOuter, const EWorldType InWorldType, const FString& InWorldName)
 {
     UWorld* NewWorld = FObjectFactory::ConstructObject<UWorld>(InOuter);
@@ -86,8 +93,6 @@ void UWorld::InitializeLightScene()
 	}
 }
 
-
-
 UObject* UWorld::Duplicate(UObject* InOuter)
 {
     // TODO: UWorld의 Duplicate는 역할 분리후 만드는것이 좋을듯
@@ -124,28 +129,29 @@ void UWorld::Release()
 {
     if (ActiveLevel)
     {
-	    for (AActor* Actor : ActiveLevel->Actors)
-	    {
-		    Actor->EndPlay(EEndPlayReason::WorldTransition);
-            TSet<UActorComponent*> Components = Actor->GetComponents();
-	        for (UActorComponent* Component : Components)
-	        {
-	            GUObjectArray.MarkRemoveObject(Component);
-	        }
-	        GUObjectArray.MarkRemoveObject(Actor);
-	    }
-        ActiveLevel->Actors.Empty();
+        ActiveLevel->Release();
+        GUObjectArray.MarkRemoveObject(ActiveLevel);
         ActiveLevel = nullptr;
     }
-
+    
     GUObjectArray.ProcessPendingDestroyObjects();
 }
 
-AActor* UWorld::SpawnActor(UClass* InClass)
+AActor* UWorld::SpawnActor(UClass* InClass, FName InActorName)
 {
+    if (!InClass)
+    {
+        UE_LOG(LogLevel::Error, TEXT("SpawnActor failed: ActorClass is null."));
+        return nullptr;
+    }
+
+    
+    // TODO: SpawnParams에서 이름 가져오거나, 필요시 여기서 자동 생성
+    // if (SpawnParams.Name != NAME_None) ActorName = SpawnParams.Name;
+    
     if (InClass->IsChildOf<AActor>())
     {
-        AActor* NewActor = Cast<AActor>(FObjectFactory::ConstructObject(InClass, this));
+        AActor* NewActor = Cast<AActor>(FObjectFactory::ConstructObject(InClass, this, InActorName));
         // TODO: 일단 AddComponent에서 Component마다 초기화
         // 추후에 RegisterComponent() 만들어지면 주석 해제
         // Actor->InitializeComponents();
@@ -153,6 +159,8 @@ AActor* UWorld::SpawnActor(UClass* InClass)
         PendingBeginPlayActors.Add(NewActor);
         return NewActor;
     }
+    
+    UE_LOG(LogLevel::Error, TEXT("SpawnActor failed: Class '%s' is not derived from AActor."), *InClass->GetName());
     return nullptr;
 }
 
@@ -167,6 +175,10 @@ bool UWorld::DestroyActor(AActor* ThisActor)
     {
         return true;
     }
+    
+    // UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+    //
+    // Engine->DeselectActor(ThisActor);
 
     // 액터의 Destroyed 호출
     ThisActor->Destroyed();
@@ -194,3 +206,4 @@ UWorld* UWorld::GetWorld() const
 {
     return const_cast<UWorld*>(this);
 }
+

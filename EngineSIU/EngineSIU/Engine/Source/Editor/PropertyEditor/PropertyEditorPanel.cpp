@@ -2,10 +2,11 @@
 
 #include "World/World.h"
 #include "Actors/Player.h"
-#include "Components/LightComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SpotLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextComponent.h"
 #include "Engine/EditorEngine.h"
@@ -16,7 +17,7 @@
 #include "Engine/Engine.h"
 #include "Components/HeightFogComponent.h"
 #include "Components/ProjectileMovementComponent.h"
-
+#include "GameFramework/Actor.h"
 #include "Engine/AssetManager.h"
 #include "UObject/UObjectIterator.h"
 
@@ -79,9 +80,9 @@ void PropertyEditorPanel::Render()
             PickedActor->SetActorScale(Scale);
 
             std::string coordiButtonLabel;
-            if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
+            if (player->GetCoordMode() == ECoordMode::CDM_WORLD)
                 coordiButtonLabel = "World";
-            else if (player->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+            else if (player->GetCoordMode() == ECoordMode::CDM_LOCAL)
                 coordiButtonLabel = "Local";
 
             if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
@@ -105,7 +106,7 @@ void PropertyEditorPanel::Render()
 
     //// TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     //if (PickedActor)
-    //    if (ULightComponentBase* lightObj = PickedActor->GetComponentByClass<ULightComponentBase>())
+    //    if (ULightComponent* lightObj = PickedActor->GetComponentByClass<ULightComponent>())
     //    {
     //        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
 
@@ -160,7 +161,7 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { pointlightObj->SetLightColor(c); });
 
                 float Intensity = pointlightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 160.0f, "%.1f"))
                     pointlightObj->SetIntensity(Intensity);
 
                 float Radius = pointlightObj->GetRadius();
@@ -187,7 +188,7 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { spotlightObj->SetLightColor(c); });
 
                 float Intensity = spotlightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 160.0f, "%.1f"))
                     spotlightObj->SetIntensity(Intensity);
 
                 float Radius = spotlightObj->GetRadius();
@@ -214,7 +215,6 @@ void PropertyEditorPanel::Render()
             ImGui::PopStyleColor();
         }
 
-
     if (PickedActor)
         if (UDirectionalLightComponent* dirlightObj = PickedActor->GetComponentByClass<UDirectionalLightComponent>())
         {
@@ -227,12 +227,28 @@ void PropertyEditorPanel::Render()
                     [&](FLinearColor c) { dirlightObj->SetLightColor(c); });
 
                 float Intensity = dirlightObj->GetIntensity();
-                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 1000.0f, "%1.f"))
+                if (ImGui::SliderFloat("Intensity", &Intensity, 0.0f, 150.0f, "%.1f"))
                     dirlightObj->SetIntensity(Intensity);
 
                 LightDirection = dirlightObj->GetDirection();
                 FImGuiWidget::DrawVec3Control("Direction", LightDirection, 0, 85);
 
+                ImGui::TreePop();
+            }
+
+            ImGui::PopStyleColor();
+        }
+
+    if(PickedActor)
+        if (UAmbientLightComponent* ambientLightObj = PickedActor->GetComponentByClass<UAmbientLightComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+
+            if (ImGui::TreeNodeEx("AmbientLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                DrawColorProperty("Light Color",
+                    [&]() { return ambientLightObj->GetLightColor(); },
+                    [&](FLinearColor c) { ambientLightObj->SetLightColor(c); });
                 ImGui::TreePop();
             }
 
@@ -334,8 +350,8 @@ void PropertyEditorPanel::Render()
                 float h, s, v;
                 float lightColor[4] = { r, g, b, a };
 
-                // SpotLight Color
-                if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
+                // Fog Color
+                if (ImGui::ColorPicker4("##Fog Color", lightColor,
                     ImGuiColorEditFlags_DisplayRGB |
                     ImGuiColorEditFlags_NoSidePreview |
                     ImGuiColorEditFlags_NoInputs |
@@ -386,15 +402,15 @@ void PropertyEditorPanel::Render()
                 }
 
                 float FogDensity = FogComponent->GetFogDensity();
-                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 1.0f))
+                if (ImGui::SliderFloat("Density", &FogDensity, 0.00f, 3.0f))
                 {
                     FogComponent->SetFogDensity(FogDensity);
                 }
 
-                float FogMaxOpacity = FogComponent->GetFogMaxOpacity();
-                if (ImGui::SliderFloat("Max Opacity", &FogMaxOpacity, 0.00f, 1.0f))
+                float FogDistanceWeight = FogComponent->GetFogDistanceWeight();
+                if (ImGui::SliderFloat("Distance Weight", &FogDistanceWeight, 0.00f, 3.0f))
                 {
-                    FogComponent->SetFogMaxOpacity(FogMaxOpacity);
+                    FogComponent->SetFogDistanceWeight(FogDistanceWeight);
                 }
 
                 float FogHeightFallOff = FogComponent->GetFogHeightFalloff();
@@ -407,6 +423,12 @@ void PropertyEditorPanel::Render()
                 if (ImGui::SliderFloat("Start Distance", &FogStartDistance, 0.00f, 50.0f))
                 {
                     FogComponent->SetStartDistance(FogStartDistance);
+                }
+
+                float FogEndtDistance = FogComponent->GetEndDistance();
+                if (ImGui::SliderFloat("End Distance", &FogEndtDistance, 0.00f, 50.0f))
+                {
+                    FogComponent->SetEndDistance(FogEndtDistance);
                 }
 
                 ImGui::TreePop();
@@ -524,7 +546,10 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
                 if (ImGui::Selectable(GetData(Class->GetName()), false))
                 {
                     USceneComponent* NewComp = Cast<USceneComponent>(StaticMeshComp->GetOwner()->AddComponent(Class));
-                    NewComp->SetupAttachment(StaticMeshComp);
+                    if (NewComp)
+                    {
+                        NewComp->SetupAttachment(StaticMeshComp);
+                    }
                     // 추후 Engine으로부터 SelectedComponent 받아서 선택된 Comp 아래로 붙일 수있으면 붙이기.
                 }
             }

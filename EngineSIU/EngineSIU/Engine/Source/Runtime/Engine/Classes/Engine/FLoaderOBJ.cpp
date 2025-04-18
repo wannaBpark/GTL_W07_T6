@@ -96,7 +96,7 @@ bool FLoaderOBJ::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
         {
             float NormalX, NormalY, NormalZ;
             LineStream >> NormalX >> NormalY >> NormalZ;
-            OutObjInfo.Normals.Add(FVector(NormalX, NormalY * -1, NormalZ));
+            OutObjInfo.Normals.Add(FVector(NormalX, NormalY * -1.f, NormalZ));
             continue;
         }
 
@@ -309,9 +309,32 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 
             FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
             OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = TexturePath;
-            OutFStaticMesh.Materials[MaterialIndex].bHasTexture = true;
+            OutFStaticMesh.Materials[MaterialIndex].TextureFlag |= (1 << 1);
 
             CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
+        }
+
+        if (Token == "map_Bump")
+        {
+            std::string Option;
+            while (LineStream >> Option)
+            {
+                if (Option == "-bm")
+                {
+                    float BumpMultiplier;
+                    LineStream >> BumpMultiplier;
+                    OutFStaticMesh.Materials[MaterialIndex].BumpMultiplier = BumpMultiplier;
+                }
+                else
+                {
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTextureName = Option;
+                    FWString TexturePath = OutObjInfo.FilePath + OutFStaticMesh.Materials[MaterialIndex].BumpTextureName.ToWideString();
+                    OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath = TexturePath;
+                    OutFStaticMesh.Materials[MaterialIndex].TextureFlag |= (1 << 2);
+
+                    CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].BumpTexturePath);
+                }
+            }
         }
     }
 
@@ -321,7 +344,7 @@ bool FLoaderOBJ::ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData&
 bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
 {
     OutStaticMesh.ObjectName = RawData.ObjectName;
-    //OutStaticMesh.PathName = RawData.PathName;
+    // OutStaticMesh.PathName = RawData.PathName;
     OutStaticMesh.DisplayName = RawData.DisplayName;
 
     // 고유 정점을 기반으로 FVertexSimple 배열 생성
@@ -332,6 +355,17 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
         const uint32 VertexIndex = RawData.VertexIndices[i];
         const uint32 UVIndex = RawData.UVIndices[i];
         const uint32 NormalIndex = RawData.NormalIndices[i];
+
+        uint32 MaterialIndex = 0;
+        for (int32 j = 0; j < OutStaticMesh.MaterialSubsets.Num(); j++)
+        {
+            const FMaterialSubset& Subset = OutStaticMesh.MaterialSubsets[j];
+            if (Subset.IndexStart <= i && i < Subset.IndexStart + Subset.IndexCount)
+            {
+                MaterialIndex = Subset.MaterialIndex;
+                break;
+            }
+        }
 
         // 키 생성 (v/vt/vn 조합)
         std::string Key = std::to_string(VertexIndex) + "/" + std::to_string(UVIndex) + "/" + std::to_string(NormalIndex);
@@ -344,11 +378,12 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
         else
         {
             FStaticMeshVertex StaticMeshVertex = {};
+            StaticMeshVertex.MaterialIndex = MaterialIndex;
             StaticMeshVertex.X = RawData.Vertices[VertexIndex].X;
             StaticMeshVertex.Y = RawData.Vertices[VertexIndex].Y;
             StaticMeshVertex.Z = RawData.Vertices[VertexIndex].Z;
 
-            StaticMeshVertex.R = 0.0f; StaticMeshVertex.G = 0.0f; StaticMeshVertex.B = 0.0f; StaticMeshVertex.A = 1.0f; // 기본 색상
+            StaticMeshVertex.R = 0.7f; StaticMeshVertex.G = 0.7f; StaticMeshVertex.B = 0.7f; StaticMeshVertex.A = 1.0f; // 기본 색상
 
             if (UVIndex != UINT32_MAX && UVIndex < RawData.UVs.Num())
             {
@@ -363,35 +398,24 @@ bool FLoaderOBJ::ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRe
                 StaticMeshVertex.NormalZ = RawData.Normals[NormalIndex].Z;
             }
 
-            if (i % 3 == 2) // 삼각형이 구성되면 Tangent 계산
-            {
-                const uint32 IndexNum = OutStaticMesh.Indices.Num();
-
-                FStaticMeshVertex& Vertex0 = OutStaticMesh.Vertices[OutStaticMesh.Indices[IndexNum - 2]];
-                FStaticMeshVertex& Vertex1 = OutStaticMesh.Vertices[OutStaticMesh.Indices[IndexNum - 1]];
-                FStaticMeshVertex& Vertex2 = StaticMeshVertex;
-
-                CalculateTangent(Vertex0, Vertex1, Vertex2);
-                CalculateTangent(Vertex1, Vertex2, Vertex0);
-                CalculateTangent(Vertex2, Vertex0, Vertex1); // 가장 마지막에 계산된 PivotVertex의 Tangent로 덮어씌워짐
-            }
-
-            for (int32 j = 0; j < OutStaticMesh.MaterialSubsets.Num(); j++)
-            {
-                const FMaterialSubset& Subset = OutStaticMesh.MaterialSubsets[j];
-                if ( i >= Subset.IndexStart && i < Subset.IndexStart + Subset.IndexCount)
-                {
-                    StaticMeshVertex.MaterialIndex = Subset.MaterialIndex;
-                    break;
-                }
-            }
-
             FinalIndex = OutStaticMesh.Vertices.Num();
-            OutStaticMesh.Vertices.Add(StaticMeshVertex);
             IndexMap[Key] = FinalIndex;
+            OutStaticMesh.Vertices.Add(StaticMeshVertex);
         }
 
         OutStaticMesh.Indices.Add(FinalIndex);
+    }
+
+    // Tangent
+    for (int32 i = 0; i < OutStaticMesh.Indices.Num(); i += 3)
+    {
+        FStaticMeshVertex& Vertex0 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i]];
+        FStaticMeshVertex& Vertex1 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i + 1]];
+        FStaticMeshVertex& Vertex2 = OutStaticMesh.Vertices[OutStaticMesh.Indices[i + 2]];
+
+        CalculateTangent(Vertex0, Vertex1, Vertex2);
+        CalculateTangent(Vertex1, Vertex2, Vertex0);
+        CalculateTangent(Vertex2, Vertex0, Vertex1);
     }
 
     // Calculate StaticMesh BoundingBox
@@ -449,12 +473,36 @@ void FLoaderOBJ::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticM
     const float E2x = Vertex2.X - PivotVertex.X;
     const float E2y = Vertex2.Y - PivotVertex.Y;
     const float E2z = Vertex2.Z - PivotVertex.Z;
-    const float f = 1.f / (s1 * t2 - s2 * t1);
-    const float Tx = f * (t2 * E1x - t1 * E2x);
-    const float Ty = f * (t2 * E1y - t1 * E2y);
-    const float Tz = f * (t2 * E1z - t1 * E2z);
 
-    FVector Tangent = FVector(Tx, Ty, Tz).Normalize();
+    const float Denominator = s1 * t2 - s2 * t1;
+    FVector Tangent;
+    
+    if (FMath::Abs(Denominator) > SMALL_NUMBER)
+    {
+        // 정상적인 계산 진행
+        const float f = 1.f / Denominator;
+        const float Tx = f * (t2 * E1x - t1 * E2x);
+        const float Ty = f * (t2 * E1y - t1 * E2y);
+        const float Tz = f * (t2 * E1z - t1 * E2z);
+        Tangent = FVector(Tx, Ty, Tz).GetSafeNormal();
+    }
+    else
+    {
+        // 대체 탄젠트 계산 방법
+        // 방법 1: 다른 방향에서 탄젠트 계산 시도
+        FVector Edge1(E1x, E1y, E1z);
+        FVector Edge2(E2x, E2y, E2z);
+    
+        // 기하학적 접근: 두 에지 사이의 각도 이등분선 사용
+        Tangent = (Edge1.GetSafeNormal() + Edge2.GetSafeNormal()).GetSafeNormal();
+    
+        // 만약 두 에지가 평행하거나 반대 방향이면 다른 방법 사용
+        if (Tangent.IsNearlyZero())
+        {
+            // TODO: 기본 축 방향 중 하나 선택 (메시의 주 방향에 따라 선택)
+            Tangent = FVector(1.0f, 0.0f, 0.0f);
+        }
+    }
 
     PivotVertex.TangentX = Tangent.X;
     PivotVertex.TangentY = Tangent.Y;
@@ -568,7 +616,8 @@ bool FManagerOBJ::SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FS
     for (const FObjMaterialInfo& Material : StaticMesh.Materials)
     {
         Serializer::WriteFString(File, Material.MaterialName);
-        File.write(reinterpret_cast<const char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        File.write(reinterpret_cast<const char*>(&Material.TextureFlag), sizeof(Material.TextureFlag));
+        //File.write(reinterpret_cast<const char*>(&Material.bHasNormalMap), sizeof(Material.bHasNormalMap));
         File.write(reinterpret_cast<const char*>(&Material.bTransparent), sizeof(Material.bTransparent));
         File.write(reinterpret_cast<const char*>(&Material.Diffuse), sizeof(Material.Diffuse));
         File.write(reinterpret_cast<const char*>(&Material.Specular), sizeof(Material.Specular));
@@ -649,7 +698,9 @@ bool FManagerOBJ::LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStati
     for (FObjMaterialInfo& Material : OutStaticMesh.Materials)
     {
         Serializer::ReadFString(File, Material.MaterialName);
-        File.read(reinterpret_cast<char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        File.read(reinterpret_cast<char*>(&Material.TextureFlag), sizeof(Material.TextureFlag));
+        //File.read(reinterpret_cast<char*>(&Material.bHasTexture), sizeof(Material.bHasTexture));
+        //File.read(reinterpret_cast<char*>(&Material.bHasNormalMap), sizeof(Material.bHasNormalMap));
         File.read(reinterpret_cast<char*>(&Material.bTransparent), sizeof(Material.bTransparent));
         File.read(reinterpret_cast<char*>(&Material.Diffuse), sizeof(Material.Diffuse));
         File.read(reinterpret_cast<char*>(&Material.Specular), sizeof(Material.Specular));
