@@ -164,7 +164,7 @@ void FViewportResource::ClearDepthStencil(ID3D11DeviceContext* DeviceContext, ER
 {
     if (FDepthStencilRHI* Resource = GetDepthStencil(Type))
     {
-        DeviceContext->ClearDepthStencilView(Resource->DSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        DeviceContext->ClearDepthStencilView(Resource->DSV, D3D11_CLEAR_DEPTH /*| D3D11_CLEAR_STENCIL*/, 1.0f, 0);
     }
 }
 

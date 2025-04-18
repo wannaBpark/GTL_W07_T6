@@ -1,4 +1,4 @@
-﻿#include "LightHeatMapRenderPass.h"
+#include "LightHeatMapRenderPass.h"
 
 #include "D3D11RHI/GraphicDevice.h"
 #include "D3D11RHI/DXDShaderManager.h"
@@ -51,11 +51,11 @@ void FLightHeatMapRenderPass::CreateShader()
         ARRAYSIZE(fogInputLayout)
     );
     // 픽셀 셰이더 생성
-    hr = ShaderManager->AddPixelShader(
+    /*hr = ShaderManager->AddPixelShader(
         L"FogPixelShader",
         L"Shaders/FogPixelShader.hlsl",
         "mainPS"
-    );
+    );*/
 
     hr = ShaderManager->AddPixelShader(
         L"FogQuadPixelShader",

@@ -294,7 +294,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     // 테스트용 tile light 열화상맵 추가
     if (TileLightCullingPass)
     {
-        LightHeatMapRenderPass->Render(Viewport);
+        //LightHeatMapRenderPass->Render(Viewport);
     }
 
     EndRender();

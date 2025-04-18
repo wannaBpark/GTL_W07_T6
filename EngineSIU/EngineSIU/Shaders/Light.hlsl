@@ -134,7 +134,8 @@ float CalculateSpecular(float3 WorldNormal, float3 ToLightDir, float3 ViewDir, f
 
 float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float WorldViewPosition, float3 DiffuseColor)
 {
-    FPointLightInfo LightInfo = PointLights[Index];
+    FPointLightInfo LightInfo = gPointLights[Index];
+    //FPointLightInfo LightInfo = PointLights[Index];
     
     float3 ToLight = LightInfo.Position - WorldPosition;
     float Distance = length(ToLight);
