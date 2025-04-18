@@ -108,6 +108,10 @@ RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
 // Group Shared 메모리 - Depth Masking 누적에 쓰입니다~
 groupshared uint tileDepthMask;
 
+// Group(타일) 단위로 오브젝트의 minZ, maxZ 값 저장
+groupshared float groupMinZ;
+groupshared float groupMaxZ;
+
 // dispatchID = groupID * [numthreads] + threadID
 
 // no difference between [1,1,1] - 그러나 DepthMap Texturing할 때 한 픽셀의 값 읽어오려면 TILE_SIZE만큼 나눠야 효율적
