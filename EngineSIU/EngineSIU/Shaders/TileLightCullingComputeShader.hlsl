@@ -133,8 +133,9 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         tileDepthMask = 0;
         groupMinZ = 0x7f7fffff;
         groupMaxZ = 0x00000000; // 그룹공유 변수는 초기화 허용X, 쓰레기값 발생 가능
-        hitCount = 0;
+        
     }
+    hitCount = 0;
     GroupMemoryBarrierWithGroupSync();
     float depthSample = 1.0f;
     float linearZ = FarZ;
@@ -155,8 +156,12 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         
     GroupMemoryBarrierWithGroupSync();
     
-    minZ = float(groupMinZ);
-    maxZ = float(groupMaxZ);
+    if (Enable25DCulling != 0 && groupMaxZ > groupMinZ)
+    {
+    
+        minZ = float(groupMinZ);
+        maxZ = float(groupMaxZ);        
+    }
         
         
         //float sliceNormZ = saturate((linearZ - minZ) / max(1e-5, (maxZ - minZ)));
@@ -246,62 +251,69 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
 
 
     // 2.5D 컬링이 활성화 -> 각 라이트의 view space 깊이 범위를 구해 depth mask와 교차 검사
-    [loop]
-    for (uint i = 0; i < NumLights; ++i)
+      
+    if (threadID.x == 0 && threadID.y == 0)
     {
-        FLightGPU light = LightBuffer[i];
-        Sphere s;
-        s.c = mul(float4(light.Position, 1), View).xyz;
-        s.r = light.Radius;
+        [loop]
+        for (uint i = 0; i < NumLights; ++i)
+        {
+            FLightGPU light = LightBuffer[i];
+            Sphere s;
+            s.c = mul(float4(light.Position, 1), View).xyz;
+            s.r = light.Radius;
         
-        bool insideFrustum = SphereInsideFrustum(s, frustum, NearZ, FarZ);
-        if (insideFrustum == false)
-        {
-            continue;
-        }
+            if (tileDepthMask == 0)
+                continue;
+        
+            bool insideFrustum = SphereInsideFrustum(s, frustum, NearZ, FarZ);
+            if (insideFrustum == false)
+            {
+                continue;
+            }
 
 
-        bool depthOverlap = true;               // 2.5D 컬링이 비활성화면 무조건 true
-        if (Enable25DCulling != 0)
-        {
+            bool depthOverlap = true; // 2.5D 컬링이 비활성화면 무조건 true
+            if (Enable25DCulling != 0)
+            {
             // 빛의 Bounding Sphere의 view-space z값 범위 계산
-            float3 posVS = mul(float4(light.Position, 1), View).xyz;
-            float s_minDepth = posVS.z - s.r;
-            float s_maxDepth = posVS.z + s.r;
+                float3 posVS = mul(float4(light.Position, 1), View).xyz;
+                float s_minDepth = posVS.z - s.r;
+                float s_maxDepth = posVS.z + s.r;
             // 0419 수정 : 그룹기준으로 슬라이스 계산
             
-            if (s_maxDepth < minZ || s_minDepth > maxZ)
-            {
-                depthOverlap = false; // 절대 겹칠 수 없음
-            }
-            else
-            {
-                // 조금이라도 겹치면 [minZ, maxZ] 범위로 0,1 saturate
-                float normMin = saturate((s_minDepth - minZ) / max(1e-5, maxZ - minZ));
-                float normMax = saturate((s_maxDepth - minZ) / max(1e-5, maxZ - minZ));
-                
-                int sphereSliceMin = (int) floor(normMin * NUM_SLICES); // light 포함 X -> 내림
-                int sphereSliceMax = (int) ceil(normMax * NUM_SLICES); // light 포함 X -> 올림
-                sphereSliceMin = clamp(sphereSliceMin, 0, NUM_SLICES - 1); // 0~31 인덱스로 클램프
-                sphereSliceMax = clamp(sphereSliceMax, 0, NUM_SLICES - 1);
-                uint sphereMask = 0;
-                for (int j = sphereSliceMin; j <= sphereSliceMax; ++j)
+                if (s_maxDepth < minZ || s_minDepth > maxZ)
                 {
-                    sphereMask |= (1u << j);
+                    depthOverlap = false; // 절대 겹칠 수 없음
                 }
+                else
+                {
+                // 조금이라도 겹치면 [minZ, maxZ] 범위로 0,1 saturate
+                    float normMin = saturate((s_minDepth - minZ) / max(1e-5, maxZ - minZ));
+                    float normMax = saturate((s_maxDepth - minZ) / max(1e-5, maxZ - minZ));
+                
+                    int sphereSliceMin = (int) floor(normMin * NUM_SLICES); // light 포함 X -> 내림
+                    int sphereSliceMax = (int) ceil(normMax * NUM_SLICES); // light 포함 X -> 올림
+                    sphereSliceMin = clamp(sphereSliceMin, 0, NUM_SLICES - 1); // 0~31 인덱스로 클램프
+                    sphereSliceMax = clamp(sphereSliceMax, 0, NUM_SLICES - 1);
+                    uint sphereMask = 0;
+                    for (int j = sphereSliceMin; j <= sphereSliceMax; ++j)
+                    {
+                        sphereMask |= (1u << j);
+                    }
             
             // 깊이 영역이 겹치지 않으면, 해당 라이트는 2.5D 기준에서 컬링됨
-                depthOverlap = (sphereMask & tileDepthMask) != 0;
+                    depthOverlap = (sphereMask & tileDepthMask) != 0;
+                }
             }
-        }
         
-        if (depthOverlap)
-        {
-            uint bucketIdx = i / 32;
-            uint bitIdx = i % 32;
-            InterlockedOr(TileLightMask[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1 << bitIdx);
-            InterlockedAdd(hitCount, 1);
+            if (depthOverlap)
+            {
+                uint bucketIdx = i / 32;
+                uint bitIdx = i % 32;
+                InterlockedOr(TileLightMask[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1 << bitIdx);
+                InterlockedAdd(hitCount, 1);
             //hitCount++;
+            }
         }
     }
     GroupMemoryBarrierWithGroupSync();
