@@ -15,7 +15,7 @@ FDepthPrePass::FDepthPrePass()
 
 FDepthPrePass::~FDepthPrePass()
 {
-}
+}   
 
 void FDepthPrePass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage)
 {
