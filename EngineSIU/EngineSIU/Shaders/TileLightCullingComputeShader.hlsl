@@ -131,42 +131,32 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     if (threadID.x == 0 && threadID.y == 0)
     {
         tileDepthMask = 0;
+        groupMinZ = 0x7f7fffff;
+        groupMaxZ = 0x00000000; // 그룹공유 변수는 초기화 허용X, 쓰레기값 발생 가능
+        hitCount = 0;
     }
     GroupMemoryBarrierWithGroupSync();
-    
+    float depthSample = 1.0f;
+    float linearZ = FarZ;
     // (1) 만약 Enable25DCulling 옵션이 켜져 있다면, 해당 타일 내의 depth mask 구성
-    if (Enable25DCulling != 0)
+    if (Enable25DCulling != 0 && all(pixel < ScreenSize))
     {
-        if (threadID.x == 0 && threadID.y == 0)
-        {
-            tileDepthMask = 0;
-            groupMinZ = 0x7f7fffff;
-            groupMaxZ = 0x00000000; // 그룹공유 변수는 초기화 허용X, 쓰레기값 발생 가능
-            hitCount = 0;
-            //groupMinZ = 0;
-            //groupMaxZ = -1e9;
-        }
-        GroupMemoryBarrierWithGroupSync();
-
-        // 픽셀이 화면 내에 속하면 depth 샘플링
-        //float depthSample = 1.0f;
-        //if (all(pixel < screenSize))
-        //{
-        //    depthSample = gDepthTexture[pixel];
-        //}
         // 픽셀별 depth 샘플링
-        float depthSample = (all(pixel < screenSize)) ? gDepthTexture[pixel] : 1.0f;
-        float linearZ = (depthSample == 1.0f) ? FarZ : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
-
-// min/max z 공유 변수 업데이트
-        uint linZ_uint = uint(linearZ);
-        InterlockedMin(groupMinZ, linZ_uint);
-        InterlockedMax(groupMaxZ, linZ_uint);
+        depthSample = gDepthTexture[pixel];
+        if (depthSample < 1.0f)
+        {
+            linearZ = (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
+            uint linZ_uint = uint(linearZ);
+            InterlockedMin(groupMinZ, linZ_uint);
+            InterlockedMax(groupMaxZ, linZ_uint);
+        }
+    }
         
-        GroupMemoryBarrierWithGroupSync();
         
-        minZ = float(groupMinZ);
-        maxZ = float(groupMaxZ);
+    GroupMemoryBarrierWithGroupSync();
+    
+    minZ = float(groupMinZ);
+    maxZ = float(groupMaxZ);
         
         
         //float sliceNormZ = saturate((linearZ - minZ) / max(1e-5, (maxZ - minZ)));
@@ -174,7 +164,10 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         //uint sliceBit = (1u << sliceIndex);
         //InterlockedOr(tileDepthMask, sliceBit);
         //GroupMemoryBarrierWithGroupSync();
-        
+    
+    if (Enable25DCulling != 0 && depthSample < 1.0f)
+    {
+    
         float rangeZ = maxZ - minZ;
         if (rangeZ < 1e-3)
         {
@@ -187,7 +180,8 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         int sliceIndex = clamp((int) floor(sliceNormZ * NUM_SLICES), 0, NUM_SLICES - 1);
         uint sliceBit = (1u << sliceIndex);
         InterlockedOr(tileDepthMask, sliceBit);
-        GroupMemoryBarrierWithGroupSync();
+    }
+    GroupMemoryBarrierWithGroupSync();
         
         // 깊이값 변환: gDepthTexture가 보통 [0,1] 범위의 비선형 값이면 선형화
         //float linearZ = (depthSample == 1.0f)
@@ -201,7 +195,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         //uint sliceBit = 1u << sliceIndex;
         //InterlockedOr(tileDepthMask, sliceBit);
         //GroupMemoryBarrierWithGroupSync();          // 동기화 (32x32픽셀: 스레드가 각 픽셀 맡음)
-    }
+    
 
     // 뷰 공간 프러스텀 계산
     float2 dim_rcp = 1.0 / float2(screenSize);
@@ -261,10 +255,13 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         s.r = light.Radius;
         
         bool insideFrustum = SphereInsideFrustum(s, frustum, NearZ, FarZ);
-        bool depthOverlap = true; // 2.5D 컬링이 비활성화면 무조건 true
-        
         if (insideFrustum == false)
+        {
             continue;
+        }
+
+
+        bool depthOverlap = true;               // 2.5D 컬링이 비활성화면 무조건 true
         if (Enable25DCulling != 0)
         {
             // 빛의 Bounding Sphere의 view-space z값 범위 계산
@@ -282,9 +279,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
                 // 조금이라도 겹치면 [minZ, maxZ] 범위로 0,1 saturate
                 float normMin = saturate((s_minDepth - minZ) / max(1e-5, maxZ - minZ));
                 float normMax = saturate((s_maxDepth - minZ) / max(1e-5, maxZ - minZ));
-            
-            //float normMin = saturate((s_minDepth - NearZ) / (FarZ - NearZ)); // 가까운 곳부터 light
-            //float normMax = saturate((s_maxDepth - NearZ) / (FarZ - NearZ)); // light부터 farplane
+                
                 int sphereSliceMin = (int) floor(normMin * NUM_SLICES); // light 포함 X -> 내림
                 int sphereSliceMax = (int) ceil(normMax * NUM_SLICES); // light 포함 X -> 올림
                 sphereSliceMin = clamp(sphereSliceMin, 0, NUM_SLICES - 1); // 0~31 인덱스로 클램프
@@ -300,7 +295,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             }
         }
         
-        if (insideFrustum && depthOverlap)
+        if (depthOverlap)
         {
             uint bucketIdx = i / 32;
             uint bitIdx = i % 32;
@@ -310,10 +305,6 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         }
     }
     GroupMemoryBarrierWithGroupSync();
-    
-    if (!(threadID.x == 0 && threadID.y == 0)) {
-        return;
-    }
     
     // thread 0에서만 실행
     if (threadID.x == 0 && threadID.y == 0)
