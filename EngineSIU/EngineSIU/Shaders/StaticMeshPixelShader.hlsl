@@ -70,10 +70,10 @@ float4 mainPS(PS_INPUT_StaticMesh Input) : SV_Target
         uint gPointLightIndex = tileLights.Indices[i];
         //FPointLightInfo light = gPointLights[gPointLightIndex];
         
-        float4 lightContribution = PointLight(gPointLightIndex, input.worldPos, normalize(input.normal));
+        float4 lightContribution = PointLight(gPointLightIndex, Input.WorldPosition, normalize(Input.WorldNormal));
         lightingAccum += lightContribution.rgb;
     }
-    lightingAccum += Ambient.AmbientColor.rgb;
+    //lightingAccum += Ambient[0].AmbientColor.rgb;
     
     // Lighting
     if (IsLit)

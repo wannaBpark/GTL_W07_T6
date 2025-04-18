@@ -76,9 +76,9 @@ cbuffer TileLightCullSettings : register(b8)
     float NearZ; // 카메라 near plane
     float FarZ; // 카메라 far plane
 
-    row_major matrix ViewMatrix; // View 행렬
-    row_major matrix ProjectionMatrix; // Projection 행렬
-    row_major matrix InverseProjection; // Projection^-1, 뷰스페이스 복원용
+    row_major matrix TileViewMatrix; // View 행렬
+    row_major matrix TileProjectionMatrix; // Projection 행렬
+    row_major matrix TileInverseProjection; // Projection^-1, 뷰스페이스 복원용
 
     uint NumLights; // 총 라이트 수
     uint Enable25DCulling; // 1이면 2.5D 컬링 사용
