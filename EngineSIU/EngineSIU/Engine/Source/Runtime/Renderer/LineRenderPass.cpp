@@ -39,7 +39,7 @@ void FLineRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDe
     CreateShader();
 }
 
-void FLineRenderPass::PrepareRender()
+void FLineRenderPass::PrepareRenderArr()
 {
 }
 

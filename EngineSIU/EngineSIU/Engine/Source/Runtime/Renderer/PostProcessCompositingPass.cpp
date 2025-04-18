@@ -41,7 +41,7 @@ void FPostProcessCompositingPass::Initialize(FDXDBufferManager* InBufferManager,
     Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
 }
 
-void FPostProcessCompositingPass::PrepareRender()
+void FPostProcessCompositingPass::PrepareRenderArr()
 {
 }
 

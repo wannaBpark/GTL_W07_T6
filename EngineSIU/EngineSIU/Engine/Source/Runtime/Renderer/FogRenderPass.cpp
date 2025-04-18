@@ -56,7 +56,7 @@ void FFogRenderPass::ReleaseShader()
 {
 }
 
-void FFogRenderPass::PrepareRender()
+void FFogRenderPass::PrepareRenderArr()
 {
     for (const auto iter : TObjectRange<UHeightFogComponent>())
     {

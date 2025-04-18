@@ -43,7 +43,7 @@ void FTileLightCullingPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     CreateBuffers();
 }
 
-void FTileLightCullingPass::PrepareRender()
+void FTileLightCullingPass::PrepareRenderArr()
 {
     for (const auto iter : TObjectRange<ULightComponentBase>())
     {

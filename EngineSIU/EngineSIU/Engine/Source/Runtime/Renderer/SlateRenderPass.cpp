@@ -29,7 +29,7 @@ void FSlateRenderPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     CreateSampler();
 }
 
-void FSlateRenderPass::PrepareRender()
+void FSlateRenderPass::PrepareRenderArr()
 {
 }
 

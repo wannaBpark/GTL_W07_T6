@@ -184,6 +184,7 @@ void FRenderer::PrepareRender(FViewportResource* ViewportResource)
     // Setup Viewport
     Graphics->DeviceContext->RSSetViewports(1, &ViewportResource->GetD3DViewport());
 
+    ViewportResource->ClearDepthStencils(Graphics->DeviceContext);
     ViewportResource->ClearRenderTargets(Graphics->DeviceContext);
 
     PrepareRenderPass();
@@ -191,14 +192,14 @@ void FRenderer::PrepareRender(FViewportResource* ViewportResource)
 
 void FRenderer::PrepareRenderPass()
 {
-    StaticMeshRenderPass->PrepareRender();
-    GizmoRenderPass->PrepareRender();
-    WorldBillboardRenderPass->PrepareRender();
-    EditorBillboardRenderPass->PrepareRender();
-    UpdateLightBufferPass->PrepareRender();
-    FogRenderPass->PrepareRender();
+    StaticMeshRenderPass->PrepareRenderArr();
+    GizmoRenderPass->PrepareRenderArr();
+    WorldBillboardRenderPass->PrepareRenderArr();
+    EditorBillboardRenderPass->PrepareRenderArr();
+    UpdateLightBufferPass->PrepareRenderArr();
+    FogRenderPass->PrepareRenderArr();
     EditorRenderPass->PrepareRender();
-    TileLightCullingPass->PrepareRender();
+    TileLightCullingPass->PrepareRenderArr();
     //DepthPrePass->PrepareRender();
 }
 
@@ -262,9 +263,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 
 	if (DepthPrePass) // Depth Pre Pass : 렌더타겟 nullptr 및 렌더 후 복구
     {
-        DepthPrePass->PrepareRender();
-        StaticMeshRenderPass->Render(Viewport);
-        DepthPrePass->ClearRenderArr();
+        DepthPrePass->Render(Viewport);
     }
 
     // Added Compute Shader Pass
@@ -278,7 +277,6 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
         UpdateLightBufferPass->SetTileConstantBuffer(TileLightCullingPass->GetTileConstantBuffer());
     }
 
-
     RenderWorldScene(Viewport);
     RenderPostProcess(Viewport);
     RenderEditorOverlay(Viewport);
@@ -286,7 +284,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     // Compositing: 위에서 렌더한 결과들을 하나로 합쳐서 뷰포트의 최종 이미지를 만드는 작업
     CompositingPass->Render(Viewport);
 
-	// if (!IsSceneDepth)
+ //    if (!IsSceneDepth)
  //    {
  //        DepthBufferDebugPass->UpdateDepthBufferSRV();
  //        

@@ -40,7 +40,7 @@ void FCompositingPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
 }
 
-void FCompositingPass::PrepareRender()
+void FCompositingPass::PrepareRenderArr()
 {
 }
 

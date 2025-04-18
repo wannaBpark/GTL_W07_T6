@@ -104,7 +104,7 @@ void FGizmoRenderPass::PrepareRenderState() const
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 }
 
-void FGizmoRenderPass::PrepareRender()
+void FGizmoRenderPass::PrepareRenderArr()
 {
 }
 

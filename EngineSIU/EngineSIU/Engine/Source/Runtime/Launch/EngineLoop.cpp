@@ -214,7 +214,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             if (LevelEditor)
             {
                 FEngineLoop::GraphicDevice.Resize(hWnd);
-                FEngineLoop::Renderer.DepthPrePass->ResizeDepthStencil();
+                // FEngineLoop::Renderer.DepthPrePass->ResizeDepthStencil();
                 FEngineLoop::Renderer.TileLightCullingPass->ResizeViewBuffers();
                 
                 uint32 ClientWidth = 0;

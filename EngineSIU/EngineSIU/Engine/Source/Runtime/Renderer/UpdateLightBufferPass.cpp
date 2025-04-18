@@ -38,7 +38,7 @@ void FUpdateLightBufferPass::Initialize(FDXDBufferManager* InBufferManager, FGra
     CreatePointLightPerTilesBuffer();
 }
 
-void FUpdateLightBufferPass::PrepareRender()
+void FUpdateLightBufferPass::PrepareRenderArr()
 {
     for (const auto iter : TObjectRange<ULightComponentBase>())
     {
