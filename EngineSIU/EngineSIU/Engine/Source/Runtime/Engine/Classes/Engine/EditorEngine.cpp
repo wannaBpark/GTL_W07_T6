@@ -43,10 +43,10 @@ void UEditorEngine::Init()
 #ifdef _DEBUG
     AActor* Actor = EditorWorld->SpawnActor<ACube>();
     
-    ADirectionalLight* DirLight = EditorWorld->SpawnActor<ADirectionalLight>();
+    /*ADirectionalLight* DirLight = EditorWorld->SpawnActor<ADirectionalLight>();
     DirLight->SetActorRotation(FRotator(20, -61, 11));
     DirLight->SetActorLocation(FVector(0, 0, 20));
-    DirLight->SetIntensity(2.f);
+    DirLight->SetIntensity(2.f);*/
 #endif
 }
 
