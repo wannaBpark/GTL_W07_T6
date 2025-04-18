@@ -138,8 +138,9 @@ private:
     TMap<EResourceType, FDepthStencilRHI> DepthStencils;
     TMap<EResourceType, FRenderTargetRHI> RenderTargets;
 
-    void ReleaseResources();
-    void ReleaseResource(EResourceType Type);
+    void ReleaseAllResources();
+    void ReleaseDepthStencil(EResourceType Type);
+    void ReleaseRenderTarget(EResourceType Type);
 
     /**
      * ClearColors 맵에는 모든 EResourceType에 대응하는 색상을

@@ -77,14 +77,14 @@ void FViewportResource::Resize(uint32 NewWidth, uint32 NewHeight)
 
 void FViewportResource::Release()
 {
-    ReleaseResources();
+    ReleaseAllResources();
 }
 
 HRESULT FViewportResource::CreateDepthStencil(EResourceType Type)
 {
     if (HasDepthStencil(Type))
     {
-        ReleaseResource(Type);
+        ReleaseDepthStencil(Type);
     }
 
     FDepthStencilRHI NewResource;
@@ -172,7 +172,7 @@ HRESULT FViewportResource::CreateRenderTarget(EResourceType Type)
 {
     if (HasRenderTarget(Type))
     {
-        ReleaseResource(Type);
+        ReleaseRenderTarget(Type);
     }
     
     FRenderTargetRHI NewResource;
@@ -260,7 +260,7 @@ std::array<float, 4> FViewportResource::GetClearColor(EResourceType Type) const
     return { 0.0f, 0.0f, 0.0f, 1.0f };
 }
 
-void FViewportResource::ReleaseResources()
+void FViewportResource::ReleaseAllResources()
 {
     for (auto& [Type, Resource] : RenderTargets)
     {
@@ -272,15 +272,19 @@ void FViewportResource::ReleaseResources()
     }
 }
 
-void FViewportResource::ReleaseResource(EResourceType Type)
+void FViewportResource::ReleaseDepthStencil(EResourceType Type)
+{
+    if (HasDepthStencil(Type))
+    {
+        DepthStencils[Type].Release();
+    }
+}
+
+void FViewportResource::ReleaseRenderTarget(EResourceType Type)
 {
     if (HasRenderTarget(Type))
     {
         RenderTargets[Type].Release();
-    }
-    if (HasDepthStencil(Type))
-    {
-        DepthStencils[Type].Release();
     }
 }
 
