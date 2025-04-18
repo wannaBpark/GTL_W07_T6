@@ -109,8 +109,9 @@ RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
 groupshared uint tileDepthMask;
 
 // Group(타일) 단위로 오브젝트의 minZ, maxZ 값 저장
-groupshared float groupMinZ;
-groupshared float groupMaxZ;
+groupshared uint groupMinZ; // float max (≈ 3.4e+38);
+groupshared uint groupMaxZ;  // float min (0);
+groupshared uint hitCount;
 
 // dispatchID = groupID * [numthreads] + threadID
 
@@ -124,12 +125,14 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     uint2 screenTileSize = TileSize;  // TILE_SIZE
     uint2 screenSize = ScreenSize;
     
+    float minZ, maxZ;
     // --- 1. 타일 내 각 픽셀의 Depth를 샘플링하고, 해당 슬라이스 인덱스의 비트를 그룹 공유 변수에 누적
     // 초기화: 그룹의 첫 번째 스레드가 tileDepthMask를 0으로 초기화
     if (threadID.x == 0 && threadID.y == 0)
     {
         tileDepthMask = 0;
     }
+    GroupMemoryBarrierWithGroupSync();
     
     // (1) 만약 Enable25DCulling 옵션이 켜져 있다면, 해당 타일 내의 depth mask 구성
     if (Enable25DCulling != 0)
@@ -137,27 +140,67 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         if (threadID.x == 0 && threadID.y == 0)
         {
             tileDepthMask = 0;
+            groupMinZ = 0x7f7fffff;
+            groupMaxZ = 0x00000000; // 그룹공유 변수는 초기화 허용X, 쓰레기값 발생 가능
+            hitCount = 0;
+            //groupMinZ = 0;
+            //groupMaxZ = -1e9;
         }
         GroupMemoryBarrierWithGroupSync();
 
         // 픽셀이 화면 내에 속하면 depth 샘플링
-        float depthSample = 0;
-        if (all(pixel < screenSize))
-        {
-            depthSample = gDepthTexture[pixel];
-        }
-        // 깊이값 변환: gDepthTexture가 보통 [0,1] 범위의 비선형 값이면 선형화
-        float linearZ = (depthSample == 1.0f)
-            ? FarZ
-            : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
-        float depthNormalized = saturate((linearZ - NearZ) / (FarZ - NearZ));
+        //float depthSample = 1.0f;
+        //if (all(pixel < screenSize))
+        //{
+        //    depthSample = gDepthTexture[pixel];
+        //}
+        // 픽셀별 depth 샘플링
+        float depthSample = (all(pixel < screenSize)) ? gDepthTexture[pixel] : 1.0f;
+        float linearZ = (depthSample == 1.0f) ? FarZ : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
 
-        // 해당 구간의 depth slice 인덱스 계산함
-        int sliceIndex = (int) floor(depthNormalized * NUM_SLICES); 
-        sliceIndex = clamp(sliceIndex, 0, NUM_SLICES - 1);
-        uint sliceBit = 1u << sliceIndex;
+// min/max z 공유 변수 업데이트
+        uint linZ_uint = uint(linearZ);
+        InterlockedMin(groupMinZ, linZ_uint);
+        InterlockedMax(groupMaxZ, linZ_uint);
+        
+        GroupMemoryBarrierWithGroupSync();
+        
+        minZ = float(groupMinZ);
+        maxZ = float(groupMaxZ);
+        
+        
+        //float sliceNormZ = saturate((linearZ - minZ) / max(1e-5, (maxZ - minZ)));
+        //int sliceIndex = clamp((int) floor(sliceNormZ * NUM_SLICES), 0, NUM_SLICES - 1);
+        //uint sliceBit = (1u << sliceIndex);
+        //InterlockedOr(tileDepthMask, sliceBit);
+        //GroupMemoryBarrierWithGroupSync();
+        
+        float rangeZ = maxZ - minZ;
+        if (rangeZ < 1e-3)
+        {
+            minZ -= 0.5f;
+            maxZ += 0.5f;
+            rangeZ = maxZ - minZ;
+        }
+
+        float sliceNormZ = saturate((linearZ - minZ) / rangeZ);
+        int sliceIndex = clamp((int) floor(sliceNormZ * NUM_SLICES), 0, NUM_SLICES - 1);
+        uint sliceBit = (1u << sliceIndex);
         InterlockedOr(tileDepthMask, sliceBit);
-        GroupMemoryBarrierWithGroupSync();          // 동기화 (32x32픽셀: 스레드가 각 픽셀 맡음)
+        GroupMemoryBarrierWithGroupSync();
+        
+        // 깊이값 변환: gDepthTexture가 보통 [0,1] 범위의 비선형 값이면 선형화
+        //float linearZ = (depthSample == 1.0f)
+        //    ? FarZ
+        //    : (NearZ * FarZ) / (FarZ - depthSample * (FarZ - NearZ));
+        //float depthNormalized = saturate((linearZ - NearZ) / (FarZ - NearZ));
+
+        //// 해당 구간의 depth slice 인덱스 계산함
+        //int sliceIndex = (int) floor(depthNormalized * NUM_SLICES); 
+        //sliceIndex = clamp(sliceIndex, 0, NUM_SLICES - 1);
+        //uint sliceBit = 1u << sliceIndex;
+        //InterlockedOr(tileDepthMask, sliceBit);
+        //GroupMemoryBarrierWithGroupSync();          // 동기화 (32x32픽셀: 스레드가 각 픽셀 맡음)
     }
 
     // 뷰 공간 프러스텀 계산
@@ -206,7 +249,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
 
     // 마스킹 초기화
     uint mask = 0;
-    uint hitCount = 0;
+
 
     // 2.5D 컬링이 활성화 -> 각 라이트의 view space 깊이 범위를 구해 depth mask와 교차 검사
     [loop]
@@ -220,26 +263,41 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         bool insideFrustum = SphereInsideFrustum(s, frustum, NearZ, FarZ);
         bool depthOverlap = true; // 2.5D 컬링이 비활성화면 무조건 true
         
+        if (insideFrustum == false)
+            continue;
         if (Enable25DCulling != 0)
         {
             // 빛의 Bounding Sphere의 view-space z값 범위 계산
             float3 posVS = mul(float4(light.Position, 1), View).xyz;
             float s_minDepth = posVS.z - s.r;
             float s_maxDepth = posVS.z + s.r;
-            float normMin = saturate((s_minDepth - NearZ) / (FarZ - NearZ)); // 가까운 곳부터 light
-            float normMax = saturate((s_maxDepth - NearZ) / (FarZ - NearZ)); // light부터 farplane
-            int sphereSliceMin = (int) floor(normMin * NUM_SLICES);     // light 포함 X -> 내림
-            int sphereSliceMax = (int) ceil(normMax * NUM_SLICES);      // light 포함 X -> 올림
-            sphereSliceMin = clamp(sphereSliceMin, 0, NUM_SLICES - 1);  // 0~31 인덱스로 클램프
-            sphereSliceMax = clamp(sphereSliceMax, 0, NUM_SLICES - 1);
-            uint sphereMask = 0;
-            for (int j = sphereSliceMin; j <= sphereSliceMax; ++j)
+            // 0419 수정 : 그룹기준으로 슬라이스 계산
+            
+            if (s_maxDepth < minZ || s_minDepth > maxZ)
             {
-                sphereMask |= (1u << j);
+                depthOverlap = false; // 절대 겹칠 수 없음
             }
+            else
+            {
+                // 조금이라도 겹치면 [minZ, maxZ] 범위로 0,1 saturate
+                float normMin = saturate((s_minDepth - minZ) / max(1e-5, maxZ - minZ));
+                float normMax = saturate((s_maxDepth - minZ) / max(1e-5, maxZ - minZ));
+            
+            //float normMin = saturate((s_minDepth - NearZ) / (FarZ - NearZ)); // 가까운 곳부터 light
+            //float normMax = saturate((s_maxDepth - NearZ) / (FarZ - NearZ)); // light부터 farplane
+                int sphereSliceMin = (int) floor(normMin * NUM_SLICES); // light 포함 X -> 내림
+                int sphereSliceMax = (int) ceil(normMax * NUM_SLICES); // light 포함 X -> 올림
+                sphereSliceMin = clamp(sphereSliceMin, 0, NUM_SLICES - 1); // 0~31 인덱스로 클램프
+                sphereSliceMax = clamp(sphereSliceMax, 0, NUM_SLICES - 1);
+                uint sphereMask = 0;
+                for (int j = sphereSliceMin; j <= sphereSliceMax; ++j)
+                {
+                    sphereMask |= (1u << j);
+                }
             
             // 깊이 영역이 겹치지 않으면, 해당 라이트는 2.5D 기준에서 컬링됨
-            depthOverlap = (sphereMask & tileDepthMask) != 0;
+                depthOverlap = (sphereMask & tileDepthMask) != 0;
+            }
         }
         
         if (insideFrustum && depthOverlap)
@@ -247,38 +305,81 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             uint bucketIdx = i / 32;
             uint bitIdx = i % 32;
             InterlockedOr(TileLightMask[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1 << bitIdx);
-            hitCount++;
+            InterlockedAdd(hitCount, 1);
+            //hitCount++;
+        }
+    }
+    GroupMemoryBarrierWithGroupSync();
+    
+    if (!(threadID.x == 0 && threadID.y == 0)) {
+        return;
+    }
+    
+    // thread 0에서만 실행
+    if (threadID.x == 0 && threadID.y == 0)
+    {
+        float4 result = float4(0, 0, 0, 0); // 기본: 아무것도 안 보임
+
+        if (hitCount > 0) // 히트된 라이트가 있는 경우만 시각화
+        {
+            const float3 heatmap[] =
+            {
+                float3(0, 0, 0),
+            float3(0, 0, 1),
+            float3(0, 1, 1),
+            float3(0, 1, 0),
+            float3(1, 1, 0),
+            float3(1, 0, 0),
+            };
+            const float maxHeat = 50.0f;
+            float l = saturate(hitCount / maxHeat) * 5;
+            float3 c1 = heatmap[floor(l)];
+            float3 c2 = heatmap[ceil(l)];
+            float3 color = lerp(c1, c2, frac(l));
+            result = float4(color, 0.8f);
+        }
+
+    // 타일 전체에 결과 색상 출력
+        for (uint i = 0; i < TILE_SIZE * TILE_SIZE; ++i)
+        {
+            uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
+            uint2 pixel = tileCoord * TILE_SIZE + local;
+
+            if (all(pixel < screenSize))
+            {
+                DebugHeatmap[pixel] = result;
+            }
         }
     }
     
-    // heatmap 시각화
-    const float3 heatmap[] = {
-        float3(0, 0, 0),
-        float3(0, 0, 1),
-        float3(0, 1, 1),
-        float3(0, 1, 0),
-        float3(1, 1, 0),
-        float3(1, 0, 0),
-    };
-    const float maxHeat = 50.0f;
-    float l = saturate(hitCount / maxHeat) * 5;
-    float3 c1 = heatmap[floor(l)];
-    float3 c2 = heatmap[ceil(l)];
-    float3 color = lerp(c1, c2, frac(l));
-    float4 result = float4(color, 0.8f);
+    //// heatmap 시각화
+    //const float3 heatmap[] = {
+    //    float3(0, 0, 0),
+    //    float3(0, 0, 1),
+    //    float3(0, 1, 1),
+    //    float3(0, 1, 0),
+    //    float3(1, 1, 0),
+    //    float3(1, 0, 0),
+    //};
+    //const float maxHeat = 50.0f;
+    //float l = saturate(hitCount / maxHeat) * 5;
+    //float3 c1 = heatmap[floor(l)];
+    //float3 c2 = heatmap[ceil(l)];
+    //float3 color = lerp(c1, c2, frac(l));
+    //float4 result = float4(color, 0.8f);
 
-    // 타일 내부 모든 픽셀에 출력
-    for (uint i = 0; i < TILE_SIZE * TILE_SIZE; ++i)
-    {
-        uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
-        // pixel = 타일 내부에서 0부터 TILE_SIZE−1까지의 오프셋
-        // tileCoord * TILE_SIZE = 타일의 왼쪽 상단 좌표
-        uint2 pixel = tileCoord * TILE_SIZE + local;
-        if (all(pixel < screenSize))
-        {
-            DebugHeatmap[pixel] = result;
-        }
-    }
+    //// 타일 내부 모든 픽셀에 출력
+    //for (uint i = 0; i < TILE_SIZE * TILE_SIZE; ++i)
+    //{
+    //    uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
+    //    // pixel = 타일 내부에서 0부터 TILE_SIZE−1까지의 오프셋
+    //    // tileCoord * TILE_SIZE = 타일의 왼쪽 상단 좌표
+    //    uint2 pixel = tileCoord * TILE_SIZE + local;
+    //    if (all(pixel < screenSize))
+    //    {
+    //        DebugHeatmap[pixel] = result;
+    //    }
+    //}
     //for (uint i = 0; i < screenSize.x * screenSize.y; ++i)
     //{
     //    uint2 pixel = unflatten2D(i, screenSize);

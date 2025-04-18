@@ -573,6 +573,7 @@ HRESULT FDXDShaderManager::AddComputeShader(const std::wstring& Key, const std::
         if (errorBlob)
         {
             OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+            UE_LOG(LogLevel::Error, "%s", (char*)errorBlob->GetBufferPointer());
             errorBlob->Release();
         }
         return hr;
