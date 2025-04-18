@@ -38,6 +38,8 @@ void FCompositingPass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsD
     SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
     
     Graphics->Device->CreateSamplerState(&SamplerDesc, &Sampler);
+
+    ViewModeBuffer = BufferManager->GetConstantBuffer("FViewModeConstants");
 }
 
 void FCompositingPass::PrepareRenderArr()
@@ -67,11 +69,13 @@ void FCompositingPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &Sampler);
 
-    // TODO: 아래 상수 버퍼가 필요한지 생각해보기
+    // 버퍼 바인딩
+    Graphics->DeviceContext->PSSetConstantBuffers(0, 1, &ViewModeBuffer);
+    
     // Update Constant Buffer
     FViewModeConstants ViewModeConstantData = {};
     ViewModeConstantData.ViewMode = static_cast<uint32>(Viewport->GetViewMode());
-    // BufferManager->UpdateConstantBuffer<FViewModeConstants>("FViewModeConstants", ViewModeConstantData);
+    BufferManager->UpdateConstantBuffer<FViewModeConstants>("FViewModeConstants", ViewModeConstantData);
 
     // Render
     ID3D11VertexShader* VertexShader = ShaderManager->GetVertexShaderByKey(L"Compositing");

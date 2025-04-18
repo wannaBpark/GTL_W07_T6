@@ -25,4 +25,6 @@ private:
     FDXDShaderManager* ShaderManager;
 
     ID3D11SamplerState* Sampler;
+
+    ID3D11Buffer* ViewModeBuffer;
 };

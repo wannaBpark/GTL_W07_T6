@@ -73,7 +73,7 @@ public:
     void PrintLightTilesMapping();
 
     void SetDepthSRV(ID3D11ShaderResourceView* InDepthSRV) { DepthSRV = InDepthSRV; }
-    ID3D11ShaderResourceView* GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
+    ID3D11ShaderResourceView*& GetDebugHeatmapSRV() { return DebugHeatmapSRV; }
     ID3D11ShaderResourceView* GetLightStructuredBufferSRV() { return LightSRV; }
     ID3D11Buffer* GetTileConstantBuffer() { return TileLightConstantBuffer; }
     TArray<UPointLightComponent*> GetPointLights() { return PointLights; }
