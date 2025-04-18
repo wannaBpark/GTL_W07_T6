@@ -28,6 +28,8 @@ public:
     virtual void ClearRenderArr() override;
 
     virtual void PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport);
+
+    virtual void RenderAllStaticMeshes(const std::shared_ptr<FEditorViewportClient>& Viewport);
     
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
   

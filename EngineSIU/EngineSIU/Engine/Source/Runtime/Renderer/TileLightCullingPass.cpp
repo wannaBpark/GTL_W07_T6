@@ -66,6 +66,9 @@ void FTileLightCullingPass::PrepareRenderArr()
 
 void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
+    DepthSRV = Viewport->GetViewportResource()->GetDepthStencil(
+        EResourceType::ERT_Debug
+    )->SRV;
     ComputeShader = ShaderManager->GetComputeShaderByKey(L"TileLightCullingComputeShader");
     UpdateTileLightConstantBuffer(Viewport);
     Dispatch(Viewport);

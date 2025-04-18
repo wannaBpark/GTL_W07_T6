@@ -24,16 +24,21 @@ void FDepthPrePass::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevi
 
 void FDepthPrePass::PrepareRenderArr()
 {
-    
+    __super::PrepareRenderArr();
 }
 
 void FDepthPrePass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    __super::Render(Viewport);
+    PrepareRenderState(Viewport);
+    __super::RenderAllStaticMeshes(Viewport);
+
+    // 렌더 타겟 해제
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 }
 
 void FDepthPrePass::ClearRenderArr()
 {
+    __super::ClearRenderArr();
 }
 
 void FDepthPrePass::PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport)
@@ -70,5 +75,6 @@ void FDepthPrePass::PrepareRenderState(const std::shared_ptr<FEditorViewportClie
     FViewportResource* ViewportResource = Viewport->GetViewportResource();
     FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(EResourceType::ERT_Debug);
 
+    //ID3D11RenderTargetView* nullRTV = nullptr;
     Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, DepthStencilRHI->DSV); // ← 깊이 전용
 }

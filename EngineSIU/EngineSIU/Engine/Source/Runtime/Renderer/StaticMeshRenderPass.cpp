@@ -282,17 +282,8 @@ void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT nu
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
+void FStaticMeshRenderPass::RenderAllStaticMeshes(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
-    const EResourceType ResourceType = EResourceType::ERT_Scene;
-    FViewportResource* ViewportResource = Viewport->GetViewportResource();
-    FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
-    FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(ResourceType);
-    
-    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, DepthStencilRHI->DSV);
-    
-    PrepareRenderState(Viewport);
-
     for (UStaticMeshComponent* Comp : StaticMeshComponents)
     {
         if (!Comp || !Comp->GetStaticMesh())
@@ -305,15 +296,15 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
         {
             continue;
         }
-        
+
         UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-        
+
         FMatrix WorldMatrix = Comp->GetWorldMatrix();
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
         const bool bIsSelected = (Engine && Engine->GetSelectedActor() == Comp->GetOwner());
-        
+
         UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
-        
+
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 
         if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
@@ -321,6 +312,21 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
             FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), WorldMatrix);
         }
     }
+}
+
+void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    const EResourceType ResourceType = EResourceType::ERT_Scene;
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
+    FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(ResourceType);
+    
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, DepthStencilRHI->DSV);
+    
+    PrepareRenderState(Viewport);
+
+    RenderAllStaticMeshes(Viewport);
+    
 
     // 렌더 타겟 해제
     Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);

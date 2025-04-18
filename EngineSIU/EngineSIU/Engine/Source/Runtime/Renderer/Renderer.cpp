@@ -200,7 +200,7 @@ void FRenderer::PrepareRenderPass()
     FogRenderPass->PrepareRenderArr();
     EditorRenderPass->PrepareRender();
     TileLightCullingPass->PrepareRenderArr();
-    //DepthPrePass->PrepareRender();
+    DepthPrePass->PrepareRenderArr();
 }
 
 void FRenderer::ClearRenderArr()
@@ -280,7 +280,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     RenderWorldScene(Viewport);
     RenderPostProcess(Viewport);
     RenderEditorOverlay(Viewport);
-
+    
     // Compositing: 위에서 렌더한 결과들을 하나로 합쳐서 뷰포트의 최종 이미지를 만드는 작업
     CompositingPass->Render(Viewport);
 

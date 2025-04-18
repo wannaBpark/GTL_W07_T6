@@ -7,7 +7,7 @@ SamplerState CompositingSampler : register(s0);
 
 cbuffer ViewMode : register(b0)
 {
-    uint ViewMode;
+    uint ViewMode; 
     float3 Padding;
 }
 
