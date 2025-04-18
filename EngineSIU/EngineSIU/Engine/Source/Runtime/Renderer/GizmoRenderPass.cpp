@@ -156,7 +156,7 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
         }
     }
     
-    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer()); // TODO: 이 래스터라이저 안씀.
 
     Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
     ID3D11ShaderResourceView* NullSRV[1] = { nullptr };

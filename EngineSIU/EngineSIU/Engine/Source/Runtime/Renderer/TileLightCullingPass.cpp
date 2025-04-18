@@ -4,6 +4,7 @@
 #include "D3D11RHI/DXDShaderManager.h"
 
 //#include "World/World.h"
+#include "UnrealClient.h"
 #include "UObject/Casts.h"
 #include "Engine/EditorEngine.h"
 #include "Components/Light/LightComponent.h"
@@ -30,9 +31,9 @@ void FTileLightCullingPass::Initialize(FDXDBufferManager* InBufferManager, FGrap
     BufferManager = InBufferManager;
     Graphics = InGraphics;
     ShaderManager = InShaderManage;
-    
-    TILE_COUNT_X = (Graphics->screenWidth + TILE_SIZE - 1) / TILE_SIZE;
-    TILE_COUNT_Y = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE;
+
+    TILE_COUNT_X = (Graphics->ScreenWidth + TILE_SIZE - 1) / TILE_SIZE;
+    TILE_COUNT_Y = (Graphics->ScreenHeight + TILE_SIZE - 1) / TILE_SIZE;
     TILE_COUNT = TILE_COUNT_X * TILE_COUNT_Y;
     SHADER_ENTITY_TILE_BUCKET_COUNT = MAX_LIGHTS_PER_TILE / 32;
     // 한 타일이 가질 수 있는 조명 ID 목록을 비트마스크로 표현한 총 슬롯 수
@@ -63,27 +64,20 @@ void FTileLightCullingPass::PrepareRender()
     
 }
 
-void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport, 
-    ID3D11ShaderResourceView *& DepthSRV
-)
+void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     ComputeShader = ShaderManager->GetComputeShaderByKey(L"TileLightCullingComputeShader");
     UpdateTileLightConstantBuffer(Viewport);
-    Dispatch(DepthSRV);
+    Dispatch(Viewport);
 
     ParseTileLightMaskData();
 }
 
-// Not In Use
-void FTileLightCullingPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
-{
-}
-
-void FTileLightCullingPass::Dispatch(ID3D11ShaderResourceView*& DepthSRV)
+void FTileLightCullingPass::Dispatch(const std::shared_ptr<FEditorViewportClient>& Viewport)
 {
     // 한 스레드 그룹(groupSizeX, groupSizeY)은 16x16픽셀 영역처리
-    const UINT groupSizeX = (Graphics->screenWidth  + TILE_SIZE - 1) / TILE_SIZE;
-    const UINT groupSizeY = (Graphics->screenHeight + TILE_SIZE - 1) / TILE_SIZE; 
+    const UINT groupSizeX = (Graphics->ScreenWidth  + TILE_SIZE - 1) / TILE_SIZE;
+    const UINT groupSizeY = (Graphics->ScreenHeight + TILE_SIZE - 1) / TILE_SIZE; 
 
     Graphics->DeviceContext->CSSetConstantBuffers(0, 1, &TileLightConstantBuffer);
 
@@ -231,8 +225,8 @@ void FTileLightCullingPass::CreateBuffers()
 {
     // 3. Debug heatmap 텍스처 + UAV (디버깅용)
     D3D11_TEXTURE2D_DESC heatMapDesc = {};
-    heatMapDesc.Width = Graphics->screenWidth;
-    heatMapDesc.Height = Graphics->screenHeight;
+    heatMapDesc.Width = Graphics->ScreenWidth;
+    heatMapDesc.Height = Graphics->ScreenHeight;
     heatMapDesc.MipLevels = 1;
     heatMapDesc.ArraySize = 1;
     heatMapDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; // R32G32B32A32_FLOAT
@@ -314,12 +308,12 @@ void FTileLightCullingPass::UpdateTileLightConstantBuffer(const std::shared_ptr<
 {
     // 1. Constant Buffer 업데이트
     TileLightCullSettings settings;
-    settings.ScreenSize[0] = Graphics->screenWidth;
-    settings.ScreenSize[1] = Graphics->screenHeight;
+    settings.ScreenSize[0] = Graphics->ScreenWidth;
+    settings.ScreenSize[1] = Graphics->ScreenHeight;
     settings.TileSize[0] = TILE_SIZE;
     settings.TileSize[1] = TILE_SIZE;
-    settings.NearZ = Viewport->nearPlane;
-    settings.FarZ = Viewport->farPlane;
+    settings.NearZ = Viewport->NearClip;
+    settings.FarZ = Viewport->FarClip;
     settings.ViewMatrix = Viewport->GetViewMatrix();
     settings.ProjectionMatrix = Viewport->GetProjectionMatrix();
     settings.InvProjectionMatrix = FMatrix::Inverse(Viewport->GetProjectionMatrix());

@@ -54,7 +54,6 @@ void FDepthPrePass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpor
 void FDepthPrePass::ClearRenderArr()
 {
     Graphics->DeviceContext->OMSetRenderTargets(0,nullptr, nullptr);
-    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->FrameBufferRTV, Graphics->DepthStencilView);
 }
 
 void FDepthPrePass::CreateDepthStencilState()
@@ -67,8 +66,8 @@ void FDepthPrePass::CreateDepthStencilState()
     Graphics->Device->CreateDepthStencilState(&dsDesc, &DepthStencilState_OnlyWrite);
 
     D3D11_TEXTURE2D_DESC depthDesc = {};
-    depthDesc.Width = Graphics->screenWidth;
-    depthDesc.Height = Graphics->screenHeight;
+    depthDesc.Width = Graphics->ScreenWidth;
+    depthDesc.Height = Graphics->ScreenHeight;
     depthDesc.MipLevels = 1;
     depthDesc.ArraySize = 1;
     depthDesc.Format = DXGI_FORMAT_R32_TYPELESS; // for both DSV + SRV

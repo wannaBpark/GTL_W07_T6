@@ -22,6 +22,7 @@
 #include <UObject/Casts.h>
 
 #include "CompositingPass.h"
+#include "LightHeatMapRenderPass.h"
 #include "PostProcessCompositingPass.h"
 #include "SlateRenderPass.h"
 #include "UnrealClient.h"
@@ -50,8 +51,11 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass = new FLineRenderPass();
     FogRenderPass = new FFogRenderPass();
     EditorRenderPass = new FEditorRenderPass();
+    
     DepthPrePass = new FDepthPrePass();
     TileLightCullingPass = new FTileLightCullingPass();
+    LightHeatMapRenderPass = new FLightHeatMapRenderPass();
+    
     CompositingPass = new FCompositingPass();
     PostProcessCompositingPass = new FPostProcessCompositingPass();
     SlateRenderPass = new FSlateRenderPass();
@@ -64,8 +68,10 @@ void FRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBuf
     LineRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     FogRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
     EditorRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
+    
     DepthPrePass->Initialize(BufferManager, Graphics, ShaderManager);
     TileLightCullingPass->Initialize(BufferManager, Graphics, ShaderManager);
+    LightHeatMapRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
     CompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
     PostProcessCompositingPass->Initialize(BufferManager, Graphics, ShaderManager);
@@ -264,8 +270,8 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     // Added Compute Shader Pass
     if (TileLightCullingPass)
     {
-        TileLightCullingPass->Render(Viewport, DepthPrePass->GetDepthSRV());
-        FogRenderPass->SetDebugHeatmapSRV(TileLightCullingPass->GetDebugHeatmapSRV());
+        TileLightCullingPass->Render(Viewport);
+        LightHeatMapRenderPass->SetDebugHeatmapSRV(TileLightCullingPass->GetDebugHeatmapSRV());
         UpdateLightBufferPass->SetPointLightData(TileLightCullingPass->GetPointLights(),
                                                 TileLightCullingPass->GetPointLightPerTiles()
         ); 
@@ -280,18 +286,17 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     // Compositing: 위에서 렌더한 결과들을 하나로 합쳐서 뷰포트의 최종 이미지를 만드는 작업
     CompositingPass->Render(Viewport);
 
-	if (!IsSceneDepth)
-    {
-        DepthBufferDebugPass->UpdateDepthBufferSRV();
-        
-        FogRenderPass->RenderFog(Viewport, DepthBufferDebugPass->GetDepthSRV());
-    }
+	// if (!IsSceneDepth)
+ //    {
+ //        DepthBufferDebugPass->UpdateDepthBufferSRV();
+ //        
+ //        LightHeatMapRenderPass->Render(Viewport, DepthBufferDebugPass->GetDepthSRV());
+ //    }
 
     // 테스트용 tile light 열화상맵 추가
     if (TileLightCullingPass)
     {
-        DepthBufferDebugPass->UpdateDepthBufferSRV();
-        FogRenderPass->RenderFog(Viewport, DepthBufferDebugPass->GetDepthSRV());
+        LightHeatMapRenderPass->Render(Viewport);
     }
 
     EndRender();

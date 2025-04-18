@@ -53,7 +53,6 @@ public:
     ~FTileLightCullingPass();
     virtual void Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManage) override;
     virtual void PrepareRender() override;
-    void Render(const std::shared_ptr<FEditorViewportClient>& Viewport, ID3D11ShaderResourceView *& DepthSRV);
     virtual void Render(const std::shared_ptr<FEditorViewportClient>& Viewport) override;
     virtual void ClearRenderArr() override;
 
@@ -62,7 +61,7 @@ public:
     void CreateViews();
     void CreateBuffers();
     void Release();
-    void Dispatch(ID3D11ShaderResourceView *& depthSRV);
+    void Dispatch(const std::shared_ptr<FEditorViewportClient>& Viewport);
     void ClearUAVs();
     void UpdateTileLightConstantBuffer(const std::shared_ptr<FEditorViewportClient>& Viewport);
 
