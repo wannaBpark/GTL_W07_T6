@@ -114,7 +114,6 @@ void FGizmoRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& View
     FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(EResourceType::ERT_Editor);
     FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(EResourceType::ERT_Gizmo);
     
-    ViewportResource->ClearDepthStencil(Graphics->DeviceContext, EResourceType::ERT_Gizmo);
     Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, DepthStencilRHI->DSV);
 
     // 씬 뎁스를 쉐이더 리소스로 사용

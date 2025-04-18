@@ -106,7 +106,6 @@ void FFogRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewpo
     const EResourceType ResourceType = EResourceType::ERT_PP_Fog; 
     FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
 
-    ViewportResource->ClearRenderTarget(Graphics->DeviceContext, ResourceType);
     Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, nullptr);
     Graphics->DeviceContext->OMSetBlendState(BlendState, nullptr, 0xffffffff);
 
