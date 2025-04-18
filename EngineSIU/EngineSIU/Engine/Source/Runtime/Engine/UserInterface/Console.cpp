@@ -45,21 +45,22 @@ void StatOverlay::Render(ID3D11DeviceContext* context, UINT width, UINT height) 
                  ImGuiWindowFlags_NoResize |
                  ImGuiWindowFlags_NoMove |
                  ImGuiWindowFlags_NoScrollbar);
-    if (showFPS) {
-        static float lastTime = ImGui::GetTime();
-        static int frameCount = 0;
-        static float fps = 0.0f;
+    if (showFPS)
+    {
+        static float LastTime = ImGui::GetTime();
+        static float FPS = 0.0f;
+        static float FrameTimeMS = 0.0f;
 
-        frameCount++;
-        float currentTime = ImGui::GetTime();
-        float deltaTime = currentTime - lastTime;
+        float CurrentTime = ImGui::GetTime();
+        float DeltaTime = CurrentTime - LastTime;
 
-        if (deltaTime >= 1.0f) { // 1초마다 FPS 업데이트
-            fps = frameCount / deltaTime;
-            frameCount = 0;
-            lastTime = currentTime;
-        }
-        ImGui::Text("FPS: %.2f", fps);
+        FPS = 1.0f / DeltaTime;
+        FrameTimeMS = DeltaTime * 1000.0f;
+
+        ImGui::Text("%.2f FPS", FPS);
+        ImGui::Text("%.2f ms", FrameTimeMS);
+
+        LastTime = CurrentTime;
     }
 
 
