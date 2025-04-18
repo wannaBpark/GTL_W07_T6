@@ -19,9 +19,10 @@ enum class LogLevel : uint8
 class StatOverlay
 {
 public:
-    bool showFPS = false;
+    // @todo Stat-FPS Default 설정 복구 (showFPS = false, showRender = false)
+    bool showFPS = true;
     bool showMemory = false;
-    bool showRender = false;
+    bool showRender = true;
 
     void ToggleStat(const std::string& command);
     void Render(ID3D11DeviceContext* context, UINT width, UINT height) const;
