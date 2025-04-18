@@ -287,10 +287,11 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
     const EResourceType ResourceType = EResourceType::ERT_Scene;
     FViewportResource* ViewportResource = Viewport->GetViewportResource();
     FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
+    FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(ResourceType);
     
-    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetDepthStencilView());
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, DepthStencilRHI->DSV);
     ViewportResource->ClearRenderTarget(Graphics->DeviceContext, ResourceType);
-    Graphics->DeviceContext->ClearDepthStencilView(ViewportResource->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    ViewportResource->ClearDepthStencil(Graphics->DeviceContext, ResourceType);
     
     PrepareRenderState(Viewport);
 

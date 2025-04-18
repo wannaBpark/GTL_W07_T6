@@ -112,7 +112,8 @@ void FLineRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& Viewp
 
     FViewportResource* ViewportResource = Viewport->GetViewportResource();
     FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
-    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetDepthStencilView());
+    FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(ResourceType);
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, DepthStencilRHI->DSV);
 
     ProcessLineRendering(Viewport);
 

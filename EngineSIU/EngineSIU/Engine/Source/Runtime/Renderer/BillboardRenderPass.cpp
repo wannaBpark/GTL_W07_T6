@@ -141,7 +141,9 @@ void FBillboardRenderPass::Render(const std::shared_ptr<FEditorViewportClient>& 
     FViewportResource* ViewportResource = Viewport->GetViewportResource();
 
     FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(ResourceType);
-    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetDepthStencilView());
+
+    // 뎁스 비교는 렌더 타겟과는 상관 없이 항상 씬 기준으로
+    Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, ViewportResource->GetDepthStencil(EResourceType::ERT_Scene)->DSV);
 
     PrepareTextureShader();
 
