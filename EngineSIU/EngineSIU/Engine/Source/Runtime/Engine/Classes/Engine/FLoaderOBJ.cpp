@@ -564,7 +564,7 @@ OBJ::FStaticMeshRenderData* FManagerOBJ::LoadObjStaticMeshAsset(const FString& P
         return nullptr;
     }
 
-    // SaveStaticMeshToBinary(BinaryPath, *NewStaticMesh); // TODO: refactoring 끝나면 활성화하기
+    SaveStaticMeshToBinary(BinaryPath, *NewStaticMesh); 
     ObjStaticMeshMap.Add(PathFileName, NewStaticMesh);
     return NewStaticMesh;
 }
@@ -623,19 +623,25 @@ bool FManagerOBJ::SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FS
         File.write(reinterpret_cast<const char*>(&Material.Specular), sizeof(Material.Specular));
         File.write(reinterpret_cast<const char*>(&Material.Ambient), sizeof(Material.Ambient));
         File.write(reinterpret_cast<const char*>(&Material.Emissive), sizeof(Material.Emissive));
+        
         File.write(reinterpret_cast<const char*>(&Material.SpecularScalar), sizeof(Material.SpecularScalar));
         File.write(reinterpret_cast<const char*>(&Material.DensityScalar), sizeof(Material.DensityScalar));
         File.write(reinterpret_cast<const char*>(&Material.TransparencyScalar), sizeof(Material.TransparencyScalar));
+        File.write(reinterpret_cast<const char*>(&Material.BumpMultiplier), sizeof(Material.BumpMultiplier));
         File.write(reinterpret_cast<const char*>(&Material.IlluminanceModel), sizeof(Material.IlluminanceModel));
 
         Serializer::WriteFString(File, Material.DiffuseTextureName);
         Serializer::WriteFWString(File, Material.DiffuseTexturePath);
+        
         Serializer::WriteFString(File, Material.AmbientTextureName);
         Serializer::WriteFWString(File, Material.AmbientTexturePath);
+        
         Serializer::WriteFString(File, Material.SpecularTextureName);
         Serializer::WriteFWString(File, Material.SpecularTexturePath);
+        
         Serializer::WriteFString(File, Material.BumpTextureName);
         Serializer::WriteFWString(File, Material.BumpTexturePath);
+        
         Serializer::WriteFString(File, Material.AlphaTextureName);
         Serializer::WriteFWString(File, Material.AlphaTexturePath);
     }
@@ -706,18 +712,25 @@ bool FManagerOBJ::LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStati
         File.read(reinterpret_cast<char*>(&Material.Specular), sizeof(Material.Specular));
         File.read(reinterpret_cast<char*>(&Material.Ambient), sizeof(Material.Ambient));
         File.read(reinterpret_cast<char*>(&Material.Emissive), sizeof(Material.Emissive));
+        
         File.read(reinterpret_cast<char*>(&Material.SpecularScalar), sizeof(Material.SpecularScalar));
         File.read(reinterpret_cast<char*>(&Material.DensityScalar), sizeof(Material.DensityScalar));
         File.read(reinterpret_cast<char*>(&Material.TransparencyScalar), sizeof(Material.TransparencyScalar));
+        File.read(reinterpret_cast<char*>(&Material.BumpMultiplier), sizeof(Material.BumpMultiplier));
         File.read(reinterpret_cast<char*>(&Material.IlluminanceModel), sizeof(Material.IlluminanceModel));
+        
         Serializer::ReadFString(File, Material.DiffuseTextureName);
         Serializer::ReadFWString(File, Material.DiffuseTexturePath);
+        
         Serializer::ReadFString(File, Material.AmbientTextureName);
         Serializer::ReadFWString(File, Material.AmbientTexturePath);
+        
         Serializer::ReadFString(File, Material.SpecularTextureName);
         Serializer::ReadFWString(File, Material.SpecularTexturePath);
+        
         Serializer::ReadFString(File, Material.BumpTextureName);
         Serializer::ReadFWString(File, Material.BumpTexturePath);
+        
         Serializer::ReadFString(File, Material.AlphaTextureName);
         Serializer::ReadFWString(File, Material.AlphaTexturePath);
 
