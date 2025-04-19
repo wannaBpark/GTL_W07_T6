@@ -17,7 +17,8 @@ cbuffer TileLightCullSettings : register(b0)
     row_major matrix Projection; // Projection 행렬
     row_major matrix InverseProjection; // Projection^-1, 뷰스페이스 복원용
 
-    uint NumLights; // 총 라이트 수
+    uint NumPointLights; // 총 라이트 수
+    uint NumSpotLights; // 총 라이트 수
     uint Enable25DCulling; // 1이면 2.5D 컬링 사용
 }
 struct Sphere
@@ -85,12 +86,11 @@ bool SphereInsideFrustum(Sphere sphere, Frustum frustum, float zNear, float zFar
     return result;
 }
 
-inline uint2 unflatten2D(uint idx, uint2 dim)
-{
+inline uint2 unflatten2D(uint idx, uint2 dim) {
     return uint2(idx % dim.x, idx / dim.x);
 }
 
-struct FLightGPU
+struct FPointLightGPU
 {
     float3 Position;
     float Radius;
@@ -98,11 +98,22 @@ struct FLightGPU
     uint isPointLight;
 };
 
-StructuredBuffer<FLightGPU> LightBuffer : register(t0); // CPU에서 전달된 PointLight들
+struct FSpotLightGPU
+{
+    float3 Position;
+    float Radius;
+    float3 Direction;
+    float AngleDeg;
+};
+
+StructuredBuffer<FPointLightGPU> PointLightBuffer : register(t0); // CPU에서 전달된 PointLight들
+StructuredBuffer<FSpotLightGPU> SpotLightBuffer : register(t2); // CPU에서 전달된 SpotLight들
 Texture2D<float> gDepthTexture : register(t1);          // Depth Texture
 
-RWStructuredBuffer<uint> TileLightMask : register(u0); // 타일별 조명 마스크
-RWTexture2D<float4> DebugHeatmap : register(u3); // 디버깅용 히트맵
+
+RWStructuredBuffer<uint> TileLightMask : register(u0);      // 타일별 Point Light 마스크
+RWTexture2D<float4> DebugHeatmap : register(u3);            // 디버깅용 히트맵
+RWStructuredBuffer<uint> TileSpotLightMask : register(u6);  // 타일별 Spot Light 마스크
 
 
 // Group Shared 메모리 - Depth Masking 누적에 쓰입니다~
@@ -255,9 +266,9 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     if (threadID.x == 0 && threadID.y == 0)
     {
         [loop]
-        for (uint i = 0; i < NumLights; ++i)
+        for (uint i = 0; i < NumPointLights; ++i)
         {
-            FLightGPU light = LightBuffer[i];
+            FPointLightGPU light = PointLightBuffer[i];
             Sphere s;
             s.c = mul(float4(light.Position, 1), View).xyz;
             s.r = light.Radius;
