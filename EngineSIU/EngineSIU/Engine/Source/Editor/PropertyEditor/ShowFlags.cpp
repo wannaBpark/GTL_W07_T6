@@ -2,65 +2,78 @@
 
 ShowFlags& ShowFlags::GetInstance()
 {
-    static ShowFlags instance;
-    return instance;
+    static ShowFlags Instance;
+    return Instance;
 }
 
-void ShowFlags::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const
+void ShowFlags::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     if (ImGui::Button("Show", ImVec2(60, 32)))
     {
         ImGui::OpenPopup("ShowFlags");
     }
 
-    const char* items[] = { "AABB", "Primitives", "BillBoardText", "UUID", "Fog", "LightWireframe" };
-    uint64 curFlag = ActiveViewport->GetShowFlag();
+    const char* Items[] = { "AABB", "Primitives", "BillBoardText", "UUID", "Fog", "LightWireframe" };
+    const uint64 CurFlag = ActiveViewport->GetShowFlag();
 
     if (ImGui::BeginPopup("ShowFlags"))
     {
-        bool selected[IM_ARRAYSIZE(items)] = 
+        bool Selected[IM_ARRAYSIZE(Items)] = 
         {
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_AABB),
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_Primitives),
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_BillboardText),
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_UUIDText),
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_Fog),
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_LightWireframe)
+            static_cast<bool>(CurFlag & EEngineShowFlags::SF_AABB),
+            static_cast<bool>(CurFlag & EEngineShowFlags::SF_Primitives),
+            static_cast<bool>(CurFlag & EEngineShowFlags::SF_BillboardText),
+            static_cast<bool>(CurFlag & EEngineShowFlags::SF_UUIDText),
+            static_cast<bool>(CurFlag & EEngineShowFlags::SF_Fog),
+            static_cast<bool>(CurFlag & EEngineShowFlags::SF_LightWireframe)
         }; // 각 항목의 체크 상태 저장
 
-        for (int i = 0; i < IM_ARRAYSIZE(items); i++)
+        for (int i = 0; i < IM_ARRAYSIZE(Items); i++)
         {
-            ImGui::Checkbox(items[i], &selected[i]);
+            ImGui::Checkbox(Items[i], &Selected[i]);
         }
 
-        ActiveViewport->SetShowFlag(ConvertSelectionToFlags(selected));
+        ActiveViewport->SetShowFlag(ConvertSelectionToFlags(Selected));
         ImGui::EndPopup();
     }
 }
 
-uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[]) const
+uint64 ShowFlags::ConvertSelectionToFlags(const bool Selected[])
 {
-    uint64 flags = EEngineShowFlags::None;
+    uint64 Flags = EEngineShowFlags::None;
 
-    if (selected[0])
-        flags |= static_cast<uint64>(EEngineShowFlags::SF_AABB);
-    if (selected[1])
-        flags |= static_cast<uint64>(EEngineShowFlags::SF_Primitives);
-    if (selected[2])
-        flags |= static_cast<uint64>(EEngineShowFlags::SF_BillboardText);
-    if (selected[3])
-        flags |= static_cast<uint64>(EEngineShowFlags::SF_UUIDText);
-    if (selected[4])
-        flags |= static_cast<uint64>(EEngineShowFlags::SF_Fog);
-    if (selected[5])
-        flags |= static_cast<uint64>(EEngineShowFlags::SF_LightWireframe);
-    return flags;
+    if (Selected[0])
+    {
+        Flags |= static_cast<uint64>(EEngineShowFlags::SF_AABB);
+    }
+    if (Selected[1])
+    {
+        Flags |= static_cast<uint64>(EEngineShowFlags::SF_Primitives);
+    }
+    if (Selected[2])
+    {
+        Flags |= static_cast<uint64>(EEngineShowFlags::SF_BillboardText);
+    }
+    if (Selected[3])
+    {
+        Flags |= static_cast<uint64>(EEngineShowFlags::SF_UUIDText);
+    }
+    if (Selected[4])
+    {
+        Flags |= static_cast<uint64>(EEngineShowFlags::SF_Fog);
+    }
+    if (Selected[5])
+    {
+        Flags |= static_cast<uint64>(EEngineShowFlags::SF_LightWireframe);
+    }
+
+    return Flags;
 }
 
 void ShowFlags::OnResize(HWND hWnd)
 {
-    RECT clientRect;
-    GetClientRect(hWnd, &clientRect);
-    width = clientRect.right - clientRect.left;
-    height = clientRect.bottom - clientRect.top;
+    RECT ClientRect;
+    GetClientRect(hWnd, &ClientRect);
+    Width = ClientRect.right - ClientRect.left;
+    Height = ClientRect.bottom - ClientRect.top;
 }
