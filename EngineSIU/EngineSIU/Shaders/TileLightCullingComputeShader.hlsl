@@ -90,6 +90,40 @@ inline uint2 unflatten2D(uint idx, uint2 dim) {
     return uint2(idx % dim.x, idx / dim.x);
 }
 
+struct Spotlight
+{
+    float3 position;        // 빛의 위치 (view space)
+    float range;            // 빛의 최대 도달 거리 (cone 높이)
+    float3 direction;       // 정규화된 빛의 방향 벡터
+    float angle;            // cone 기준 outer angle (radian)
+};
+
+struct AABB
+{
+    float3 center;          // 뷰 공간에서 AABB 중심
+    float3 extents;         // 반 너비 (extent) 벡터
+};
+
+// SpotLightvsAABB 함수 
+bool SpotlightVsAABB(Spotlight spotlight, AABB aabb)
+{
+    float sphereRadius = length(aabb.extents); // AABB → Bounding Sphere 반지름^2
+    float3 v = aabb.center - spotlight.position; // spotlight → AABB 중심까지 벡터
+    float lenSq = dot(v, v); // v 벡터의 길이^2
+    float v1Len = dot(v, spotlight.direction); // v 벡터를 spotlight 방향으로 투영한 길이
+
+    // cone 외곽선과의 최소 거리 계산 - cos/sin (라디안)
+    float cosA = cos(spotlight.angle);
+    float sinA = sin(spotlight.angle);
+    float perpDist = sqrt(max(lenSq - v1Len * v1Len, 0.0));
+    float distanceClosestPoint = -v1Len * sinA + cosA * perpDist;
+
+    bool angleCull = distanceClosestPoint > sphereRadius; // 제곱으로 수정
+    bool frontCull = v1Len > sphereRadius + spotlight.range;
+    bool backCull = v1Len < -sphereRadius;
+    return !(angleCull || frontCull || backCull);
+}
+
 struct FPointLightGPU
 {
     float3 Position;
@@ -173,13 +207,6 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         minZ = float(groupMinZ);
         maxZ = float(groupMaxZ);        
     }
-        
-        
-        //float sliceNormZ = saturate((linearZ - minZ) / max(1e-5, (maxZ - minZ)));
-        //int sliceIndex = clamp((int) floor(sliceNormZ * NUM_SLICES), 0, NUM_SLICES - 1);
-        //uint sliceBit = (1u << sliceIndex);
-        //InterlockedOr(tileDepthMask, sliceBit);
-        //GroupMemoryBarrierWithGroupSync();
     
     if (Enable25DCulling != 0 && depthSample < 1.0f)
     {
@@ -265,6 +292,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
       
     if (threadID.x == 0 && threadID.y == 0)
     {
+        // 1) Point Light Culling
         [loop]
         for (uint i = 0; i < NumPointLights; ++i)
         {
@@ -323,8 +351,58 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
                 uint bitIdx = i % 32;
                 InterlockedOr(TileLightMask[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1 << bitIdx);
                 InterlockedAdd(hitCount, 1);
-            //hitCount++;
+                //hitCount++;
             }
+        }
+        
+        float3 xyMin = viewCorners[0];
+        float3 xyMax = viewCorners[0];
+        [unroll]
+        for (uint k = 1; k < 4; ++k)
+        {
+            xyMin.xy = min(xyMin.xy, viewCorners[k].xy);
+            xyMax.xy = max(xyMax.xy, viewCorners[k].xy);
+        }
+        float2 tileCenterXY = (xyMin.xy + xyMax.xy) * 0.5;
+        float2 tileHalfSizeXY = (xyMax.xy - xyMin.xy) * 0.5;
+        
+        // 2) SpotLight Culling
+        for (uint j = 0; j < NumSpotLights; ++j)
+        {
+            FSpotLightGPU light = SpotLightBuffer[j];
+            
+            float3 posVS = mul(float4(light.Position, 1.0), View).xyz;
+            float3 dirVS = normalize(mul(float4(light.Direction, 0.0), View).xyz);
+            float halfAngle = radians(light.AngleDeg * 0.5);
+            
+            // slice당 Z 높이와 반높이
+            float sliceHeight = (maxZ - minZ) / float(NUM_SLICES);
+            float halfSliceZ = sliceHeight * 0.5;
+            
+            for (int slice = 0; slice < NUM_SLICES; ++slice)
+            {
+                // 각 슬라이스의 Z 중앙
+                float sliceCenterZ = minZ + sliceHeight * (slice + 0.5);
+
+                // AABB 구성 (XY는 고정, Z만 변화)
+                AABB sliceAABB;
+                sliceAABB.center = float3(tileCenterXY, sliceCenterZ);
+                sliceAABB.extents = float3(tileHalfSizeXY, halfSliceZ);
+
+            
+                // 타일의 Z슬라이스 AABB와 Spotlight 교차 판정
+                Spotlight sl = { posVS, light.Radius, dirVS, halfAngle };
+                if (!SpotlightVsAABB(sl, sliceAABB))
+                    continue;
+            
+            
+                uint bucketIdx = j / 32;
+                uint bitIdx = j % 32;
+                InterlockedOr(TileSpotLightMask[flatTileIndex * SHADER_ENTITY_TILE_BUCKET_COUNT + bucketIdx], 1u << bitIdx);
+                InterlockedAdd(hitCount, 1);
+                break; // 
+            }
+            
         }
     }
     GroupMemoryBarrierWithGroupSync();
@@ -340,7 +418,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             {
                 float3(0, 0, 0),
             float3(0, 0, 1),
-            float3(0, 1, 1),
+            float3(1, 1, 0),
             float3(0, 1, 0),
             float3(1, 1, 0),
             float3(1, 0, 0),
@@ -365,40 +443,6 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             }
         }
     }
-    
-    //// heatmap 시각화
-    //const float3 heatmap[] = {
-    //    float3(0, 0, 0),
-    //    float3(0, 0, 1),
-    //    float3(0, 1, 1),
-    //    float3(0, 1, 0),
-    //    float3(1, 1, 0),
-    //    float3(1, 0, 0),
-    //};
-    //const float maxHeat = 50.0f;
-    //float l = saturate(hitCount / maxHeat) * 5;
-    //float3 c1 = heatmap[floor(l)];
-    //float3 c2 = heatmap[ceil(l)];
-    //float3 color = lerp(c1, c2, frac(l));
-    //float4 result = float4(color, 0.8f);
-
-    //// 타일 내부 모든 픽셀에 출력
-    //for (uint i = 0; i < TILE_SIZE * TILE_SIZE; ++i)
-    //{
-    //    uint2 local = unflatten2D(i, uint2(TILE_SIZE, TILE_SIZE));
-    //    // pixel = 타일 내부에서 0부터 TILE_SIZE−1까지의 오프셋
-    //    // tileCoord * TILE_SIZE = 타일의 왼쪽 상단 좌표
-    //    uint2 pixel = tileCoord * TILE_SIZE + local;
-    //    if (all(pixel < screenSize))
-    //    {
-    //        DebugHeatmap[pixel] = result;
-    //    }
-    //}
-    //for (uint i = 0; i < screenSize.x * screenSize.y; ++i)
-    //{
-    //    uint2 pixel = unflatten2D(i, screenSize);
-    //    DebugHeatmap[pixel] = float4(heatmap[3].xyz, 1.0f);
-    //}
 
     // SV_DispatchThreadID는 전체 화면상의 픽셀 좌표(전역 좌표)를 나타냅니다.
     

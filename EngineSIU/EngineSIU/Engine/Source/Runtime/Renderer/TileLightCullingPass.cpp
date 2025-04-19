@@ -92,7 +92,7 @@ void FTileLightCullingPass::Dispatch(const std::shared_ptr<FEditorViewportClient
     }
     if (SpotLightSRV)
     {
-        Graphics->DeviceContext->CSSetShaderResources(3, 1, &SpotLightSRV);                  // register(t0)
+        Graphics->DeviceContext->CSSetShaderResources(2, 1, &SpotLightSRV);                  // register(t0)
     }
     
     if (DepthSRV)
