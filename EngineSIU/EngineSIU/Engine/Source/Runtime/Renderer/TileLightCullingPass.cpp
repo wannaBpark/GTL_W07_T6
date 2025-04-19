@@ -16,7 +16,7 @@
 
 #define SAFE_RELEASE(p) if (p) { p->Release(); p = nullptr; }
 
-#define _PRINTDEBUG TRUE
+#define _PRINTDEBUG FALSE
 
 FTileLightCullingPass::FTileLightCullingPass()
 {
