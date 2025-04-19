@@ -93,6 +93,7 @@ struct LightPerTiles
 StructuredBuffer<FPointLightInfo> gPointLights : register(t10);
 StructuredBuffer<LightPerTiles> gLightPerTiles : register(t20);
 
+
 float CalculateAttenuation(float Distance, float AttenuationFactor, float Radius)
 {
     if (Distance > Radius)
