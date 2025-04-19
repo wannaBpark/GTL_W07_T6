@@ -417,7 +417,7 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             const float3 heatmap[] =
             {
                 float3(0, 0, 0),
-            float3(0, 0, 1),
+            float3(1, 0, 1),
             float3(1, 1, 0),
             float3(0, 1, 0),
             float3(1, 1, 0),
