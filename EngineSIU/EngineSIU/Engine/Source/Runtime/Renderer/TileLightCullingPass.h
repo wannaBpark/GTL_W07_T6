@@ -77,6 +77,8 @@ public:
     ID3D11Buffer* GetTileConstantBuffer() { return TileLightConstantBuffer; }
     TArray<UPointLightComponent*> GetPointLights() { return PointLights; }
     TArray<TArray<uint32>> GetPointLightPerTiles() { return PointLightPerTiles;  }
+    TArray<USpotLightComponent*> GetSpotLights() { return SpotLights; }
+    TArray<TArray<uint32>> GetSpotLightPerTiles() { return SpotLightPerTiles; }
 
     uint32 GetTotalTileCount() { return TILE_COUNT; }
 

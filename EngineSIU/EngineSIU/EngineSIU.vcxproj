@@ -302,7 +302,9 @@
     <None Include="Shaders\FogShader.hlsl" />
     <None Include="Shaders\GizmoPixelShader.hlsl" />
     <None Include="Shaders\GizmoVertexShader.hlsl" />
-    <None Include="Shaders\Light.hlsl" />
+    <None Include="Shaders\Light.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="Shaders\PixelBillBoardShader.hlsl" />
     <None Include="Shaders\PostProcessCompositingShader.hlsl" />
     <None Include="Shaders\ShaderLine.hlsl" />
