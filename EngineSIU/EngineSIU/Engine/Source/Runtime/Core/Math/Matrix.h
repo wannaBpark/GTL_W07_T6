@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Serialization/Archive.h"
 
+struct FPlane;
 struct FVector;
 struct FVector4;
 struct FRotator;
@@ -44,6 +45,16 @@ public:
     static FMatrix GetTranslationMatrix(const FVector& InPosition);
     static FMatrix GetRotationMatrix(const FRotator& InRotation);
     static FMatrix GetRotationMatrix(const FQuat& InRotation);
+    //
+    // bool MakeFrustumPlane(float A, float B, float C, float D, FPlane& OutPlane);
+    bool  GetFrustumNearPlane(FPlane& OutPlane) const;
+    bool  GetFrustumFarPlane(FPlane& OutPlane) const;
+    bool  GetFrustumLeftPlane(FPlane& OutPlane) const;
+    bool  GetFrustumRightPlane(FPlane& OutPlane) const;
+    bool  GetFrustumTopPlane(FPlane& OutPlane) const;
+    bool  GetFrustumBottomPlane(FPlane& OutPlane) const;
+    
+
 
     FQuat ToQuat(const FMatrix& M) const;
 };

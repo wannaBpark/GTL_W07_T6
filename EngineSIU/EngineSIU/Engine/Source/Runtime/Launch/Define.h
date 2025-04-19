@@ -262,6 +262,24 @@ struct FBoundingBox
 
         return true;
     }
+    // 바운딩 박스의 중심점을 계산하는 헬퍼 함수 
+    FVector GetCenter() const
+    {
+        return (min + max) * 0.5f;
+    }
+
+    // 바운딩 박스의 범위(크기의 절반)를 계산하는 헬퍼 함수 
+    FVector GetExtent() const
+    {
+        return (max - min) * 0.5f;
+    }
+
+    // 바운딩 박스가 유효한지 확인하는 헬퍼 함수 
+    bool IsValid() const
+    {
+        // 간단한 유효성 검사: min의 모든 성분이 max의 해당 성분보다 작거나 같아야 함
+        return min.X <= max.X && min.Y <= max.Y && min.Z <= max.Z;
+    }
 };
 
 struct FCone

@@ -9,6 +9,8 @@
 #include "HAL/PlatformType.h"
 #include <cmath>
 
+#include "Plane.h"
+
 
 // 단위 행렬 정의
 const FMatrix FMatrix::Identity = { {
@@ -330,6 +332,86 @@ FMatrix FMatrix::GetRotationMatrix(const FQuat& InRotation)
 
     return Result;
 }
+
+bool MakeFrustumPlane(float A, float B, float C, float D, FPlane& OutPlane)
+{
+    const float	LengthSquared = A * A + B * B + C * C;
+    if (LengthSquared > 0.00001f * 0.00001f)
+    {
+        const float	InvLength = FMath::InvSqrt(LengthSquared);
+        OutPlane = FPlane(-A * InvLength, -B * InvLength, -C * InvLength, D * InvLength);
+        return true;
+    }
+    else
+        return false;
+}
+
+bool FMatrix::GetFrustumNearPlane(FPlane& OutPlane) const
+{
+    return MakeFrustumPlane(
+    M[0][3] - M[0][2],
+    M[1][3] - M[1][2],
+    M[2][3] - M[2][2],
+    M[3][3] - M[3][2],
+    OutPlane
+    );
+}
+
+bool FMatrix::GetFrustumFarPlane(FPlane& OutPlane) const
+{
+    return MakeFrustumPlane(
+    M[0][2],
+    M[1][2],
+    M[2][2],
+    M[3][2],
+    OutPlane
+    );
+}
+
+bool FMatrix::GetFrustumLeftPlane(FPlane& OutPlane) const
+{
+    return MakeFrustumPlane(
+        M[0][3] + M[0][0],
+        M[1][3] + M[1][0],
+        M[2][3] + M[2][0],
+        M[3][3] + M[3][0],
+        OutPlane
+    );
+}
+
+bool FMatrix::GetFrustumRightPlane(FPlane& OutPlane) const
+{
+    return MakeFrustumPlane(
+        M[0][3] - M[0][0],
+        M[1][3] - M[1][0],
+        M[2][3] - M[2][0],
+        M[3][3] - M[3][0],
+        OutPlane
+    );
+}
+
+bool FMatrix::GetFrustumTopPlane(FPlane& OutPlane) const
+{
+    return MakeFrustumPlane(
+        M[0][3] - M[0][1],
+        M[1][3] - M[1][1],
+        M[2][3] - M[2][1],
+        M[3][3] - M[3][1],
+        OutPlane
+    );
+}
+
+bool FMatrix::GetFrustumBottomPlane(FPlane& OutPlane) const
+{
+    return MakeFrustumPlane(
+        M[0][3] + M[0][1],
+        M[1][3] + M[1][1],
+        M[2][3] + M[2][1],
+        M[3][3] + M[3][1],
+        OutPlane
+    );
+}
+
 
 FQuat FMatrix::ToQuat(const FMatrix& M) const
 {
