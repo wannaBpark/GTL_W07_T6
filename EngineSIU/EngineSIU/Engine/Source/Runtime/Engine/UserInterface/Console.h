@@ -20,6 +20,7 @@ public:
     // @todo Stat-FPS Default 설정 복구 (showFPS = false, showRender = false)
     bool ShowFPS = true;
     bool ShowMemory = false;
+    bool ShowLight = false;
     bool ShowRender = true;
 
     void ToggleStat(const std::string& Command);

@@ -2,6 +2,15 @@
 #include <cstdarg>
 #include <cstdio>
 #include "UnrealEd/EditorViewportClient.h"
+#include "Engine/Engine.h"
+#include "Renderer/UpdateLightBufferPass.h"
+#include "UObject/Casts.h"
+#include "UObject/UObjectIterator.h"
+#include "Components/Light/LightComponent.h"
+#include "Components/Light/PointLightComponent.h"
+#include "Components/Light/SpotLightComponent.h"
+#include "Components/Light/DirectionalLightComponent.h"
+#include "Components/Light/AmbientLightComponent.h"
 
 void StatOverlay::ToggleStat(const std::string& Command)
 {
@@ -15,10 +24,16 @@ void StatOverlay::ToggleStat(const std::string& Command)
         ShowMemory = true;
         ShowRender = true;
     }
+    else if (Command == "stat light")
+    {
+        ShowLight = true;
+        ShowRender = true;
+    }
     else if (Command == "stat none")
     {
         ShowFPS = false;
         ShowMemory = false;
+        ShowLight = false;
         ShowRender = false;
     }
 }
@@ -35,16 +50,16 @@ void StatOverlay::Render(ID3D11DeviceContext* Context, UINT Width, UINT Height) 
     const ImVec2 WindowSize(DisplaySize.x * 0.5f, DisplaySize.y * 0.5f);
     // 창을 중앙에 배치하기 위해 위치를 계산합니다.
     const ImVec2 WindowPos((DisplaySize.x - WindowSize.x) * 0.5f, (DisplaySize.y - WindowSize.y) * 0.5f);
-    
+
     ImGui::SetNextWindowPos(WindowPos, ImGuiCond_Always);
     ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Always);
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
     ImGui::Begin("Stat Overlay", nullptr,
-                 ImGuiWindowFlags_NoTitleBar |
-                 ImGuiWindowFlags_NoResize |
-                 ImGuiWindowFlags_NoMove |
-                 ImGuiWindowFlags_NoScrollbar);
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoScrollbar);
 
     if (ShowFPS)
     {
@@ -60,6 +75,7 @@ void StatOverlay::Render(ID3D11DeviceContext* Context, UINT Width, UINT Height) 
 
         ImGui::Text("%.2f FPS", FPS);
         ImGui::Text("%.2f ms", FrameTimeMS);
+        ImGui::Text("\n");
 
         LastTime = CurrentTime;
     }
@@ -71,6 +87,42 @@ void StatOverlay::Render(ID3D11DeviceContext* Context, UINT Width, UINT Height) 
         ImGui::Text("Allocated Container Count: %llu", FPlatformMemory::GetAllocationCount<EAT_Container>());
         ImGui::Text("Allocated Container memory: %llu B", FPlatformMemory::GetAllocationBytes<EAT_Container>());
     }
+
+    if (ShowLight)
+    {
+        // @todo Find Better Way to Get Light Count
+        int NumPointLights = 0;
+        int NumSpotLights = 0;
+        for (const auto iter : TObjectRange<ULightComponentBase>())
+        {
+            if (iter->GetWorld() == GEngine->ActiveWorld)
+            {
+                if (UPointLightComponent* PointLight = Cast<UPointLightComponent>(iter))
+                {
+                    NumPointLights++;
+                }
+                else if (USpotLightComponent* SpotLight = Cast<USpotLightComponent>(iter))
+                {
+                    NumSpotLights++;
+                }
+                /*
+                else if (UDirectionalLightComponent* DirectionalLight = Cast<UDirectionalLightComponent>(iter))
+                {
+                    DirectionalLights.Add(DirectionalLight);
+                }
+                else if (UAmbientLightComponent* AmbientLight = Cast<UAmbientLightComponent>(iter))
+                {
+                    AmbientLights.Add(AmbientLight);
+                }
+                */
+            }
+        }
+        ImGui::Text("[ Light Counters ]\n");
+        ImGui::Text("Point Light: %d", NumPointLights);
+        ImGui::Text("Spot Light: %d", NumSpotLights);
+        ImGui::Text("\n");
+    }
+
     ImGui::PopStyleColor();
     ImGui::End();
 }
@@ -107,16 +159,16 @@ void Console::Draw() {
 
     // 창 크기 및 위치 계산
     const ImVec2 DisplaySize = ImGui::GetIO().DisplaySize;
-    
+
     // 콘솔 창의 크기와 위치 설정
     const float ExpandedHeight = DisplaySize.y * 0.4f; // 확장된 상태일 때 높이 (예: 화면의 40%)
     constexpr float CollapsedHeight = 30.0f;               // 축소된 상태일 때 높이
     const float CurrentHeight = bExpand ? ExpandedHeight : CollapsedHeight;
-    
+
     // 왼쪽 하단에 위치하도록 계산 (창의 좌측 하단이 화면의 좌측 하단에 위치)
     const ImVec2 WindowSize(DisplaySize.x * 0.5f, CurrentHeight); // 폭은 화면의 40%
     const ImVec2 WindowPos(0, DisplaySize.y - CurrentHeight);
-    
+
     // 창 위치와 크기를 고정
     ImGui::SetNextWindowPos(WindowPos, ImGuiCond_Always);
     ImGui::SetNextWindowSize(WindowSize, ImGuiCond_Always);
@@ -131,7 +183,7 @@ void Console::Draw() {
         ImGui::End();
         return;
     }
-    
+
     // 버튼 UI (로그 수준별 추가)
     if (ImGui::Button("Clear"))
     {
