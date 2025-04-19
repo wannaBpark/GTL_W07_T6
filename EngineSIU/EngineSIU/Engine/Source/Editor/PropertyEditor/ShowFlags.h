@@ -12,7 +12,8 @@ enum Type : uint64
     SF_Primitives = 1ULL << 1,
     SF_BillboardText = 1ULL << 2,
     SF_UUIDText = 1ULL << 3,
-    SF_Fog = 1ULL << 4
+    SF_Fog = 1ULL << 4,
+    SF_LightWireframe = 1ULL << 5,
 };
 }
 
@@ -20,7 +21,7 @@ class UWorld;
 class ShowFlags : public IWindowToggleable
 {
 private:
-	ShowFlags();
+	ShowFlags() = default;
 
 public:
 	static ShowFlags& GetInstance();
@@ -34,7 +35,7 @@ public:
 			bWasOpen = false;
 		}
 	}
-	uint64 currentFlags;
+	uint64 currentFlags = 63;
 private:
 	bool bWasOpen = true;
 	UINT width;

@@ -1,10 +1,5 @@
 #include "PropertyEditor/ShowFlags.h"
 
-ShowFlags::ShowFlags()
-    : currentFlags(31)
-{
-}
-
 ShowFlags& ShowFlags::GetInstance()
 {
     static ShowFlags instance;
@@ -13,40 +8,34 @@ ShowFlags& ShowFlags::GetInstance()
 
 void ShowFlags::Draw(const std::shared_ptr<FEditorViewportClient>& ActiveViewport) const
 {
-    float controllWindowWidth = static_cast<float>(width) * 0.12f;
-    float controllWindowHeight = static_cast<float>(height) * 0.f;
-
-    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.64f;
-    float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.f;
-
-    // 창 크기와 위치 설정
-    ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
-    ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
-
-    if (ImGui::Begin("ShowFlags"))
+    if (ImGui::Button("Show", ImVec2(60, 32)))
     {
-        const char* items[] = { "AABB", "Primitives", "BillBoardText", "UUID", "Fog" };
-        uint64 curFlag = ActiveViewport->GetShowFlag();
-        bool selected[IM_ARRAYSIZE(items)] = {
+        ImGui::OpenPopup("ShowFlags");
+    }
+
+    const char* items[] = { "AABB", "Primitives", "BillBoardText", "UUID", "Fog", "LightWireframe" };
+    uint64 curFlag = ActiveViewport->GetShowFlag();
+
+    if (ImGui::BeginPopup("ShowFlags"))
+    {
+        bool selected[IM_ARRAYSIZE(items)] = 
+        {
             static_cast<bool>(curFlag & EEngineShowFlags::SF_AABB),
             static_cast<bool>(curFlag & EEngineShowFlags::SF_Primitives),
             static_cast<bool>(curFlag & EEngineShowFlags::SF_BillboardText),
             static_cast<bool>(curFlag & EEngineShowFlags::SF_UUIDText),
-            static_cast<bool>(curFlag & EEngineShowFlags::SF_Fog)
+            static_cast<bool>(curFlag & EEngineShowFlags::SF_Fog),
+            static_cast<bool>(curFlag & EEngineShowFlags::SF_LightWireframe)
         }; // 각 항목의 체크 상태 저장
 
-        if (ImGui::BeginCombo("Show Flags", "Select Show Flags"))
+        for (int i = 0; i < IM_ARRAYSIZE(items); i++)
         {
-            for (int i = 0; i < IM_ARRAYSIZE(items); i++)
-            {
-                ImGui::Checkbox(items[i], &selected[i]);
-            }
-            ImGui::EndCombo();
+            ImGui::Checkbox(items[i], &selected[i]);
         }
-        ActiveViewport->SetShowFlag(ConvertSelectionToFlags(selected));
 
+        ActiveViewport->SetShowFlag(ConvertSelectionToFlags(selected));
+        ImGui::EndPopup();
     }
-    ImGui::End(); // 윈도우 종료
 }
 
 uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[]) const
@@ -63,6 +52,8 @@ uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[]) const
         flags |= static_cast<uint64>(EEngineShowFlags::SF_UUIDText);
     if (selected[4])
         flags |= static_cast<uint64>(EEngineShowFlags::SF_Fog);
+    if (selected[5])
+        flags |= static_cast<uint64>(EEngineShowFlags::SF_LightWireframe);
     return flags;
 }
 
