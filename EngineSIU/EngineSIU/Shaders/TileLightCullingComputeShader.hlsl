@@ -1,5 +1,5 @@
 // 상수 정의
-#define TILE_SIZE 32
+#define TILE_SIZE 16
 #define MAX_LIGHTS_PER_TILE 2048
 #define SHADER_ENTITY_TILE_BUCKET_COUNT (MAX_LIGHTS_PER_TILE / 32)
 #define THREAD_GROUP_SIZE 8
@@ -252,7 +252,8 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
     float3 corners[8];
     float nearZ = NearZ;
     float farZ = FarZ;
-
+    float4 clipNear;
+    float4 clipFar;
     // tile clip corner 좌표 → view 변환
     float3 viewCorners[8];
     [unroll]
@@ -265,8 +266,8 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
         // i=3: (tileMax.x, tileMax.y) → 오른쪽 하단
         uv /= screenSize;
         uv.y = 1.0 - uv.y; // y축 반전해야 카메라 위로 들어올렸을 때 사각형은 아래로 감
-        float4 clipNear = float4(uv * 2.0 - 1.0, nearZ, 1.0);
-        float4 clipFar =  float4(uv * 2.0 - 1.0, farZ , 1.0);
+        clipNear = float4(uv * 2.0 - 1.0, nearZ, 1.0);
+        clipFar =  float4(uv * 2.0 - 1.0, farZ , 1.0);
 
         float4 viewNear = mul(clipNear, InverseProjection);
         float4 viewFar =  mul(clipFar , InverseProjection);
@@ -373,10 +374,10 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             
             float3 posVS = mul(float4(light.Position, 1.0), View).xyz;
             float3 dirVS = normalize(mul(float4(light.Direction, 0.0), View).xyz);
-            float halfAngle = radians(light.AngleDeg * 0.5);
+            float halfAngle = radians(light.AngleDeg);
             
             // slice당 Z 높이와 반높이
-            float sliceHeight = (maxZ - minZ) / float(NUM_SLICES);
+            float sliceHeight = (clipFar - clipNear) / float(NUM_SLICES);
             float halfSliceZ = sliceHeight * 0.5;
             
             for (int slice = 0; slice < NUM_SLICES; ++slice)
@@ -417,13 +418,13 @@ void mainCS(uint3 groupID : SV_GroupID, uint3 dispatchID : SV_DispatchThreadID, 
             const float3 heatmap[] =
             {
                 float3(0, 0, 0),
-            float3(1, 0, 1),
-            float3(1, 1, 0),
+            float3(0, 0, 1),
+            float3(0, 1, 1),
             float3(0, 1, 0),
             float3(1, 1, 0),
             float3(1, 0, 0),
             };
-            const float maxHeat = 50.0f;
+            const float maxHeat = 5.0f;
             float l = saturate(hitCount / maxHeat) * 5;
             float3 c1 = heatmap[floor(l)];
             float3 c2 = heatmap[ceil(l)];

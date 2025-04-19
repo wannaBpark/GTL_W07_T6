@@ -67,9 +67,6 @@ void FDXDShaderManager::UpdateShaderIfOutdated(const std::wstring Key, const std
     {
         // Pixel Shader Map에 존재한다면 해당 PS 제거
         if (PixelShaders.Contains(Key)) { 
-            PixelShaders[Key]->Release();
-            PixelShaders[Key] = nullptr;
-
             (Defines)
                 ? AddPixelShader(Key, FilePath, EntryPoint, Defines)
                 : AddPixelShader(Key, FilePath, EntryPoint);

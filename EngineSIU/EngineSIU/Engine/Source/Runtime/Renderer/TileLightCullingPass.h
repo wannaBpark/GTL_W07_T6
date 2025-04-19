@@ -116,7 +116,7 @@ private:
     
     ID3D11Buffer* TileLightConstantBuffer;
 
-    const uint32 TILE_SIZE = 32;
+    const uint32 TILE_SIZE = 16;
     const uint32 MAX_LIGHTS_PER_TILE = 2048;
     
     uint32 TILE_COUNT_X;
