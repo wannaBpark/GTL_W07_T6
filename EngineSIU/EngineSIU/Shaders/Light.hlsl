@@ -209,18 +209,21 @@ float4 DirectionalLight(int nIndex, float3 WorldPosition, float3 WorldNormal, fl
     return float4(Lit * LightInfo.Intensity, 1.0);
 }
 
-float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
+float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor, uint TileIndex)
 {
     float4 FinalColor = float4(0.0, 0.0, 0.0, 0.0);
-    
-    // 다소 비효율적일 수도 있음.
-/*
-    [unroll(MAX_POINT_LIGHT)]
-    for (int i = 0; i < PointLightsCount; i++)
+
+    // 현재 타일의 조명 정보 읽기
+    LightPerTiles TileLights = gLightPerTiles[TileIndex];
+    // 조명 기여 누적 (예시: 단순히 조명 색상을 더함)
+    for (uint i = 0; i < TileLights.NumLights; ++i)
     {
-        FinalColor += PointLight(i, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
+        // tileLights.Indices[i] 는 전역 조명 인덱스
+        uint gPointLightIndex = TileLights.Indices[i];
+        //FPointLightInfo light = gPointLights[gPointLightIndex];
+        FinalColor += PointLight(gPointLightIndex, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }
-*/    
+    
     [unroll(MAX_SPOT_LIGHT)]
     for (int j = 0; j < SpotLightsCount; j++)
     {
@@ -234,7 +237,38 @@ float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPositi
     [unroll(MAX_AMBIENT_LIGHT)]
     for (int l = 0; l < AmbientLightsCount; l++)
     {
-        FinalColor += float4(Ambient[l].AmbientColor.rgb, 0.0);
+        FinalColor += float4(Ambient[l].AmbientColor.rgb * DiffuseColor, 0.0);
+        FinalColor.a = 1.0;
+    }
+    
+    return FinalColor;
+}
+
+float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
+{
+    float4 FinalColor = float4(0.0, 0.0, 0.0, 0.0);
+
+    // 다소 비효율적일 수도 있음.
+    [unroll(MAX_POINT_LIGHT)]
+    for (int i = 0; i < PointLightsCount; i++)
+    {
+        FinalColor += PointLight(i, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
+    }
+
+    [unroll(MAX_SPOT_LIGHT)]
+    for (int j = 0; j < SpotLightsCount; j++)
+    {
+        FinalColor += SpotLight(j, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
+    }
+    [unroll(MAX_DIRECTIONAL_LIGHT)]
+    for (int k = 0; k < DirectionalLightsCount; k++)
+    {
+        FinalColor += DirectionalLight(k, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
+    }
+    [unroll(MAX_AMBIENT_LIGHT)]
+    for (int l = 0; l < AmbientLightsCount; l++)
+    {
+        FinalColor += float4(Ambient[l].AmbientColor.rgb * DiffuseColor, 0.0);
         FinalColor.a = 1.0;
     }
     

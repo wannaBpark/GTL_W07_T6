@@ -63,6 +63,7 @@ private:
 
     ID3D11Buffer* PointLightBuffer;
     ID3D11ShaderResourceView* PointLightSRV;
+    
     ID3D11Buffer* PointLightPerTilesBuffer;
     ID3D11ShaderResourceView* PointLightPerTilesSRV;
 
