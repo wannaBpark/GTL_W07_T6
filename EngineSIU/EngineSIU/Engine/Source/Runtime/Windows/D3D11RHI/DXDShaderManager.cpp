@@ -53,15 +53,12 @@ void FDXDShaderManager::UpdateShaderIfOutdated(const std::wstring Key, const std
         ShaderTimeStamps.Add(Key, currentTime);
         return;
     }
-    if (*FoundTime == currentTime) // Map에 저장된 마지막 수정 타임이 현재와 똑같을 경우
-        return;
+    //if (*FoundTime == currentTime) // Map에 저장된 마지막 수정 타임이 현재와 똑같을 경우
+    //    return;
 
     if (IsVertexShader)
     {
-        // Vertex Shader Map에 존재한다면 해당 VS, Input Layout 제거
-        if (VertexShaders.Contains(Key)) { VertexShaders[Key]->Release(); VertexShaders[Key] = nullptr; }
-        if (InputLayouts.Contains(Key)) { InputLayouts[Key]->Release();    InputLayouts[Key] = nullptr; }
-
+        ShaderTimeStamps[Key] = currentTime;
         (Defines)
             ? AddVertexShaderAndInputLayout(Key, FilePath, EntryPoint, Layout, LayoutSize, Defines)
             : AddVertexShaderAndInputLayout(Key, FilePath, EntryPoint, Layout, LayoutSize);
@@ -397,9 +394,12 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::ws
     {
         RegisterShaderForReload(Key, FileName, EntryPoint, false, nullptr, nullptr, 0);
     }
+
+    // Pixel Shader Map에 존재한다면 해당 PS 제거
+    if (PixelShaders.Contains(Key)) { PixelShaders[Key]->Release();PixelShaders[Key] = nullptr; }
+
     PixelShaders[Key] = NewPixelShader;
     
-
     return S_OK;
 }
 
@@ -448,6 +448,10 @@ HRESULT FDXDShaderManager::AddPixelShader(const std::wstring& Key, const std::ws
     {
         RegisterShaderForReload(Key, FileName, EntryPoint, false, const_cast<D3D_SHADER_MACRO*>(defines), nullptr, 0);
     }
+
+    // Pixel Shader Map에 존재한다면 해당 PS 제거
+    if (PixelShaders.Contains(Key)) { PixelShaders[Key]->Release();PixelShaders[Key] = nullptr; }
+
 	PixelShaders[Key] = NewPixelShader;
 	return S_OK;
 }
@@ -643,6 +647,10 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
         RegisterShaderForReload(Key, FileName, EntryPoint, true, nullptr, const_cast<D3D11_INPUT_ELEMENT_DESC*>(Layout), LayoutSize);
     }
 
+    // Vertex Shader Map에 존재한다면 해당 VS, Input Layout 제거
+    if (VertexShaders.Contains(Key)) { VertexShaders[Key]->Release(); VertexShaders[Key] = nullptr; }
+    if (InputLayouts.Contains(Key)) { InputLayouts[Key]->Release();    InputLayouts[Key] = nullptr; }
+
     VertexShaders[Key] = NewVertexShader;
     InputLayouts[Key] = NewInputLayout;
 
@@ -694,6 +702,10 @@ HRESULT FDXDShaderManager::AddVertexShaderAndInputLayout(const std::wstring& Key
     {
         RegisterShaderForReload(Key, FileName, EntryPoint, true, const_cast<D3D_SHADER_MACRO*>(defines), const_cast<D3D11_INPUT_ELEMENT_DESC*>(Layout), LayoutSize);
     }
+
+    // Vertex Shader Map에 존재한다면 해당 VS, Input Layout 제거
+    if (VertexShaders.Contains(Key)) { VertexShaders[Key]->Release(); VertexShaders[Key] = nullptr; }
+    if (InputLayouts.Contains(Key)) { InputLayouts[Key]->Release();    InputLayouts[Key] = nullptr; }
 
     VertexShaders[Key] = NewVertexShader;
     InputLayouts[Key] = NewInputLayout;
