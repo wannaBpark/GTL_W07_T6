@@ -91,8 +91,10 @@ struct LightPerTiles
     uint Padding[3];
 };
 StructuredBuffer<FPointLightInfo> gPointLights : register(t10);
-StructuredBuffer<LightPerTiles> gLightPerTiles : register(t20);
+StructuredBuffer<LightPerTiles> gPointLightPerTiles : register(t20);
 
+StructuredBuffer<FSpotLightInfo> gSpotLights : register(t11);
+StructuredBuffer<LightPerTiles> gSpotLightPerTiles : register(t21);
 
 float CalculateAttenuation(float Distance, float AttenuationFactor, float Radius)
 {
@@ -130,7 +132,7 @@ float CalculateSpecular(float3 WorldNormal, float3 ToLightDir, float3 ViewDir, f
     float3 HalfDir = normalize(ToLightDir + ViewDir); // Blinn-Phong
     float Spec = pow(max(dot(WorldNormal, HalfDir), 0.0), Shininess);
 #endif
-    return Spec * SpecularStrength;
+    return Spec * SpecularStrength; 
 }
 
 float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float WorldViewPosition, float3 DiffuseColor)
@@ -162,7 +164,8 @@ float4 PointLight(int Index, float3 WorldPosition, float3 WorldNormal, float Wor
 
 float4 SpotLight(int Index, float3 WorldPosition, float3 WorldNormal, float3 WorldViewPosition, float3 DiffuseColor)
 {
-    FSpotLightInfo LightInfo = SpotLights[Index];
+    FSpotLightInfo LightInfo = gSpotLights[Index];
+    // FSpotLightInfo LightInfo = SpotLights[Index];
     
     float3 ToLight = LightInfo.Position - WorldPosition;
     float Distance = length(ToLight);
@@ -215,7 +218,7 @@ float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPositi
     float4 FinalColor = float4(0.0, 0.0, 0.0, 0.0);
 
     // 현재 타일의 조명 정보 읽기
-    LightPerTiles TileLights = gLightPerTiles[TileIndex];
+    LightPerTiles TileLights = gPointLightPerTiles[TileIndex];
     // 조명 기여 누적 (예시: 단순히 조명 색상을 더함)
     for (uint i = 0; i < TileLights.NumLights; ++i)
     {
@@ -224,19 +227,29 @@ float4 Lighting(float3 WorldPosition, float3 WorldNormal, float3 WorldViewPositi
         //FPointLightInfo light = gPointLights[gPointLightIndex];
         FinalColor += PointLight(gPointLightIndex, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }
-    
-    [unroll(MAX_SPOT_LIGHT)]
-    for (int j = 0; j < SpotLightsCount; j++)
+
+    TileLights = gSpotLightPerTiles[TileIndex];
+    // 조명 기여 누적 (예시: 단순히 조명 색상을 더함)
+    for (uint i = 0; i < TileLights.NumLights; ++i)
     {
-        FinalColor += SpotLight(j, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
+        // tileLights.Indices[i] 는 전역 조명 인덱스
+        uint gSpotLightIndex = TileLights.Indices[i];
+        //FPointLightInfo light = gPointLights[gPointLightIndex];
+        FinalColor += SpotLight(gSpotLightIndex, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }
+    
+    // [unroll(MAX_SPOT_LIGHT)]
+    // for (int j = 0; j < SpotLightsCount; j++)
+    // {
+    //     FinalColor += SpotLight(j, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
+    // }
     [unroll(MAX_DIRECTIONAL_LIGHT)]
     for (int k = 0; k < DirectionalLightsCount; k++)
     {
         FinalColor += DirectionalLight(k, WorldPosition, WorldNormal, WorldViewPosition, DiffuseColor);
     }
     [unroll(MAX_AMBIENT_LIGHT)]
-    for (int l = 0; l < AmbientLightsCount; l++)
+    for (int l = 0; l < AmbientLightsCount; l++) 
     {
         FinalColor += float4(Ambient[l].AmbientColor.rgb * DiffuseColor, 0.0);
         FinalColor.a = 1.0;

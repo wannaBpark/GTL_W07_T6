@@ -369,6 +369,9 @@ void FTileLightCullingPass::Release()
     
     SAFE_RELEASE(PointLightBuffer);
     SAFE_RELEASE(PointLightSRV);
+
+    SAFE_RELEASE(SpotLightBuffer);
+    SAFE_RELEASE(SpotLightSRV);
 }
 
 void FTileLightCullingPass::ClearUAVs()
@@ -470,38 +473,59 @@ void FTileLightCullingPass::ParseTileLightMaskData()
         return;
     }
 
+    if (!CopyTileLightMaskToCPU(SpotLightMaskData, TileSpotUAVBuffer))
+    {
+        UE_LOG(LogLevel::Error, TEXT("Tile Spot LightMask 데이터를 CPU로 복사 실패"));
+        return;
+    }
+
     // 화면 타일 수: TileUAVBuffer의 데이터는 각 타일마다 SHADER_ENTITY_TILE_BUCKET_COUNT개의 uint32로 구성
 
     uint32 TotalTiles = TILE_COUNT_X * TILE_COUNT_Y; // MaskData사이즈 = TILECNT_X * TILECNT_Y * 32비트
     PointLightPerTiles.SetNum(TotalTiles);
+    SpotLightPerTiles.SetNum(TotalTiles);
 
     uint32 BucketsPerTile = SHADER_ENTITY_TILE_BUCKET_COUNT;
-    uint32 TotalLightCount = PointLights.Num(); 
+    uint32 TotalPointLightCount = PointLights.Num(); 
+    uint32 TotalSpotLightCount = SpotLights.Num();
 
     // 각 타일을 순회하면서 각 타일별 비트마스크를 파싱
     for (uint32 tileIndex = 0; tileIndex < TotalTiles; ++tileIndex)
     {
-        TArray<uint32> LightIndices;
+        TArray<uint32> PointLightIndices;
+        TArray<uint32> SpotLightIndices;
 
         uint32 startIndex = tileIndex * BucketsPerTile;
         for (uint32 bucket = 0; bucket < BucketsPerTile; ++bucket)
         {
-            uint32 mask = PointLightMaskData[startIndex + bucket];
+            uint32 pointMask = PointLightMaskData[startIndex + bucket];
+            uint32 spotMask = SpotLightMaskData[startIndex + bucket];
             for (uint32 bit = 0; bit < 32; ++bit)
             {
-                if (mask & (1u << bit))
+                if (pointMask & (1u << bit))
                 {
                     // 전역 조명 인덱스는 bucket * 32 + bit 로 계산됨.
                     uint32 globalLightIndex = bucket * 32 + bit;
                     // 전역 조명 인덱스가 총 조명 수보다 작은 경우에만 추가
-                    if (globalLightIndex < TotalLightCount)
+                    if (globalLightIndex < TotalPointLightCount)
                     {
-                        LightIndices.Add(globalLightIndex);
+                        PointLightIndices.Add(globalLightIndex);
+                    }
+                }
+                if (spotMask & (1u << bit))
+                {
+                    // 전역 조명 인덱스는 bucket * 32 + bit 로 계산됨.
+                    uint32 globalLightIndex = bucket * 32 + bit;
+                    // 전역 조명 인덱스가 총 조명 수보다 작은 경우에만 추가
+                    if (globalLightIndex < TotalSpotLightCount)
+                    {
+                        SpotLightIndices.Add(globalLightIndex);
                     }
                 }
             }
         }
-        PointLightPerTiles[tileIndex] = LightIndices;
+        PointLightPerTiles[tileIndex] = PointLightIndices;
+        SpotLightPerTiles[tileIndex] = SpotLightIndices;
     }
 
 #if _PRINTDEBUG
@@ -514,37 +538,55 @@ void FTileLightCullingPass::ParseTileLightMaskData()
 void FTileLightCullingPass::PrintLightTilesMapping()
 {
     // 총 전역 조명 수
-    uint32 TotalLights = PointLights.Num();
+    uint32 TotalPointLights = PointLights.Num();
+    uint32 TotalSpotLights = SpotLights.Num();
 
-    TArray<TArray<uint32>> LightTiles;
-    LightTiles.SetNum(TotalLights);
+    TArray<TArray<uint32>> PointLightTiles;
+    TArray<TArray<uint32>> SpotLightTiles;
+    PointLightTiles.SetNum(TotalPointLights);
+    SpotLightTiles.SetNum(TotalSpotLights);
 
-    uint32 TotalTiles = PointLightPerTiles.Num();
-    for (uint32 tileIndex = 0; tileIndex < TotalTiles; ++tileIndex)
+    uint32 TotalPointLightTiles = PointLightPerTiles.Num();
+    uint32 TotalSpotLightTiles = SpotLightPerTiles.Num();
+    for (uint32 tileIndex = 0; tileIndex < TotalPointLightTiles; ++tileIndex)
     {
         // 해당 타일에 영향을 주는 조명 인덱스 목록
         const TArray<uint32>& LightIndices = PointLightPerTiles[tileIndex];
         for (uint32 idx = 0; idx < LightIndices.Num(); ++idx)
         {
             uint32 globalLightIndex = LightIndices[idx]; // 전역 조명 인덱스 (예: 0, 4, 7 등)
-            if (globalLightIndex < TotalLights)
+            if (globalLightIndex < TotalPointLights)
             {
-                LightTiles[globalLightIndex].Add(tileIndex);
+                PointLightTiles[globalLightIndex].Add(tileIndex);
+            }
+        }
+    }
+
+    for (uint32 tileIndex = 0; tileIndex < TotalSpotLightTiles; ++tileIndex)
+    {
+        // 해당 타일에 영향을 주는 조명 인덱스 목록
+        const TArray<uint32>& LightIndices = SpotLightPerTiles[tileIndex];
+        for (uint32 idx = 0; idx < LightIndices.Num(); ++idx)
+        {
+            uint32 globalLightIndex = LightIndices[idx]; // 전역 조명 인덱스 (예: 0, 4, 7 등)
+            if (globalLightIndex < TotalSpotLights)
+            {
+                SpotLightTiles[globalLightIndex].Add(tileIndex);
             }
         }
     }
 
     // 각 조명별로 어떤 타일이 영향을 받는지 출력
-    for (uint32 lightIndex = 0; lightIndex < TotalLights; ++lightIndex)
+    for (uint32 lightIndex = 0; lightIndex < TotalPointLights; ++lightIndex)
     {
-        const TArray<uint32>& Tiles = LightTiles[lightIndex];
+        const TArray<uint32>& Tiles = PointLightTiles[lightIndex];
         if (Tiles.Num() == 0)
         {
             continue; // 해당 조명이 어느 타일에도 영향을 주지 않으면 생략
         }
 
         // 출력 문자열 구성 (예: "Light No. 1: 0, 3, 5")
-        FString Output = FString::Printf(TEXT("Light No. %d: "), lightIndex + 1);
+        FString Output = FString::Printf(TEXT("PointLight No. %d: "), lightIndex + 1);
         for (int32 i = 0; i < Tiles.Num(); ++i)
         {
             Output += FString::Printf(TEXT("%d"), Tiles[i]);
@@ -554,6 +596,26 @@ void FTileLightCullingPass::PrintLightTilesMapping()
             }
         }
 
+        UE_LOG(LogLevel::Error, TEXT("%s"), *Output);
+    }
+
+    for (uint32 lightIndex = 0; lightIndex < TotalSpotLights; ++lightIndex)
+    {
+        const TArray<uint32>& Tiles = SpotLightTiles[lightIndex];
+        if (Tiles.Num() == 0)
+        {
+            continue; // 해당 조명이 어느 타일에도 영향을 주지 않으면 생략
+        }
+        // 출력 문자열 구성 (예: "Light No. 1: 0, 3, 5")
+        FString Output = FString::Printf(TEXT("SpotLight No. %d: "), lightIndex + 1);
+        for (int32 i = 0; i < Tiles.Num(); ++i)
+        {
+            Output += FString::Printf(TEXT("%d"), Tiles[i]);
+            if (i < Tiles.Num() - 1)
+            {
+                Output += TEXT(", ");
+            }
+        }
         UE_LOG(LogLevel::Error, TEXT("%s"), *Output);
     }
 }
